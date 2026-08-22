@@ -14,16 +14,25 @@ export default function ProtectedLayout({
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [width, setWidth] = useState(264);
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) router.replace("/login");
   }, [loading, user, router]);
 
-  // restore saved sidebar width
+  // restore saved sidebar prefs
   useEffect(() => {
-    const saved = Number(localStorage.getItem("askdocs_sidebar_width"));
-    if (saved >= 220 && saved <= 420) setWidth(saved);
+    const savedWidth = Number(localStorage.getItem("askdocs_sidebar_width"));
+    if (savedWidth >= 220 && savedWidth <= 420) setWidth(savedWidth);
+    setCollapsed(localStorage.getItem("askdocs_sidebar_collapsed") === "1");
   }, []);
+
+  function toggleCollapsed() {
+    setCollapsed((c) => {
+      localStorage.setItem("askdocs_sidebar_collapsed", c ? "0" : "1");
+      return !c;
+    });
+  }
 
   if (loading) {
     return (
@@ -41,7 +50,7 @@ export default function ProtectedLayout({
         <button
           onClick={() => setDrawerOpen(true)}
           aria-label="Open menu"
-          className="rounded-lg p-2 text-slate-600 hover:bg-slate-100"
+          className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <line x1="3" y1="6" x2="21" y2="6" />
@@ -58,8 +67,10 @@ export default function ProtectedLayout({
           onCloseMobile={() => setDrawerOpen(false)}
           width={width}
           setWidth={setWidth}
+          collapsed={collapsed}
+          onToggleCollapsed={toggleCollapsed}
         />
-        <main className="flex-1 overflow-y-auto p-4 pb-16 pt-16 md:p-6 md:pb-6 md:pt-6">
+        <main className="min-w-0 flex-1 overflow-y-auto p-4 pb-16 pt-16 md:p-6 md:pb-6 md:pt-6">
           <WelcomeModal />
           {children}
         </main>

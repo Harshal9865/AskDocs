@@ -270,7 +270,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="relative mx-auto flex h-[calc(100dvh-8rem)] max-w-5xl flex-col gap-4 md:h-[calc(100vh-3rem)] md:flex-row">
+    <div className="relative mx-auto flex h-[var(--chat-h)] max-w-5xl flex-col gap-4 md:flex-row">
       {/* conversation list */}
       {listOpen && (
         <div
@@ -493,6 +493,7 @@ export default function ChatPage() {
     </div>
   );
 }
+
 
 
 
