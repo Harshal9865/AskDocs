@@ -187,6 +187,60 @@ export const api = {
       ...json({ content }),
     }),
 
+  // ---- profile / settings ----
+  updateMe: (name: string) =>
+    request<User>("/auth/me", { method: "PATCH", ...json({ name }) }),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    request<void>("/auth/change-password", {
+      method: "POST",
+      ...json({ current_password: currentPassword, new_password: newPassword }),
+    }),
+  renameWorkspace: (wsId: string, name: string) =>
+    request<Workspace>(`/workspaces/${wsId}`, { method: "PATCH", ...json({ name }) }),
+
+  // ---- document detail ----
+  getDocumentChunks: (wsId: string, docId: string) =>
+    request<{ id: string; ordinal: number; token_count: number; content: string }[]>(
+      `/workspaces/${wsId}/documents/${docId}/chunks`,
+    ),
+
+  // ---- activity ----
+  getActivity: (wsId: string) =>
+    request<
+      { id: string; actor: string; action: string; target: string; created_at: string }[]
+    >(`/workspaces/${wsId}/activity`),
+
+  // ---- trash ----
+  trashDocuments: (wsId: string) =>
+    request<{ id: string; title: string; file_type: string; deleted_at: string }[]>(
+      `/workspaces/${wsId}/trash/documents`,
+    ),
+  trashConversations: (wsId: string) =>
+    request<{ id: string; title: string; deleted_at: string }[]>(
+      `/workspaces/${wsId}/trash/conversations`,
+    ),
+  restoreDocument: (wsId: string, docId: string) =>
+    request<void>(`/workspaces/${wsId}/trash/documents/${docId}/restore`, { method: "POST" }),
+  purgeDocument: (wsId: string, docId: string) =>
+    request<void>(`/workspaces/${wsId}/trash/documents/${docId}`, { method: "DELETE" }),
+
+  // ---- search & insights ----
+  search: (wsId: string, q: string) =>
+    request<{
+      documents: { id: string; title: string; file_type: string }[];
+      messages: { id: string; conversation_id: string; conversation_title: string; role: string; snippet: string }[];
+      excerpts: { id: string; document_title: string; snippet: string }[];
+    }>(`/workspaces/${wsId}/search?q=${encodeURIComponent(q)}`),
+  insights: (wsId: string) =>
+    request<{
+      total_documents: number;
+      ready_documents: number;
+      total_questions: number;
+      unanswered_count: number;
+      unanswered_questions: { question: string; asked_at: string }[];
+      top_cited_documents: { title: string; citations: number }[];
+    }>(`/workspaces/${wsId}/insights`),
+
   // ---- documents ----
   async uploadDocument(wsId: string, file: File) {
     const form = new FormData();

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -10,13 +10,14 @@ export default function Home() {
 
   useEffect(() => {
     if (loading) return;
-    router.replace(user ? "/chat" : "/login");
+    router.replace(user ? "/dashboard" : "/login");
   }, [loading, user, router]);
 
   return (
     <div className="flex min-h-screen items-center justify-center text-slate-500">
-      Loading…
+      Loadingâ€¦
     </div>
   );
 }
+
 

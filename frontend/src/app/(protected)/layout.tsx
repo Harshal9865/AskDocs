@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { WorkspaceProvider } from "@/lib/workspace-context";
 import Sidebar from "@/components/Sidebar";
+import WelcomeModal from "@/components/WelcomeModal";
 
 export default function ProtectedLayout({
   children,
@@ -59,6 +60,7 @@ export default function ProtectedLayout({
           setWidth={setWidth}
         />
         <main className="flex-1 overflow-y-auto p-4 pb-16 pt-16 md:p-6 md:pb-6 md:pt-6">
+          <WelcomeModal />
           {children}
         </main>
       </div>

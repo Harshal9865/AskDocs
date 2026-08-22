@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -20,7 +20,7 @@ export default function LoginPage() {
     setError(null);
     try {
       await login(email.trim().toLowerCase(), password);
-      router.replace("/chat");
+      router.replace("/dashboard");
     } catch (err) {
       setError((err as Error).message || "Login failed");
     } finally {
@@ -74,7 +74,7 @@ export default function LoginPage() {
           disabled={busy}
           className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-indigo-600 disabled:opacity-50"
         >
-          {busy ? "Signing in…" : "Sign in"}
+          {busy ? "Signing inâ€¦" : "Sign in"}
         </button>
 
         <p className="mt-4 text-center text-sm text-slate-600">
@@ -87,3 +87,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
