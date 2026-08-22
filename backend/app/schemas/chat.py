@@ -51,3 +51,4 @@ class MessageOut(BaseModel):
     created_at: datetime
     suggested_colleagues: list[SuggestedColleague] | None = None
     conflict: dict | None = None
+    freshness: dict | None = None

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -19,6 +19,7 @@ interface ChatMessage {
   citations?: Citation[] | null;
   suggested?: SuggestedColleague[];
   conflict?: { is_conflict: boolean; note: string } | null;
+  freshness?: { oldest_days: number; document_title: string } | null;
   streaming?: boolean;
 }
 
@@ -152,6 +153,7 @@ export default function ChatPage() {
         content: m.content,
         citations: m.citations,
         conflict: m.conflict ?? null,
+            freshness: m.freshness ?? null,
         suggested:
           m.suggested_colleagues && (!m.citations || m.citations.length === 0)
             ? m.suggested_colleagues
@@ -208,7 +210,7 @@ export default function ChatPage() {
           next[next.length - 1] = { ...last, content: last.content + text };
           return next;
         }),
-      (citations, suggested, conflict) => {
+      (citations, suggested, conflict, freshness) => {
         done = true;
         setMessages((prev) => {
           const next = [...prev];
@@ -218,6 +220,7 @@ export default function ChatPage() {
             streaming: false,
             citations,
             conflict,
+            freshness,
             suggested: citations && citations.length > 0 ? [] : suggested,
           };
           return next;
@@ -403,6 +406,15 @@ export default function ChatPage() {
                     </p>
                   </div>
                 )}
+                {m.role === "assistant" && !m.streaming && m.freshness && (
+                  <div className="mt-2 max-w-[92%] rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                    <p className="text-[11px] text-slate-600">
+                      ⏳ Based in part on{" "}
+                      <span className="font-semibold">{m.freshness.document_title}</span>, uploaded{" "}
+                      {m.freshness.oldest_days} days ago. Newer documents may exist.
+                    </p>
+                  </div>
+                )}
                 {m.role === "assistant" && !m.streaming && m.suggested && m.suggested.length > 0 && (
                   <div className="mt-2 max-w-[92%] rounded-xl border border-indigo-100 bg-indigo-50 p-3">
                     <p className="text-xs font-semibold text-indigo-900">
@@ -481,6 +493,7 @@ export default function ChatPage() {
     </div>
   );
 }
+
 
 
 

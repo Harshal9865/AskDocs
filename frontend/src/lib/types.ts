@@ -92,6 +92,11 @@ export interface ConflictWarning {
   note: string;
 }
 
+export interface FreshnessWarning {
+  oldest_days: number;
+  document_title: string;
+}
+
 export interface Message {
   id: string;
   role: "user" | "assistant";
@@ -99,5 +104,6 @@ export interface Message {
   citations: Citation[] | null;
   suggested_colleagues?: { user_id: string; name: string }[] | null;
   conflict?: ConflictWarning | null;
+  freshness?: FreshnessWarning | null;
   created_at: string;
 }

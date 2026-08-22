@@ -1,4 +1,4 @@
-import json
+﻿import json
 import uuid
 
 from fastapi import APIRouter, HTTPException, status
@@ -17,6 +17,7 @@ from app.schemas.chat import (
 from app.services.llm.gemini_provider import get_llm
 from app.services.retrieval import (
     conversation_history,
+    get_freshness,
     is_low_confidence,
     search_chunks,
     suggest_colleagues,
@@ -166,6 +167,7 @@ async def ask_question_sync(
         answer = await llm.answer(payload.content, chunks, history)
         citations = _citations_json(chunks)
         conflict = await llm.detect_conflict(chunks)
+    freshness = await get_freshness(db, chunks)
 
     msg = Message(
         conversation_id=conv.id,
@@ -180,6 +182,7 @@ async def ask_question_sync(
     out = MessageOut.model_validate(msg)
     out.suggested_colleagues = suggestions
     out.conflict = conflict
+    out.freshness = freshness
     return out
 
 
@@ -217,13 +220,15 @@ async def ask_question_stream(
                 yield f"data: {json.dumps({'type': 'answer', 'text': REFUSAL})}\n\n"
                 answer_parts.append(REFUSAL)
                 conflict = None
+                freshness = None
             else:
                 async for token in llm.stream_answer(payload.content, chunks, history):
                     answer_parts.append(token)
                     yield f"data: {json.dumps({'type': 'answer', 'text': token})}\n\n"
                 conflict = await llm.detect_conflict(chunks)
+                freshness = await get_freshness(db, chunks)
             citations = _citations_json(chunks)
-            yield f"data: {json.dumps({'type': 'done', 'citations': citations, 'suggested_colleagues': suggestions, 'conflict': conflict})}\n\n"
+            yield f"data: {json.dumps({'type': 'done', 'citations': citations, 'suggested_colleagues': suggestions, 'conflict': conflict, 'freshness': freshness})}\n\n"
 
             async with AsyncSessionLocal() as session:
                 saved = Message(
@@ -293,6 +298,7 @@ async def get_answer_permalink(
         "workspace_id": str(conv.workspace_id),
         "created_at": msg.created_at.isoformat(),
     }
+
 
 
 

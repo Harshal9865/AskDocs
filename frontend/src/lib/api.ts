@@ -1,6 +1,7 @@
 ﻿import type {
   Citation,
   ConflictWarning,
+  FreshnessWarning,
   Conversation,
   DocumentItem,
   Invitation,
@@ -310,6 +311,7 @@ export const api = {
       citations: Citation[] | null,
       suggestedColleagues: { user_id: string; name: string }[],
       conflict: ConflictWarning | null,
+      freshness: FreshnessWarning | null,
     ) => void,
     onSaved?: (messageId: string) => void,
     onError?: (message: string) => void,
@@ -353,6 +355,7 @@ export const api = {
                 event.citations ?? [],
                 event.suggested_colleagues ?? [],
                 event.conflict ?? null,
+                event.freshness ?? null,
               );
             else if (event.type === "error") onError?.(event.message);
           } catch {
@@ -365,5 +368,6 @@ export const api = {
     }
   },
 };
+
 
 

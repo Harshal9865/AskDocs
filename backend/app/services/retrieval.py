@@ -66,6 +66,37 @@ async def conversation_history(
 
 LOW_CONFIDENCE_SCORE = 0.35
 
+FRESHNESS_THRESHOLD_DAYS = 90
+
+
+async def get_freshness(db, chunks: list[RetrievedChunk]) -> dict | None:
+    """Warn when the answer relies on old documents.
+
+    Returns {"oldest_days": int, "document_title": str} for the oldest cited
+    document when it is older than the threshold; otherwise None.
+    """
+    if not chunks:
+        return None
+
+    from app.models.base import utcnow
+    from app.models.document import Document
+
+    doc_ids = {c.document_id for c in chunks}
+    result = await db.execute(
+        select(Document.id, Document.title, Document.created_at).where(
+            Document.id.in_(doc_ids)
+        )
+    )
+    oldest = None  # (days, title)
+    for _did, title, created_at in result.all():
+        days = (utcnow() - created_at).days
+        if oldest is None or days > oldest[0]:
+            oldest = (days, title)
+
+    if oldest is None or oldest[0] < FRESHNESS_THRESHOLD_DAYS:
+        return None
+    return {"oldest_days": oldest[0], "document_title": oldest[1]}
+
 
 def is_low_confidence(chunks: list[RetrievedChunk]) -> bool:
     """No chunks at all, or best similarity is weak."""
