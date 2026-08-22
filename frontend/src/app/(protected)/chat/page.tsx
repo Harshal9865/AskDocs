@@ -6,6 +6,14 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
 import type { Citation, Conversation, Message } from "@/lib/types";
+import {
+  ChevronDown,
+  FileText,
+  MessagesSquare,
+  Trash2,
+  TriangleAlert,
+  UsersRound,
+} from "lucide-react";
 
 interface SuggestedColleague {
   user_id: string;
@@ -310,7 +318,7 @@ export default function ChatPage() {
                 title="Delete conversation"
                 className="mr-1 shrink-0 rounded-md p-2 text-xs text-slate-400 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-600 focus:opacity-100 group-hover:opacity-100"
               >
-                🗑
+                <Trash2 className="h-4 w-4" />
               </button>
             )}
           </div>
@@ -326,9 +334,9 @@ export default function ChatPage() {
             aria-label="Show conversations"
             className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
-            <span aria-hidden>💬</span>
+            <MessagesSquare className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
             <span className="truncate">{activeConv ? activeConv.title : "Conversations"}</span>
-            <span aria-hidden className="ml-auto shrink-0 text-slate-400">▾</span>
+            <ChevronDown aria-hidden className="ml-auto h-4 w-4 shrink-0 text-slate-400" />
           </button>
           <button
             onClick={() => void newConversation()}
@@ -369,9 +377,10 @@ export default function ChatPage() {
                         <button
                           key={ci}
                           onClick={() => setShowCitations(m.citations!)}
-                          className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:border-indigo-400 hover:text-indigo-700"
+                          className="flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:border-indigo-400 hover:text-indigo-700"
                         >
-                          📄 {c.document_title}
+                          <FileText className="h-3 w-3" />
+                          {c.document_title}
                         </button>
                       ))}
                       {m.id && (
@@ -395,13 +404,14 @@ export default function ChatPage() {
                   )}
                 {m.role === "assistant" && !m.streaming && m.conflict?.is_conflict && (
                   <div className="mt-2 max-w-[92%] rounded-xl border border-amber-300 bg-amber-50 p-3">
-                    <p className="text-xs font-semibold text-amber-900">
-                      ⚠️ Sources disagree — these documents give conflicting information.
+                    <p className="flex items-start gap-1.5 text-xs font-semibold text-amber-900">
+                      <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                      Sources disagree — these documents give conflicting information.
                     </p>
                     {m.conflict.note && (
-                      <p className="mt-1 text-xs text-amber-800">{m.conflict.note}</p>
+                      <p className="mt-1 pl-5 text-xs text-amber-800">{m.conflict.note}</p>
                     )}
-                    <p className="mt-1 text-[10px] text-amber-700">
+                    <p className="mt-1 pl-5 text-[10px] text-amber-700">
                       Verify with the document owners before relying on this answer.
                     </p>
                   </div>
@@ -417,8 +427,9 @@ export default function ChatPage() {
                 )}
                 {m.role === "assistant" && !m.streaming && m.suggested && m.suggested.length > 0 && (
                   <div className="mt-2 max-w-[92%] rounded-xl border border-indigo-100 bg-indigo-50 p-3">
-                    <p className="text-xs font-semibold text-indigo-900">
-                      🧑‍💼 No document answered this — ask your team:
+                    <p className="flex items-center gap-1.5 text-xs font-semibold text-indigo-900">
+                      <UsersRound className="h-3.5 w-3.5" />
+                      No document answered this — ask your team:
                     </p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {m.suggested.map((s) =>
@@ -493,6 +504,7 @@ export default function ChatPage() {
     </div>
   );
 }
+
 
 
 

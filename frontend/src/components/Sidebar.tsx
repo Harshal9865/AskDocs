@@ -3,6 +3,21 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import {
+  BarChart3,
+  CircleHelp,
+  FileText,
+  History,
+  LayoutDashboard,
+  LogOut,
+  MessagesSquare,
+  Search,
+  Settings,
+  Sparkles,
+  Trash2,
+  UserCog,
+  UsersRound,
+} from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -10,21 +25,21 @@ import Colleagues from "@/components/Colleagues";
 import NotificationBell from "@/components/NotificationBell";
 
 const NAV = [
-  { href: "/dashboard", label: "Dashboard", icon: "🏠" },
-  { href: "/chat", label: "AI Chat", icon: "💬" },
-  { href: "/chats", label: "Office Chats", icon: "👥" },
-  { href: "/documents", label: "Documents", icon: "📄" },
-  { href: "/search", label: "Search", icon: "🔍" },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/chat", label: "AI Chat", icon: Sparkles },
+  { href: "/chats", label: "Office Chats", icon: MessagesSquare },
+  { href: "/documents", label: "Documents", icon: FileText },
+  { href: "/search", label: "Search", icon: Search },
 ];
 
 const NAV_SECONDARY = [
-  { href: "/insights", label: "Insights", icon: "📊" },
-  { href: "/trash", label: "Trash", icon: "🗑️" },
-  { href: "/activity", label: "Activity log", icon: "📜" },
-  { href: "/members", label: "Members", icon: "🧑‍🤝‍🧑" },
-  { href: "/settings/workspace", label: "Workspace settings", icon: "⚙️" },
-  { href: "/settings", label: "Account settings", icon: "🔧" },
-  { href: "/help", label: "Help & FAQ", icon: "❓" },
+  { href: "/insights", label: "Insights", icon: BarChart3 },
+  { href: "/trash", label: "Trash", icon: Trash2 },
+  { href: "/activity", label: "Activity log", icon: History },
+  { href: "/members", label: "Members", icon: UsersRound },
+  { href: "/settings/workspace", label: "Workspace settings", icon: Settings },
+  { href: "/settings", label: "Account settings", icon: UserCog },
+  { href: "/help", label: "Help & FAQ", icon: CircleHelp },
 ];
 
 const MIN_W = 220;
@@ -179,12 +194,12 @@ export default function Sidebar({
           <Link
             href="/dashboard"
             onClick={onCloseMobile}
-            className="text-lg font-bold text-slate-900 hover:text-indigo-700"
+            className="text-[15px] font-bold tracking-tight text-slate-900"
             aria-label="AskDocs home"
             title="Go to Dashboard"
           >
             <span className={collapsed ? "hidden" : ""}>AskDocs</span>
-            <span className={`sb-collapsed-show h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-lg font-black text-white ${collapsed ? "sb-center" : ""}`}>
+            <span className={`sb-collapsed-show h-9 w-9 items-center justify-center rounded-lg bg-slate-900 text-base font-bold text-white ${collapsed ? "sb-center" : ""}`}>
               A
             </span>
           </Link>
@@ -220,9 +235,9 @@ export default function Sidebar({
               disabled={busy}
               aria-label={`Delete workspace ${workspace?.name ?? ""}`}
               title="Delete this workspace"
-              className="shrink-0 rounded-lg px-2 py-1.5 text-sm text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
+              className="shrink-0 rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
             >
-              🗑
+              <Trash2 className="h-4 w-4" />
             </button>
           )}
         </div>
@@ -231,7 +246,7 @@ export default function Sidebar({
             onClick={toggleCollapsed}
             title={workspace ? `Workspace: ${workspace.name}` : "No workspace"}
             aria-label="Expand sidebar"
-            className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold uppercase text-white shadow-sm"
+            className="mx-auto flex h-10 w-10 items-center justify-center rounded-md bg-slate-800 text-sm font-semibold uppercase text-white"
           >
             {(workspace?.name ?? "?").slice(0, 1)}
           </button>
@@ -273,44 +288,62 @@ export default function Sidebar({
         )}
         </div>
 
-      <nav className="scrollbar-thin flex-1 overflow-y-auto p-3">
-        {NAV.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={onCloseMobile}
-            title={collapsed ? item.label : undefined}
-            className={`mb-1 flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm ${
-              pathname === item.href
-                ? "bg-indigo-600 font-semibold text-white"
-                : "text-slate-700 hover:bg-slate-100"
-            }`}
-          >
-            <span aria-hidden>{item.icon}</span>
-            <span className="sb-label truncate">{item.label}</span>
-          </Link>
-        ))}
+      <nav className="scrollbar-thin flex-1 overflow-y-auto p-2">
+        {NAV.map((item) => {
+          const active = pathname === item.href;
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={onCloseMobile}
+              title={collapsed ? item.label : undefined}
+              className={`mb-0.5 flex h-8 items-center gap-2 rounded-md px-2 text-[13px] font-medium transition-colors ${
+                collapsed ? "justify-center px-0" : ""
+              } ${
+                active
+                  ? "bg-white text-indigo-700 shadow-sm ring-1 ring-slate-900/5"
+                  : "text-slate-600 hover:bg-slate-900/5"
+              }`}
+            >
+              <Icon
+                aria-hidden
+                className={`h-4 w-4 shrink-0 ${active ? "text-indigo-600" : "text-slate-500"}`}
+              />
+              {!collapsed && <span className="truncate">{item.label}</span>}
+            </Link>
+          );
+        })}
 
-        <div className="sb-label mb-1 mt-4 px-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+        <div className="sb-label mb-1 mt-5 px-2 text-[11px] font-medium uppercase tracking-wider text-slate-400">
           More
         </div>
-        {NAV_SECONDARY.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={onCloseMobile}
-            title={collapsed ? item.label : undefined}
-            className={`mb-0.5 flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs ${
-              pathname === item.href
-                ? "bg-indigo-600 font-semibold text-white"
-                : "text-slate-600 hover:bg-slate-100"
-            }`}
-          >
-            <span aria-hidden>{item.icon}</span>
-            <span className="sb-label truncate">{item.label}</span>
-          </Link>
-        ))}
-        <div className="sb-hide mt-4 -mx-3">
+        {NAV_SECONDARY.map((item) => {
+          const active = pathname === item.href;
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={onCloseMobile}
+              title={collapsed ? item.label : undefined}
+              className={`mb-0.5 flex h-7 items-center gap-2 rounded-md px-2 text-[13px] transition-colors ${
+                collapsed ? "justify-center px-0" : ""
+              } ${
+                active
+                  ? "bg-white text-indigo-700 shadow-sm ring-1 ring-slate-900/5"
+                  : "text-slate-600 hover:bg-slate-900/5"
+              }`}
+            >
+              <Icon
+                aria-hidden
+                className={`h-4 w-4 shrink-0 ${active ? "text-indigo-600" : "text-slate-500"}`}
+              />
+              {!collapsed && <span className="truncate">{item.label}</span>}
+            </Link>
+          );
+        })}
+        <div className="sb-hide mt-4 -mx-2">
           <Colleagues />
         </div>
       </nav>
@@ -340,7 +373,9 @@ export default function Sidebar({
           className="mt-3 w-full rounded-lg border border-slate-300 py-2 text-xs text-slate-600 hover:bg-slate-50"
         >
           <span className="sb-label">Sign out</span>
-          <span className="sb-collapsed-show sb-center">⏻</span>
+          <span className="sb-collapsed-show sb-center">
+            <LogOut className="h-4 w-4" />
+          </span>
         </button>
       </div>
 
@@ -356,4 +391,5 @@ export default function Sidebar({
     </>
   );
 }
+
 

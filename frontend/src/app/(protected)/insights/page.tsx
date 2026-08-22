@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { BookOpen, Target } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
 
@@ -59,7 +60,10 @@ export default function InsightsPage() {
 
       {/* Knowledge-Gap Radar */}
       <section className="mb-8 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-        <h2 className="mb-1 text-sm font-bold text-slate-800">🎯 Knowledge-Gap Radar</h2>
+        <h2 className="mb-1 flex items-center gap-1.5 text-sm font-bold text-slate-800">
+          <Target className="h-4 w-4 text-indigo-600" aria-hidden />
+          Knowledge-Gap Radar
+        </h2>
         <p className="mb-4 text-xs text-slate-500">
           Questions the AI couldn&apos;t answer — write documents about these to close the gaps.
         </p>
@@ -84,7 +88,7 @@ export default function InsightsPage() {
 
       {/* Top cited */}
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-        <h2 className="mb-4 text-sm font-bold text-slate-800">📚 Most-cited documents</h2>
+        <h2 className="mb-4 flex items-center gap-1.5 text-sm font-bold text-slate-800"><BookOpen className="h-4 w-4 text-indigo-600" aria-hidden />Most-cited documents</h2>
         {data.top_cited_documents.length === 0 ? (
           <p className="text-sm text-slate-400">Ask some questions first — citations will rank documents here.</p>
         ) : (
@@ -125,4 +129,5 @@ function Stat({ label, value, accent }: { label: string; value: string | number;
     </div>
   );
 }
+
 

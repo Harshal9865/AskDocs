@@ -5,7 +5,8 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
-import type { DocumentItem, TeamChat, Workspace } from "@/lib/types";
+import { ChartNoAxesColumn, FileText, MessageSquare, MessagesSquare, Sparkles, Upload, Users2 } from "lucide-react";
+import type { DocumentItem, TeamChat } from "@/lib/types";
 
 function Stat({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
   return (
@@ -160,4 +161,7 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+
+
 
