@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
@@ -16,7 +16,20 @@ const NAV = [
   { href: "/members", label: "Members" },
 ];
 
-export default function Sidebar() {
+const MIN_W = 220;
+const MAX_W = 420;
+
+export default function Sidebar({
+  mobileOpen = false,
+  onCloseMobile,
+  width = 264,
+  setWidth,
+}: {
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
+  width?: number;
+  setWidth?: (w: number) => void;
+}) {
   const { user, logout } = useAuth();
   const { workspace, workspaces, select, refresh } = useWorkspace();
   const router = useRouter();
@@ -25,6 +38,33 @@ export default function Sidebar() {
   const [newName, setNewName] = useState("");
   const [busy, setBusy] = useState(false);
   const [myRole, setMyRole] = useState<string | null>(null);
+  const asideRef = useRef<HTMLElement>(null);
+
+  // drag-to-resize (desktop)
+  const startResize = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      const startX = e.clientX;
+      const startW = width;
+      const onMove = (ev: MouseEvent) => {
+        const w = Math.min(MAX_W, Math.max(MIN_W, startW + ev.clientX - startX));
+        setWidth?.(w);
+      };
+      const onUp = () => {
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("mouseup", onUp);
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+        const w = Number(asideRef.current?.offsetWidth ?? startW);
+        localStorage.setItem("askdocs_sidebar_width", String(w));
+      };
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+    },
+    [width, setWidth],
+  );
 
   // resolve my role in the active workspace
   useEffect(() => {
@@ -84,17 +124,42 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r border-slate-200 bg-white">
-      <div className="border-b border-slate-100 p-4">
-        <Link
-          href="/chat"
-          className="text-lg font-bold text-slate-900 hover:text-indigo-700"
-          aria-label="AskDocs home"
-          title="Go to AI Chat"
-        >
-          AskDocs
-        </Link>
-        <div className="mt-3 flex items-center gap-1.5">
+    <>
+      {/* mobile backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-slate-900/50 md:hidden"
+          onClick={onCloseMobile}
+          aria-hidden
+        />
+      )}
+      <aside
+        ref={asideRef}
+        style={{ width }}
+        className={`fixed inset-y-0 left-0 z-50 flex shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-white transition-transform duration-200 md:relative md:z-auto md:translate-x-0 ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between border-b border-slate-100 p-4">
+          <Link
+            href="/chat"
+            onClick={onCloseMobile}
+            className="text-lg font-bold text-slate-900 hover:text-indigo-700"
+            aria-label="AskDocs home"
+            title="Go to AI Chat"
+          >
+            AskDocs
+          </Link>
+          <button
+            onClick={onCloseMobile}
+            aria-label="Close menu"
+            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 md:hidden"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="border-b border-slate-100 p-4">
+          <div className="mt-3 flex items-center gap-1.5">
           <select
             value={workspace?.id ?? ""}
             onChange={(e) => {
@@ -157,13 +222,14 @@ export default function Sidebar() {
             </button>
           </form>
         )}
-      </div>
+        </div>
 
       <nav className="flex-1 overflow-y-auto p-3">
         {NAV.map((item) => (
           <Link
             key={item.href}
             href={item.href}
+            onClick={onCloseMobile}
             className={`mb-1 block rounded-lg px-3 py-2 text-sm ${
               pathname === item.href
                 ? "bg-indigo-600 font-semibold text-white"
@@ -189,13 +255,24 @@ export default function Sidebar() {
         <button
           onClick={() => {
             logout();
+            onCloseMobile?.();
             router.replace("/login");
           }}
-          className="mt-3 w-full rounded-lg border border-slate-300 py-1.5 text-xs text-slate-600 hover:bg-slate-50"
+          className="mt-3 w-full rounded-lg border border-slate-300 py-2 text-xs text-slate-600 hover:bg-slate-50"
         >
           Sign out
         </button>
       </div>
+
+      {/* desktop drag-to-resize handle */}
+      <div
+        onMouseDown={startResize}
+        role="separator"
+        aria-label="Resize sidebar"
+        title="Drag to resize sidebar"
+        className="absolute inset-y-0 right-0 z-10 hidden w-1.5 cursor-col-resize bg-transparent transition-colors hover:bg-indigo-200 md:block"
+      />
     </aside>
+    </>
   );
 }

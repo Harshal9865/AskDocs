@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
@@ -37,6 +37,7 @@ export default function ChatsPage() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [showNewGroup, setShowNewGroup] = useState(false);
+  const [listOpen, setListOpen] = useState(false);
   const [groupTitle, setGroupTitle] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const threadEnd = useRef<HTMLDivElement>(null);
@@ -97,6 +98,7 @@ export default function ChatsPage() {
   async function openDM(member: Member) {
     if (!workspace) return;
     try {
+      setListOpen(false);
       const chat = await api.createDirectChat(workspace.id, member.user_id);
       setActiveChat(chat);
       setMessages([]);
@@ -109,6 +111,7 @@ export default function ChatsPage() {
   async function createGroup() {
     if (!workspace || !groupTitle.trim() || selectedIds.length < 2) return;
     try {
+      setListOpen(false);
       const chat = await api.createGroupChat(workspace.id, groupTitle.trim(), selectedIds);
       setShowNewGroup(false);
       setGroupTitle("");
@@ -153,9 +156,16 @@ export default function ChatsPage() {
     "You";
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-3rem)] max-w-5xl gap-4">
+    <div className="relative mx-auto flex h-[calc(100dvh-8.5rem)] max-w-5xl gap-4 md:h-[calc(100vh-3rem)]">
+      {listOpen && (
+        <div
+          className="fixed inset-0 z-10 bg-slate-900/50 md:hidden"
+          onClick={() => setListOpen(false)}
+          aria-hidden
+        />
+      )}
       {/* left panel */}
-      <div className="flex w-64 shrink-0 flex-col overflow-y-auto border-r border-slate-200 pr-3">
+      <div className={`absolute inset-y-0 left-0 z-20 flex w-64 transform flex-col overflow-y-auto border-r border-slate-200 bg-white pr-3 transition-transform duration-200 md:relative md:z-auto md:translate-x-0 ${listOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"}`}>
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-700">Office mates</h2>
           <button
@@ -170,7 +180,7 @@ export default function ChatsPage() {
 
         {colleagues.length === 0 && (
           <p className="mb-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
-            No colleagues yet — invite your team from the Members page.
+            No colleagues yet â€” invite your team from the Members page.
           </p>
         )}
 
@@ -241,6 +251,13 @@ export default function ChatsPage() {
 
       {/* thread */}
       <div className="flex min-w-0 flex-1 flex-col rounded-xl border border-slate-200 bg-white shadow-sm">
+        <button
+          onClick={() => setListOpen((o) => !o)}
+          aria-label="Toggle chats list"
+          className="mx-3 mt-3 self-start rounded-lg border border-slate-300 px-2 py-1.5 text-xs text-slate-600 hover:bg-slate-50 md:hidden"
+        >
+          💬 Chats
+        </button>
         {!activeChat ? (
           <div className="flex h-full items-center justify-center text-center text-sm text-slate-400">
             Pick a colleague to start a direct message,
@@ -269,7 +286,7 @@ export default function ChatsPage() {
             <div className="flex-1 space-y-3 overflow-y-auto p-6">
               {messages.length === 0 ? (
                 <p className="pt-8 text-center text-sm text-slate-400">
-                  No messages yet — say hello!
+                  No messages yet â€” say hello!
                 </p>
               ) : (
                 messages.map((msg) => {
@@ -303,7 +320,7 @@ export default function ChatsPage() {
                   id="team-chat-input"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Write a message…"
+                  placeholder="Write a messageâ€¦"
                   className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                 />
                 <button
@@ -388,3 +405,5 @@ export default function ChatsPage() {
     </div>
   );
 }
+
+

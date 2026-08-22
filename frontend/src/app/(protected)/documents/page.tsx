@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
@@ -118,11 +118,11 @@ export default function DocumentsPage() {
           onChange={(e) => void upload(e.target.files)}
         />
         {uploading ? (
-          <p className="text-sm font-medium">Uploading…</p>
+          <p className="text-sm font-medium">Uploadingâ€¦</p>
         ) : (
           <>
             <p className="text-sm font-medium">Drop files here or click to browse</p>
-            <p className="mt-1 text-xs text-slate-500">PDF · DOCX · MD · TXT · ≤ 20 MB</p>
+            <p className="mt-1 text-xs text-slate-500">PDF Â· DOCX Â· MD Â· TXT Â· â‰¤ 20 MB</p>
           </>
         )}
       </div>
@@ -132,7 +132,7 @@ export default function DocumentsPage() {
       )}
 
       {loading ? (
-        <p className="text-sm text-slate-600">Loading documents…</p>
+        <p className="text-sm text-slate-600">Loading documentsâ€¦</p>
       ) : docs.length === 0 ? (
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-8 text-center text-sm text-slate-600">
           No documents yet. Upload your first one above to start asking questions.
@@ -147,8 +147,8 @@ export default function DocumentsPage() {
               <div className="min-w-0">
                 <div className="truncate text-sm font-medium">{d.title}</div>
                 <div className="text-xs text-slate-500">
-                  {d.file_type.toUpperCase()} · {fmtSize(d.size_bytes)}
-                  {d.error_msg ? ` · ${d.error_msg}` : ""}
+                  {d.file_type.toUpperCase()} Â· {fmtSize(d.size_bytes)}
+                  {d.error_msg ? ` Â· ${d.error_msg}` : ""}
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -171,4 +171,5 @@ export default function DocumentsPage() {
     </div>
   );
 }
+
 

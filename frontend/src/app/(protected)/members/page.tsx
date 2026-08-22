@@ -108,34 +108,34 @@ export default function MembersPage() {
 
       {isAdmin && (
         <>
-          <form onSubmit={invite} className="mb-4 flex gap-2">
-            <input
-              type="email"
-              required
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              placeholder="teammate@company.com"
-              className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-            />
-            <select
-              value={inviteRole}
-              onChange={(e) => setInviteRole(e.target.value as Role)}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
-              aria-label="Role for new member"
-            >
-              {ROLES.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
-            <button
-              type="submit"
-              className="rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-white hover:bg-indigo-700"
-            >
-              Invite
-            </button>
-          </form>
+        <form onSubmit={invite} className="mb-4 flex flex-wrap gap-2">
+          <input
+            type="email"
+            required
+            value={inviteEmail}
+            onChange={(e) => setInviteEmail(e.target.value)}
+            placeholder="teammate@company.com"
+            className="min-w-[180px] flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+          />
+          <select
+            value={inviteRole}
+            onChange={(e) => setInviteRole(e.target.value as Role)}
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
+            aria-label="Role for new member"
+          >
+            {ROLES.map((r) => (
+              <option key={r} value={r}>
+                {r}
+              </option>
+            ))}
+          </select>
+          <button
+            type="submit"
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+          >
+            Invite
+          </button>
+        </form>
 
           {pendingInvites.length > 0 && (
             <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">

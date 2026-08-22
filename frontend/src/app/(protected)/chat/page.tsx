@@ -63,6 +63,7 @@ export default function ChatPage() {
   const [busy, setBusy] = useState(false);
   const [myRole, setMyRole] = useState<string | null>(null);
   const [showCitations, setShowCitations] = useState<Citation[] | null>(null);
+  const [listOpen, setListOpen] = useState(false);
   const threadEnd = useRef<HTMLDivElement>(null);
 
   // resolve my role in this workspace (admin => can delete any conversation)
@@ -132,6 +133,7 @@ export default function ChatPage() {
   }, [messages]);
 
   async function openConversation(conv: Conversation) {
+    setListOpen(false);
     setActiveConv(conv);
     const history = await api.listMessages(conv.id);
     setMessages(
@@ -146,6 +148,7 @@ export default function ChatPage() {
   async function newConversation() {
     if (!workspace) return;
     const conv = await api.createConversation(workspace.id);
+    setListOpen(false);
     await loadConversations();
     setActiveConv(conv);
     setMessages([]);
@@ -221,9 +224,16 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-3rem)] max-w-5xl gap-4">
+    <div className="relative mx-auto flex h-[calc(100dvh-8.5rem)] max-w-5xl gap-4 md:h-[calc(100vh-3rem)]">
       {/* conversation list */}
-      <div className="w-56 shrink-0 overflow-y-auto border-r border-slate-200 pr-3">
+      {listOpen && (
+        <div
+          className="fixed inset-0 z-10 bg-slate-900/50 md:hidden"
+          onClick={() => setListOpen(false)}
+          aria-hidden
+        />
+      )}
+      <div className={`absolute inset-y-0 left-0 z-20 w-60 transform overflow-y-auto border-r border-slate-200 bg-white pr-3 transition-transform duration-200 md:relative md:z-auto md:w-56 md:translate-x-0 md:bg-transparent ${listOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"}`}>
         <button
           onClick={() => void newConversation()}
           className="mb-3 w-full rounded-lg bg-indigo-600 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
@@ -252,7 +262,7 @@ export default function ChatPage() {
                 }}
                 aria-label={`Delete conversation ${c.title}`}
                 title="Delete conversation"
-                className="mr-1 shrink-0 rounded-md px-1.5 py-1 text-xs text-slate-400 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-600 focus:opacity-100 group-hover:opacity-100"
+                className="mr-1 shrink-0 rounded-md p-2 text-xs text-slate-400 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-600 focus:opacity-100 group-hover:opacity-100"
               >
                 🗑
               </button>
@@ -263,6 +273,13 @@ export default function ChatPage() {
 
       {/* thread */}
       <div className="flex min-w-0 flex-1 flex-col rounded-xl border border-slate-200 bg-white shadow-sm">
+            <button
+              onClick={() => setListOpen((o) => !o)}
+              aria-label="Toggle conversations list"
+              className="mx-3 mt-3 self-start rounded-lg border border-slate-300 px-2 py-1.5 text-xs text-slate-600 hover:bg-slate-50 md:hidden"
+            >
+              💬 Conversations
+            </button>
         <div className="flex-1 space-y-4 overflow-y-auto p-6">
           {!activeConv ? (
             <div className="flex h-full items-center justify-center text-center text-sm text-slate-400">
@@ -345,4 +362,7 @@ export default function ChatPage() {
     </div>
   );
 }
+
+
+
 
