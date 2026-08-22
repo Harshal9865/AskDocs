@@ -18,7 +18,7 @@ export default function ProtectedLayout({
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-zinc-500">
+      <div className="flex min-h-screen items-center justify-center text-slate-500">
         Loading…
       </div>
     );
@@ -34,3 +34,4 @@ export default function ProtectedLayout({
     </WorkspaceProvider>
   );
 }
+

@@ -77,7 +77,7 @@ export default function DocumentsPage() {
 
   if (!workspace) {
     return (
-      <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center text-zinc-500">
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-8 text-center text-zinc-500">
         Create or select a workspace first.
       </div>
     );
@@ -86,7 +86,7 @@ export default function DocumentsPage() {
   return (
     <div className="mx-auto max-w-3xl">
       <h1 className="mb-1 text-xl font-bold">Documents</h1>
-      <p className="mb-6 text-sm text-zinc-500">
+      <p className="mb-6 text-sm text-slate-600">
         Upload PDF, DOCX, Markdown or TXT files (max 20 MB). They are chunked and
         embedded automatically.
       </p>
@@ -105,8 +105,8 @@ export default function DocumentsPage() {
         onClick={() => fileInput.current?.click()}
         className={`mb-6 cursor-pointer rounded-xl border-2 border-dashed p-10 text-center transition-colors ${
           dragOver
-            ? "border-zinc-900 bg-zinc-100"
-            : "border-zinc-300 bg-white hover:border-zinc-500"
+            ? "border-indigo-500 bg-indigo-50"
+            : "border-slate-300 bg-white hover:border-indigo-400"
         }`}
       >
         <input
@@ -122,19 +122,19 @@ export default function DocumentsPage() {
         ) : (
           <>
             <p className="text-sm font-medium">Drop files here or click to browse</p>
-            <p className="mt-1 text-xs text-zinc-400">PDF · DOCX · MD · TXT · ≤ 20 MB</p>
+            <p className="mt-1 text-xs text-slate-500">PDF · DOCX · MD · TXT · ≤ 20 MB</p>
           </>
         )}
       </div>
 
       {error && (
-        <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+        <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">{error}</p>
       )}
 
       {loading ? (
-        <p className="text-sm text-zinc-500">Loading documents…</p>
+        <p className="text-sm text-slate-600">Loading documents…</p>
       ) : docs.length === 0 ? (
-        <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center text-sm text-zinc-500">
+        <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-8 text-center text-sm text-slate-600">
           No documents yet. Upload your first one above to start asking questions.
         </div>
       ) : (
@@ -142,11 +142,11 @@ export default function DocumentsPage() {
           {docs.map((d) => (
             <li
               key={d.id}
-              className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-4 py-3"
+              className="flex items-center justify-between rounded-xl border border-slate-200 bg-white shadow-sm px-4 py-3"
             >
               <div className="min-w-0">
                 <div className="truncate text-sm font-medium">{d.title}</div>
-                <div className="text-xs text-zinc-400">
+                <div className="text-xs text-slate-500">
                   {d.file_type.toUpperCase()} · {fmtSize(d.size_bytes)}
                   {d.error_msg ? ` · ${d.error_msg}` : ""}
                 </div>
@@ -171,3 +171,4 @@ export default function DocumentsPage() {
     </div>
   );
 }
+

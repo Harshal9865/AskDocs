@@ -72,7 +72,7 @@ export default function MembersPage() {
 
   if (!workspace) {
     return (
-      <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center text-zinc-500">
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-8 text-center text-zinc-500">
         Create or select a workspace first.
       </div>
     );
@@ -83,7 +83,7 @@ export default function MembersPage() {
   return (
     <div className="mx-auto max-w-2xl">
       <h1 className="mb-1 text-xl font-bold">Members</h1>
-      <p className="mb-6 text-sm text-zinc-500">
+      <p className="mb-6 text-sm text-slate-600">
         {isAdmin
           ? "Invite teammates and manage their access."
           : "People with access to this workspace."}
@@ -97,7 +97,7 @@ export default function MembersPage() {
             value={inviteEmail}
             onChange={(e) => setInviteEmail(e.target.value)}
             placeholder="teammate@company.com (must have an AskDocs account)"
-            className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900"
+            className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
           />
           <select
             value={inviteRole}
@@ -112,7 +112,7 @@ export default function MembersPage() {
           </select>
           <button
             type="submit"
-            className="rounded-lg bg-zinc-900 px-4 text-sm font-semibold text-white hover:bg-zinc-700"
+            className="rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-white hover:bg-indigo-700"
           >
             Invite
           </button>
@@ -120,21 +120,21 @@ export default function MembersPage() {
       )}
 
       {error && (
-        <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+        <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">{error}</p>
       )}
 
       {loading ? (
-        <p className="text-sm text-zinc-500">Loading members…</p>
+        <p className="text-sm text-slate-600">Loading members…</p>
       ) : (
         <ul className="space-y-2">
           {members.map((m) => (
             <li
               key={m.user_id}
-              className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-4 py-3"
+              className="flex items-center justify-between rounded-xl border border-slate-200 bg-white shadow-sm px-4 py-3"
             >
               <div className="min-w-0">
                 <div className="truncate text-sm font-medium">{m.email}</div>
-                <div className="text-xs capitalize text-zinc-400">{m.role}</div>
+                <div className="text-xs font-medium capitalize text-indigo-600">{m.role}</div>
               </div>
               {isAdmin ? (
                 <div className="flex items-center gap-2">
@@ -143,7 +143,7 @@ export default function MembersPage() {
                     onChange={(e) =>
                       void changeRole(m, e.target.value as Role)
                     }
-                    className="rounded-lg border border-zinc-300 bg-white px-2 py-1.5 text-xs"
+                    className="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs"
                   >
                     {ROLES.map((r) => (
                       <option key={r} value={r}>
@@ -159,7 +159,7 @@ export default function MembersPage() {
                   </button>
                 </div>
               ) : (
-                <span className="text-xs text-zinc-400">{m.role}</span>
+                <span className="text-xs font-medium text-slate-500">{m.role}</span>
               )}
             </li>
           ))}
@@ -168,3 +168,4 @@ export default function MembersPage() {
     </div>
   );
 }
+

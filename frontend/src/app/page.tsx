@@ -14,8 +14,9 @@ export default function Home() {
   }, [loading, user, router]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center text-zinc-500">
+    <div className="flex min-h-screen items-center justify-center text-slate-500">
       Loading…
     </div>
   );
 }
+

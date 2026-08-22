@@ -40,8 +40,8 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r border-zinc-200 bg-zinc-50">
-      <div className="border-b border-zinc-200 p-4">
+    <aside className="flex w-64 shrink-0 flex-col border-r border-slate-200 bg-white">
+      <div className="border-b border-slate-100 p-4">
         <div className="text-lg font-bold">AskDocs</div>
         <select
           value={workspace?.id ?? ""}
@@ -49,7 +49,7 @@ export default function Sidebar() {
             const ws = workspaces.find((w) => w.id === e.target.value);
             if (ws) select(ws);
           }}
-          className="mt-3 w-full rounded-lg border border-zinc-300 bg-white px-2 py-1.5 text-sm"
+          className="mt-3 w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm"
           aria-label="Active workspace"
         >
           {workspaces.length === 0 && <option value="">No workspace</option>}
@@ -62,7 +62,7 @@ export default function Sidebar() {
         {!creating ? (
           <button
             onClick={() => setCreating(true)}
-            className="mt-2 w-full rounded-lg border border-dashed border-zinc-300 py-1.5 text-xs text-zinc-500 hover:border-zinc-500 hover:text-zinc-800"
+            className="mt-2 w-full rounded-lg border border-dashed border-slate-300 py-1.5 text-xs text-slate-600 hover:border-indigo-400 hover:text-indigo-700"
           >
             + New workspace
           </button>
@@ -85,7 +85,7 @@ export default function Sidebar() {
             <button
               type="button"
               onClick={() => setCreating(false)}
-              className="rounded-lg px-2 py-1 text-xs text-zinc-500"
+              className="rounded-lg px-2 py-1 text-xs text-slate-500"
             >
               ✕
             </button>
@@ -100,8 +100,8 @@ export default function Sidebar() {
             href={item.href}
             className={`mb-1 block rounded-lg px-3 py-2 text-sm ${
               pathname === item.href
-                ? "bg-zinc-900 font-semibold text-white"
-                : "text-zinc-700 hover:bg-zinc-200"
+                ? "bg-indigo-600 font-semibold text-white"
+                : "text-slate-700 hover:bg-slate-100"
             }`}
           >
             {item.label}
@@ -109,15 +109,15 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="border-t border-zinc-200 p-4">
+      <div className="border-t border-slate-100 p-4">
         <div className="truncate text-sm font-medium">{user?.name}</div>
-        <div className="mb-3 truncate text-xs text-zinc-500">{user?.email}</div>
+        <div className="mb-3 truncate text-xs text-slate-500">{user?.email}</div>
         <button
           onClick={() => {
             logout();
             router.replace("/login");
           }}
-          className="w-full rounded-lg border border-zinc-300 py-1.5 text-xs text-zinc-600 hover:bg-white"
+          className="w-full rounded-lg border border-slate-300 py-1.5 text-xs text-slate-600 hover:bg-slate-50"
         >
           Sign out
         </button>
@@ -125,3 +125,4 @@ export default function Sidebar() {
     </aside>
   );
 }
+

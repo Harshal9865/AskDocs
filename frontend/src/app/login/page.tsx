@@ -28,13 +28,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
       <form
         onSubmit={onSubmit}
-        className="w-full max-w-sm rounded-xl border border-zinc-200 bg-white p-8 shadow-sm"
+        className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-8 shadow-sm"
       >
         <h1 className="mb-1 text-2xl font-bold">AskDocs</h1>
-        <p className="mb-6 text-sm text-zinc-500">
+        <p className="mb-6 text-sm text-slate-600">
           Sign in to your team knowledge base
         </p>
 
@@ -47,7 +47,7 @@ export default function LoginPage() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mb-4 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900"
+          className="mb-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
           placeholder="you@team.com"
         />
 
@@ -60,7 +60,7 @@ export default function LoginPage() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mb-4 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900"
+          className="mb-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
           placeholder="••••••••"
         />
 
@@ -73,14 +73,14 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={busy}
-          className="w-full rounded-lg bg-zinc-900 py-2 text-sm font-semibold text-white hover:bg-zinc-700 disabled:opacity-50"
+          className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-indigo-600 disabled:opacity-50"
         >
           {busy ? "Signing in…" : "Sign in"}
         </button>
 
-        <p className="mt-4 text-center text-sm text-zinc-500">
+        <p className="mt-4 text-center text-sm text-slate-600">
           No account?{" "}
-          <Link href="/register" className="font-medium text-zinc-900 underline">
+          <Link href="/register" className="font-semibold text-indigo-700 underline hover:text-indigo-800">
             Register
           </Link>
         </p>
@@ -88,3 +88,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
