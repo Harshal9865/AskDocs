@@ -9,7 +9,7 @@ import type { DocumentItem, TeamChat, Workspace } from "@/lib/types";
 
 function Stat({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
   return (
-    <div className="card-lift rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       <div className={`text-2xl font-bold ${accent ? "text-indigo-600" : "text-slate-900"}`}>{value}</div>
       <div className="mt-1 text-xs font-medium uppercase tracking-wide text-slate-400">{label}</div>
     </div>
@@ -75,7 +75,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <section className="card-lift rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-700">Recent documents</h2>
             <Link href="/documents" className="text-xs font-medium text-indigo-600 hover:underline">
@@ -117,7 +117,7 @@ export default function DashboardPage() {
           )}
         </section>
 
-        <section className="card-lift rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-700">Recent office chats</h2>
             <Link href="/chats" className="text-xs font-medium text-indigo-600 hover:underline">
@@ -160,5 +160,4 @@ export default function DashboardPage() {
     </div>
   );
 }
-
 

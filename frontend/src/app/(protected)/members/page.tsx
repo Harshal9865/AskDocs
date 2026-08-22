@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
@@ -177,7 +177,7 @@ export default function MembersPage() {
           {members.map((m) => (
             <li
               key={m.user_id}
-              className="flex items-center justify-between card-lift rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
+              className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
             >
               <div className="flex min-w-0 items-center gap-2.5">
                 <span
@@ -227,4 +227,3 @@ export default function MembersPage() {
     </div>
   );
 }
-

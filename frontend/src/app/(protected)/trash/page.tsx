@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
@@ -110,7 +110,7 @@ export default function TrashPage() {
             {docs.map((d) => (
               <li
                 key={d.id}
-                className="flex flex-wrap items-center justify-between gap-2 card-lift rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
               >
                 <div>
                   <div className="text-sm font-medium">📄 {d.title}</div>
@@ -141,7 +141,7 @@ export default function TrashPage() {
       ) : (
         <ul className="space-y-2">
           {convs.map((c) => (
-            <li key={c.id} className="card-lift rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+            <li key={c.id} className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
               <div className="text-sm font-medium">💬 {c.title}</div>
               <div className="text-xs text-slate-400">deleted {new Date(c.deleted_at).toLocaleString()}</div>
             </li>
@@ -151,4 +151,3 @@ export default function TrashPage() {
     </div>
   );
 }
-
