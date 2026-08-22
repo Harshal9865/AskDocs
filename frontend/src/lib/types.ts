@@ -92,5 +92,6 @@ export interface Message {
   role: "user" | "assistant";
   content: string;
   citations: Citation[] | null;
+  suggested_colleagues?: { user_id: string; name: string }[] | null;
   created_at: string;
 }

@@ -1,15 +1,22 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
 import type { Citation, Conversation, Message } from "@/lib/types";
 
+interface SuggestedColleague {
+  user_id: string;
+  name: string;
+}
+
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   citations?: Citation[] | null;
+  suggested?: SuggestedColleague[];
   streaming?: boolean;
 }
 
@@ -141,8 +148,24 @@ export default function ChatPage() {
         role: m.role,
         content: m.content,
         citations: m.citations,
+        suggested:
+          m.suggested_colleagues && (!m.citations || m.citations.length === 0)
+            ? m.suggested_colleagues
+            : [],
       })),
     );
+  }
+
+  const [askedIdx, setAskedIdx] = useState<number | null>(null);
+
+  async function askColleague(colleague: SuggestedColleague, question: string, idx: number) {
+    if (!workspace) return;
+    try {
+      await api.askColleague(workspace.id, colleague.user_id, question);
+      setAskedIdx(idx);
+    } catch (err) {
+      alert(`Could not message ${colleague.name}: ${(err as Error).message}`);
+    }
   }
 
   async function newConversation() {
@@ -180,12 +203,17 @@ export default function ChatPage() {
           next[next.length - 1] = { ...last, content: last.content + text };
           return next;
         }),
-      (citations) => {
+      (citations, suggested) => {
         done = true;
         setMessages((prev) => {
           const next = [...prev];
           const last = next[next.length - 1];
-          next[next.length - 1] = { ...last, streaming: false, citations };
+          next[next.length - 1] = {
+            ...last,
+            streaming: false,
+            citations,
+            suggested: citations && citations.length > 0 ? [] : suggested,
+          };
           return next;
         });
         void loadConversations(); // refresh titles in sidebar list
@@ -330,6 +358,40 @@ export default function ChatPage() {
                       ))}
                     </div>
                   )}
+                {m.role === "assistant" && !m.streaming && m.suggested && m.suggested.length > 0 && (
+                  <div className="mt-2 max-w-[92%] rounded-xl border border-indigo-100 bg-indigo-50 p-3">
+                    <p className="text-xs font-semibold text-indigo-900">
+                      🧑‍💼 No document answered this — ask your team:
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {m.suggested.map((s) =>
+                        askedIdx === i ? (
+                          <Link
+                            key={s.user_id}
+                            href="/chats"
+                            className="rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700"
+                          >
+                            ✓ Asked — open chat
+                          </Link>
+                        ) : (
+                          <button
+                            key={s.user_id}
+                            onClick={() =>
+                              void askColleague(
+                                s,
+                                messages[i - 1]?.content ?? "",
+                                i,
+                              )
+                            }
+                            className="rounded-full border border-indigo-300 bg-white px-3 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-100"
+                          >
+                            Ask {s.name}
+                          </button>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ))
           )}

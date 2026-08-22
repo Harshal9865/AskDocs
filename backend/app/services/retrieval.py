@@ -55,4 +55,65 @@ async def conversation_history(
     )
     msgs = list(result.scalars().all())
     msgs.reverse()
-    return [{"role": m.role.value if hasattr(m.role, "value") else m.role, "content": m.content} for m in msgs]
+    return [
+        {
+            "role": m.role.value if hasattr(m.role, "value") else m.role,
+            "content": m.content,
+        }
+        for m in msgs
+    ]
+
+
+LOW_CONFIDENCE_SCORE = 0.35
+
+
+def is_low_confidence(chunks: list[RetrievedChunk]) -> bool:
+    """No chunks at all, or best similarity is weak."""
+    if not chunks:
+        return True
+    return max(c.score for c in chunks) < LOW_CONFIDENCE_SCORE
+
+
+async def suggest_colleagues(db, workspace_id, chunks: list[RetrievedChunk], limit: int = 3):
+    """The people most likely to know the answer: uploaders of the closest
+    matching documents (even when the match itself was too weak to answer)."""
+    from app.models.user import User
+    from sqlalchemy import select
+
+    doc_ids = {c.document_id for c in chunks}
+    if not doc_ids:
+        # fall back to the workspace's document uploaders
+        from app.models.document import Document
+
+        docs = await db.execute(
+            select(Document.uploader_id)
+            .where(Document.workspace_id == workspace_id)
+            .limit(limit * 3)
+        )
+        uploader_ids = [uid for (uid,) in docs.all()][:limit]
+    else:
+        from app.models.document import Document
+
+        docs = await db.execute(
+            select(Document.id, Document.uploader_id).where(
+                Document.id.in_(doc_ids)
+            )
+        )
+        ranked: dict[str, float] = {}
+        for c in chunks:
+            if c.document_id not in ranked or c.score > ranked[c.document_id]:
+                ranked[c.document_id] = c.score
+        id_to_uploader = {str(did): uid for did, uid in docs.all()}
+        ordered_docs = sorted(ranked.items(), key=lambda kv: -kv[1])
+        uploader_ids = []
+        for did, _score in ordered_docs:
+            uid = id_to_uploader.get(did)
+            if uid and uid not in uploader_ids:
+                uploader_ids.append(uid)
+
+    suggestions = []
+    for uid in uploader_ids[:limit]:
+        user = await db.get(User, uid)
+        if user:
+            suggestions.append({"user_id": str(uid), "name": user.name or user.email})
+    return suggestions

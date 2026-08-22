@@ -36,6 +36,11 @@ class Citation(BaseModel):
     snippet: str
 
 
+class SuggestedColleague(BaseModel):
+    user_id: str
+    name: str
+
+
 class MessageOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -44,3 +49,4 @@ class MessageOut(BaseModel):
     content: str
     citations: list | None = None
     created_at: datetime
+    suggested_colleagues: list[SuggestedColleague] | None = None

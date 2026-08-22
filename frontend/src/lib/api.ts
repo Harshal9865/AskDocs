@@ -181,6 +181,18 @@ export const api = {
     }),
   listTeamMessages: (chatId: string) =>
     request<TeamMessage[]>(`/team-chats/${chatId}/messages`),
+  /** One-tap "Ask the team": opens (or reuses) the DM and sends the question. */
+  askColleague: async (wsId: string, userId: string, question: string) => {
+    const chat = await request<TeamChat>(`/workspaces/${wsId}/team-chats/direct`, {
+      method: "POST",
+      ...json({ user_id: userId }),
+    });
+    const msg = await request<TeamMessage>(`/team-chats/${chat.id}/messages`, {
+      method: "POST",
+      ...json({ content: question }),
+    });
+    return { chat, msg };
+  },
   sendTeamMessage: (chatId: string, content: string) =>
     request<TeamMessage>(`/team-chats/${chatId}/messages`, {
       method: "POST",
@@ -281,7 +293,10 @@ export const api = {
     convId: string,
     content: string,
     onToken: (text: string) => void,
-    onDone: (citations: Citation[] | null) => void,
+    onDone: (
+      citations: Citation[] | null,
+      suggestedColleagues: { user_id: string; name: string }[],
+    ) => void,
     onError: (message: string) => void,
     signal?: AbortSignal,
   ) {
@@ -317,7 +332,8 @@ export const api = {
           try {
             const event = JSON.parse(trimmed.slice(6));
             if (event.type === "answer") onToken(event.text);
-            else if (event.type === "done") onDone(event.citations ?? []);
+            else if (event.type === "done")
+              onDone(event.citations ?? [], event.suggested_colleagues ?? []);
             else if (event.type === "error") onError(event.message);
           } catch {
             /* skip malformed line */

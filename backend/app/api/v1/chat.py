@@ -15,7 +15,12 @@ from app.schemas.chat import (
     MessageOut,
 )
 from app.services.llm.gemini_provider import get_llm
-from app.services.retrieval import conversation_history, search_chunks
+from app.services.retrieval import (
+    conversation_history,
+    is_low_confidence,
+    search_chunks,
+    suggest_colleagues,
+)
 
 router = APIRouter()
 
@@ -147,6 +152,11 @@ async def ask_question_sync(
     llm = get_llm()
     query_embedding = (await llm.embed([payload.content]))[0]
     chunks = await search_chunks(db, conv.workspace_id, query_embedding)
+    suggestions = (
+        await suggest_colleagues(db, conv.workspace_id, chunks)
+        if is_low_confidence(chunks)
+        else []
+    )
 
     if not chunks:
         answer, citations = REFUSAL, []
@@ -155,11 +165,19 @@ async def ask_question_sync(
         answer = await llm.answer(payload.content, chunks, history)
         citations = _citations_json(chunks)
 
-    msg = Message(conversation_id=conv.id, role="assistant", content=answer, citations=citations)
+    msg = Message(
+        conversation_id=conv.id,
+        role="assistant",
+        content=answer,
+        citations=citations,
+    )
     db.add(msg)
     await db.commit()
     await db.refresh(msg)
-    return msg
+
+    out = MessageOut.model_validate(msg)
+    out.suggested_colleagues = suggestions
+    return out
 
 
 @router.post("/conversations/{conversation_id}/messages")
@@ -182,6 +200,11 @@ async def ask_question_stream(
     llm = get_llm()
     query_embedding = (await llm.embed([payload.content]))[0]
     chunks = await search_chunks(db, conv.workspace_id, query_embedding)
+    suggestions = (
+        await suggest_colleagues(db, conv.workspace_id, chunks)
+        if is_low_confidence(chunks)
+        else []
+    )
     history = await conversation_history(db, conv.id)
 
     async def event_stream():
@@ -195,7 +218,7 @@ async def ask_question_stream(
                     answer_parts.append(token)
                     yield f"data: {json.dumps({'type': 'answer', 'text': token})}\n\n"
             citations = _citations_json(chunks)
-            yield f"data: {json.dumps({'type': 'done', 'citations': citations})}\n\n"
+            yield f"data: {json.dumps({'type': 'done', 'citations': citations, 'suggested_colleagues': suggestions})}\n\n"
 
             async with AsyncSessionLocal() as session:
                 session.add(
