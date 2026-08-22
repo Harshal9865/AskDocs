@@ -23,7 +23,19 @@ export interface Workspace {
 export interface Member {
   user_id: string;
   email: string;
+  name: string;
   role: Role;
+  online: boolean;
+  last_seen_at: string | null;
+}
+
+export interface Invitation {
+  id: string;
+  workspace_id: string;
+  email: string;
+  role: Role;
+  status: "pending" | "accepted" | "declined" | "cancelled";
+  created_at: string;
 }
 
 export interface DocumentItem {
@@ -40,6 +52,31 @@ export interface Conversation {
   workspace_id: string;
   user_id: string;
   title: string;
+  type?: string;
+  created_at: string;
+}
+
+export interface Participant {
+  user_id: string;
+  email: string;
+  name: string;
+  online: boolean;
+}
+
+export interface TeamChat {
+  id: string;
+  type: "direct" | "group";
+  title: string;
+  created_at: string;
+  participants: Participant[];
+  last_message_at: string | null;
+  last_message_preview: string | null;
+}
+
+export interface TeamMessage {
+  id: string;
+  sender_id: string | null;
+  content: string;
   created_at: string;
 }
 

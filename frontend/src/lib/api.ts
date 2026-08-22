@@ -2,9 +2,12 @@ import type {
   Citation,
   Conversation,
   DocumentItem,
+  Invitation,
   Member,
   Message,
   Role,
+  TeamChat,
+  TeamMessage,
   TokenPair,
   User,
   Workspace,
@@ -144,6 +147,45 @@ export const api = {
     }),
   removeMember: (wsId: string, userId: string) =>
     request<void>(`/workspaces/${wsId}/members/${userId}`, { method: "DELETE" }),
+
+  // ---- invitations ----
+  myInvitations: () => request<Invitation[]>("/invitations"),
+  invitationPreview: (id: string) =>
+    request<{ workspace_name: string; inviter_email: string; role: string }>(
+      `/invitations/${id}/workspace`,
+    ),
+  acceptInvitation: (id: string) =>
+    request<Invitation>(`/invitations/${id}/accept`, { method: "POST" }),
+  declineInvitation: (id: string) =>
+    request<Invitation>(`/invitations/${id}/decline`, { method: "POST" }),
+  cancelInvitation: (wsId: string, id: string) =>
+    request<void>(`/workspaces/${wsId}/invitations/${id}`, { method: "DELETE" }),
+  listWorkspaceInvitations: (wsId: string) =>
+    request<Invitation[]>(`/workspaces/${wsId}/invitations`),
+
+  // ---- presence ----
+  presencePing: () => request<void>("/presence/ping", { method: "POST" }),
+
+  // ---- team chats (DMs + groups) ----
+  listTeamChats: (wsId: string) =>
+    request<TeamChat[]>(`/workspaces/${wsId}/team-chats`),
+  createDirectChat: (wsId: string, userId: string) =>
+    request<TeamChat>(`/workspaces/${wsId}/team-chats/direct`, {
+      method: "POST",
+      ...json({ user_id: userId }),
+    }),
+  createGroupChat: (wsId: string, title: string, memberIds: string[]) =>
+    request<TeamChat>(`/workspaces/${wsId}/team-chats/group`, {
+      method: "POST",
+      ...json({ title, member_ids: memberIds }),
+    }),
+  listTeamMessages: (chatId: string) =>
+    request<TeamMessage[]>(`/team-chats/${chatId}/messages`),
+  sendTeamMessage: (chatId: string, content: string) =>
+    request<TeamMessage>(`/team-chats/${chatId}/messages`, {
+      method: "POST",
+      ...json({ content }),
+    }),
 
   // ---- documents ----
   async uploadDocument(wsId: string, file: File) {

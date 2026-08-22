@@ -6,9 +6,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
+import Colleagues from "@/components/Colleagues";
+import NotificationBell from "@/components/NotificationBell";
 
 const NAV = [
-  { href: "/chat", label: "Chat" },
+  { href: "/chat", label: "AI Chat" },
+  { href: "/chats", label: "Office Chats" },
   { href: "/documents", label: "Documents" },
   { href: "/members", label: "Members" },
 ];
@@ -149,7 +152,7 @@ export default function Sidebar() {
         )}
       </div>
 
-      <nav className="flex-1 p-3">
+      <nav className="flex-1 overflow-y-auto p-3">
         {NAV.map((item) => (
           <Link
             key={item.href}
@@ -163,17 +166,25 @@ export default function Sidebar() {
             {item.label}
           </Link>
         ))}
+        <div className="mt-4 -mx-3">
+          <Colleagues />
+        </div>
       </nav>
 
       <div className="border-t border-slate-100 p-4">
-        <div className="truncate text-sm font-medium">{user?.name}</div>
-        <div className="mb-3 truncate text-xs text-slate-500">{user?.email}</div>
+        <div className="flex items-center justify-between">
+          <div className="min-w-0">
+            <div className="truncate text-sm font-medium">{user?.name}</div>
+            <div className="truncate text-xs text-slate-500">{user?.email}</div>
+          </div>
+          <NotificationBell />
+        </div>
         <button
           onClick={() => {
             logout();
             router.replace("/login");
           }}
-          className="w-full rounded-lg border border-slate-300 py-1.5 text-xs text-slate-600 hover:bg-slate-50"
+          className="mt-3 w-full rounded-lg border border-slate-300 py-1.5 text-xs text-slate-600 hover:bg-slate-50"
         >
           Sign out
         </button>

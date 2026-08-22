@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
-import type { Member, Role } from "@/lib/types";
+import type { Invitation, Member, Role } from "@/lib/types";
 
 const ROLES: Role[] = ["viewer", "member", "admin"];
 
@@ -12,6 +12,7 @@ export default function MembersPage() {
   const { user } = useAuth();
   const { workspace } = useWorkspace();
   const [members, setMembers] = useState<Member[]>([]);
+  const [pendingInvites, setPendingInvites] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState("");
@@ -25,6 +26,9 @@ export default function MembersPage() {
       setMembers(list);
       const me = list.find((m) => m.email === user?.email);
       setMyRole(me?.role ?? "viewer");
+      if (me?.role === "admin") {
+        setPendingInvites(await api.listWorkspaceInvitations(workspace.id));
+      }
       setError(null);
     } catch (err) {
       setError((err as Error).message);
@@ -35,13 +39,16 @@ export default function MembersPage() {
 
   useEffect(() => {
     void load();
+    // poll presence so dots stay fresh on this page
+    const t = setInterval(() => void load(), 30000);
+    return () => clearInterval(t);
   }, [load]);
 
   async function invite(e: React.FormEvent) {
     e.preventDefault();
     if (!workspace || !inviteEmail.trim()) return;
     try {
-      await api.addMember(workspace.id, inviteEmail.trim(), inviteRole);
+      await api.addMember(workspace.id, inviteEmail.trim().toLowerCase(), inviteRole);
       setInviteEmail("");
       await load();
     } catch (err) {
@@ -70,9 +77,19 @@ export default function MembersPage() {
     }
   }
 
+  async function cancelInvite(inv: Invitation) {
+    if (!workspace || !confirm(`Cancel invitation for ${inv.email}?`)) return;
+    try {
+      await api.cancelInvitation(workspace.id, inv.id);
+      await load();
+    } catch (err) {
+      alert((err as Error).message);
+    }
+  }
+
   if (!workspace) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-8 text-center text-zinc-500">
+      <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
         Create or select a workspace first.
       </div>
     );
@@ -85,38 +102,68 @@ export default function MembersPage() {
       <h1 className="mb-1 text-xl font-bold">Members</h1>
       <p className="mb-6 text-sm text-slate-600">
         {isAdmin
-          ? "Invite teammates and manage their access."
+          ? "Invite teammates — they accept from the notification bell after signing in."
           : "People with access to this workspace."}
       </p>
 
       {isAdmin && (
-        <form onSubmit={invite} className="mb-6 flex gap-2">
-          <input
-            type="email"
-            required
-            value={inviteEmail}
-            onChange={(e) => setInviteEmail(e.target.value)}
-            placeholder="teammate@company.com (must have an AskDocs account)"
-            className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-          />
-          <select
-            value={inviteRole}
-            onChange={(e) => setInviteRole(e.target.value as Role)}
-            className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm"
-          >
-            {ROLES.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
-          <button
-            type="submit"
-            className="rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-white hover:bg-indigo-700"
-          >
-            Invite
-          </button>
-        </form>
+        <>
+          <form onSubmit={invite} className="mb-4 flex gap-2">
+            <input
+              type="email"
+              required
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              placeholder="teammate@company.com"
+              className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+            />
+            <select
+              value={inviteRole}
+              onChange={(e) => setInviteRole(e.target.value as Role)}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
+              aria-label="Role for new member"
+            >
+              {ROLES.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              className="rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-white hover:bg-indigo-700"
+            >
+              Invite
+            </button>
+          </form>
+
+          {pendingInvites.length > 0 && (
+            <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+              <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Pending invitations ({pendingInvites.length})
+              </h2>
+              <ul className="space-y-2">
+                {pendingInvites.map((inv) => (
+                  <li key={inv.id} className="flex items-center justify-between text-sm">
+                    <span className="truncate">
+                      {inv.email}{" "}
+                      <span className="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-amber-800">
+                        {inv.role}
+                      </span>
+                    </span>
+                    <button
+                      onClick={() => void cancelInvite(inv)}
+                      aria-label={`Cancel invitation for ${inv.email}`}
+                      className="text-xs text-red-500 hover:underline"
+                    >
+                      Cancel
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </>
       )}
 
       {error && (
@@ -130,20 +177,31 @@ export default function MembersPage() {
           {members.map((m) => (
             <li
               key={m.user_id}
-              className="flex items-center justify-between rounded-xl border border-slate-200 bg-white shadow-sm px-4 py-3"
+              className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
             >
-              <div className="min-w-0">
-                <div className="truncate text-sm font-medium">{m.email}</div>
-                <div className="text-xs font-medium capitalize text-indigo-600">{m.role}</div>
+              <div className="flex min-w-0 items-center gap-2.5">
+                <span
+                  className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${
+                    m.online ? "bg-emerald-500" : "bg-slate-300"
+                  }`}
+                  title={m.online ? "Online" : "Offline"}
+                  aria-label={m.online ? "Online" : "Offline"}
+                />
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-medium">{m.name || m.email}</div>
+                  <div className="truncate text-xs text-slate-500">
+                    {m.name ? `${m.email} · ` : ""}
+                    {m.role}
+                  </div>
+                </div>
               </div>
-              {isAdmin ? (
+              {isAdmin && m.email !== user?.email ? (
                 <div className="flex items-center gap-2">
                   <select
                     value={m.role}
-                    onChange={(e) =>
-                      void changeRole(m, e.target.value as Role)
-                    }
+                    onChange={(e) => void changeRole(m, e.target.value as Role)}
                     className="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs"
+                    aria-label={`Change role for ${m.email}`}
                   >
                     {ROLES.map((r) => (
                       <option key={r} value={r}>
@@ -153,13 +211,14 @@ export default function MembersPage() {
                   </select>
                   <button
                     onClick={() => void remove(m)}
+                    aria-label={`Remove ${m.email}`}
                     className="text-xs text-red-500 hover:underline"
                   >
                     Remove
                   </button>
                 </div>
               ) : (
-                <span className="text-xs font-medium text-slate-500">{m.role}</span>
+                <span className="text-xs font-medium capitalize text-indigo-600">{m.role}</span>
               )}
             </li>
           ))}
@@ -168,4 +227,3 @@ export default function MembersPage() {
     </div>
   );
 }
-

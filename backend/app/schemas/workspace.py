@@ -29,6 +29,7 @@ class MemberUpdate(BaseModel):
 class MemberOut(BaseModel):
     user_id: uuid.UUID
     email: str
+    name: str = ""
     role: str
     online: bool = False
     last_seen_at: datetime | None = None

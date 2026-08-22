@@ -94,6 +94,7 @@ async def list_members(workspace_id: uuid.UUID, db: DbSession, membership: Membe
         MemberOut(
             user_id=m.user_id,
             email=u.email,
+            name=u.name,
             role=m.role.value if isinstance(m.role, Role) else m.role,
             online=is_online(u.last_seen_at),
             last_seen_at=u.last_seen_at,
