@@ -81,7 +81,9 @@ def create_slack_app():
 
     from slack_bolt.async_app import AsyncApp
 
-    app = AsyncApp(token=None)  # tokens read from env by SocketModeHandler
+    import os
+
+    app = AsyncApp(token=os.environ["SLACK_BOT_TOKEN"])
 
     @app.command("/askdocs")
     async def askdocs_command(ack, respond, command):

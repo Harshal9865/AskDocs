@@ -20,6 +20,7 @@ dependencies = [
     "python-docx>=1.1",
     "google-genai>=1.0",
     "slack-bolt>=1.18",
+    "aiohttp>=3.9",
 ]
 
 [project.optional-dependencies]
