@@ -1,0 +1,231 @@
+import type {
+  Citation,
+  Conversation,
+  DocumentItem,
+  Member,
+  Message,
+  Role,
+  TokenPair,
+  User,
+  Workspace,
+} from "./types";
+
+export const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
+
+type Tokens = { access: string; refresh: string } | null;
+
+let tokens: Tokens = null;
+let onTokensChanged: ((t: Tokens) => void) | null = null;
+
+export function setTokens(t: Tokens, notify = true) {
+  tokens = t;
+  if (notify && onTokensChanged) onTokensChanged(t);
+}
+
+export function getAccessToken() {
+  return tokens?.access ?? null;
+}
+
+export function setTokenListener(fn: (t: Tokens) => void) {
+  onTokensChanged = fn;
+}
+
+export class ApiError extends Error {
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
+}
+
+async function refreshTokens(): Promise<boolean> {
+  if (!tokens?.refresh) return false;
+  try {
+    const res = await fetch(`${API_BASE}/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token: tokens.refresh }),
+    });
+    if (!res.ok) return false;
+    const pair: TokenPair = await res.json();
+    setTokens({ access: pair.access_token, refresh: pair.refresh_token });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function request<T>(
+  path: string,
+  init: RequestInit & { retry?: boolean } = {},
+): Promise<T> {
+  const headers = new Headers(init.headers);
+  if (tokens?.access) headers.set("Authorization", `Bearer ${tokens.access}`);
+  if (init.body && !(init.body instanceof FormData)) {
+    if (!headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+  }
+
+  let res = await fetch(`${API_BASE}${path}`, { ...init, headers });
+
+  if (res.status === 401 && !init.retry) {
+    const ok = await refreshTokens();
+    if (ok) {
+      res = await fetch(`${API_BASE}${path}`, {
+        ...init,
+        headers: (() => {
+          const h = new Headers(init.headers);
+          if (tokens?.access) h.set("Authorization", `Bearer ${tokens.access}`);
+          return h;
+        })(),
+      });
+    }
+  }
+
+  if (res.status === 204) return undefined as T;
+  const text = await res.text();
+  let data: unknown = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = text;
+  }
+  if (!res.ok) {
+    const detail =
+      typeof data === "object" && data !== null
+        ? JSON.stringify((data as Record<string, unknown>).detail ?? data)
+        : String(data ?? res.statusText);
+    throw new ApiError(res.status, detail);
+  }
+  return data as T;
+}
+
+function json(body: unknown): RequestInit {
+  return { body: JSON.stringify(body) };
+}
+
+export const api = {
+  setOnTokens: setTokenListener,
+
+  // ---- auth ----
+  async register(email: string, password: string, name: string) {
+    return request<User>("/auth/register", {
+      method: "POST",
+      ...json({ email, password, name }),
+    });
+  },
+  async login(email: string, password: string): Promise<TokenPair> {
+    const form = new URLSearchParams({ username: email, password });
+    return request<TokenPair>("/auth/login", {
+      method: "POST",
+      body: form.toString(),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
+  },
+  me: () => request<User>("/auth/me"),
+
+  // ---- workspaces ----
+  createWorkspace: (name: string) =>
+    request<Workspace>("/workspaces", { method: "POST", ...json({ name }) }),
+  listWorkspaces: () => request<Workspace[]>("/workspaces"),
+  listMembers: (wsId: string) =>
+    request<Member[]>(`/workspaces/${wsId}/members`),
+  addMember: (wsId: string, email: string, role: Role) =>
+    request<Member>(`/workspaces/${wsId}/members`, {
+      method: "POST",
+      ...json({ email, role }),
+    }),
+  updateMemberRole: (wsId: string, userId: string, role: Role) =>
+    request<Member>(`/workspaces/${wsId}/members/${userId}`, {
+      method: "PATCH",
+      ...json({ role }),
+    }),
+  removeMember: (wsId: string, userId: string) =>
+    request<void>(`/workspaces/${wsId}/members/${userId}`, { method: "DELETE" }),
+
+  // ---- documents ----
+  async uploadDocument(wsId: string, file: File) {
+    const form = new FormData();
+    form.append("file", file);
+    return request<DocumentItem>(`/workspaces/${wsId}/documents`, {
+      method: "POST",
+      body: form,
+    });
+  },
+  listDocuments: (wsId: string) =>
+    request<DocumentItem[]>(`/workspaces/${wsId}/documents`),
+  deleteDocument: (wsId: string, docId: string) =>
+    request<void>(`/workspaces/${wsId}/documents/${docId}`, { method: "DELETE" }),
+
+  // ---- chat ----
+  createConversation: (wsId: string) =>
+    request<Conversation>(`/workspaces/${wsId}/conversations`, {
+      method: "POST",
+      body: "{}",
+      headers: { "Content-Type": "application/json" },
+    }),
+  listConversations: (wsId: string) =>
+    request<Conversation[]>(`/workspaces/${wsId}/conversations`),
+  listMessages: (convId: string) =>
+    request<Message[]>(`/conversations/${convId}/messages`),
+
+  /** Non-streaming ask. */
+  ask: (convId: string, content: string) =>
+    request<Message>(`/conversations/${convId}/ask`, {
+      method: "POST",
+      ...json({ content }),
+    }),
+
+  /** SSE streaming ask. Calls onToken per chunk; resolves with citations. */
+  async askStream(
+    convId: string,
+    content: string,
+    onToken: (text: string) => void,
+    onDone: (citations: Citation[] | null) => void,
+    onError: (message: string) => void,
+    signal?: AbortSignal,
+  ) {
+    try {
+      const res = await fetch(
+        `${API_BASE}/conversations/${convId}/messages`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(tokens?.access ? { Authorization: `Bearer ${tokens.access}` } : {}),
+          },
+          body: JSON.stringify({ content }),
+          signal,
+        },
+      );
+      if (!res.ok || !res.body) {
+        onError(`Request failed (${res.status})`);
+        return;
+      }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n\n");
+        buffer = lines.pop() ?? "";
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith("data: ")) continue;
+          try {
+            const event = JSON.parse(trimmed.slice(6));
+            if (event.type === "answer") onToken(event.text);
+            else if (event.type === "done") onDone(event.citations ?? []);
+            else if (event.type === "error") onError(event.message);
+          } catch {
+            /* skip malformed line */
+          }
+        }
+      }
+    } catch (err) {
+      if ((err as Error).name !== "AbortError") onError(String(err));
+    }
+  },
+};
