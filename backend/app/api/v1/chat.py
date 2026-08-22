@@ -85,9 +85,8 @@ async def list_conversations(
 
 @router.get("/conversations/{conversation_id}/messages", response_model=list[MessageOut])
 async def get_messages(
-    conversation_id: uuid.UUID, db: DbSession, membership: Membership, user: CurrentUser
+    conversation_id: uuid.UUID, db: DbSession, user: CurrentUser
 ):
-    del membership
     conv = await _get_conversation_checked(db, conversation_id, user)
     result = await db.execute(
         select(Message).where(Message.conversation_id == conv.id).order_by(Message.created_at)
@@ -100,7 +99,6 @@ async def ask_question_sync(
     conversation_id: uuid.UUID,
     payload: MessageCreate,
     db: DbSession,
-    membership: Membership,
     user: CurrentUser,
 ):
     """Non-streaming Q&A - same pipeline as SSE, easier to test/debug."""
@@ -134,7 +132,6 @@ async def ask_question_stream(
     conversation_id: uuid.UUID,
     payload: MessageCreate,
     db: DbSession,
-    membership: Membership,
     user: CurrentUser,
 ):
     """SSE streaming Q&A. Events: {type: answer|done|error}."""
@@ -177,4 +174,5 @@ async def ask_question_stream(
             yield f"data: {json.dumps({'type': 'error', 'message': str(exc)[:300]})}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
+
 

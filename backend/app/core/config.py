@@ -19,8 +19,8 @@ class Settings(BaseSettings):
     CORS_ORIGINS: list[str] = ["http://localhost:3000"]
 
     GEMINI_API_KEY: str | None = None
-    GEMINI_CHAT_MODEL: str = "gemini-2.0-flash"
-    GEMINI_EMBED_MODEL: str = "models/text-embedding-004"
+    GEMINI_CHAT_MODEL: str = "gemini-3.6-flash"
+    GEMINI_EMBED_MODEL: str = "gemini-embedding-001"
 
     STORAGE_DIR: str = "storage"
     MAX_UPLOAD_BYTES: int = 20 * 1024 * 1024

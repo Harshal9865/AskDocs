@@ -1,6 +1,7 @@
 import asyncio
 
 from google import genai
+from google.genai import types
 
 from app.core.config import get_settings
 from app.services.llm.base import LLMProvider, RetrievedChunk
@@ -30,6 +31,7 @@ class GeminiProvider(LLMProvider):
         result = await self.client.aio.models.embed_content(
             model=self.settings.GEMINI_EMBED_MODEL,
             contents=texts,
+            config=types.EmbedContentConfig(output_dimensionality=768),
         )
         return [list(e.values) for e in result.embeddings]
 
