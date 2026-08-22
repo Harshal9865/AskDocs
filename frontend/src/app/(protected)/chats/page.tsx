@@ -156,7 +156,7 @@ export default function ChatsPage() {
     "You";
 
   return (
-    <div className="relative mx-auto flex h-[calc(100dvh-8.5rem)] max-w-5xl gap-4 md:h-[calc(100vh-3rem)]">
+    <div className="relative mx-auto flex h-[calc(100dvh-8rem)] max-w-5xl flex-col gap-4 md:h-[calc(100vh-3rem)] md:flex-row">
       {listOpen && (
         <div
           className="fixed inset-0 z-10 bg-slate-900/50 md:hidden"
@@ -165,14 +165,14 @@ export default function ChatsPage() {
         />
       )}
       {/* left panel */}
-      <div className={`absolute inset-y-0 left-0 z-20 flex w-64 transform flex-col overflow-y-auto border-r border-slate-200 bg-white pr-3 transition-transform duration-200 md:relative md:z-auto md:translate-x-0 ${listOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"}`}>
+      <div className={`absolute inset-y-0 left-0 z-20 flex w-72 max-w-[85vw] transform flex-col overflow-y-auto border-r border-slate-200 bg-white pr-3 transition-transform duration-200 scroll-touch md:relative md:z-auto md:translate-x-0 ${listOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"}`}>
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-700">Office mates</h2>
           <button
             onClick={() => setShowNewGroup(true)}
             aria-label="Create group chat"
             title="New group chat"
-            className="rounded-lg bg-indigo-600 px-2 py-1 text-xs font-semibold text-white hover:bg-indigo-700"
+            className="rounded-lg bg-indigo-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700"
           >
             + Group
           </button>
@@ -180,7 +180,7 @@ export default function ChatsPage() {
 
         {colleagues.length === 0 && (
           <p className="mb-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
-            No colleagues yet â€” invite your team from the Members page.
+            No colleagues yet — invite your team from the Members page.
           </p>
         )}
 
@@ -189,7 +189,7 @@ export default function ChatsPage() {
             <li key={m.user_id}>
               <button
                 onClick={() => void openDM(m)}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-100"
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-100"
                 title={`Message ${m.name || m.email}`}
               >
                 <PresenceDot online={m.online} />
@@ -250,22 +250,36 @@ export default function ChatsPage() {
       </div>
 
       {/* thread */}
-      <div className="flex min-w-0 flex-1 flex-col rounded-xl border border-slate-200 bg-white shadow-sm">
-        <button
-          onClick={() => setListOpen((o) => !o)}
-          aria-label="Toggle chats list"
-          className="mx-3 mt-3 self-start rounded-lg border border-slate-300 px-2 py-1.5 text-xs text-slate-600 hover:bg-slate-50 md:hidden"
-        >
-          💬 Chats
-        </button>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border border-slate-200 bg-white shadow-sm">
+        {/* mobile thread header */}
+        <div className="flex items-center justify-between gap-2 border-b border-slate-100 px-3 py-2 md:hidden">
+          <button
+            onClick={() => setListOpen(true)}
+            aria-label="Show chats"
+            className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            <span aria-hidden>💬</span>
+            <span className="truncate">
+              {activeChat ? chatTitle(activeChat, user?.email) : "Chats"}
+            </span>
+            <span aria-hidden className="ml-auto shrink-0 text-slate-400">▾</span>
+          </button>
+          <button
+            onClick={() => setShowNewGroup(true)}
+            aria-label="New group chat"
+            className="shrink-0 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white"
+          >
+            + Group
+          </button>
+        </div>
         {!activeChat ? (
-          <div className="flex h-full items-center justify-center text-center text-sm text-slate-400">
+          <div className="flex h-full items-center justify-center px-4 text-center text-sm text-slate-400">
             Pick a colleague to start a direct message,
             <br /> or create a group chat to plan together.
           </div>
         ) : (
           <>
-            <div className="border-b border-slate-100 px-6 py-3">
+            <div className={`border-b border-slate-100 ${"px-4 py-3 sm:px-6"} hidden md:block`}>
               <div className="flex items-center gap-2 text-sm font-semibold">
                 {activeChat.type === "direct" && (
                   <PresenceDot
@@ -283,10 +297,10 @@ export default function ChatsPage() {
               )}
             </div>
 
-            <div className="flex-1 space-y-3 overflow-y-auto p-6">
+            <div className="scroll-touch flex-1 space-y-3 overflow-y-auto px-3 py-4 sm:px-6">
               {messages.length === 0 ? (
                 <p className="pt-8 text-center text-sm text-slate-400">
-                  No messages yet â€” say hello!
+                  No messages yet — say hello!
                 </p>
               ) : (
                 messages.map((msg) => {
@@ -299,7 +313,7 @@ export default function ChatsPage() {
                         </div>
                       )}
                       <div
-                        className={`inline-block max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2 text-sm ${
+                        className={`inline-block max-w-[92%] whitespace-pre-wrap rounded-2xl px-3.5 py-2 text-sm sm:max-w-[80%] sm:px-4 ${
                           mine
                             ? "rounded-br-md bg-indigo-600 text-white"
                             : "rounded-bl-md border border-slate-200 bg-white text-slate-900"
@@ -314,19 +328,19 @@ export default function ChatsPage() {
               <div ref={threadEnd} />
             </div>
 
-            <form onSubmit={send} className="border-t border-slate-200 p-4">
+            <form onSubmit={send} className="border-t border-slate-200 p-3 pb-safe sm:p-4">
               <div className="flex gap-2">
                 <input
                   id="team-chat-input"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Write a messageâ€¦"
-                  className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  placeholder="Write a message…"
+                  className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:px-4"
                 />
                 <button
                   type="submit"
                   disabled={sending || !input.trim()}
-                  className="rounded-lg bg-indigo-600 px-5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-40"
+                  className="shrink-0 rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-40 sm:px-5"
                 >
                   Send
                 </button>
@@ -343,7 +357,7 @@ export default function ChatsPage() {
           onClick={() => setShowNewGroup(false)}
         >
           <div
-            className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
+            className="max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-5 shadow-xl sm:p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="mb-4 text-lg font-bold">New group chat</h2>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -58,7 +58,7 @@ export default function InsightsPage() {
       </div>
 
       {/* Knowledge-Gap Radar */}
-      <section className="mb-8 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="mb-8 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <h2 className="mb-1 text-sm font-bold text-slate-800">🎯 Knowledge-Gap Radar</h2>
         <p className="mb-4 text-xs text-slate-500">
           Questions the AI couldn&apos;t answer — write documents about these to close the gaps.
@@ -83,7 +83,7 @@ export default function InsightsPage() {
       </section>
 
       {/* Top cited */}
-      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <h2 className="mb-4 text-sm font-bold text-slate-800">📚 Most-cited documents</h2>
         {data.top_cited_documents.length === 0 ? (
           <p className="text-sm text-slate-400">Ask some questions first — citations will rank documents here.</p>
@@ -119,9 +119,10 @@ export default function InsightsPage() {
 
 function Stat({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       <div className={`text-2xl font-bold ${accent && Number(value) > 0 ? "text-amber-600" : "text-slate-900"}`}>{value}</div>
       <div className="mt-1 text-xs font-medium uppercase tracking-wide text-slate-400">{label}</div>
     </div>
   );
 }
+

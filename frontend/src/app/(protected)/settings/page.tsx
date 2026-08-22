@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { api } from "@/lib/api";
@@ -81,7 +81,7 @@ export default function SettingsPage() {
           <button
             type="submit"
             disabled={nameBusy || !name.trim()}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+            className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 sm:w-auto"
           >
             {nameBusy ? "Saving…" : "Save name"}
           </button>
@@ -125,7 +125,7 @@ export default function SettingsPage() {
           <button
             type="submit"
             disabled={pwBusy || !current || next.length < 8}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+            className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 sm:w-auto"
           >
             {pwBusy ? "Changing…" : "Change password"}
           </button>
@@ -134,3 +134,4 @@ export default function SettingsPage() {
     </div>
   );
 }
+

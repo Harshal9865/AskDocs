@@ -224,7 +224,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="relative mx-auto flex h-[calc(100dvh-8.5rem)] max-w-5xl gap-4 md:h-[calc(100vh-3rem)]">
+    <div className="relative mx-auto flex h-[calc(100dvh-8rem)] max-w-5xl flex-col gap-4 md:h-[calc(100vh-3rem)] md:flex-row">
       {/* conversation list */}
       {listOpen && (
         <div
@@ -233,10 +233,10 @@ export default function ChatPage() {
           aria-hidden
         />
       )}
-      <div className={`absolute inset-y-0 left-0 z-20 w-60 transform overflow-y-auto border-r border-slate-200 bg-white pr-3 transition-transform duration-200 md:relative md:z-auto md:w-56 md:translate-x-0 md:bg-transparent ${listOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"}`}>
+      <div className={`absolute inset-y-0 left-0 z-20 w-72 max-w-[85vw] transform overflow-y-auto border-r border-slate-200 bg-white pr-3 transition-transform duration-200 scroll-touch md:relative md:z-auto md:w-56 md:translate-x-0 md:bg-transparent ${listOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"}`}>
         <button
           onClick={() => void newConversation()}
-          className="mb-3 w-full rounded-lg bg-indigo-600 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
+          className="mb-3 w-full rounded-lg bg-indigo-600 py-2.5 text-xs font-semibold text-white hover:bg-indigo-700"
         >
           + New conversation
         </button>
@@ -272,15 +272,27 @@ export default function ChatPage() {
       </div>
 
       {/* thread */}
-      <div className="flex min-w-0 flex-1 flex-col rounded-xl border border-slate-200 bg-white shadow-sm">
-            <button
-              onClick={() => setListOpen((o) => !o)}
-              aria-label="Toggle conversations list"
-              className="mx-3 mt-3 self-start rounded-lg border border-slate-300 px-2 py-1.5 text-xs text-slate-600 hover:bg-slate-50 md:hidden"
-            >
-              💬 Conversations
-            </button>
-        <div className="flex-1 space-y-4 overflow-y-auto p-6">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border border-slate-200 bg-white shadow-sm">
+        {/* mobile thread header */}
+        <div className="flex items-center justify-between gap-2 border-b border-slate-100 px-3 py-2 md:hidden">
+          <button
+            onClick={() => setListOpen(true)}
+            aria-label="Show conversations"
+            className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            <span aria-hidden>💬</span>
+            <span className="truncate">{activeConv ? activeConv.title : "Conversations"}</span>
+            <span aria-hidden className="ml-auto shrink-0 text-slate-400">▾</span>
+          </button>
+          <button
+            onClick={() => void newConversation()}
+            aria-label="New conversation"
+            className="shrink-0 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white"
+          >
+            + New
+          </button>
+        </div>
+        <div className="scroll-touch flex-1 space-y-4 overflow-y-auto px-3 py-4 sm:px-6">
           {!activeConv ? (
             <div className="flex h-full items-center justify-center text-center text-sm text-slate-400">
               Start a new conversation to ask about your documents.
@@ -293,7 +305,7 @@ export default function ChatPage() {
             messages.map((m, i) => (
               <div key={i}>
                 <div
-                  className={`inline-block max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm ${
+                  className={`inline-block max-w-[92%] whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-sm sm:max-w-[85%] sm:px-4 ${
                     m.role === "user"
                       ? "ml-auto block rounded-br-md bg-indigo-600 text-white" : "block rounded-bl-md border border-slate-200 bg-white"
                   }`}
@@ -311,7 +323,7 @@ export default function ChatPage() {
                         <button
                           key={ci}
                           onClick={() => setShowCitations(m.citations!)}
-                          className="rounded-full border border-zinc-300 px-3 py-1 text-xs text-slate-700 hover:border-zinc-900 hover:text-zinc-900"
+                          className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:border-indigo-400 hover:text-indigo-700"
                         >
                           📄 {c.document_title}
                         </button>
@@ -329,7 +341,7 @@ export default function ChatPage() {
             e.preventDefault();
             void send();
           }}
-          className="border-t border-slate-200 p-4"
+          className="border-t border-slate-200 p-3 pb-safe sm:p-4"
         >
           <div className="flex gap-2">
             <input

@@ -141,3 +141,34 @@ body {
     @apply font-sans;
   }
 }
+
+/* ---------- Mobile UX foundation ---------- */
+
+/* Remove blue tap flash on touch devices */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent iOS Safari auto-zoom when focusing inputs (<16px triggers zoom).
+   Applies only on touch-width screens so desktop typography is unchanged. */
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Safe-area helpers for notched phones */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Smooth, momentum-based scrolling in chat threads */
+.scroll-touch {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
