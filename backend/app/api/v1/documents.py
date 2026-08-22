@@ -1,4 +1,4 @@
-import uuid
+﻿import uuid
 
 from fastapi import (
     APIRouter,
@@ -13,6 +13,7 @@ from sqlalchemy import delete, select
 
 from app.core.config import get_settings
 from app.core.deps import AdminMembership, CurrentUser, DbSession, MemberMembership, Membership
+from app.models.activity import log_activity
 from app.models.document import Chunk, Document
 from app.services.ingestion import ingest_document
 from app.storage.db_storage import get_storage
@@ -88,6 +89,8 @@ async def upload_document(
     await db.commit()
     await db.refresh(document)
 
+    await log_activity(db, membership.workspace_id, user.id, "document.uploaded", document.title)
+    await db.commit()
     background_tasks.add_task(_run_ingest, document.id)
     return document
 
@@ -99,6 +102,7 @@ async def list_documents(
     result = await db.execute(
         select(Document)
         .where(Document.workspace_id == membership.workspace_id)
+        .where(Document.deleted_at.is_(None))
         .order_by(Document.created_at.desc())
     )
     return list(result.scalars().all())
@@ -112,9 +116,36 @@ async def get_document(
     membership: Membership,
 ):
     document = await db.get(Document, document_id)
-    if document is None or document.workspace_id != membership.workspace_id:
+    if document is None or document.workspace_id != membership.workspace_id or document.deleted_at is not None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Document not found")
     return document
+
+
+@router.get("/workspaces/{workspace_id}/documents/{document_id}/chunks")
+async def get_document_chunks(
+    workspace_id: uuid.UUID,
+    document_id: uuid.UUID,
+    db: DbSession,
+    membership: Membership,
+):
+    document = await db.get(Document, document_id)
+    if document is None or document.workspace_id != membership.workspace_id or document.deleted_at is not None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Document not found")
+    result = await db.execute(
+        select(Chunk)
+        .where(Chunk.document_id == document.id)
+        .order_by(Chunk.ordinal)
+    )
+    chunks = result.scalars().all()
+    return [
+        {
+            "id": str(c.id),
+            "ordinal": c.ordinal,
+            "token_count": c.token_count,
+            "content": c.content,
+        }
+        for c in chunks
+    ]
 
 
 @router.delete("/workspaces/{workspace_id}/documents/{document_id}", status_code=204)
@@ -124,9 +155,16 @@ async def delete_document(
     db: DbSession,
     membership: AdminMembership,
 ):
+    """Soft-delete to trash (restore via /trash endpoints)."""
+    from app.models.base import utcnow
+
     document = await db.get(Document, document_id)
-    if document is None or document.workspace_id != membership.workspace_id:
+    if document is None or document.workspace_id != membership.workspace_id or document.deleted_at is not None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Document not found")
-    await db.execute(delete(Chunk).where(Chunk.document_id == document.id))
-    await db.delete(document)
+    document.deleted_at = utcnow()
+    await log_activity(db, membership.workspace_id, membership.user_id, "document.trashed", document.title)
     await db.commit()
+
+
+
+

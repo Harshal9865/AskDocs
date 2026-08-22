@@ -1,9 +1,9 @@
 from typing import Annotated
-
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import BaseModel
 from sqlalchemy import select
 
 from app.core.deps import CurrentUser, DbSession
@@ -69,3 +69,30 @@ async def refresh(payload: RefreshRequest, db: DbSession):
 @router.get("/me", response_model=UserOut)
 async def me(user: CurrentUser):
     return user
+
+
+class ProfileUpdate(BaseModel):
+    name: str
+
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+
+@router.patch("/me", response_model=UserOut)
+async def update_me(payload: ProfileUpdate, db: DbSession, user: CurrentUser):
+    user.name = payload.name.strip()[:200] or user.name
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+
+@router.post("/change-password", status_code=204)
+async def change_password(payload: PasswordChange, db: DbSession, user: CurrentUser):
+    if not verify_password(payload.current_password, user.password_hash):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Current password is incorrect")
+    if len(payload.new_password) < 8:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "New password must be at least 8 characters")
+    user.password_hash = hash_password(payload.new_password)
+    await db.commit()

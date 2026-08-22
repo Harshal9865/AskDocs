@@ -1,6 +1,7 @@
-import uuid
+﻿import uuid
+from datetime import datetime
 
-from sqlalchemy import Enum, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import DateTime, Enum, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -19,6 +20,7 @@ class Conversation(BaseModel):
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     title: Mapped[str] = mapped_column(String(300), default="New conversation")
     type: Mapped[str] = mapped_column(ConversationTypeEnum, default="docs_qa")
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
 
 class Message(BaseModel):
@@ -43,3 +45,4 @@ class ConversationParticipant(BaseModel):
         ForeignKey("conversations.id"), index=True
     )
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), index=True)
+

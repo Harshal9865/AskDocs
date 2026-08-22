@@ -21,7 +21,7 @@ async def search_chunks(
                1 - (c.embedding <=> :emb) AS score
         FROM chunks c
         JOIN documents d ON d.id = c.document_id
-        WHERE c.workspace_id = :wsid
+        WHERE c.workspace_id = :wsid AND d.deleted_at IS NULL
         ORDER BY c.embedding <=> :emb
         LIMIT :k
         """

@@ -1,4 +1,4 @@
-import re
+﻿import re
 import uuid
 
 from fastapi import APIRouter, HTTPException, status
@@ -8,6 +8,7 @@ from app.core.deps import AdminMembership, CurrentUser, DbSession, Membership
 from app.models.chat import Conversation, Message
 from app.models.document import Chunk, Document
 from app.models.invitation import Invitation
+from app.models.activity import ActivityLog, log_activity
 from app.models.user import User
 from app.models.workspace import Role, Workspace, WorkspaceMember
 from app.schemas.workspace import (
@@ -38,6 +39,7 @@ async def create_workspace(payload: WorkspaceCreate, db: DbSession, user: Curren
     ws = Workspace(name=payload.name, slug=slug, created_by=user.id)
     db.add(ws)
     await db.flush()
+    await log_activity(db, ws.id, user.id, 'workspace.created', ws.name)
     db.add(WorkspaceMember(workspace_id=ws.id, user_id=user.id, role=Role.admin))
     await db.commit()
     await db.refresh(ws)
@@ -60,6 +62,22 @@ async def get_workspace(workspace_id: uuid.UUID, db: DbSession, membership: Memb
     return ws
 
 
+@router.patch("/{workspace_id}", response_model=WorkspaceOut)
+async def rename_workspace(
+    workspace_id: uuid.UUID,
+    payload: WorkspaceCreate,
+    db: DbSession,
+    membership: AdminMembership,
+):
+    ws = await db.get(Workspace, membership.workspace_id)
+    if not payload.name.strip():
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Name cannot be empty")
+    ws.name = payload.name.strip()[:200]
+    await db.commit()
+    await db.refresh(ws)
+    return ws
+
+
 @router.delete("/{workspace_id}", status_code=204)
 async def delete_workspace(workspace_id: uuid.UUID, db: DbSession, membership: AdminMembership):
     """Admin-only. Removes the workspace and everything in it."""
@@ -75,8 +93,10 @@ async def delete_workspace(workspace_id: uuid.UUID, db: DbSession, membership: A
 
     await db.execute(delete(WorkspaceMember).where(WorkspaceMember.workspace_id == ws_id))
     from app.models.invitation import Invitation
+    from app.models.activity import ActivityLog
 
     await db.execute(delete(Invitation).where(Invitation.workspace_id == ws_id))
+    await db.execute(delete(ActivityLog).where(ActivityLog.workspace_id == ws_id))
     await db.execute(delete(Workspace).where(Workspace.id == ws_id))
     await db.commit()
 
@@ -144,6 +164,7 @@ async def add_member(
         email=email,
         role=Role(payload.role),
     )
+    await log_activity(db, membership.workspace_id, membership.user_id, 'member.invited', email)
     db.add(invite)
     await db.commit()
     await db.refresh(invite)
@@ -244,3 +265,4 @@ async def remove_member(
         raise HTTPException(status.HTTP_409_CONFLICT, "Cannot remove the last admin")
     await db.delete(member)
     await db.commit()
+

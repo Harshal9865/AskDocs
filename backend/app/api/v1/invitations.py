@@ -1,10 +1,11 @@
-import uuid
+﻿import uuid
 
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 
 from app.core.deps import CurrentUser, DbSession
 from app.models.invitation import Invitation
+from app.models.activity import log_activity
 from app.models.user import User
 from app.models.workspace import Role, Workspace, WorkspaceMember
 from app.schemas.workspace import InvitationOut
@@ -88,6 +89,7 @@ async def accept_invitation(
         role=Role(invite.role.value) if hasattr(invite.role, "value") else Role(invite.role),
     )
     db.add(member)
+    await log_activity(db, invite.workspace_id, user.id, 'member.joined', user.email)
     invite.status = "accepted"
     await db.commit()
     await db.refresh(invite)
@@ -111,3 +113,4 @@ async def decline_invitation(
     invite.status = "declined"
     await db.commit()
     return invite
+

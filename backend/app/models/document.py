@@ -1,7 +1,8 @@
-import uuid
+﻿import uuid
+from datetime import datetime
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import Enum, ForeignKey, Integer, String, Text
+from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -23,6 +24,7 @@ class Document(BaseModel):
     status: Mapped[str] = mapped_column(StatusEnum, default="pending")
     error_msg: Mapped[str | None] = mapped_column(Text, nullable=True)
     size_bytes: Mapped[int] = mapped_column(Integer)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
 
 class Chunk(BaseModel):
@@ -37,3 +39,5 @@ class Chunk(BaseModel):
     token_count: Mapped[int] = mapped_column(Integer)
     metadata_json: Mapped[dict] = mapped_column(JSONB, default=dict)
     embedding = mapped_column(Vector(768))
+
+
