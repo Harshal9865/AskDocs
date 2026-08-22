@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -18,7 +19,7 @@ export default function LoginPage() {
     setBusy(true);
     setError(null);
     try {
-      await login(email, password);
+      await login(email.trim().toLowerCase(), password);
       router.replace("/chat");
     } catch (err) {
       setError((err as Error).message || "Login failed");
@@ -54,18 +55,16 @@ export default function LoginPage() {
         <label className="mb-1 block text-sm font-medium" htmlFor="password">
           Password
         </label>
-        <input
-          id="password"
-          type="password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mb-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-          placeholder="••••••••"
-        />
+        <div className="mb-4">
+          <PasswordInput
+            id="password"
+            value={password}
+            onChange={setPassword}
+          />
+        </div>
 
         {error && (
-          <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+          <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
             {error}
           </p>
         )}
@@ -88,4 +87,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

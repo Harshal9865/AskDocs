@@ -128,6 +128,8 @@ export const api = {
   createWorkspace: (name: string) =>
     request<Workspace>("/workspaces", { method: "POST", ...json({ name }) }),
   listWorkspaces: () => request<Workspace[]>("/workspaces"),
+  deleteWorkspace: (wsId: string) =>
+    request<void>(`/workspaces/${wsId}`, { method: "DELETE" }),
   listMembers: (wsId: string) =>
     request<Member[]>(`/workspaces/${wsId}/members`),
   addMember: (wsId: string, email: string, role: Role) =>
@@ -168,6 +170,8 @@ export const api = {
     request<Conversation[]>(`/workspaces/${wsId}/conversations`),
   listMessages: (convId: string) =>
     request<Message[]>(`/conversations/${convId}/messages`),
+  deleteConversation: (convId: string) =>
+    request<void>(`/conversations/${convId}`, { method: "DELETE" }),
 
   /** Non-streaming ask. */
   ask: (convId: string, content: string) =>

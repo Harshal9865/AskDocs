@@ -3,10 +3,11 @@ import uuid
 
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import StreamingResponse
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
 from app.core.deps import AsyncSessionLocal, CurrentUser, DbSession, Membership
 from app.models.chat import Conversation, Message
+from app.models.workspace import Role, WorkspaceMember
 from app.schemas.chat import (
     ConversationCreate,
     ConversationOut,
@@ -25,7 +26,7 @@ async def _get_conversation_checked(
     db, conversation_id: uuid.UUID, user: CurrentUser
 ) -> Conversation:
     conv = await db.get(Conversation, conversation_id)
-    if conv is None or conv.user_id != user.id:
+    if conv is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Conversation not found")
     return conv
 
@@ -88,10 +89,42 @@ async def get_messages(
     conversation_id: uuid.UUID, db: DbSession, user: CurrentUser
 ):
     conv = await _get_conversation_checked(db, conversation_id, user)
+    if conv.user_id != user.id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Conversation not found")
     result = await db.execute(
         select(Message).where(Message.conversation_id == conv.id).order_by(Message.created_at)
     )
     return list(result.scalars().all())
+
+
+@router.delete("/conversations/{conversation_id}", status_code=204)
+async def delete_conversation(
+    conversation_id: uuid.UUID, db: DbSession, user: CurrentUser
+):
+    """Owner or workspace admin can delete; messages are removed too."""
+    conv = await _get_conversation_checked(db, conversation_id, user)
+    if conv.user_id == user.id:
+        allowed = True
+    else:
+        result = await db.execute(
+            select(WorkspaceMember).where(
+                WorkspaceMember.workspace_id == conv.workspace_id,
+                WorkspaceMember.user_id == user.id,
+            )
+        )
+        membership = result.scalar_one_or_none()
+        if membership is None:
+            # non-member: don't reveal existence
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Conversation not found")
+        role = membership.role.value if hasattr(membership.role, "value") else membership.role
+        allowed = role == "admin"
+    if not allowed:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN, "Not allowed to delete this conversation"
+        )
+    await db.execute(delete(Message).where(Message.conversation_id == conv.id))
+    await db.delete(conv)
+    await db.commit()
 
 
 @router.post("/conversations/{conversation_id}/ask", response_model=MessageOut)
@@ -103,6 +136,8 @@ async def ask_question_sync(
 ):
     """Non-streaming Q&A - same pipeline as SSE, easier to test/debug."""
     conv = await _get_conversation_checked(db, conversation_id, user)
+    if conv.user_id != user.id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Conversation not found")
 
     db.add(Message(conversation_id=conv.id, role="user", content=payload.content))
     if conv.title == "New conversation":
@@ -136,6 +171,8 @@ async def ask_question_stream(
 ):
     """SSE streaming Q&A. Events: {type: answer|done|error}."""
     conv = await _get_conversation_checked(db, conversation_id, user)
+    if conv.user_id != user.id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Conversation not found")
 
     db.add(Message(conversation_id=conv.id, role="user", content=payload.content))
     if conv.title == "New conversation":
@@ -174,5 +211,6 @@ async def ask_question_stream(
             yield f"data: {json.dumps({'type': 'error', 'message': str(exc)[:300]})}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
+
 
 

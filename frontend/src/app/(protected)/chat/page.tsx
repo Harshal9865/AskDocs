@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
 import type { Citation, Conversation, Message } from "@/lib/types";
 
@@ -54,13 +55,66 @@ function CitationsModal({
 
 export default function ChatPage() {
   const { workspace } = useWorkspace();
+  const { user } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConv, setActiveConv] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [myRole, setMyRole] = useState<string | null>(null);
   const [showCitations, setShowCitations] = useState<Citation[] | null>(null);
   const threadEnd = useRef<HTMLDivElement>(null);
+
+  // resolve my role in this workspace (admin => can delete any conversation)
+  useEffect(() => {
+    if (!workspace || !user) {
+      setMyRole(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const members = await api.listMembers(workspace.id);
+        if (!cancelled) {
+          setMyRole(members.find((m) => m.email === user.email)?.role ?? null);
+        }
+      } catch {
+        if (!cancelled) setMyRole(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [workspace, user]);
+
+  const canDelete = (conv: Conversation) =>
+    conv.user_id === user?.id || myRole === "admin";
+
+  async function deleteConversation(conv: Conversation) {
+    if (!confirm(`Delete conversation "${conv.title}"? This cannot be undone.`)) {
+      return;
+    }
+    try {
+      await api.deleteConversation(conv.id);
+      if (activeConv?.id === conv.id) {
+        setActiveConv(null);
+        setMessages([]);
+      }
+      await loadConversations();
+    } catch (err) {
+      alert((err as Error).message);
+    }
+  }
+
+  // Escape closes the citations modal
+  useEffect(() => {
+    if (!showCitations) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowCitations(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showCitations]);
 
   const loadConversations = useCallback(async () => {
     if (!workspace) return;
@@ -177,17 +231,33 @@ export default function ChatPage() {
           + New conversation
         </button>
         {conversations.map((c) => (
-          <button
+          <div
             key={c.id}
-            onClick={() => void openConversation(c)}
-            className={`mb-1 block w-full truncate rounded-lg px-3 py-2 text-left text-sm ${
-              activeConv?.id === c.id
-                ? "bg-indigo-100 font-semibold text-indigo-900"
-                : "text-slate-600 hover:bg-slate-100"
+            className={`group flex items-center rounded-lg ${
+              activeConv?.id === c.id ? "bg-indigo-100" : "hover:bg-slate-100"
             }`}
           >
-            {c.title}
-          </button>
+            <button
+              onClick={() => void openConversation(c)}
+              className="min-w-0 flex-1 truncate px-3 py-2 text-left text-sm text-slate-600 group-hover:text-slate-900"
+              title={c.title}
+            >
+              {c.title}
+            </button>
+            {canDelete(c) && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  void deleteConversation(c);
+                }}
+                aria-label={`Delete conversation ${c.title}`}
+                title="Delete conversation"
+                className="mr-1 shrink-0 rounded-md px-1.5 py-1 text-xs text-slate-400 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-600 focus:opacity-100 group-hover:opacity-100"
+              >
+                🗑
+              </button>
+            )}
+          </div>
         ))}
       </div>
 

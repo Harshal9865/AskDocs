@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -11,15 +12,20 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (password !== confirm) {
+      setError("Passwords do not match");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
-      await register(email, password, name);
+      await register(email.trim().toLowerCase(), password, name.trim());
       router.replace("/chat");
     } catch (err) {
       setError((err as Error).message || "Registration failed");
@@ -67,19 +73,32 @@ export default function RegisterPage() {
         <label className="mb-1 block text-sm font-medium" htmlFor="password">
           Password
         </label>
-        <input
-          id="password"
-          type="password"
-          required
-          minLength={8}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mb-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-          placeholder="min. 8 characters"
-        />
+        <div className="mb-1">
+          <PasswordInput
+            id="password"
+            value={password}
+            onChange={setPassword}
+            minLength={8}
+            autoComplete="new-password"
+          />
+        </div>
+        <p className="mb-3 text-xs text-slate-500">Minimum 8 characters.</p>
+
+        <label className="mb-1 block text-sm font-medium" htmlFor="confirm">
+          Confirm password
+        </label>
+        <div className="mb-4">
+          <PasswordInput
+            id="confirm"
+            value={confirm}
+            onChange={setConfirm}
+            autoComplete="new-password"
+            ariaLabel="Password confirmation"
+          />
+        </div>
 
         {error && (
-          <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+          <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
             {error}
           </p>
         )}
@@ -102,4 +121,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-

@@ -13,6 +13,7 @@ class ConversationOut(BaseModel):
 
     id: uuid.UUID
     workspace_id: uuid.UUID
+    user_id: uuid.UUID
     title: str
     created_at: datetime
 

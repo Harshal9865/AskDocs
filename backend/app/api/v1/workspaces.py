@@ -2,9 +2,11 @@ import re
 import uuid
 
 from fastapi import APIRouter, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
 from app.core.deps import AdminMembership, CurrentUser, DbSession, Membership
+from app.models.chat import Conversation, Message
+from app.models.document import Chunk, Document
 from app.models.user import User
 from app.models.workspace import Role, Workspace, WorkspaceMember
 from app.schemas.workspace import (
@@ -54,6 +56,24 @@ async def list_workspaces(db: DbSession, user: CurrentUser):
 async def get_workspace(workspace_id: uuid.UUID, db: DbSession, membership: Membership):
     ws = await db.get(Workspace, membership.workspace_id)
     return ws
+
+
+@router.delete("/{workspace_id}", status_code=204)
+async def delete_workspace(workspace_id: uuid.UUID, db: DbSession, membership: AdminMembership):
+    """Admin-only. Removes the workspace and everything in it."""
+    ws_id = membership.workspace_id
+
+    conversation_ids = select(Conversation.id).where(Conversation.workspace_id == ws_id)
+    await db.execute(delete(Message).where(Message.conversation_id.in_(conversation_ids)))
+    await db.execute(delete(Conversation).where(Conversation.workspace_id == ws_id))
+
+    document_ids = select(Document.id).where(Document.workspace_id == ws_id)
+    await db.execute(delete(Chunk).where(Chunk.document_id.in_(document_ids)))
+    await db.execute(delete(Document).where(Document.workspace_id == ws_id))
+
+    await db.execute(delete(WorkspaceMember).where(WorkspaceMember.workspace_id == ws_id))
+    await db.execute(delete(Workspace).where(Workspace.id == ws_id))
+    await db.commit()
 
 
 @router.get("/{workspace_id}/members", response_model=list[MemberOut])

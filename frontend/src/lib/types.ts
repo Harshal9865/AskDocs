@@ -38,6 +38,7 @@ export interface DocumentItem {
 export interface Conversation {
   id: string;
   workspace_id: string;
+  user_id: string;
   title: string;
   created_at: string;
 }
