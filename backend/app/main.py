@@ -14,10 +14,12 @@ settings = get_settings()
 
 app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG)
 
+allow_all = "*" in settings.CORS_ORIGINS
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
-    allow_credentials=True,
+    allow_origins=["*"] if allow_all else settings.CORS_ORIGINS,
+    allow_credentials=not allow_all,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -28,3 +30,4 @@ app.include_router(api_router, prefix="/api/v1")
 @app.get("/health")
 def health():
     return {"status": "ok"}
+

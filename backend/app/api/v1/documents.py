@@ -15,7 +15,7 @@ from app.core.config import get_settings
 from app.core.deps import AdminMembership, CurrentUser, DbSession, MemberMembership, Membership
 from app.models.document import Chunk, Document
 from app.services.ingestion import ingest_document
-from app.storage.local import get_storage
+from app.storage.db_storage import get_storage
 
 router = APIRouter()
 
@@ -73,7 +73,7 @@ async def upload_document(
         raise HTTPException(413, "File too large (max 20 MB)")
 
     storage = get_storage()
-    key = storage.save(str(membership.workspace_id), file.filename or "untitled.txt", data)
+    key = await storage.save(str(membership.workspace_id), file.filename or "untitled.txt", data)
 
     document = Document(
         workspace_id=membership.workspace_id,

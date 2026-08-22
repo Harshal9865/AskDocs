@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     GEMINI_EMBED_MODEL: str = "gemini-embedding-001"
 
     STORAGE_DIR: str = "storage"
+    STORAGE_BACKEND: str = "local"  # "local" (dev) or "db" (hosted, e.g. Render)
     MAX_UPLOAD_BYTES: int = 20 * 1024 * 1024
 
     CHUNK_SIZE_TOKENS: int = 500

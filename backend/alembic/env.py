@@ -12,6 +12,7 @@ import app.models.workspace  # noqa: F401
 import app.models.invitation  # noqa: F401
 import app.models.document  # noqa: F401
 import app.models.chat  # noqa: F401
+import app.models.file  # noqa: F401
 
 config = context.config
 

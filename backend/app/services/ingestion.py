@@ -65,7 +65,7 @@ async def ingest_document(db: AsyncSession, document_id: uuid.UUID):
     document = await db.get(Document, document_id)
     if document is None:
         return
-    from app.storage.local import get_storage
+    from app.storage.db_storage import get_storage
     from app.services.llm.gemini_provider import get_llm
 
     try:
@@ -73,7 +73,7 @@ async def ingest_document(db: AsyncSession, document_id: uuid.UUID):
         await db.commit()
 
         storage = get_storage()
-        data = storage.open(document.storage_key)
+        data = await storage.open(document.storage_key)
         text = extract_text(data, document.file_type)
 
         pieces = chunk_text(text)
