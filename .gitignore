@@ -31,3 +31,8 @@ Thumbs.db
 
 # Docker volumes
 pgdata/
+
+# runtime artifacts
+*.pid
+server_out.log
+server_err.log
