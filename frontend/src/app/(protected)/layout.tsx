@@ -37,11 +37,11 @@ export default function ProtectedLayout({
   return (
     <WorkspaceProvider>
       {/* mobile top bar */}
-      <header className="fixed inset-x-0 top-0 z-30 flex h-12 items-center gap-3 border-b border-slate-200 bg-white/80 px-4 backdrop-blur-xl md:hidden">
+      <header className="fixed inset-x-0 top-0 z-30 flex h-12 items-center gap-3 border-b border-slate-200 bg-white px-4 md:hidden">
         <button
           onClick={() => setDrawerOpen(true)}
           aria-label="Open menu"
-          className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100"
+          className="rounded-lg p-2 text-slate-600 hover:bg-slate-100"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <line x1="3" y1="6" x2="21" y2="6" />
@@ -49,7 +49,7 @@ export default function ProtectedLayout({
             <line x1="3" y1="18" x2="21" y2="18" />
           </svg>
         </button>
-        <span className="text-brand-gradient text-lg font-bold">AskDocs</span>
+        <span className="text-lg font-bold text-slate-900">AskDocs</span>
       </header>
 
       <div className="flex min-h-screen">

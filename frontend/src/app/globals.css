@@ -239,31 +239,3 @@ input:focus-visible {
 
 /* ---------- Advanced design polish ---------- */
 
-/* Subtle brand tint at the top of every page */
-body {
-  background-image: radial-gradient(
-    1100px 380px at 50% -120px,
-    rgba(99, 102, 241, 0.07),
-    transparent 70%
-  );
-}
-
-/* Gradient wordmark */
-.text-brand-gradient {
-  background: linear-gradient(135deg, #4338ca 0%, #7c3aed 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* Layered, realistic card shadows */
-.shadow-layered {
-  box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.05),
-    0 6px 20px rgba(15, 23, 42, 0.06);
-}
-
-/* Gentle press feedback on nav rows */
-nav a:active {
-  transform: scale(0.985);
-}

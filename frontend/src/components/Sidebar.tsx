@@ -179,12 +179,12 @@ export default function Sidebar({
           <Link
             href="/dashboard"
             onClick={onCloseMobile}
-            className="text-lg font-bold hover:opacity-80"
+            className="text-lg font-bold text-slate-900 hover:text-indigo-700"
             aria-label="AskDocs home"
             title="Go to Dashboard"
           >
-            <span className="text-brand-gradient">AskDocs</span>
-            <span className="sb-collapsed-show sb-center h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 text-lg font-black text-white">
+            <span className={collapsed ? "hidden" : ""}>AskDocs</span>
+            <span className={`sb-collapsed-show h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-lg font-black text-white ${collapsed ? "sb-center" : ""}`}>
               A
             </span>
           </Link>
@@ -231,7 +231,7 @@ export default function Sidebar({
             onClick={toggleCollapsed}
             title={workspace ? `Workspace: ${workspace.name}` : "No workspace"}
             aria-label="Expand sidebar"
-            className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-sm font-bold uppercase text-white shadow-sm"
+            className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold uppercase text-white shadow-sm"
           >
             {(workspace?.name ?? "?").slice(0, 1)}
           </button>
