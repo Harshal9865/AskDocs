@@ -172,3 +172,35 @@ body {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
+/* ---------- Light refinements (no layout changes) ---------- */
+
+/* Never allow sideways scrolling off-screen */
+html,
+body {
+  overflow-x: hidden;
+}
+
+/* Slim, unobtrusive scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Consistent keyboard focus rings */
+a:focus-visible,
+button:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
