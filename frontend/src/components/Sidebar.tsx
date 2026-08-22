@@ -302,7 +302,7 @@ export default function Sidebar({
             title={collapsed ? item.label : undefined}
             className={`mb-0.5 flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs ${
               pathname === item.href
-                ? "bg-indigo-100 font-semibold text-indigo-900"
+                ? "bg-indigo-600 font-semibold text-white"
                 : "text-slate-600 hover:bg-slate-100"
             }`}
           >
