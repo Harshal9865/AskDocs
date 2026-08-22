@@ -27,6 +27,13 @@ app.add_middleware(
 app.include_router(api_router, prefix="/api/v1")
 
 
+@app.on_event("startup")
+async def startup():
+    from app.services.slack_bot import start_slack_bot
+
+    await start_slack_bot()
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}

@@ -87,11 +87,17 @@ export interface Citation {
   snippet: string;
 }
 
+export interface ConflictWarning {
+  is_conflict: boolean;
+  note: string;
+}
+
 export interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
   citations: Citation[] | null;
   suggested_colleagues?: { user_id: string; name: string }[] | null;
+  conflict?: ConflictWarning | null;
   created_at: string;
 }

@@ -35,3 +35,9 @@ class LLMProvider(ABC):
     @abstractmethod
     async def stream_answer(self, question: str, contexts: list[RetrievedChunk], history: list[dict] | None = None):
         """Yield answer tokens one by one."""
+
+    async def detect_conflict(self, contexts: list[RetrievedChunk]) -> dict | None:
+        """Check whether top excerpts from different documents contradict each
+        other. Returns {"is_conflict": bool, "note": str} or None if not
+        applicable (single document) or the check fails."""
+        return None

@@ -50,3 +50,4 @@ class MessageOut(BaseModel):
     citations: list | None = None
     created_at: datetime
     suggested_colleagues: list[SuggestedColleague] | None = None
+    conflict: dict | None = None

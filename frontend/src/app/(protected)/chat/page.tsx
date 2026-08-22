@@ -13,10 +13,12 @@ interface SuggestedColleague {
 }
 
 interface ChatMessage {
+  id?: string;
   role: "user" | "assistant";
   content: string;
   citations?: Citation[] | null;
   suggested?: SuggestedColleague[];
+  conflict?: { is_conflict: boolean; note: string } | null;
   streaming?: boolean;
 }
 
@@ -145,9 +147,11 @@ export default function ChatPage() {
     const history = await api.listMessages(conv.id);
     setMessages(
       history.map((m: Message) => ({
+        id: m.id,
         role: m.role,
         content: m.content,
         citations: m.citations,
+        conflict: m.conflict ?? null,
         suggested:
           m.suggested_colleagues && (!m.citations || m.citations.length === 0)
             ? m.suggested_colleagues
@@ -157,6 +161,7 @@ export default function ChatPage() {
   }
 
   const [askedIdx, setAskedIdx] = useState<number | null>(null);
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
 
   async function askColleague(colleague: SuggestedColleague, question: string, idx: number) {
     if (!workspace) return;
@@ -203,7 +208,7 @@ export default function ChatPage() {
           next[next.length - 1] = { ...last, content: last.content + text };
           return next;
         }),
-      (citations, suggested) => {
+      (citations, suggested, conflict) => {
         done = true;
         setMessages((prev) => {
           const next = [...prev];
@@ -212,11 +217,21 @@ export default function ChatPage() {
             ...last,
             streaming: false,
             citations,
+            conflict,
             suggested: citations && citations.length > 0 ? [] : suggested,
           };
           return next;
         });
         void loadConversations(); // refresh titles in sidebar list
+      },
+      (messageId) => {
+        // persisted: capture id for permalinks
+        setMessages((prev) => {
+          const next = [...prev];
+          const last = next[next.length - 1];
+          next[next.length - 1] = { ...last, id: messageId };
+          return next;
+        });
       },
       (message) => {
         done = true;
@@ -356,8 +371,38 @@ export default function ChatPage() {
                           📄 {c.document_title}
                         </button>
                       ))}
+                      {m.id && (
+                        <button
+                          onClick={() => {
+                            navigator.clipboard
+                              .writeText(`${window.location.origin}/answers/${m.id}`)
+                              .then(() => {
+                                setCopiedIdx(i);
+                                setTimeout(() => setCopiedIdx(null), 2000);
+                              });
+                          }}
+                          aria-label="Copy shareable link to this answer"
+                          title="Share this answer"
+                          className="rounded-full border border-indigo-300 bg-white px-3 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-50"
+                        >
+                          {copiedIdx === i ? "✓ Copied" : "🔗 Share"}
+                        </button>
+                      )}
                     </div>
                   )}
+                {m.role === "assistant" && !m.streaming && m.conflict?.is_conflict && (
+                  <div className="mt-2 max-w-[92%] rounded-xl border border-amber-300 bg-amber-50 p-3">
+                    <p className="text-xs font-semibold text-amber-900">
+                      ⚠️ Sources disagree — these documents give conflicting information.
+                    </p>
+                    {m.conflict.note && (
+                      <p className="mt-1 text-xs text-amber-800">{m.conflict.note}</p>
+                    )}
+                    <p className="mt-1 text-[10px] text-amber-700">
+                      Verify with the document owners before relying on this answer.
+                    </p>
+                  </div>
+                )}
                 {m.role === "assistant" && !m.streaming && m.suggested && m.suggested.length > 0 && (
                   <div className="mt-2 max-w-[92%] rounded-xl border border-indigo-100 bg-indigo-50 p-3">
                     <p className="text-xs font-semibold text-indigo-900">

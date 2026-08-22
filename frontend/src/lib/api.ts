@@ -1,5 +1,6 @@
-import type {
+﻿import type {
   Citation,
+  ConflictWarning,
   Conversation,
   DocumentItem,
   Invitation,
@@ -236,6 +237,18 @@ export const api = {
   purgeDocument: (wsId: string, docId: string) =>
     request<void>(`/workspaces/${wsId}/trash/documents/${docId}`, { method: "DELETE" }),
 
+  // ---- answer permalinks ----
+  getAnswer: (id: string) =>
+    request<{
+      id: string;
+      question: string;
+      answer: string;
+      citations: Citation[];
+      conversation_title: string;
+      workspace_id: string;
+      created_at: string;
+    }>(`/answers/${id}`),
+
   // ---- search & insights ----
   search: (wsId: string, q: string) =>
     request<{
@@ -296,8 +309,10 @@ export const api = {
     onDone: (
       citations: Citation[] | null,
       suggestedColleagues: { user_id: string; name: string }[],
+      conflict: ConflictWarning | null,
     ) => void,
-    onError: (message: string) => void,
+    onSaved?: (messageId: string) => void,
+    onError?: (message: string) => void,
     signal?: AbortSignal,
   ) {
     try {
@@ -313,10 +328,10 @@ export const api = {
           signal,
         },
       );
-      if (!res.ok || !res.body) {
-        onError(`Request failed (${res.status})`);
-        return;
-      }
+        if (!res.ok || !res.body) {
+          onError?.(`Request failed (${res.status})`);
+          return;
+        }
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
@@ -332,16 +347,23 @@ export const api = {
           try {
             const event = JSON.parse(trimmed.slice(6));
             if (event.type === "answer") onToken(event.text);
+            else if (event.type === "saved" && onSaved) onSaved(event.message_id);
             else if (event.type === "done")
-              onDone(event.citations ?? [], event.suggested_colleagues ?? []);
-            else if (event.type === "error") onError(event.message);
+              onDone(
+                event.citations ?? [],
+                event.suggested_colleagues ?? [],
+                event.conflict ?? null,
+              );
+            else if (event.type === "error") onError?.(event.message);
           } catch {
             /* skip malformed line */
           }
         }
       }
     } catch (err) {
-      if ((err as Error).name !== "AbortError") onError(String(err));
+      if ((err as Error).name !== "AbortError") onError?.(String(err));
     }
   },
 };
+
+

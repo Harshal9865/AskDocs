@@ -160,10 +160,12 @@ async def ask_question_sync(
 
     if not chunks:
         answer, citations = REFUSAL, []
+        conflict = None
     else:
         history = await conversation_history(db, conv.id)
         answer = await llm.answer(payload.content, chunks, history)
         citations = _citations_json(chunks)
+        conflict = await llm.detect_conflict(chunks)
 
     msg = Message(
         conversation_id=conv.id,
@@ -177,6 +179,7 @@ async def ask_question_sync(
 
     out = MessageOut.model_validate(msg)
     out.suggested_colleagues = suggestions
+    out.conflict = conflict
     return out
 
 
@@ -213,27 +216,83 @@ async def ask_question_stream(
             if not chunks:
                 yield f"data: {json.dumps({'type': 'answer', 'text': REFUSAL})}\n\n"
                 answer_parts.append(REFUSAL)
+                conflict = None
             else:
                 async for token in llm.stream_answer(payload.content, chunks, history):
                     answer_parts.append(token)
                     yield f"data: {json.dumps({'type': 'answer', 'text': token})}\n\n"
+                conflict = await llm.detect_conflict(chunks)
             citations = _citations_json(chunks)
-            yield f"data: {json.dumps({'type': 'done', 'citations': citations, 'suggested_colleagues': suggestions})}\n\n"
+            yield f"data: {json.dumps({'type': 'done', 'citations': citations, 'suggested_colleagues': suggestions, 'conflict': conflict})}\n\n"
 
             async with AsyncSessionLocal() as session:
-                session.add(
-                    Message(
-                        conversation_id=conv.id,
-                        role="assistant",
-                        content="".join(answer_parts),
-                        citations=citations,
-                    )
+                saved = Message(
+                    conversation_id=conv.id,
+                    role="assistant",
+                    content="".join(answer_parts),
+                    citations=citations,
                 )
+                session.add(saved)
                 await session.commit()
+                yield f"data: {json.dumps({'type': 'saved', 'message_id': str(saved.id)})}\n\n"
         except Exception as exc:  # noqa: BLE001
             yield f"data: {json.dumps({'type': 'error', 'message': str(exc)[:300]})}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+
+@router.get("/answers/{message_id}")
+async def get_answer_permalink(
+    message_id: uuid.UUID,
+    db: DbSession,
+    user: CurrentUser,
+):
+    """Shareable cited answer: the assistant message plus its original question.
+    Accessible to any member of the workspace the conversation belongs to."""
+    from app.models.workspace import WorkspaceMember
+
+    msg = await db.get(Message, message_id)
+    if (
+        msg is None
+        or (msg.role.value if hasattr(msg.role, "value") else str(msg.role)) != "assistant"
+    ):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Answer not found")
+
+    conv = await db.get(Conversation, msg.conversation_id)
+    if conv is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Answer not found")
+
+    membership = await db.execute(
+        select(WorkspaceMember).where(
+            WorkspaceMember.workspace_id == conv.workspace_id,
+            WorkspaceMember.user_id == user.id,
+        )
+    )
+    if membership.scalar_one_or_none() is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Answer not found")
+
+    # original question = latest user message before this answer
+    q_result = await db.execute(
+        select(Message)
+        .where(
+            Message.conversation_id == conv.id,
+            Message.role == "user",
+            Message.created_at <= msg.created_at,
+        )
+        .order_by(Message.created_at.desc())
+        .limit(1)
+    )
+    question = q_result.scalar_one_or_none()
+
+    return {
+        "id": str(msg.id),
+        "question": question.content if question else "",
+        "answer": msg.content,
+        "citations": msg.citations or [],
+        "conversation_title": conv.title,
+        "workspace_id": str(conv.workspace_id),
+        "created_at": msg.created_at.isoformat(),
+    }
 
 
 

@@ -88,5 +88,49 @@ class GeminiProvider(LLMProvider):
             task.cancel()
 
 
+    async def detect_conflict(self, contexts: list[RetrievedChunk]) -> dict | None:
+        """Ask Gemini whether the best excerpts from different documents
+        contradict each other. Only runs when 2+ documents are involved."""
+        by_doc: dict[str, list[RetrievedChunk]] = {}
+        for c in contexts:
+            by_doc.setdefault(c.document_id, []).append(c)
+        if len(by_doc) < 2:
+            return None
+
+        excerpts = []
+        for cs in by_doc.values():
+            best = max(cs, key=lambda c: c.score)
+            excerpts.append(f"[Document: {best.document_title}]\n{best.content[:1500]}")
+
+        prompt = (
+            "You are checking whether company document excerpts disagree with each other.\n"
+            "Compare the excerpts below. If they state contradictory facts about the same "
+            "subject (different numbers, dates, policies, or outcomes), they conflict.\n"
+            'Reply ONLY with JSON: {"conflict": true|false, "note": "<one short sentence '
+            'explaining what disagrees, or saying they are consistent>"}\n\n'
+            + "\n\n---\n\n".join(excerpts[:4])
+        )
+        try:
+            response = await asyncio.to_thread(
+                lambda: self.client.models.generate_content(
+                    model=self.settings.GEMINI_CHAT_MODEL,
+                    contents=[prompt],
+                ).text
+            )
+            text = (response or "").strip()
+            if text.startswith("```"):
+                text = text.strip("`")
+                if text.lower().startswith("json"):
+                    text = text[4:]
+            import json as _json
+
+            data = _json.loads(text.strip())
+            return {
+                "is_conflict": bool(data.get("conflict", False)),
+                "note": str(data.get("note", ""))[:300],
+            }
+        except Exception:  # noqa: BLE001 - never break an answer over this check
+            return None
+
 def get_llm() -> LLMProvider:
     return GeminiProvider()

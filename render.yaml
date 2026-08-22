@@ -20,3 +20,12 @@ services:
         value: '["*"]'
       - key: DEBUG
         value: "false"
+      # Slack bot (optional): leave blank to disable
+      - key: SLACK_BOT_TOKEN
+        sync: false
+      - key: SLACK_APP_TOKEN
+        sync: false
+      - key: SLACK_SIGNING_SECRET
+        sync: false
+      - key: SLACK_WORKSPACE_ID
+        sync: false
