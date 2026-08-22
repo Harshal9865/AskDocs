@@ -86,7 +86,14 @@ export default function Sidebar() {
   return (
     <aside className="flex w-64 shrink-0 flex-col border-r border-slate-200 bg-white">
       <div className="border-b border-slate-100 p-4">
-        <div className="text-lg font-bold">AskDocs</div>
+        <Link
+          href="/chat"
+          className="text-lg font-bold text-slate-900 hover:text-indigo-700"
+          aria-label="AskDocs home"
+          title="Go to AI Chat"
+        >
+          AskDocs
+        </Link>
         <div className="mt-3 flex items-center gap-1.5">
           <select
             value={workspace?.id ?? ""}
