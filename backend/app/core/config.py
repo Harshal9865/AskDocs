@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -10,6 +11,17 @@ class Settings(BaseSettings):
     DEBUG: bool = True
 
     DATABASE_URL: str = "postgresql+psycopg://askdocs:askdocs@localhost:5432/askdocs"
+
+    @field_validator("DATABASE_URL", mode="after")
+    @classmethod
+    def _force_psycopg3_driver(cls, v: str) -> str:
+        """Hosts (Neon/Render) hand out plain postgresql:// URLs; force the
+        psycopg3 dialect since psycopg2 isn't installed."""
+        if v.startswith("postgresql://"):
+            return v.replace("postgresql://", "postgresql+psycopg://", 1)
+        if v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql+psycopg://", 1)
+        return v
 
     JWT_SECRET: str = "change-me"
     JWT_ALGORITHM: str = "HS256"
