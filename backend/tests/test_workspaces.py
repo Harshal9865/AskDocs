@@ -19,8 +19,12 @@ async def _register_and_login(client) -> dict:
         "/api/v1/auth/login", data={"username": email, "password": "secret123"}
     )
     tokens = resp.json()
+    me = await client.get(
+        "/api/v1/auth/me", headers={"Authorization": f"Bearer {tokens['access_token']}"}
+    )
     return {
         "email": email,
+        "id": me.json()["id"],
         "headers": {"Authorization": f"Bearer {tokens['access_token']}"},
     }
 
@@ -55,15 +59,22 @@ async def test_rbac_isolation_and_roles(client):
     resp = await client.get(f"/api/v1/workspaces/{ws_id}/members", headers=outsider["headers"])
     assert resp.status_code == 404
 
-    # non-admin member cannot invite: first add as admin-only route check via viewer
-    # invite member_user as viewer by owner
+    # invite member_user as viewer by owner, then invitee accepts
     resp = await client.post(
         f"/api/v1/workspaces/{ws_id}/members",
         json={"email": member_user["email"], "role": "viewer"},
         headers=owner["headers"],
     )
     assert resp.status_code == 201, resp.text
-    member_id = resp.json()["user_id"]
+    invites = (
+        await client.get("/api/v1/invitations", headers=member_user["headers"])
+    ).json()
+    target = next(i for i in invites if i["workspace_id"] == ws_id)
+    acc = await client.post(
+        f"/api/v1/invitations/{target['id']}/accept", headers=member_user["headers"]
+    )
+    assert acc.status_code == 200, acc.text
+    member_id = member_user["id"]
 
     # viewer cannot upload documents (role gate): use a fake file
     resp = await client.post(
@@ -107,7 +118,7 @@ async def test_rbac_isolation_and_roles(client):
     )
     assert resp.status_code == 409
 
-    # duplicate membership -> 409
+    # duplicate pending invitation -> 409
     resp = await client.post(
         f"/api/v1/workspaces/{ws_id}/members",
         json={"email": member_user["email"], "role": "member"},
@@ -115,10 +126,10 @@ async def test_rbac_isolation_and_roles(client):
     )
     assert resp.status_code == 409
 
-    # unknown invitee -> 404
+    # unknown invitee still creates an invitation (works for future accounts) -> 201
     resp = await client.post(
         f"/api/v1/workspaces/{ws_id}/members",
         json={"email": "ghost@nowhere.dev", "role": "member"},
         headers=owner["headers"],
     )
-    assert resp.status_code == 404
+    assert resp.status_code == 201

@@ -7,9 +7,11 @@ from sqlalchemy import delete, select
 from app.core.deps import AdminMembership, CurrentUser, DbSession, Membership
 from app.models.chat import Conversation, Message
 from app.models.document import Chunk, Document
+from app.models.invitation import Invitation
 from app.models.user import User
 from app.models.workspace import Role, Workspace, WorkspaceMember
 from app.schemas.workspace import (
+    InvitationOut,
     MemberAdd,
     MemberOut,
     MemberUpdate,
@@ -72,52 +74,113 @@ async def delete_workspace(workspace_id: uuid.UUID, db: DbSession, membership: A
     await db.execute(delete(Document).where(Document.workspace_id == ws_id))
 
     await db.execute(delete(WorkspaceMember).where(WorkspaceMember.workspace_id == ws_id))
+    from app.models.invitation import Invitation
+
+    await db.execute(delete(Invitation).where(Invitation.workspace_id == ws_id))
     await db.execute(delete(Workspace).where(Workspace.id == ws_id))
     await db.commit()
 
 
 @router.get("/{workspace_id}/members", response_model=list[MemberOut])
 async def list_members(workspace_id: uuid.UUID, db: DbSession, membership: Membership):
+    from app.api.v1.presence import is_online
+
     result = await db.execute(
         select(WorkspaceMember, User)
         .join(User, User.id == WorkspaceMember.user_id)
         .where(WorkspaceMember.workspace_id == membership.workspace_id)
     )
     return [
-        MemberOut(user_id=m.user_id, email=u.email, role=m.role.value if isinstance(m.role, Role) else m.role)
+        MemberOut(
+            user_id=m.user_id,
+            email=u.email,
+            role=m.role.value if isinstance(m.role, Role) else m.role,
+            online=is_online(u.last_seen_at),
+            last_seen_at=u.last_seen_at,
+        )
         for m, u in result.all()
     ]
 
 
-@router.post("/{workspace_id}/members", response_model=MemberOut, status_code=201)
+@router.post("/{workspace_id}/members", response_model=InvitationOut, status_code=201)
 async def add_member(
     workspace_id: uuid.UUID,
     payload: MemberAdd,
     db: DbSession,
     membership: AdminMembership,
 ):
+    """Create a pending invitation. The invitee must accept to join."""
     if payload.role not in VALID_ROLES:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Invalid role")
-    result = await db.execute(select(User).where(User.email == payload.email))
-    invitee = result.scalar_one_or_none()
-    if invitee is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "No user with that email")
-    dup = await db.execute(
-        select(WorkspaceMember).where(
+    email = payload.email.strip().lower()
+
+    # already a member?
+    dup_member = await db.execute(
+        select(WorkspaceMember.user_id)
+        .join(User, User.id == WorkspaceMember.user_id)
+        .where(
             WorkspaceMember.workspace_id == membership.workspace_id,
-            WorkspaceMember.user_id == invitee.id,
+            User.email == email,
         )
     )
-    if dup.scalar_one_or_none():
+    if dup_member.scalar_one_or_none():
         raise HTTPException(status.HTTP_409_CONFLICT, "Already a member")
-    member = WorkspaceMember(
+
+    # pending invitation already exists?
+    dup_invite = await db.execute(
+        select(Invitation).where(
+            Invitation.workspace_id == membership.workspace_id,
+            Invitation.email == email,
+            Invitation.status == "pending",
+        )
+    )
+    if dup_invite.scalar_one_or_none():
+        raise HTTPException(status.HTTP_409_CONFLICT, "Invitation already pending")
+
+    invite = Invitation(
         workspace_id=membership.workspace_id,
-        user_id=invitee.id,
+        inviter_id=membership.user_id,
+        email=email,
         role=Role(payload.role),
     )
-    db.add(member)
+    db.add(invite)
     await db.commit()
-    return MemberOut(user_id=member.user_id, email=invitee.email, role=payload.role)
+    await db.refresh(invite)
+    return InvitationOut.model_validate(invite)
+
+
+@router.delete("/{workspace_id}/invitations/{invitation_id}", status_code=204)
+async def cancel_invitation(
+    workspace_id: uuid.UUID,
+    invitation_id: uuid.UUID,
+    db: DbSession,
+    membership: AdminMembership,
+):
+    result = await db.execute(
+        select(Invitation).where(
+            Invitation.id == invitation_id,
+            Invitation.workspace_id == membership.workspace_id,
+            Invitation.status == "pending",
+        )
+    )
+    invite = result.scalar_one_or_none()
+    if invite is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Invitation not found")
+    invite.status = "cancelled"
+    await db.commit()
+
+
+@router.get("/{workspace_id}/invitations", response_model=list[InvitationOut])
+async def list_workspace_invitations(
+    workspace_id: uuid.UUID, db: DbSession, membership: AdminMembership
+):
+    result = await db.execute(
+        select(Invitation).where(
+            Invitation.workspace_id == membership.workspace_id,
+            Invitation.status == "pending",
+        )
+    )
+    return list(result.scalars().all())
 
 
 async def _count_admins(db, workspace_id) -> int:

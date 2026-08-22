@@ -1,12 +1,13 @@
 import uuid
 
-from sqlalchemy import Enum, ForeignKey, String, Text
+from sqlalchemy import Enum, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import BaseModel
 
 MessageRoleEnum = Enum("user", "assistant", name="message_role")
+ConversationTypeEnum = Enum("docs_qa", "direct", "group", name="conversation_type")
 
 
 class Conversation(BaseModel):
@@ -17,6 +18,7 @@ class Conversation(BaseModel):
     )
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     title: Mapped[str] = mapped_column(String(300), default="New conversation")
+    type: Mapped[str] = mapped_column(ConversationTypeEnum, default="docs_qa")
 
 
 class Message(BaseModel):
@@ -25,6 +27,19 @@ class Message(BaseModel):
     conversation_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("conversations.id"), index=True
     )
+    sender_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True
+    )  # NULL for AI-generated messages
     role: Mapped[str] = mapped_column(MessageRoleEnum)
     content: Mapped[str] = mapped_column(Text)
     citations: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+
+
+class ConversationParticipant(BaseModel):
+    __tablename__ = "conversation_participants"
+    __table_args__ = (UniqueConstraint("conversation_id", "user_id"),)
+
+    conversation_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("conversations.id"), index=True
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), index=True)

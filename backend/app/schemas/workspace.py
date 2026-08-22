@@ -30,3 +30,16 @@ class MemberOut(BaseModel):
     user_id: uuid.UUID
     email: str
     role: str
+    online: bool = False
+    last_seen_at: datetime | None = None
+
+
+class InvitationOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    workspace_id: uuid.UUID
+    email: str
+    role: str
+    status: str
+    created_at: datetime

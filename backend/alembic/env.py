@@ -9,6 +9,7 @@ from app.core.config import get_settings
 from app.models.base import Base
 import app.models.user  # noqa: F401
 import app.models.workspace  # noqa: F401
+import app.models.invitation  # noqa: F401
 import app.models.document  # noqa: F401
 import app.models.chat  # noqa: F401
 

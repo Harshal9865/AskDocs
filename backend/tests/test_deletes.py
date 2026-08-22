@@ -25,7 +25,7 @@ async def _register_and_login(client) -> dict:
 
 
 async def _setup_workspace(client, owner: dict) -> dict:
-    """Returns {'ws_id', 'owner_id', 'admin2', 'member', 'outsider'} with roles set."""
+    """Returns {'ws_id', 'owner', 'admin2', 'member'} with roles set."""
     resp = await client.post(
         "/api/v1/workspaces", json={"name": f"WS {random.randint(0, 10**9)}"}, headers=owner["headers"]
     )
@@ -41,6 +41,10 @@ async def _setup_workspace(client, owner: dict) -> dict:
             headers=owner["headers"],
         )
         assert r.status_code == 201, r.text
+        invites = (await client.get("/api/v1/invitations", headers=user["headers"])).json()
+        target = next(i for i in invites if i["workspace_id"] == ws_id)
+        acc = await client.post(f"/api/v1/invitations/{target['id']}/accept", headers=user["headers"])
+        assert acc.status_code == 200, acc.text
     return {
         "ws_id": ws_id,
         "owner": owner,
@@ -71,6 +75,14 @@ async def test_delete_conversation_owner_or_admin(client):
         json={"email": other_member["email"], "role": "member"},
         headers=env["owner"]["headers"],
     )
+    invites = (
+        await client.get("/api/v1/invitations", headers=other_member["headers"])
+    ).json()
+    target = next(i for i in invites if i["workspace_id"] == ws_id)
+    acc = await client.post(
+        f"/api/v1/invitations/{target['id']}/accept", headers=other_member["headers"]
+    )
+    assert acc.status_code == 200, acc.text
     r = await client.delete(f"/api/v1/conversations/{conv_id}", headers=other_member["headers"])
     assert r.status_code == 403
 
