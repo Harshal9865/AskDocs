@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -50,6 +50,18 @@ export default function Sidebar({
   const [busy, setBusy] = useState(false);
   const [myRole, setMyRole] = useState<string | null>(null);
   const asideRef = useRef<HTMLElement>(null);
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    setCollapsed(localStorage.getItem("askdocs_sb_collapsed") === "1");
+  }, []);
+
+  function toggleCollapsed() {
+    setCollapsed((c) => {
+      localStorage.setItem("askdocs_sb_collapsed", c ? "0" : "1");
+      return !c;
+    });
+  }
 
   // drag-to-resize (desktop)
   const startResize = useCallback(
@@ -146,20 +158,35 @@ export default function Sidebar({
       )}
       <aside
         ref={asideRef}
-        style={{ width: `min(${width}px, 85vw)` }}
-        className={`fixed inset-y-0 left-0 z-50 flex shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-white transition-transform duration-200 md:relative md:z-auto md:translate-x-0 ${
+        style={{ width: collapsed ? 68 : `min(${width}px, 85vw)` }}
+        className={`sb-aside fixed inset-y-0 left-0 z-50 flex shrink-0 flex-col border-r border-slate-200 bg-white md:relative md:z-auto md:translate-x-0 md:overflow-visible ${
           mobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
-        }`}
+        } ${collapsed ? "sb-collapsed shadow-xl" : ""}`}
       >
+        {/* collapse arrow - floats on the right edge */}
+        <button
+          onClick={toggleCollapsed}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="absolute -right-3 top-14 z-20 hidden h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition-all hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 md:flex"
+        >
+          <svg className="sb-chevron transition-transform duration-200" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+
         <div className="flex items-center justify-between border-b border-slate-100 p-4">
           <Link
             href="/dashboard"
             onClick={onCloseMobile}
-            className="text-lg font-bold text-slate-900 hover:text-indigo-700"
+            className="text-lg font-bold hover:opacity-80"
             aria-label="AskDocs home"
             title="Go to Dashboard"
           >
-            AskDocs
+            <span className="text-brand-gradient">AskDocs</span>
+            <span className="sb-collapsed-show sb-center h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 text-lg font-black text-white">
+              A
+            </span>
           </Link>
           <button
             onClick={onCloseMobile}
@@ -169,7 +196,7 @@ export default function Sidebar({
             ✕
           </button>
         </div>
-        <div className="border-b border-slate-100 p-4">
+        <div className="sb-hide border-b border-slate-100 p-4">
           <div className="mt-3 flex items-center gap-1.5">
           <select
             value={workspace?.id ?? ""}
@@ -199,15 +226,26 @@ export default function Sidebar({
             </button>
           )}
         </div>
+        <div className="sb-collapsed-show border-b border-slate-100 p-2">
+          <button
+            onClick={toggleCollapsed}
+            title={workspace ? `Workspace: ${workspace.name}` : "No workspace"}
+            aria-label="Expand sidebar"
+            className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-sm font-bold uppercase text-white shadow-sm"
+          >
+            {(workspace?.name ?? "?").slice(0, 1)}
+          </button>
+        </div>
         {!creating ? (
           <button
             onClick={() => setCreating(true)}
+            aria-label="New workspace"
             className="mt-2 w-full rounded-lg border border-dashed border-slate-300 py-2.5 text-xs text-slate-600 hover:border-indigo-400 hover:text-indigo-700"
           >
             + New workspace
           </button>
         ) : (
-          <form onSubmit={createWorkspace} className="mt-2 flex gap-1">
+          <form onSubmit={createWorkspace} className="sb-hide mt-2 flex gap-1">
             <input
               autoFocus
               maxLength={100}
@@ -235,12 +273,13 @@ export default function Sidebar({
         )}
         </div>
 
-      <nav className="flex-1 overflow-y-auto p-3">
+      <nav className="scrollbar-thin flex-1 overflow-y-auto p-3">
         {NAV.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             onClick={onCloseMobile}
+            title={collapsed ? item.label : undefined}
             className={`mb-1 flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm ${
               pathname === item.href
                 ? "bg-indigo-600 font-semibold text-white"
@@ -248,11 +287,11 @@ export default function Sidebar({
             }`}
           >
             <span aria-hidden>{item.icon}</span>
-            {item.label}
+            <span className="sb-label truncate">{item.label}</span>
           </Link>
         ))}
 
-        <div className="mb-1 mt-4 px-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+        <div className="sb-label mb-1 mt-4 px-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
           More
         </div>
         {NAV_SECONDARY.map((item) => (
@@ -260,6 +299,7 @@ export default function Sidebar({
             key={item.href}
             href={item.href}
             onClick={onCloseMobile}
+            title={collapsed ? item.label : undefined}
             className={`mb-0.5 flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs ${
               pathname === item.href
                 ? "bg-indigo-100 font-semibold text-indigo-900"
@@ -267,19 +307,25 @@ export default function Sidebar({
             }`}
           >
             <span aria-hidden>{item.icon}</span>
-            {item.label}
+            <span className="sb-label truncate">{item.label}</span>
           </Link>
         ))}
-        <div className="mt-4 -mx-3">
+        <div className="sb-hide mt-4 -mx-3">
           <Colleagues />
         </div>
       </nav>
 
-      <div className="border-t border-slate-100 p-4">
+      <div className={`border-t border-slate-100 p-4 ${collapsed ? "px-2" : ""}`}>
         <div className="flex items-center justify-between">
           <div className="min-w-0">
-            <div className="truncate text-sm font-medium">{user?.name}</div>
-            <div className="truncate text-xs text-slate-500">{user?.email}</div>
+            <div className="sb-label truncate text-sm font-medium">{user?.name}</div>
+            <div className="sb-label truncate text-xs text-slate-500">{user?.email}</div>
+            <span
+              title={`${user?.name} (${user?.email})`}
+              className="sb-collapsed-show sb-center mx-auto h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold uppercase text-slate-700"
+            >
+              {(user?.name ?? "?").slice(0, 2)}
+            </span>
           </div>
           <NotificationBell />
         </div>
@@ -289,9 +335,12 @@ export default function Sidebar({
             onCloseMobile?.();
             router.replace("/login");
           }}
+          aria-label="Sign out"
+          title="Sign out"
           className="mt-3 w-full rounded-lg border border-slate-300 py-2 text-xs text-slate-600 hover:bg-slate-50"
         >
-          Sign out
+          <span className="sb-label">Sign out</span>
+          <span className="sb-collapsed-show sb-center">⏻</span>
         </button>
       </div>
 
@@ -307,3 +356,4 @@ export default function Sidebar({
     </>
   );
 }
+
