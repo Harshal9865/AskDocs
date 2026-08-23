@@ -147,14 +147,17 @@ export default function DashboardPage() {
       <div className="mt-6 rounded-xl border border-indigo-100 bg-indigo-50 p-5">
         <h2 className="text-sm font-semibold text-indigo-900">Quick actions</h2>
         <div className="mt-3 flex flex-wrap gap-2">
-          <Link href="/documents" className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700">
-            ⬆ Upload document
+          <Link href="/documents" className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700">
+            <Upload className="h-3.5 w-3.5" aria-hidden />
+            Upload document
           </Link>
-          <Link href="/chat" className="rounded-lg border border-indigo-300 bg-white px-4 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-50">
-            💬 Ask AI a question
+          <Link href="/chat" className="flex items-center gap-1.5 rounded-lg border border-indigo-300 bg-white px-4 py-2.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-50">
+            <Sparkles className="h-3.5 w-3.5" aria-hidden />
+            Ask AI a question
           </Link>
-          <Link href="/insights" className="rounded-lg border border-indigo-300 bg-white px-4 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-50">
-            📊 View knowledge gaps
+          <Link href="/insights" className="flex items-center gap-1.5 rounded-lg border border-indigo-300 bg-white px-4 py-2.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-50">
+            <ChartNoAxesColumn className="h-3.5 w-3.5" aria-hidden />
+            View knowledge gaps
           </Link>
         </div>
       </div>

@@ -52,9 +52,32 @@ html {
   color-scheme: light only;
 }
 
+/* Bulletproof font: Geist on every element, no variable-chain indirection */
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+a,
+span,
+button,
+input,
+select,
+textarea,
+label,
+li {
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+}
+
 body {
   @apply bg-slate-50 text-slate-900;
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  letter-spacing: -0.01em;
 }
 
 ::selection {

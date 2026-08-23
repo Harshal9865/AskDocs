@@ -1,5 +1,7 @@
 "use client";
 
+import { ChevronDown } from "lucide-react";
+
 export default function HelpPage() {
   const faqs: { q: string; a: React.ReactNode }[] = [
     {
@@ -48,17 +50,17 @@ export default function HelpPage() {
     <div className="mx-auto max-w-2xl">
       <h1 className="mb-1 text-xl font-bold">Help & FAQ</h1>
       <p className="mb-6 text-sm text-slate-500">Everything you need to know about AskDocs.</p>
-      <div className="space-y-3">
+      <div className="space-y-2">
         {faqs.map((f) => (
           <details
             key={f.q}
-            className="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+            className="group rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm transition-shadow open:shadow-md"
           >
-            <summary className="cursor-pointer list-none text-sm font-semibold text-slate-800 marker:hidden">
-              <span className="mr-2 text-indigo-500 group-open:rotate-90 inline-block transition-transform">▶</span>
+            <summary className="flex cursor-pointer list-none items-center gap-3 text-sm font-semibold text-slate-800 [&::-webkit-details-marker]:hidden">
+              <ChevronDown className="h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 group-open:rotate-180" />
               {f.q}
             </summary>
-            <div className="mt-3 pl-6 text-sm leading-relaxed text-slate-600">{f.a}</div>
+            <div className="mt-2 pl-7 text-sm leading-relaxed text-slate-600">{f.a}</div>
           </details>
         ))}
       </div>

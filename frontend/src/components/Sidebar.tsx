@@ -22,7 +22,6 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
 import Colleagues from "@/components/Colleagues";
-import NotificationBell from "@/components/NotificationBell";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -174,7 +173,7 @@ export default function Sidebar({
       <aside
         ref={asideRef}
         style={{ width: collapsed ? 68 : `min(${width}px, 85vw)` }}
-        className={`sb-aside fixed inset-y-0 left-0 z-50 flex shrink-0 flex-col border-r border-slate-200 bg-white md:relative md:z-auto md:translate-x-0 md:overflow-visible ${
+        className={`sb-aside fixed left-0 top-14 bottom-0 z-40 flex shrink-0 flex-col border-r border-slate-200 bg-white md:sticky md:top-14 md:h-[calc(100dvh-3.5rem)] md:z-auto md:translate-x-0 md:overflow-visible ${
           mobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         } ${collapsed ? "sb-collapsed shadow-xl" : ""}`}
       >
@@ -360,7 +359,6 @@ export default function Sidebar({
               {(user?.name ?? "?").slice(0, 2)}
             </span>
           </div>
-          <NotificationBell />
         </div>
         <button
           onClick={() => {
@@ -391,5 +389,6 @@ export default function Sidebar({
     </>
   );
 }
+
 
 

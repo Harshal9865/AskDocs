@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { WorkspaceProvider } from "@/lib/workspace-context";
 import Sidebar from "@/components/Sidebar";
+import TopNavbar from "@/components/TopNavbar";
 import WelcomeModal from "@/components/WelcomeModal";
 
 export default function ProtectedLayout({
@@ -36,30 +37,28 @@ export default function ProtectedLayout({
 
   return (
     <WorkspaceProvider>
-      {/* mobile top bar */}
-      <header className="fixed inset-x-0 top-0 z-30 flex h-12 items-center gap-3 border-b border-slate-200 bg-white px-4 md:hidden">
-        <button
-          onClick={() => setDrawerOpen(true)}
-          aria-label="Open menu"
-          className="rounded-lg p-2 text-slate-600 hover:bg-slate-100"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
-        </button>
-        <span className="text-lg font-bold text-slate-900">AskDocs</span>
-      </header>
+      <TopNavbar />
 
-      <div className="flex min-h-screen">
+      <div className="flex min-h-[100dvh] pt-14">
         <Sidebar
           mobileOpen={drawerOpen}
           onCloseMobile={() => setDrawerOpen(false)}
           width={width}
           setWidth={setWidth}
         />
-        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 pb-16 pt-16 md:p-6 md:pb-6 md:pt-6">
+        {/* mobile hamburger sits inside the navbar's left edge */}
+        <button
+          onClick={() => setDrawerOpen(true)}
+          aria-label="Open menu"
+          className="fixed left-3 top-[70px] z-30 rounded-lg border border-slate-200 bg-white p-2 text-slate-600 shadow-sm hover:bg-slate-50 md:hidden"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6">
           <WelcomeModal />
           {children}
         </main>

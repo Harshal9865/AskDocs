@@ -4,19 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
+import Avatar from "@/components/Avatar";
 import type { Member } from "@/lib/types";
-
-function PresenceDot({ online }: { online: boolean }) {
-  return (
-    <span
-      className={`inline-block h-2 w-2 shrink-0 rounded-full ${
-        online ? "bg-emerald-500" : "bg-slate-300"
-      }`}
-      title={online ? "Online" : "Offline"}
-      aria-label={online ? "Online" : "Offline"}
-    />
-  );
-}
 
 export default function Colleagues() {
   const { workspace } = useWorkspace();
@@ -48,12 +37,7 @@ export default function Colleagues() {
     const ping = () => void api.presencePing().catch(() => {});
     ping(); // immediate first ping
     const t = setInterval(ping, 20000);
-    const onUnload = () => navigator.sendBeacon?.("/api/v1/presence/ping");
-    window.addEventListener("beforeunload", onUnload);
-    return () => {
-      clearInterval(t);
-      window.removeEventListener("beforeunload", onUnload);
-    };
+    return () => clearInterval(t);
   }, []);
 
   if (!workspace || loading) return null;
@@ -63,25 +47,26 @@ export default function Colleagues() {
   const onlineCount = members.filter((m) => m.online).length;
 
   return (
-    <div className="border-t border-slate-100 p-3">
+    <div className="border-t border-slate-200/70 p-3">
       <div className="mb-2 flex items-center justify-between px-1">
-        <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
           Colleagues
         </span>
-        <span className="flex items-center gap-1 text-[10px] text-slate-400">
-          <PresenceDot online={onlineCount > 0} />
+        <span className="flex items-center gap-1 text-[10px] font-medium text-slate-400">
+          <span className={`h-1.5 w-1.5 rounded-full ${onlineCount > 0 ? "bg-emerald-500" : "bg-slate-300"}`} />
           {onlineCount}/{members.length} online
         </span>
       </div>
       <ul className="space-y-0.5">
         {colleagues.map((m) => (
-          <li
-            key={m.user_id}
-            className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-slate-700"
-            title={m.email}
-          >
-            <PresenceDot online={m.online} />
-            <span className="truncate">{m.name ?? m.email}</span>
+          <li key={m.user_id}>
+            <div
+              className="flex items-center gap-2 rounded-lg px-2 py-1.5"
+              title={m.online ? `${m.name} — Online` : `${m.name} — Offline`}
+            >
+              <Avatar name={m.name || m.email} size={28} showPresence online={m.online} />
+              <span className="truncate text-[13px] text-slate-700">{m.name || m.email}</span>
+            </div>
           </li>
         ))}
       </ul>

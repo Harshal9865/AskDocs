@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
+import Avatar from "@/components/Avatar";
+import { UsersRound } from "lucide-react";
 import type { Member, TeamChat, TeamMessage } from "@/lib/types";
 
 function chatTitle(chat: TeamChat, myEmail?: string): string {
@@ -192,7 +194,7 @@ export default function ChatsPage() {
                 className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-100"
                 title={`Message ${m.name || m.email}`}
               >
-                <PresenceDot online={m.online} />
+                <Avatar name={m.name || m.email} size={28} showPresence online={m.online} />
                 <span className="truncate">{m.name || m.email}</span>
               </button>
             </li>
@@ -305,21 +307,34 @@ export default function ChatsPage() {
               ) : (
                 messages.map((msg) => {
                   const mine = msg.sender_id === user?.id;
+                  const sender = activeChat.participants.find(
+                    (p) => p.user_id === msg.sender_id,
+                  );
                   return (
-                    <div key={msg.id} className={mine ? "text-right" : ""}>
-                      {!mine && (
-                        <div className="mb-0.5 text-xs font-medium text-slate-400">
-                          {senderName(msg.sender_id)}
-                        </div>
+                    <div
+                      key={msg.id}
+                      className={`flex items-end gap-2 ${mine ? "justify-end" : ""}`}
+                    >
+                      {!mine && sender && (
+                        <span title={sender.name}>
+                          <Avatar name={sender.name || sender.email} size={28} />
+                        </span>
                       )}
-                      <div
-                        className={`inline-block max-w-[92%] whitespace-pre-wrap rounded-2xl px-3.5 py-2 text-sm sm:max-w-[80%] sm:px-4 ${
-                          mine
-                            ? "rounded-br-md bg-indigo-600 text-white"
-                            : "rounded-bl-md border border-slate-200 bg-white text-slate-900"
-                        }`}
-                      >
-                        {msg.content}
+                      <div className={`min-w-0 max-w-[80%] ${mine ? "text-right" : ""}`}>
+                        {!mine && (
+                          <div className="mb-0.5 text-xs font-medium text-slate-400">
+                            {senderName(msg.sender_id)}
+                          </div>
+                        )}
+                        <div
+                          className={`inline-block max-w-full whitespace-pre-wrap rounded-2xl px-3.5 py-2 text-sm sm:px-4 ${
+                            mine
+                              ? "rounded-br-md bg-indigo-600 text-white"
+                              : "rounded-bl-md border border-slate-200 bg-white text-slate-900"
+                          }`}
+                        >
+                          {msg.content}
+                        </div>
                       </div>
                     </div>
                   );
@@ -419,5 +434,6 @@ export default function ChatsPage() {
     </div>
   );
 }
+
 
 

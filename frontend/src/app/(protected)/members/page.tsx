@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
+import Avatar from "@/components/Avatar";
 import type { Invitation, Member, Role } from "@/lib/types";
 
 const ROLES: Role[] = ["viewer", "member", "admin"];
@@ -179,14 +180,8 @@ export default function MembersPage() {
               key={m.user_id}
               className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
             >
-              <div className="flex min-w-0 items-center gap-2.5">
-                <span
-                  className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${
-                    m.online ? "bg-emerald-500" : "bg-slate-300"
-                  }`}
-                  title={m.online ? "Online" : "Offline"}
-                  aria-label={m.online ? "Online" : "Offline"}
-                />
+              <div className="flex min-w-0 items-center gap-3">
+                <Avatar name={m.name || m.email} size={40} showPresence online={m.online} />
                 <div className="min-w-0">
                   <div className="truncate text-sm font-medium">{m.name || m.email}</div>
                   <div className="truncate text-xs text-slate-500">
