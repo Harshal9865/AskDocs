@@ -1,8 +1,5 @@
 "use client";
 
-import { PresenceDot } from "@/components/PresenceDot";
-
-// Teams-like deterministic color palette
 const COLORS = [
   "bg-indigo-500",
   "bg-sky-500",
@@ -27,12 +24,17 @@ export default function Avatar({
   size = 36,
   online,
   showPresence = false,
+  src,
+  stickerId,
 }: {
   name: string;
   size?: number;
-  /** optional email/second string to vary the color */
   online?: boolean;
   showPresence?: boolean;
+  /** object URL / public URL of an uploaded photo */
+  src?: string | null;
+  /** sticker id, e.g. "female-2" — served from /stickers/{id}.svg */
+  stickerId?: string | null;
 }) {
   const initials = (name || "?")
     .trim()
@@ -44,13 +46,30 @@ export default function Avatar({
 
   return (
     <span className="relative inline-block shrink-0" style={{ width: size, height: size }}>
-      <span
-        className={`flex h-full w-full items-center justify-center rounded-full font-semibold text-white select-none ${colorFor(name)}`}
-        style={{ fontSize: size * 0.38 }}
-        aria-label={name}
-      >
-        {initials}
-      </span>
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt={name}
+          className="h-full w-full rounded-full object-cover"
+          style={{ fontSize: size * 0.38 }}
+        />
+      ) : stickerId ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={`/stickers/${stickerId}.svg`}
+          alt={name}
+          className="h-full w-full rounded-full"
+        />
+      ) : (
+        <span
+          className={`flex h-full w-full items-center justify-center rounded-full font-semibold text-white select-none ${colorFor(name)}`}
+          style={{ fontSize: size * 0.38 }}
+          aria-label={name}
+        >
+          {initials}
+        </span>
+      )}
       {showPresence && (
         <span className="absolute -bottom-0.5 -right-0.5">
           <span
@@ -66,5 +85,3 @@ export default function Avatar({
     </span>
   );
 }
-
-export { PresenceDot };

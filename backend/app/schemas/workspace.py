@@ -15,6 +15,8 @@ class WorkspaceOut(BaseModel):
     name: str
     slug: str
     created_at: datetime
+    brand_kind: str | None = None
+    brand_value: str | None = None
 
 
 class MemberAdd(BaseModel):
@@ -33,6 +35,8 @@ class MemberOut(BaseModel):
     role: str
     online: bool = False
     last_seen_at: datetime | None = None
+    avatar_kind: str | None = None
+    avatar_value: str | None = None
 
 
 class InvitationOut(BaseModel):

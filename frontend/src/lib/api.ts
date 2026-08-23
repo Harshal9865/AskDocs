@@ -129,6 +129,37 @@ export const api = {
   },
   me: () => request<User>("/auth/me"),
 
+  // ---- avatar & brand ----
+  setAvatar: (kind: "initials" | "sticker", value?: string) =>
+    request<User>("/auth/avatar/set", { method: "POST", ...json({ kind, value }) }),
+  uploadAvatarPhoto: (file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return request<User>("/auth/avatar/photo", { method: "POST", body: form });
+  },
+  /** Authenticated fetch of the uploaded photo -> object URL */
+  getAvatarPhotoUrl: async () => {
+    const blob = await request<Blob>("/auth/avatar/image");
+    return URL.createObjectURL(blob);
+  },
+  setBrand: (wsId: string, kind: "default" | "sticker", value?: string) =>
+    request<{ brand_kind: string; brand_value: string | null }>(
+      `/workspaces/${wsId}/brand`,
+      { method: "POST", ...json({ kind, value }) },
+    ),
+  uploadBrandPhoto: (wsId: string, file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return request<{ brand_kind: string; brand_value: string | null }>(
+      `/workspaces/${wsId}/brand/photo`,
+      { method: "POST", body: form },
+    );
+  },
+  getBrandLogoUrl: async (wsId: string) => {
+    const blob = await request<Blob>(`/workspaces/${wsId}/brand/logo`);
+    return URL.createObjectURL(blob);
+  },
+
   // ---- workspaces ----
   createWorkspace: (name: string) =>
     request<Workspace>("/workspaces", { method: "POST", ...json({ name }) }),

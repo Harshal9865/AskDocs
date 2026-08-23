@@ -5,6 +5,8 @@ export interface User {
   email: string;
   name: string;
   created_at: string;
+  avatar_kind?: "initials" | "sticker" | "upload";
+  avatar_value?: string | null;
 }
 
 export interface TokenPair {
@@ -18,12 +20,16 @@ export interface Workspace {
   name: string;
   slug: string;
   created_at: string;
+  brand_kind?: "default" | "sticker" | "upload";
+  brand_value?: string | null;
 }
 
 export interface Member {
   user_id: string;
   email: string;
   name: string;
+  avatar_kind?: string;
+  avatar_value?: string | null;
   role: Role;
   online: boolean;
   last_seen_at: string | null;

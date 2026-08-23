@@ -5,16 +5,41 @@ import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown, Search, Settings, LogOut } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useWorkspace } from "@/lib/workspace-context";
 import NotificationBell from "@/components/NotificationBell";
 import Avatar from "@/components/Avatar";
 
 export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, avatarSrc } = useAuth();
+  const { workspace } = useWorkspace();
   const [q, setQ] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [brandSrc, setBrandSrc] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // resolve uploaded brand logo for the active workspace
+  useEffect(() => {
+    let cancelled = false;
+    setBrandSrc(null);
+    (async () => {
+      if (!workspace || workspace.brand_kind !== "upload" || !workspace.brand_value) return;
+      try {
+        const url = await api.getBrandLogoUrl(workspace.id);
+        if (!cancelled) setBrandSrc(url);
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [workspace]);
+
+  // apply sticker brand when set
+  const brandSticker =
+    workspace?.brand_kind === "sticker" ? workspace.brand_value : null;
 
   // close avatar menu on outside click
   useEffect(() => {
@@ -50,8 +75,16 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         className="flex shrink-0 items-center gap-2"
         aria-label="AskDocs home"
       >
-        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-sm font-black text-white">
-          A
+        <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-lg bg-indigo-600 text-sm font-black text-white">
+          {brandSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={brandSrc} alt="Brand" className="h-full w-full object-cover" />
+          ) : brandSticker ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={`/stickers/${brandSticker}.svg`} alt="Brand" className="h-full w-full" />
+          ) : (
+            "A"
+          )}
         </span>
         <span className="hidden text-[15px] font-bold tracking-tight text-slate-900 sm:block">
           AskDocs
@@ -88,7 +121,14 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
             aria-expanded={menuOpen}
             className="flex items-center gap-1 rounded-full p-0.5 transition-colors hover:bg-slate-100"
           >
-            <Avatar name={user?.name ?? "?"} size={32} />
+            <Avatar
+              name={user?.name ?? "?"}
+              size={32}
+              src={avatarSrc}
+              stickerId={
+                user?.avatar_kind === "sticker" ? user.avatar_value ?? null : null
+              }
+            />
             <ChevronDown
               className={`h-3.5 w-3.5 text-slate-400 transition-transform ${menuOpen ? "rotate-180" : ""}`}
             />
@@ -167,3 +207,4 @@ function MenuItem({
     </button>
   );
 }
+
