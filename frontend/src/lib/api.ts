@@ -5,6 +5,7 @@
   Conversation,
   DocumentItem,
   Invitation,
+  JoinRequest,
   Member,
   Message,
   Role,
@@ -243,6 +244,33 @@ export const api = {
     }),
   renameWorkspace: (wsId: string, name: string) =>
     request<Workspace>(`/workspaces/${wsId}`, { method: "PATCH", ...json({ name }) }),
+  setWorkspaceVisibility: (wsId: string, isPublic: boolean) =>
+    request<Workspace>(`/workspaces/${wsId}/visibility`, {
+      method: "PATCH",
+      ...json({ is_public: isPublic }),
+    }),
+
+  // ---- discover & join requests ----
+  discoverWorkspaces: (q?: string) =>
+    request<Workspace[]>(
+      q ? `/workspaces/public?q=${encodeURIComponent(q)}` : "/workspaces/public",
+    ),
+  createJoinRequest: (wsId: string, message?: string) =>
+    request<JoinRequest>(`/workspaces/${wsId}/join-requests`, {
+      method: "POST",
+      ...json({ message }),
+    }),
+  listJoinRequests: (wsId: string) =>
+    request<JoinRequest[]>(`/workspaces/${wsId}/join-requests`),
+  myJoinRequests: () => request<JoinRequest[]>("/workspaces/join-requests/me"),
+  approveJoinRequest: (wsId: string, reqId: string) =>
+    request<JoinRequest>(`/workspaces/${wsId}/join-requests/${reqId}/approve`, {
+      method: "POST",
+    }),
+  rejectJoinRequest: (wsId: string, reqId: string) =>
+    request<JoinRequest>(`/workspaces/${wsId}/join-requests/${reqId}/reject`, {
+      method: "POST",
+    }),
 
   // ---- document detail ----
   getDocumentChunks: (wsId: string, docId: string) =>

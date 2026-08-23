@@ -9,11 +9,13 @@ from app.core.deps import AdminMembership, CurrentUser, DbSession, Membership
 from app.models.chat import Conversation, Message
 from app.models.document import Chunk, Document
 from app.models.invitation import Invitation
+from app.models.join_request import WorkspaceJoinRequest
 from app.models.activity import ActivityLog, log_activity
 from app.models.user import User
 from app.models.workspace import Role, Workspace, WorkspaceMember
 from app.schemas.workspace import (
     InvitationOut,
+    JoinRequestOut,
     MemberAdd,
     MemberOut,
     MemberUpdate,
@@ -55,6 +57,62 @@ async def list_workspaces(db: DbSession, user: CurrentUser):
         .where(WorkspaceMember.user_id == user.id)
     )
     return list(result.scalars().all())
+
+
+@router.get("/public", response_model=list[WorkspaceOut])
+async def list_public_workspaces(
+    db: DbSession,
+    user: CurrentUser,
+    q: str | None = None,
+    limit: int = 20,
+    offset: int = 0,
+):
+    """Discoverable public workspaces (excludes already joined)."""
+    from sqlalchemy import func
+
+    query = select(Workspace).where(Workspace.is_public == True)  # noqa: E712
+    if q:
+        like = f"%{q.strip()}%"
+        query = query.where(Workspace.name.ilike(like) | Workspace.slug.ilike(like))
+    query = query.order_by(Workspace.created_at.desc()).limit(min(limit, 50)).offset(offset)
+    result = await db.execute(query)
+    all_public = list(result.scalars().all())
+    # exclude already member
+    member_ids = await db.execute(select(WorkspaceMember.workspace_id).where(WorkspaceMember.user_id == user.id))
+    joined = {wid for (wid,) in member_ids.all()}
+    return [w for w in all_public if w.id not in joined]
+
+
+@router.get("/join-requests/me", response_model=list[JoinRequestOut])
+async def my_join_requests(db: DbSession, user: CurrentUser):
+    from app.models.join_request import WorkspaceJoinRequest
+
+    result = await db.execute(
+        select(WorkspaceJoinRequest)
+        .where(WorkspaceJoinRequest.user_id == user.id)
+        .order_by(WorkspaceJoinRequest.created_at.desc())
+    )
+    items = list(result.scalars().all())
+    out = []
+    for r in items:
+        ws = await db.get(Workspace, r.workspace_id)
+        out.append(
+            JoinRequestOut(
+                id=r.id,
+                workspace_id=r.workspace_id,
+                user_id=r.user_id,
+                message=r.message,
+                status=r.status,
+                created_at=r.created_at,
+                user_email=user.email,
+                user_name=user.name,
+            )
+        )
+    # enrich with workspace name via separate query is done above per item; for batch, we already have ws per item
+    # For list, we need workspace name not in schema, but keep as above; frontend will fetch workspace name separately
+    return out
+
+
 
 
 @router.get("/{workspace_id}", response_model=WorkspaceOut)
@@ -171,6 +229,24 @@ async def rename_workspace(
     return ws
 
 
+class VisibilityUpdate(BaseModel):
+    is_public: bool
+
+
+@router.patch("/{workspace_id}/visibility", response_model=WorkspaceOut)
+async def set_visibility(
+    workspace_id: uuid.UUID,
+    payload: VisibilityUpdate,
+    db: DbSession,
+    membership: AdminMembership,
+):
+    ws = await db.get(Workspace, membership.workspace_id)
+    ws.is_public = payload.is_public
+    await db.commit()
+    await db.refresh(ws)
+    return ws
+
+
 @router.delete("/{workspace_id}", status_code=204)
 async def delete_workspace(workspace_id: uuid.UUID, db: DbSession, membership: AdminMembership):
     """Admin-only. Removes the workspace and everything in it."""
@@ -189,6 +265,9 @@ async def delete_workspace(workspace_id: uuid.UUID, db: DbSession, membership: A
     from app.models.activity import ActivityLog
 
     await db.execute(delete(Invitation).where(Invitation.workspace_id == ws_id))
+    from app.models.join_request import WorkspaceJoinRequest
+
+    await db.execute(delete(WorkspaceJoinRequest).where(WorkspaceJoinRequest.workspace_id == ws_id))
     await db.execute(delete(ActivityLog).where(ActivityLog.workspace_id == ws_id))
     await db.execute(delete(Workspace).where(Workspace.id == ws_id))
     await db.commit()
@@ -298,6 +377,169 @@ async def list_workspace_invitations(
         )
     )
     return list(result.scalars().all())
+
+
+class JoinRequestCreate(BaseModel):
+    message: str | None = None
+
+
+@router.post("/{workspace_id}/join-requests", response_model=JoinRequestOut, status_code=201)
+async def create_join_request(
+    workspace_id: uuid.UUID,
+    payload: JoinRequestCreate,
+    db: DbSession,
+    user: CurrentUser,
+):
+    from app.models.join_request import WorkspaceJoinRequest
+
+    ws = await db.get(Workspace, workspace_id)
+    if ws is None or not ws.is_public:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Workspace not found or not public")
+    # already member?
+    exists = await db.execute(
+        select(WorkspaceMember).where(
+            WorkspaceMember.workspace_id == workspace_id, WorkspaceMember.user_id == user.id
+        )
+    )
+    if exists.scalar_one_or_none():
+        raise HTTPException(status.HTTP_409_CONFLICT, "Already a member")
+    # pending request exists?
+    dup = await db.execute(
+        select(WorkspaceJoinRequest).where(
+            WorkspaceJoinRequest.workspace_id == workspace_id,
+            WorkspaceJoinRequest.user_id == user.id,
+            WorkspaceJoinRequest.status == "pending",
+        )
+    )
+    if dup.scalar_one_or_none():
+        raise HTTPException(status.HTTP_409_CONFLICT, "Join request already pending")
+    req = WorkspaceJoinRequest(
+        workspace_id=workspace_id, user_id=user.id, message=(payload.message or "")[:500] or None, status="pending"
+    )
+    db.add(req)
+    await db.commit()
+    await db.refresh(req)
+    return JoinRequestOut(
+        id=req.id,
+        workspace_id=req.workspace_id,
+        user_id=req.user_id,
+        message=req.message,
+        status=req.status,
+        created_at=req.created_at,
+        user_email=user.email,
+        user_name=user.name,
+    )
+
+
+@router.get("/{workspace_id}/join-requests", response_model=list[JoinRequestOut])
+async def list_join_requests(
+    workspace_id: uuid.UUID, db: DbSession, membership: AdminMembership
+):
+    from app.models.join_request import WorkspaceJoinRequest
+
+    result = await db.execute(
+        select(WorkspaceJoinRequest, User)
+        .join(User, User.id == WorkspaceJoinRequest.user_id)
+        .where(
+            WorkspaceJoinRequest.workspace_id == membership.workspace_id,
+            WorkspaceJoinRequest.status == "pending",
+        )
+        .order_by(WorkspaceJoinRequest.created_at.desc())
+    )
+    return [
+        JoinRequestOut(
+            id=r.id,
+            workspace_id=r.workspace_id,
+            user_id=r.user_id,
+            message=r.message,
+            status=r.status,
+            created_at=r.created_at,
+            user_email=u.email,
+            user_name=u.name,
+        )
+        for r, u in result.all()
+    ]
+
+
+@router.post("/{workspace_id}/join-requests/{request_id}/approve", response_model=JoinRequestOut)
+async def approve_join_request(
+    workspace_id: uuid.UUID,
+    request_id: uuid.UUID,
+    db: DbSession,
+    membership: AdminMembership,
+):
+    from app.models.join_request import WorkspaceJoinRequest
+
+    result = await db.execute(
+        select(WorkspaceJoinRequest).where(
+            WorkspaceJoinRequest.id == request_id,
+            WorkspaceJoinRequest.workspace_id == membership.workspace_id,
+            WorkspaceJoinRequest.status == "pending",
+        )
+    )
+    req = result.scalar_one_or_none()
+    if req is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Request not found")
+    req.status = "approved"
+    req.reviewed_by = membership.user_id
+    from app.models.base import utcnow
+
+    req.reviewed_at = utcnow()
+    # create membership as viewer by default
+    db.add(WorkspaceMember(workspace_id=membership.workspace_id, user_id=req.user_id, role=Role.member))
+    await log_activity(db, membership.workspace_id, membership.user_id, "member.joined", str(req.user_id))
+    await db.commit()
+    await db.refresh(req)
+    user = await db.get(User, req.user_id)
+    return JoinRequestOut(
+        id=req.id,
+        workspace_id=req.workspace_id,
+        user_id=req.user_id,
+        message=req.message,
+        status=req.status,
+        created_at=req.created_at,
+        user_email=user.email if user else None,
+        user_name=user.name if user else None,
+    )
+
+
+@router.post("/{workspace_id}/join-requests/{request_id}/reject", response_model=JoinRequestOut)
+async def reject_join_request(
+    workspace_id: uuid.UUID,
+    request_id: uuid.UUID,
+    db: DbSession,
+    membership: AdminMembership,
+):
+    from app.models.join_request import WorkspaceJoinRequest
+
+    result = await db.execute(
+        select(WorkspaceJoinRequest).where(
+            WorkspaceJoinRequest.id == request_id,
+            WorkspaceJoinRequest.workspace_id == membership.workspace_id,
+            WorkspaceJoinRequest.status == "pending",
+        )
+    )
+    req = result.scalar_one_or_none()
+    if req is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Request not found")
+    req.status = "rejected"
+    req.reviewed_by = membership.user_id
+    from app.models.base import utcnow
+
+    req.reviewed_at = utcnow()
+    await db.commit()
+    await db.refresh(req)
+    user = await db.get(User, req.user_id)
+    return JoinRequestOut(
+        id=req.id,
+        workspace_id=req.workspace_id,
+        user_id=req.user_id,
+        message=req.message,
+        status=req.status,
+        created_at=req.created_at,
+        user_email=user.email if user else None,
+        user_name=user.name if user else None,
+    )
 
 
 async def _count_admins(db, workspace_id) -> int:

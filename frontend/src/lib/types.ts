@@ -22,6 +22,18 @@ export interface Workspace {
   created_at: string;
   brand_kind?: "default" | "sticker" | "upload";
   brand_value?: string | null;
+  is_public?: boolean;
+}
+
+export interface JoinRequest {
+  id: string;
+  workspace_id: string;
+  user_id: string;
+  message: string | null;
+  status: "pending" | "approved" | "rejected" | "cancelled";
+  created_at: string;
+  user_email?: string | null;
+  user_name?: string | null;
 }
 
 export interface Member {

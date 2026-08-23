@@ -17,6 +17,20 @@ class WorkspaceOut(BaseModel):
     created_at: datetime
     brand_kind: str | None = None
     brand_value: str | None = None
+    is_public: bool = False
+
+
+class JoinRequestOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    workspace_id: uuid.UUID
+    user_id: uuid.UUID
+    message: str | None = None
+    status: str
+    created_at: datetime
+    user_email: str | None = None
+    user_name: str | None = None
 
 
 class MemberAdd(BaseModel):

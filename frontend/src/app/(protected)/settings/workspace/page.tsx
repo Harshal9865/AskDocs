@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -9,8 +9,15 @@ export default function WorkspaceSettingsPage() {
   const { workspace, refresh } = useWorkspace();
   const router = useRouter();
   const [name, setName] = useState(workspace?.name ?? "");
+  const [isPublic, setIsPublic] = useState(workspace?.is_public ?? false);
+  const [visMsg, setVisMsg] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    setName(workspace?.name ?? "");
+    setIsPublic(workspace?.is_public ?? false);
+  }, [workspace]);
 
   if (!workspace) {
     return (
@@ -35,6 +42,20 @@ export default function WorkspaceSettingsPage() {
       setMsg((err as Error).message);
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function togglePublic() {
+    if (!wsId) return;
+    const next = !isPublic;
+    setVisMsg(null);
+    try {
+      await api.setWorkspaceVisibility(wsId, next);
+      setIsPublic(next);
+      await refresh();
+      setVisMsg(next ? "Workspace is now discoverable." : "Workspace is now private.");
+    } catch (err) {
+      setVisMsg((err as Error).message);
     }
   }
 
@@ -77,6 +98,26 @@ export default function WorkspaceSettingsPage() {
             {busy ? "Saving…" : "Save"}
           </button>
         </form>
+      </section>
+
+      <section className="mb-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-800">Discoverable</h2>
+            <p className="text-xs text-slate-500">Allow others to find and request to join this workspace.</p>
+          </div>
+          <button
+            onClick={() => void togglePublic()}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors ${
+              isPublic ? "bg-indigo-600" : "bg-slate-300"
+            }`}
+            aria-pressed={isPublic}
+            aria-label="Toggle discoverability"
+          >
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition ${isPublic ? "translate-x-5" : "translate-x-0"}`} />
+          </button>
+        </div>
+        {visMsg && <p className="mt-2 text-xs font-medium text-indigo-600">{visMsg}</p>}
       </section>
 
       <section className="rounded-xl border border-red-200 bg-red-50 p-5">

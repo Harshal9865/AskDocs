@@ -1,7 +1,7 @@
 import enum
 import uuid
 
-from sqlalchemy import Enum, ForeignKey, UniqueConstraint, String
+from sqlalchemy import Boolean, Enum, ForeignKey, UniqueConstraint, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import BaseModel
@@ -23,6 +23,7 @@ class Workspace(BaseModel):
         String(20), default="default"
     )  # default | sticker | upload
     brand_value: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    is_public: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false", index=True)
 
 
 class WorkspaceMember(BaseModel):

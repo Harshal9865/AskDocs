@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   BarChart3,
   CircleHelp,
+  Compass,
   FileText,
   History,
   LayoutDashboard,
@@ -29,6 +30,7 @@ const NAV = [
   { href: "/chats", label: "Office Chats", icon: MessagesSquare },
   { href: "/documents", label: "Documents", icon: FileText },
   { href: "/search", label: "Search", icon: Search },
+  { href: "/discover", label: "Discover", icon: Compass },
 ];
 
 const NAV_SECONDARY = [

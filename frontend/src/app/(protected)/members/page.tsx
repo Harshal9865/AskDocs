@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
 import Avatar from "@/components/Avatar";
-import type { Invitation, Member, Role } from "@/lib/types";
+import type { Invitation, JoinRequest, Member, Role } from "@/lib/types";
 
 const ROLES: Role[] = ["viewer", "member", "admin"];
 
@@ -14,6 +14,7 @@ export default function MembersPage() {
   const { workspace } = useWorkspace();
   const [members, setMembers] = useState<Member[]>([]);
   const [pendingInvites, setPendingInvites] = useState<Invitation[]>([]);
+  const [joinRequests, setJoinRequests] = useState<JoinRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState("");
@@ -28,7 +29,12 @@ export default function MembersPage() {
       const me = list.find((m) => m.email === user?.email);
       setMyRole(me?.role ?? "viewer");
       if (me?.role === "admin") {
-        setPendingInvites(await api.listWorkspaceInvitations(workspace.id));
+        const [invites, reqs] = await Promise.all([
+          api.listWorkspaceInvitations(workspace.id),
+          api.listJoinRequests(workspace.id).catch(() => [] as JoinRequest[]),
+        ]);
+        setPendingInvites(invites);
+        setJoinRequests(reqs);
       }
       setError(null);
     } catch (err) {
@@ -82,6 +88,17 @@ export default function MembersPage() {
     if (!workspace || !confirm(`Cancel invitation for ${inv.email}?`)) return;
     try {
       await api.cancelInvitation(workspace.id, inv.id);
+      await load();
+    } catch (err) {
+      alert((err as Error).message);
+    }
+  }
+
+  async function handleJoinRequest(reqId: string, action: "approve" | "reject") {
+    if (!workspace) return;
+    try {
+      if (action === "approve") await api.approveJoinRequest(workspace.id, reqId);
+      else await api.rejectJoinRequest(workspace.id, reqId);
       await load();
     } catch (err) {
       alert((err as Error).message);
@@ -159,6 +176,38 @@ export default function MembersPage() {
                     >
                       Cancel
                     </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {joinRequests.length > 0 && (
+            <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+              <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Join requests ({joinRequests.length})
+              </h2>
+              <ul className="space-y-2">
+                {joinRequests.map((req) => (
+                  <li key={req.id} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="min-w-0 flex-1 truncate">
+                      <span className="font-medium">{req.user_name || req.user_email}</span>
+                      <span className="ml-1 text-xs text-slate-500">{req.user_email}</span>
+                      {req.message && <span className="ml-2 text-xs italic text-slate-400">&quot;{req.message}&quot;</span>}
+                    </span>
+                    <span className="flex gap-1.5">
+                      <button
+                        onClick={() => void handleJoinRequest(req.id, "approve")}
+                        className="rounded-lg bg-emerald-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-emerald-700"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => void handleJoinRequest(req.id, "reject")}
+                        className="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                      >
+                        Reject
+                      </button>
+                    </span>
                   </li>
                 ))}
               </ul>
