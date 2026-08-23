@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import NotificationBell from "@/components/NotificationBell";
 import Avatar from "@/components/Avatar";
 
-export default function TopNavbar() {
+export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
@@ -30,6 +30,20 @@ export default function TopNavbar() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center gap-3 border-b border-slate-200 bg-white px-3 sm:px-5">
+      {/* mobile hamburger */}
+      {onMenu && (
+        <button
+          onClick={onMenu}
+          aria-label="Open menu"
+          className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 md:hidden"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+      )}
       {/* brand */}
       <button
         onClick={() => router.push("/dashboard")}
@@ -51,9 +65,7 @@ export default function TopNavbar() {
           if (q.trim().length >= 2)
             router.push(`/search?q=${encodeURIComponent(q.trim())}`);
         }}
-        className={`relative w-40 sm:w-64 ${pathname === "/search" ? "ml-auto" : ""} ${
-          pathname === "/search" ? "" : "ml-auto"
-        }`}
+        className="relative ml-auto w-40 sm:w-64"
       >
         <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         <input

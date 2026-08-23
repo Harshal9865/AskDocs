@@ -278,7 +278,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="relative mx-auto flex h-[calc(100dvh-8rem)] max-w-5xl flex-col gap-4 md:h-[calc(100vh-3rem)] md:flex-row">
+    <div className="relative mx-auto flex h-[var(--chat-h)] max-w-5xl flex-col gap-4 md:flex-row">
       {/* conversation list */}
       {listOpen && (
         <div
@@ -287,7 +287,7 @@ export default function ChatPage() {
           aria-hidden
         />
       )}
-      <div className={`absolute inset-y-0 left-0 z-20 w-72 max-w-[85vw] transform overflow-y-auto border-r border-slate-200 bg-white pr-3 transition-transform duration-200 scroll-touch md:relative md:z-auto md:w-56 md:translate-x-0 md:bg-transparent ${listOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"}`}>
+      <div className={`sb-scroll absolute inset-y-0 left-0 z-20 w-72 max-w-[85vw] transform overflow-y-auto rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all duration-200 md:relative md:z-auto md:w-64 md:translate-x-0 md:border-slate-200 ${listOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"}`}>
         <button
           onClick={() => void newConversation()}
           className="mb-3 w-full rounded-lg bg-indigo-600 py-2.5 text-xs font-semibold text-white hover:bg-indigo-700"
@@ -504,6 +504,7 @@ export default function ChatPage() {
     </div>
   );
 }
+
 
 
 

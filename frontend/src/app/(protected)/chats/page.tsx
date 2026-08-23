@@ -158,7 +158,7 @@ export default function ChatsPage() {
     "You";
 
   return (
-    <div className="relative mx-auto flex h-[calc(100dvh-8rem)] max-w-5xl flex-col gap-4 md:h-[calc(100vh-3rem)] md:flex-row">
+    <div className="relative mx-auto flex h-[var(--chat-h)] max-w-5xl flex-col gap-4 md:flex-row">
       {listOpen && (
         <div
           className="fixed inset-0 z-10 bg-slate-900/50 md:hidden"
@@ -167,7 +167,7 @@ export default function ChatsPage() {
         />
       )}
       {/* left panel */}
-      <div className={`absolute inset-y-0 left-0 z-20 flex w-72 max-w-[85vw] transform flex-col overflow-y-auto border-r border-slate-200 bg-white pr-3 transition-transform duration-200 scroll-touch md:relative md:z-auto md:translate-x-0 ${listOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"}`}>
+      <div className={`sb-scroll absolute inset-y-0 left-0 z-20 flex w-72 max-w-[85vw] transform flex-col overflow-y-auto rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all duration-200 md:relative md:z-auto md:w-72 md:translate-x-0 ${listOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"}`}>
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-700">Office mates</h2>
           <button
@@ -434,6 +434,7 @@ export default function ChatsPage() {
     </div>
   );
 }
+
 
 
 

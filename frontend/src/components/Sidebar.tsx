@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -210,7 +210,7 @@ export default function Sidebar({
             ✕
           </button>
         </div>
-        <div className="sb-hide border-b border-slate-100 p-4">
+        <div className="sb-hide shrink-0 border-b border-slate-100 p-4">
           <div className="mt-3 flex items-center gap-1.5">
           <select
             value={workspace?.id ?? ""}
@@ -240,7 +240,7 @@ export default function Sidebar({
             </button>
           )}
         </div>
-        <div className="sb-collapsed-show border-b border-slate-100 p-2">
+        <div className="sb-collapsed-show shrink-0 border-b border-slate-100 p-2">
           <button
             onClick={toggleCollapsed}
             title={workspace ? `Workspace: ${workspace.name}` : "No workspace"}
@@ -287,7 +287,7 @@ export default function Sidebar({
         )}
         </div>
 
-      <nav className="scrollbar-thin flex-1 overflow-y-auto p-2">
+      <nav className="scrollbar-thin min-h-0 flex-1 overflow-y-auto p-2">
         {NAV.map((item) => {
           const active = pathname === item.href;
           const Icon = item.icon;

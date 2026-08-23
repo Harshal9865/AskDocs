@@ -37,7 +37,7 @@ export default function ProtectedLayout({
 
   return (
     <WorkspaceProvider>
-      <TopNavbar />
+      <TopNavbar onMenu={() => setDrawerOpen(true)} />
 
       <div className="flex min-h-[100dvh] pt-14">
         <Sidebar
@@ -46,18 +46,6 @@ export default function ProtectedLayout({
           width={width}
           setWidth={setWidth}
         />
-        {/* mobile hamburger sits inside the navbar's left edge */}
-        <button
-          onClick={() => setDrawerOpen(true)}
-          aria-label="Open menu"
-          className="fixed left-3 top-[70px] z-30 rounded-lg border border-slate-200 bg-white p-2 text-slate-600 shadow-sm hover:bg-slate-50 md:hidden"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
-        </button>
         <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6">
           <WelcomeModal />
           {children}
