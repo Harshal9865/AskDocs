@@ -37,6 +37,20 @@ async def _get_conversation_checked(
     return conv
 
 
+async def _workspace_role(db, workspace_id: uuid.UUID, user_id) -> str | None:
+    """Role of the user in the workspace; None if not a member."""
+    result = await db.execute(
+        select(WorkspaceMember).where(
+            WorkspaceMember.workspace_id == workspace_id,
+            WorkspaceMember.user_id == user_id,
+        )
+    )
+    member = result.scalar_one_or_none()
+    if member is None:
+        return None
+    return member.role.value if hasattr(member.role, "value") else str(member.role)
+
+
 def _citations_json(chunks) -> list[dict]:
     return [
         {
@@ -79,14 +93,18 @@ async def create_conversation(
 async def list_conversations(
     workspace_id: uuid.UUID, db: DbSession, membership: Membership, user: CurrentUser
 ):
-    result = await db.execute(
-        select(Conversation)
-        .where(
-            Conversation.workspace_id == membership.workspace_id,
-            Conversation.user_id == user.id,
-        )
-        .order_by(Conversation.created_at.desc())
+    """All AI conversations in the workspace for admins/members.
+    Viewers only see their own."""
+    query = select(Conversation).where(
+        Conversation.workspace_id == membership.workspace_id,
+        Conversation.type == "docs_qa",
+        Conversation.deleted_at.is_(None),
     )
+    role = await _workspace_role(db, membership.workspace_id, user.id)
+    if role == "viewer":
+        query = query.where(Conversation.user_id == user.id)
+    query = query.order_by(Conversation.created_at.desc())
+    result = await db.execute(query)
     return list(result.scalars().all())
 
 
@@ -95,8 +113,12 @@ async def get_messages(
     conversation_id: uuid.UUID, db: DbSession, user: CurrentUser
 ):
     conv = await _get_conversation_checked(db, conversation_id, user)
-    if conv.user_id != user.id:
+    role = await _workspace_role(db, conv.workspace_id, user.id)
+    if role is None:
+        # non-member: don't reveal existence
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Conversation not found")
+    if conv.user_id != user.id and role == "viewer":
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Viewers can only view their own conversations")
     result = await db.execute(
         select(Message).where(Message.conversation_id == conv.id).order_by(Message.created_at)
     )
@@ -142,8 +164,11 @@ async def ask_question_sync(
 ):
     """Non-streaming Q&A - same pipeline as SSE, easier to test/debug."""
     conv = await _get_conversation_checked(db, conversation_id, user)
-    if conv.user_id != user.id:
+    role = await _workspace_role(db, conv.workspace_id, user.id)
+    if role is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Conversation not found")
+    if conv.user_id != user.id and role == "viewer":
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Viewers can only use their own conversations")
 
     db.add(Message(conversation_id=conv.id, role="user", content=payload.content))
     if conv.title == "New conversation":
@@ -195,8 +220,11 @@ async def ask_question_stream(
 ):
     """SSE streaming Q&A. Events: {type: answer|done|error}."""
     conv = await _get_conversation_checked(db, conversation_id, user)
-    if conv.user_id != user.id:
+    role = await _workspace_role(db, conv.workspace_id, user.id)
+    if role is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Conversation not found")
+    if conv.user_id != user.id and role == "viewer":
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Viewers can only use their own conversations")
 
     db.add(Message(conversation_id=conv.id, role="user", content=payload.content))
     if conv.title == "New conversation":
