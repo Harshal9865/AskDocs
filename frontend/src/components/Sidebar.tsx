@@ -33,12 +33,12 @@ const NAV = [
 
 const NAV_SECONDARY = [
   { href: "/insights", label: "Insights", icon: BarChart3 },
-  { href: "/trash", label: "Trash", icon: Trash2 },
   { href: "/activity", label: "Activity log", icon: History },
   { href: "/members", label: "Members", icon: UsersRound },
   { href: "/settings/workspace", label: "Workspace settings", icon: Settings },
   { href: "/settings", label: "Account settings", icon: UserCog },
   { href: "/help", label: "Help & FAQ", icon: CircleHelp },
+  { href: "/trash", label: "Trash", icon: Trash2 },
 ];
 
 const MIN_W = 220;

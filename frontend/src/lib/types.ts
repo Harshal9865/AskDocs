@@ -42,6 +42,7 @@ export interface Invitation {
   role: Role;
   status: "pending" | "accepted" | "declined" | "cancelled";
   created_at: string;
+  expires_at: string | null;
 }
 
 export interface DocumentItem {

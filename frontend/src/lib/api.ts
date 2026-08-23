@@ -181,8 +181,9 @@ export const api = {
   removeMember: (wsId: string, userId: string) =>
     request<void>(`/workspaces/${wsId}/members/${userId}`, { method: "DELETE" }),
 
-  // ---- invitations ----
+// ---- invitations ----
   myInvitations: () => request<Invitation[]>("/invitations"),
+  myInvitationHistory: () => request<Invitation[]>(`/invitations/history`),
   invitationPreview: (id: string) =>
     request<{ workspace_name: string; inviter_email: string; role: string }>(
       `/invitations/${id}/workspace`,

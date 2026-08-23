@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.orm import joinedload
 
 from app.core.deps import CurrentUser, DbSession
 from app.models.invitation import Invitation
@@ -28,6 +29,17 @@ async def my_invitations(db: DbSession, user: CurrentUser):
 
     valid = [i for i in invites if i.expires_at is None or i.expires_at > utcnow()]
     return valid
+
+
+@router.get("/invitations/history", response_model=list[InvitationOut])
+async def my_invitation_history(db: DbSession, user: CurrentUser):
+    """Full invitation history (accepted/declined/pending) for the current user."""
+    result = await db.execute(
+        select(Invitation)
+        .where(Invitation.email == user.email)
+        .order_by(Invitation.created_at.desc())
+    )
+    return list(result.scalars().all())
 
 
 @router.get("/invitations/{invitation_id}/workspace", response_model=dict)
