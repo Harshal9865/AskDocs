@@ -16,3 +16,7 @@ class User(BaseModel):
     last_seen_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True, default=None
     )
+    avatar_kind: Mapped[str] = mapped_column(
+        String(20), default="initials"
+    )  # initials | sticker | upload
+    avatar_value: Mapped[str | None] = mapped_column(String(500), nullable=True)

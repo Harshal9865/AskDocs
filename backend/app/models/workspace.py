@@ -19,6 +19,10 @@ class Workspace(BaseModel):
     name: Mapped[str] = mapped_column(String(200))
     slug: Mapped[str] = mapped_column(String(220), unique=True, index=True)
     created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
+    brand_kind: Mapped[str] = mapped_column(
+        String(20), default="default"
+    )  # default | sticker | upload
+    brand_value: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
 
 class WorkspaceMember(BaseModel):

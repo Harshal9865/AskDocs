@@ -17,6 +17,8 @@ class UserOut(BaseModel):
     email: str
     name: str
     created_at: datetime
+    avatar_kind: str = "initials"
+    avatar_value: str | None = None
 
 
 class TokenPair(BaseModel):

@@ -1,7 +1,8 @@
-﻿import re
+import re
 import uuid
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, File, HTTPException, UploadFile, status
+from pydantic import BaseModel
 from sqlalchemy import delete, select
 
 from app.core.deps import AdminMembership, CurrentUser, DbSession, Membership
@@ -60,6 +61,98 @@ async def list_workspaces(db: DbSession, user: CurrentUser):
 async def get_workspace(workspace_id: uuid.UUID, db: DbSession, membership: Membership):
     ws = await db.get(Workspace, membership.workspace_id)
     return ws
+
+
+# ---------- Workspace brand logo ----------
+
+BRAND_STICKERS = {"male-1", "male-2", "male-3", "male-4", "female-1", "female-2", "female-3", "female-4", "cute-1", "cute-2", "cute-3", "cute-4"}
+
+
+@router.get("/{workspace_id}/brand")
+async def get_brand(workspace_id: uuid.UUID, db: DbSession, membership: Membership):
+    ws = await db.get(Workspace, membership.workspace_id)
+    return {
+        "brand_kind": ws.brand_kind,
+        "brand_value": ws.brand_value,
+    }
+
+
+class BrandSetRequest(BaseModel):
+    kind: str  # default | sticker
+    value: str | None = None
+
+
+from pydantic import BaseModel as BaseModel_  # noqa: E402
+
+
+@router.post("/{workspace_id}/brand")
+async def set_brand(
+    workspace_id: uuid.UUID,
+    payload: BrandSetRequest,
+    db: DbSession,
+    membership: AdminMembership,
+):
+    if payload.kind not in ("default", "sticker"):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Use /brand/photo for uploads")
+    ws = await db.get(Workspace, membership.workspace_id)
+    if payload.kind == "sticker":
+        if payload.value not in BRAND_STICKERS:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Unknown sticker")
+        ws.brand_kind = "sticker"
+        ws.brand_value = payload.value
+    else:
+        ws.brand_kind = "default"
+        ws.brand_value = None
+    await db.commit()
+    return {"brand_kind": ws.brand_kind, "brand_value": ws.brand_value}
+
+
+@router.post("/{workspace_id}/brand/photo")
+async def upload_brand_photo(
+    workspace_id: uuid.UUID,
+    db: DbSession,
+    membership: AdminMembership,
+    file: UploadFile = File(...),
+):
+    import os
+
+    from app.storage.db_storage import DbStorage
+
+    if file.content_type not in ("image/png", "image/jpeg", "image/webp"):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Only PNG, JPEG or WebP images are allowed")
+    data = await file.read()
+    if len(data) > 5 * 1024 * 1024:
+        raise HTTPException(status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, "Max image size is 5 MB")
+    ext = {".png": ".png"}.get("", "")
+    ext = ".png" if file.content_type == "image/png" else ".jpg" if file.content_type == "image/jpeg" else ".webp"
+    storage = DbStorage()
+    key = storage.save(f"brands/{membership.workspace_id}", f"logo{ext}", data)
+
+    ws = await db.get(Workspace, membership.workspace_id)
+    ws.brand_kind = "upload"
+    ws.brand_value = key
+    await db.commit()
+    return {"brand_kind": "upload", "brand_value": key}
+
+
+@router.get("/{workspace_id}/brand/logo")
+async def get_brand_logo(workspace_id: uuid.UUID, db: DbSession, membership: Membership):
+    """Serve the uploaded brand logo bytes (404 unless kind == upload)."""
+    import mimetypes
+
+    from fastapi.responses import Response
+
+    ws = await db.get(Workspace, membership.workspace_id)
+    if ws is None or ws.brand_kind != "upload" or not ws.brand_value:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No uploaded logo")
+    from app.models.file import FileBlob
+
+    row = await db.execute(select(FileBlob.data).where(FileBlob.key == ws.brand_value))
+    data = row.scalar_one_or_none()
+    if data is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Logo not found")
+    media = mimetypes.guess_type(ws.brand_value)[0] or "application/octet-stream"
+    return Response(content=bytes(data), media_type=media)
 
 
 @router.patch("/{workspace_id}", response_model=WorkspaceOut)
