@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronDown, Search, Settings, LogOut } from "lucide-react";
+import Link from "next/link";
+import { ChevronDown, LayoutDashboard, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -93,7 +94,39 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         </span>
       </button>
 
-{/* global search */}
+      {/* desktop nav — fills the empty middle */}
+      <nav className="hidden items-center gap-1 lg:flex">
+        {[
+          { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
+          { href: "/chat", label: "AI Chat", Icon: Sparkles },
+          { href: "/chats", label: "Office Chats", Icon: MessagesSquare },
+          { href: "/documents", label: "Documents", Icon: FileText },
+        ].map(({ href, label, Icon }) => {
+          const active = pathname === href || pathname.startsWith(href + "/");
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
+                active
+                  ? "bg-slate-900 text-white dark:bg-white dark:text-black"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white"
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {label}
+            </Link>
+          );
+        })}
+        {workspace && (
+          <span className="ml-2 hidden items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 xl:flex">
+            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            {workspace.name}
+          </span>
+        )}
+      </nav>
+
+      {/* global search */}
       <form
         onSubmit={(e) => {
           e.preventDefault();

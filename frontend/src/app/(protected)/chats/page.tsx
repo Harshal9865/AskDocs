@@ -241,7 +241,7 @@ export default function ChatsPage() {
         />
       )}
       {/* left panel */}
-      <div className={`sb-scroll absolute inset-y-0 left-0 z-20 flex w-72 max-w-[85vw] transform flex-col overflow-y-auto rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all duration-200 md:relative md:z-auto md:w-72 md:translate-x-0 ${listOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"}`}>
+      <div className={`sb-scroll dark:border-white/10 dark:bg-[#181818] absolute inset-y-0 left-0 z-20 flex w-72 max-w-[85vw] transform flex-col overflow-y-auto rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all duration-200 md:relative md:z-auto md:w-72 md:translate-x-0 ${listOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"}`}>
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-700">Office mates</h2>
           <button
@@ -331,7 +331,10 @@ export default function ChatsPage() {
       </div>
 
       {/* thread */}
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="gemini-gradient-bg dark:border-white/10 dark:bg-[#181818] relative flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="gemini-orb gemini-orb-1" />
+        <div className="gemini-orb gemini-orb-2" />
+        <div className="gemini-orb gemini-orb-3" />
         {/* mobile thread header */}
         <div className="flex items-center justify-between gap-2 border-b border-slate-100 px-3 py-2 md:hidden">
           <button
@@ -354,7 +357,7 @@ export default function ChatsPage() {
           </button>
         </div>
         {!activeChat ? (
-          <div className="flex h-full items-center justify-center px-4 text-center text-sm text-slate-400">
+          <div className="relative z-10 flex h-full items-center justify-center px-4 text-center text-sm text-slate-400 dark:text-zinc-500">
             Pick a colleague to start a direct message,
             <br /> or create a group chat to plan together.
           </div>
@@ -387,9 +390,9 @@ export default function ChatsPage() {
               )}
             </div>
 
-            <div className="scroll-touch flex-1 space-y-3 overflow-y-auto px-3 py-4 sm:px-6">
+            <div className="scroll-touch relative z-10 flex-1 space-y-3 overflow-y-auto px-3 py-4 sm:px-6">
               {messages.length === 0 ? (
-                <p className="pt-8 text-center text-sm text-slate-400">
+                <p className="pt-8 text-center text-sm text-slate-400 dark:text-zinc-500">
                   No messages yet — say hello!
                 </p>
               ) : (
@@ -450,7 +453,7 @@ export default function ChatsPage() {
               <div ref={threadEnd} />
             </div>
 
-            <div className="px-3 pb-2 pb-safe sm:px-4 sm:pb-2">
+            <div className="border-t border-slate-100/60 px-3 pb-4 pt-3 dark:border-white/5 sm:px-4 sm:pb-5 sm:pt-3">
               <ChatComposer
                 inputId="team-chat-input"
                 value={input}
