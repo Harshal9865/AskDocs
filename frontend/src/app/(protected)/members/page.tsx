@@ -5,9 +5,28 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
 import Avatar from "@/components/Avatar";
+import { useUserAvatar } from "@/lib/use-user-avatar";
 import type { Invitation, JoinRequest, Member, Role } from "@/lib/types";
 
 const ROLES: Role[] = ["viewer", "member", "admin"];
+
+function MemberAvatar({ member, size }: { member: Member; size: number }) {
+  const { src, stickerId } = useUserAvatar(
+    member.user_id,
+    member.avatar_kind,
+    member.avatar_value,
+  );
+  return (
+    <Avatar
+      name={member.name || member.email}
+      size={size}
+      showPresence
+      online={member.online}
+      src={src}
+      stickerId={stickerId}
+    />
+  );
+}
 
 export default function MembersPage() {
   const { user } = useAuth();
@@ -230,7 +249,7 @@ export default function MembersPage() {
               className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
             >
               <div className="flex min-w-0 items-center gap-3">
-                <Avatar name={m.name || m.email} size={40} showPresence online={m.online} />
+                <MemberAvatar member={m} size={40} />
                 <div className="min-w-0">
                   <div className="truncate text-sm font-medium">{m.name || m.email}</div>
                   <div className="truncate text-xs text-slate-500">
@@ -271,3 +290,4 @@ export default function MembersPage() {
     </div>
   );
 }
+

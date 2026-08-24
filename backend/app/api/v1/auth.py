@@ -152,6 +152,45 @@ async def avatar_image(db: DbSession, user: CurrentUser):
     return Response(content=bytes(data), media_type=media)
 
 
+@router.get("/users/{user_id}/avatar")
+async def get_user_avatar(user_id: uuid.UUID, db: DbSession, user: CurrentUser):
+    """Serve another user's uploaded profile photo (workspace members only)."""
+    import mimetypes
+
+    from app.models.workspace import WorkspaceMember
+    from fastapi.responses import Response
+
+    target = await db.get(User, user_id)
+    if (
+        target is None
+        or target.avatar_kind != "upload"
+        or not target.avatar_value
+    ):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No uploaded photo")
+    # verify caller shares at least one workspace with the target
+    shared = await db.execute(
+        select(WorkspaceMember.workspace_id).where(
+            WorkspaceMember.user_id == user.id,
+            WorkspaceMember.workspace_id.in_(
+                select(WorkspaceMember.workspace_id).where(
+                    WorkspaceMember.user_id == user_id
+                )
+            ),
+        )
+    )
+    if shared.first() is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Not found")
+
+    row = await db.execute(
+        select(FileBlob.data).where(FileBlob.key == target.avatar_value)
+    )
+    data = row.scalar_one_or_none()
+    if data is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Photo not found")
+    media = mimetypes.guess_type(target.avatar_value)[0] or "application/octet-stream"
+    return Response(content=bytes(data), media_type=media)
+
+
 class ProfileUpdate(BaseModel):
     name: str
 

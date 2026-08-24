@@ -183,6 +183,8 @@ export const api = {
     const blob = await requestBlob(`/workspaces/${wsId}/brand/logo`);
     return URL.createObjectURL(blob);
   },
+  /** Fetch another user's uploaded avatar photo as object URL (binary-safe) */
+  getUserAvatarUrl: (userId: string) => requestBlob(`/users/${userId}/avatar`),
 
   // ---- workspaces ----
   createWorkspace: (name: string) =>

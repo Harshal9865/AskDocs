@@ -1,10 +1,12 @@
 ﻿"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
 import ChatComposer from "@/components/ChatComposer";
+import { useUserAvatar } from "@/lib/use-user-avatar";
 import Avatar from "@/components/Avatar";
 import { UsersRound } from "lucide-react";
 import type { Member, TeamChat, TeamMessage } from "@/lib/types";
@@ -17,6 +19,30 @@ function chatTitle(chat: TeamChat, myEmail?: string): string {
 
 function otherParticipant(chat: TeamChat, myEmail?: string) {
   return chat.participants.find((p) => p.email !== myEmail);
+}
+
+function MemberAvatarSmall({
+  user,
+  size,
+}: {
+  user: { user_id?: string; id?: string; name?: string | null; email?: string | null; avatar_kind?: string | null; avatar_value?: string | null; online?: boolean };
+  size: number;
+}) {
+  const { src, stickerId } = useUserAvatar(
+    user.user_id || user.id,
+    user.avatar_kind,
+    user.avatar_value,
+  );
+  return (
+    <Avatar
+      name={user.name ?? user.email ?? "User"}
+      size={size}
+      showPresence
+      online={user.online}
+      src={src}
+      stickerId={stickerId}
+    />
+  );
 }
 
 function PresenceDot({ online }: { online: boolean }) {
@@ -195,7 +221,7 @@ export default function ChatsPage() {
                 className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-100"
                 title={`Message ${m.name || m.email}`}
               >
-                <Avatar name={m.name || m.email} size={28} showPresence online={m.online} />
+                <MemberAvatarSmall user={m} size={28} />
                 <span className="truncate">{m.name || m.email}</span>
               </button>
             </li>
@@ -318,7 +344,7 @@ export default function ChatsPage() {
                     >
                       {!mine && sender && (
                         <span title={sender.name}>
-                          <Avatar name={sender.name || sender.email} size={28} />
+                          <MemberAvatarSmall user={sender} size={28} />
                         </span>
                       )}
                       <div className={`min-w-0 max-w-[80%] ${mine ? "text-right" : ""}`}>

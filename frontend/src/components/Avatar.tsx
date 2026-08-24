@@ -27,16 +27,15 @@ export default function Avatar({
   src,
   stickerId,
 }: {
-  name: string;
+  name?: string;
   size?: number;
   online?: boolean;
   showPresence?: boolean;
-  /** object URL / public URL of an uploaded photo */
   src?: string | null;
-  /** sticker id, e.g. "female-2" — served from /stickers/{id}.svg */
   stickerId?: string | null;
 }) {
-  const initials = (name || "?")
+  const displayName = name ?? "User";
+  const initials = (displayName || "?")
     .trim()
     .split(/\s+/)
     .slice(0, 2)
@@ -50,7 +49,7 @@ export default function Avatar({
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={src}
-          alt={name}
+          alt={displayName}
           className="h-full w-full rounded-full object-cover"
           style={{ fontSize: size * 0.38 }}
         />
@@ -58,14 +57,14 @@ export default function Avatar({
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={`/stickers/${stickerId}.svg`}
-          alt={name}
+          alt={displayName}
           className="h-full w-full rounded-full"
         />
       ) : (
         <span
-          className={`flex h-full w-full items-center justify-center rounded-full font-semibold text-white select-none ${colorFor(name)}`}
+          className={`flex h-full w-full items-center justify-center rounded-full font-semibold text-white select-none ${colorFor(displayName)}`}
           style={{ fontSize: size * 0.38 }}
-          aria-label={name}
+          aria-label={displayName}
         >
           {initials}
         </span>
