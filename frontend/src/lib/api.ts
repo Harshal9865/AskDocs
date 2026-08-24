@@ -110,6 +110,23 @@ function json(body: unknown): RequestInit {
   return { body: JSON.stringify(body) };
 }
 
+/** Binary-safe authenticated fetch (images etc.) with silent token refresh. */
+async function requestBlob(path: string): Promise<Blob> {
+  const buildHeaders = () => {
+    const h = new Headers();
+    if (tokens?.access) h.set("Authorization", `Bearer ${tokens.access}`);
+    return h;
+  };
+
+  let res = await fetch(`${API_BASE}${path}`, { headers: buildHeaders() });
+  if (res.status === 401) {
+    const ok = await refreshTokens();
+    if (ok) res = await fetch(`${API_BASE}${path}`, { headers: buildHeaders() });
+  }
+  if (!res.ok) throw new ApiError(res.status, `Request failed (${res.status})`);
+  return await res.blob();
+}
+
 export const api = {
   setOnTokens: setTokenListener,
 
@@ -138,9 +155,9 @@ export const api = {
     form.append("file", file);
     return request<User>("/auth/avatar/photo", { method: "POST", body: form });
   },
-  /** Authenticated fetch of the uploaded photo -> object URL */
+  /** Authenticated fetch of the uploaded photo -> object URL (binary-safe) */
   getAvatarPhotoUrl: async () => {
-    const blob = await request<Blob>("/auth/avatar/image");
+    const blob = await requestBlob("/auth/avatar/image");
     return URL.createObjectURL(blob);
   },
   setBrand: (wsId: string, kind: "default" | "sticker", value?: string) =>
@@ -157,7 +174,7 @@ export const api = {
     );
   },
   getBrandLogoUrl: async (wsId: string) => {
-    const blob = await request<Blob>(`/workspaces/${wsId}/brand/logo`);
+    const blob = await requestBlob(`/workspaces/${wsId}/brand/logo`);
     return URL.createObjectURL(blob);
   },
 
