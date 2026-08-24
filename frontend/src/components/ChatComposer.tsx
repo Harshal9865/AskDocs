@@ -139,7 +139,7 @@ export default function ChatComposer({
       }}
       className={
         aurora
-          ? `aurora-frame rounded-2xl ${variant === "green" ? "aurora-frame--green" : ""}`
+          ? `ask-aurora-wrap rounded-2xl ${variant === "green" ? "ask-aurora-wrap--green" : ""}`
           : `dark:border-white/10 dark:bg-[#242424] relative rounded-2xl border bg-white shadow-sm transition-all ${
               dragOver
                 ? "border-[#1DB954] ring-2 ring-[#1DB954]/20 dark:border-[#1DB954]"
@@ -147,8 +147,23 @@ export default function ChatComposer({
             }`
       }
     >
+      {aurora && (
+        <div className="ask-aurora-blobs" aria-hidden>
+          <span className="ask-aurora-blob ask-aurora-blob--1" />
+          <span className="ask-aurora-blob ask-aurora-blob--2" />
+          <span className="ask-aurora-blob ask-aurora-blob--3" />
+        </div>
+      )}
       <div
-        className={`aurora-card bg-white dark:bg-[#0d0d1a] ${aurora ? "shadow-sm" : ""}`}
+        className={
+          aurora
+            ? `relative z-10 rounded-2xl border bg-white shadow-sm transition-all dark:bg-[#0d0d1a] ${
+                dragOver
+                  ? "border-indigo-400 ring-2 ring-indigo-100 dark:border-[#1DB954] dark:ring-[#1DB954]/20"
+                  : "border-slate-200 dark:border-white/10 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 dark:focus-within:border-[#1DB954] dark:focus-within:ring-[#1DB954]/20"
+              }`
+            : "contents"
+        }
       >
       {/* attachment previews */}
       {attachments.length > 0 && (

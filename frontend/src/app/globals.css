@@ -538,16 +538,72 @@ button.bg-indigo-600:hover {
   background: rgba(99, 102, 241, 0.15);
 }
 
-/* ---------- Aurora glow composer ---------- */
-@property --aurora-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
+/* ---------- Aurora glow composer — flowing blobs, no rectangle ---------- */
+@keyframes aurora-orbit-1 {
+  0% { transform: translate(-18%, -12%) scale(1); }
+  33% { transform: translate(22%, -8%) scale(1.12); }
+  66% { transform: translate(8%, 18%) scale(0.92); }
+  100% { transform: translate(-18%, -12%) scale(1); }
 }
-@keyframes aurora-spin {
-  to {
-    --aurora-angle: 360deg;
-  }
+@keyframes aurora-orbit-2 {
+  0% { transform: translate(16%, 14%) scale(0.9); }
+  33% { transform: translate(-14%, 16%) scale(1.08); }
+  66% { transform: translate(-8%, -14%) scale(1.05); }
+  100% { transform: translate(16%, 14%) scale(0.9); }
+}
+@keyframes aurora-orbit-3 {
+  0% { transform: translate(0%, 18%) scale(1.05); }
+  50% { transform: translate(10%, -16%) scale(0.88); }
+  100% { transform: translate(0%, 18%) scale(1.05); }
+}
+.ask-aurora-wrap {
+  position: relative;
+  border-radius: 1rem;
+  isolation: isolate;
+}
+.ask-aurora-blobs {
+  position: absolute;
+  inset: -14px;
+  border-radius: 1.4rem;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 0;
+}
+.ask-aurora-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(22px);
+  opacity: 0.85;
+  will-change: transform;
+}
+.ask-aurora-blob--1 {
+  width: 140px; height: 90px; top: -18px; left: -14px;
+  background: radial-gradient(ellipse at center, #6366f1 0%, #a855f7 55%, transparent 75%);
+  animation: aurora-orbit-1 9s ease-in-out infinite;
+}
+.ask-aurora-blob--2 {
+  width: 160px; height: 80px; bottom: -16px; right: -12px;
+  background: radial-gradient(ellipse at center, #ec4899 0%, #22d3ee 50%, transparent 75%);
+  animation: aurora-orbit-2 11s ease-in-out infinite;
+}
+.ask-aurora-blob--3 {
+  width: 120px; height: 70px; top: 50%; left: 55%;
+  background: radial-gradient(ellipse at center, #fbbf24 0%, #6366f1 60%, transparent 78%);
+  animation: aurora-orbit-3 13s ease-in-out infinite;
+  opacity: 0.55;
+}
+.dark .ask-aurora-blob--1 { opacity: 1; filter: blur(26px); }
+.dark .ask-aurora-blob--2 { opacity: 1; filter: blur(24px); }
+.dark .ask-aurora-blob--3 { opacity: 0.7; }
+.ask-aurora-wrap:focus-within .ask-aurora-blob { filter: blur(28px); opacity: 1; }
+.ask-aurora-wrap--green .ask-aurora-blob--1 {
+  background: radial-gradient(ellipse at center, #1DB954 0%, #22d3ee 55%, transparent 75%);
+}
+.ask-aurora-wrap--green .ask-aurora-blob--2 {
+  background: radial-gradient(ellipse at center, #34d399 0%, #fbbf24 50%, transparent 75%);
+}
+.ask-aurora-wrap--green .ask-aurora-blob--3 {
+  background: radial-gradient(ellipse at center, #1DB954 0%, #22d3ee 60%, transparent 78%);
 }
 .aurora-frame {
   position: relative;
@@ -560,7 +616,7 @@ button.bg-indigo-600:hover {
   position: absolute;
   border-radius: 1.3rem;
   background: conic-gradient(
-    from var(--aurora-angle),
+    from 0deg,
     #6366f1,
     #a855f7,
     #ec4899,
@@ -568,7 +624,7 @@ button.bg-indigo-600:hover {
     #fbbf24,
     #6366f1
   );
-  animation: aurora-spin 7s linear infinite;
+  animation: none;
   pointer-events: none;
 }
 .aurora-frame::before {
