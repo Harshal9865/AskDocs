@@ -8,6 +8,7 @@ import Sidebar from "@/components/Sidebar";
 import TopNavbar from "@/components/TopNavbar";
 import CommandPalette from "@/components/CommandPalette";
 import WelcomeModal from "@/components/WelcomeModal";
+import Loading from "@/components/Loading";
 
 export default function ProtectedLayout({
   children,
@@ -28,11 +29,7 @@ export default function ProtectedLayout({
   }, []);
 
   if (loading) {
-    return (
-      <div className="dark:bg-[#121212] flex min-h-screen items-center justify-center text-slate-500">
-        Loading…
-      </div>
-    );
+    return <Loading />;
   }
   if (!user) return null;
 
@@ -40,7 +37,7 @@ export default function ProtectedLayout({
     <WorkspaceProvider>
       <TopNavbar onMenu={() => setDrawerOpen(true)} />
 
-      <div className="dark:bg-[#121212] flex min-h-[100dvh] pt-14 transition-colors">
+      <div className="dark:bg-[#121212] flex min-h-[100dvh] pt-14 pl-[68px] transition-colors md:pl-0">
         <Sidebar
           mobileOpen={drawerOpen}
           onCloseMobile={() => setDrawerOpen(false)}

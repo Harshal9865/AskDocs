@@ -90,7 +90,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
             "A"
           )}
         </span>
-        <span className="dark:text-white hidden text-[15px] font-bold tracking-tight text-slate-900 sm:block">
+        <span className="dark:text-white text-[15px] font-bold tracking-tight text-slate-900">
           AskDocs
         </span>
       </button>

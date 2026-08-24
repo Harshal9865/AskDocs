@@ -176,7 +176,7 @@ export default function Sidebar({
         ref={asideRef}
         style={{ width: collapsed ? 68 : `min(${width}px, 85vw)` }}
         className={`dark:border-slate-700/50 dark:bg-[#1a1a2e] sb-aside fixed left-0 top-14 bottom-0 z-40 flex shrink-0 flex-col border-r border-slate-200 bg-white transition-colors md:sticky md:top-14 md:h-[calc(100dvh-3.5rem)] md:z-auto md:translate-x-0 md:overflow-visible ${
-          mobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
+          mobileOpen ? "translate-x-0 shadow-2xl" : "translate-x-0 sb-mobile-rail"
         } ${collapsed ? "sb-collapsed shadow-xl" : ""}`}
       >
         {/* collapse arrow - floats on the right edge */}
@@ -207,7 +207,7 @@ export default function Sidebar({
           <button
             onClick={onCloseMobile}
             aria-label="Close menu"
-            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 md:hidden"
+            className={`rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-white/10 ${mobileOpen ? "" : "hidden"}`}
           >
             ✕
           </button>
@@ -298,7 +298,8 @@ export default function Sidebar({
               key={item.href}
               href={item.href}
               onClick={onCloseMobile}
-              title={collapsed ? item.label : undefined}
+              title={item.label}
+              aria-label={item.label}
               className={`mb-0.5 flex h-8 items-center gap-2 rounded-md px-2 text-[13px] font-medium transition-colors ${
                 collapsed ? "justify-center px-0" : ""
               } ${
@@ -327,7 +328,8 @@ export default function Sidebar({
               key={item.href}
               href={item.href}
               onClick={onCloseMobile}
-              title={collapsed ? item.label : undefined}
+              title={item.label}
+              aria-label={item.label}
               className={`mb-0.5 flex h-7 items-center gap-2 rounded-md px-2 text-[13px] transition-colors ${
                 collapsed ? "justify-center px-0" : ""
               } ${
