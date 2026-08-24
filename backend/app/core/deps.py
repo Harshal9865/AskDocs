@@ -93,16 +93,16 @@ async def get_current_user_ws(
 ) -> User:
     """Authenticate WebSocket connection via JWT token from query parameter."""
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
         user_id = uuid.UUID(payload.get("sub"))
-    except (JWTError, ValueError) as e:
+    except (jwt.PyJWTError, ValueError):
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Invalid token")
-        raise HTTPException(status_code=401, detail="Invalid token")
+        raise
     
     async with AsyncSessionLocal() as session:
         result = await session.execute(select(User).where(User.id == user_id))
         user = result.scalar_one_or_none()
         if user is None:
             await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="User not found")
-            raise HTTPException(status_code=401, detail="User not found")
+            raise
         return user
