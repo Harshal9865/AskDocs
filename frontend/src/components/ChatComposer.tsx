@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, Paperclip, X } from "lucide-react";
+import { ArrowUp, Paperclip, Plus, X } from "lucide-react";
 
 export interface AttachedFile {
   file: File;
@@ -98,7 +98,7 @@ export default function ChatComposer({
         setDragOver(false);
         handleFiles(e.dataTransfer.files);
       }}
-      className={`rounded-2xl border bg-white shadow-sm transition-all ${
+      className={`dark:border-slate-700/50 dark:bg-[#242424] rounded-2xl border bg-white shadow-sm transition-all ${
         dragOver
           ? "border-indigo-400 ring-2 ring-indigo-100"
           : "border-slate-200 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100"
@@ -110,7 +110,7 @@ export default function ChatComposer({
           {attachments.map((a, i) => (
             <div
               key={i}
-              className="group relative flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5"
+              className="dark:bg-[#2a2a2a] group relative flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5"
             >
               {a.previewUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -120,15 +120,15 @@ export default function ChatComposer({
                   className="h-8 w-8 rounded object-cover"
                 />
               ) : (
-                <Paperclip className="h-3.5 w-3.5 text-slate-400" />
+                <Paperclip className="dark:text-slate-400 h-3.5 w-3.5 text-slate-400" />
               )}
-              <span className="max-w-[140px] truncate text-xs text-slate-600">
+              <span className="dark:text-slate-300 max-w-[140px] truncate text-xs text-slate-600">
                 {a.file.name}
               </span>
               <button
                 onClick={() => removeAttachment(i)}
                 aria-label={`Remove ${a.file.name}`}
-                className="rounded-full p-0.5 text-slate-400 hover:bg-slate-200 hover:text-slate-700"
+                className="dark:text-slate-500 dark:hover:text-slate-300 rounded-full p-0.5 text-slate-400 hover:bg-slate-200 hover:text-slate-700"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -145,15 +145,16 @@ export default function ChatComposer({
               onClick={() => fileRef.current?.click()}
               disabled={disabled}
               aria-label="Attach file"
-              title="Attach file"
-              className="shrink-0 rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-indigo-600 disabled:opacity-40"
+              title="Attach image, PDF, or text file"
+              className="dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-indigo-400 shrink-0 rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-indigo-600 disabled:opacity-40"
             >
-              <Paperclip className="h-5 w-5" />
+              <Plus className="h-5 w-5" />
             </button>
             <input
               ref={fileRef}
               type="file"
               multiple
+              accept="image/*,.pdf,.txt,.csv,.doc,.docx"
               hidden
               onChange={(e) => handleFiles(e.target.files)}
             />
@@ -169,7 +170,7 @@ export default function ChatComposer({
           disabled={disabled}
           placeholder={placeholder ?? "Type a message…"}
           id={inputId}
-          className="min-h-[44px] max-h-40 flex-1 resize-none border-0 bg-transparent p-2 text-sm placeholder:text-slate-400 focus:ring-0 disabled:text-slate-400"
+          className="dark:text-white dark:placeholder:text-slate-500 min-h-[44px] max-h-40 flex-1 resize-none border-0 bg-transparent p-2 text-sm placeholder:text-slate-400 focus:ring-0 disabled:text-slate-400"
         />
 
         <button

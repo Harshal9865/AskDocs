@@ -49,7 +49,7 @@
 }
 
 html {
-  color-scheme: light only;
+  color-scheme: light dark;
 }
 
 /* Bulletproof font: Geist on every element, no variable-chain indirection */
@@ -78,6 +78,11 @@ body {
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, sans-serif;
   letter-spacing: -0.01em;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.dark body {
+  background-color: #121212;
+  color: #e1e1e1;
 }
 
 ::selection {
@@ -120,37 +125,37 @@ body {
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: oklch(0.11 0 0);
+  --foreground: oklch(0.95 0 0);
+  --card: oklch(0.14 0 0);
+  --card-foreground: oklch(0.95 0 0);
+  --popover: oklch(0.14 0 0);
+  --popover-foreground: oklch(0.95 0 0);
+  --primary: oklch(0.65 0.19 290);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.22 0 0);
+  --secondary-foreground: oklch(0.92 0 0);
+  --muted: oklch(0.20 0 0);
+  --muted-foreground: oklch(0.62 0 0);
+  --accent: oklch(0.22 0 0);
+  --accent-foreground: oklch(0.92 0 0);
+  --destructive: oklch(0.65 0.22 25);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 10%);
+  --ring: oklch(0.65 0.19 290);
+  --chart-1: oklch(0.65 0.19 290);
+  --chart-2: oklch(0.70 0.18 170);
+  --chart-3: oklch(0.60 0.20 330);
+  --chart-4: oklch(0.55 0.16 60);
+  --chart-5: oklch(0.50 0.15 200);
+  --sidebar: oklch(0.12 0 0);
+  --sidebar-foreground: oklch(0.92 0 0);
+  --sidebar-primary: oklch(0.65 0.19 290);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.20 0 0);
+  --sidebar-accent-foreground: oklch(0.92 0 0);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.65 0.19 290);
 }
 
 @layer base {
@@ -295,4 +300,153 @@ button.bg-indigo-600:hover {
   :root {
     --chat-h: calc(100vh - 3.5rem - 3rem);
   }
+}
+
+/* ---------- Dark mode overrides ---------- */
+.dark body {
+  @apply bg-[#121212] text-[#e1e1e1];
+}
+.dark .sb-aside {
+  border-right-color: oklch(1 0 0 / 8%);
+  box-shadow: 6px 0 20px rgba(0, 0, 0, 0.3);
+}
+.dark .shadow-sm {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    0 4px 14px rgba(0, 0, 0, 0.25) !important;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #333;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+.dark select,
+.dark input:not([type="file"]) {
+  background-color: oklch(0.18 0 0);
+  border-color: oklch(1 0 0 / 10%);
+  color: oklch(0.92 0 0);
+}
+
+/* ---------- Gemini-style flowing gradient ---------- */
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 100% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+@keyframes orb-float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -20px) scale(1.1); }
+  50% { transform: translate(-10px, 20px) scale(0.95); }
+  75% { transform: translate(-30px, -10px) scale(1.05); }
+}
+
+@keyframes orb-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(-20px, 30px) scale(1.05); }
+  50% { transform: translate(20px, -10px) scale(1.1); }
+  75% { transform: translate(10px, -30px) scale(0.95); }
+}
+
+@keyframes orb-float-3 {
+  0%, 100% { transform: translate(0, 0) scale(0.95); }
+  33% { transform: translate(20px, 20px) scale(1.1); }
+  66% { transform: translate(-20px, 10px) scale(1); }
+}
+
+.gemini-gradient-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.gemini-gradient-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.08) 0%,
+    rgba(139, 92, 246, 0.06) 25%,
+    rgba(236, 72, 153, 0.05) 50%,
+    rgba(59, 130, 246, 0.06) 75%,
+    rgba(99, 102, 241, 0.08) 100%
+  );
+  background-size: 300% 300%;
+  animation: gradient-shift 12s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dark .gemini-gradient-bg::before {
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.12) 0%,
+    rgba(236, 72, 153, 0.08) 25%,
+    rgba(59, 130, 246, 0.10) 50%,
+    rgba(16, 185, 129, 0.06) 75%,
+    rgba(139, 92, 246, 0.12) 100%
+  );
+  background-size: 300% 300%;
+  animation: gradient-shift 12s ease-in-out infinite;
+}
+
+.gemini-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.gemini-orb-1 {
+  width: 300px;
+  height: 300px;
+  top: 10%;
+  left: 15%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.18), transparent 70%);
+  animation: orb-float-1 15s ease-in-out infinite, glow-pulse 8s ease-in-out infinite;
+}
+
+.gemini-orb-2 {
+  width: 250px;
+  height: 250px;
+  bottom: 15%;
+  right: 10%;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.15), transparent 70%);
+  animation: orb-float-2 18s ease-in-out infinite, glow-pulse 10s ease-in-out infinite 2s;
+}
+
+.gemini-orb-3 {
+  width: 200px;
+  height: 200px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.12), transparent 70%);
+  animation: orb-float-3 20s ease-in-out infinite, glow-pulse 12s ease-in-out infinite 4s;
+}
+
+.dark .gemini-orb-1 {
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.25), transparent 70%);
+}
+.dark .gemini-orb-2 {
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.20), transparent 70%);
+}
+.dark .gemini-orb-3 {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.18), transparent 70%);
 }

@@ -11,6 +11,8 @@ import {
   ChevronDown,
   FileText,
   MessagesSquare,
+  Paperclip,
+  Plus,
   Trash2,
   TriangleAlert,
   UsersRound,
@@ -202,20 +204,36 @@ export default function ChatPage() {
     setInput("");
   }
 
-  async function sendWithText(question: string, _attachments: unknown[]) {
-    if (!activeConv || !question || busy) return;
+  async function sendWithText(question: string, attachments: { file: File; previewUrl?: string }[]) {
+    if (!activeConv || (!question && attachments.length === 0) || busy) return;
     setBusy(true);
 
     setMessages((prev) => [
       ...prev,
-      { role: "user", content: question },
+      { role: "user", content: question || (attachments.length > 0 ? `📎 ${attachments.map(a => a.file.name).join(", ")}` : "") },
       { role: "assistant", content: "", streaming: true },
     ]);
+
+    // Upload attachments first, then send the message
+    let attachmentText = "";
+    if (attachments.length > 0) {
+      try {
+        const uploaded = await api.uploadChatAttachments(activeConv.id, attachments.map(a => a.file));
+        attachmentText = uploaded.map((a: { filename: string; text_excerpt?: string }) => {
+          if (a.text_excerpt) return `[File: ${a.filename}]\n${a.text_excerpt}`;
+          return `[File: ${a.filename}]`;
+        }).join("\n\n");
+      } catch {
+        // silently continue — text-only ask
+      }
+    }
+
+    const fullQuestion = [question, attachmentText].filter(Boolean).join("\n\n");
 
     let done = false;
     await api.askStream(
       activeConv.id,
-      question,
+      fullQuestion,
       (text) =>
         setMessages((prev) => {
           const next = [...prev];
@@ -276,7 +294,7 @@ export default function ChatPage() {
 
   if (!workspace) {
     return (
-      <div className="rounded-xl border border-zinc-200 bg-white p-8 text-center text-zinc-500">
+      <div className="dark:border-slate-700/50 dark:bg-[#1a1a2e] rounded-xl border border-zinc-200 bg-white p-8 text-center text-zinc-500">
         Create or select a workspace first.
       </div>
     );
@@ -292,7 +310,7 @@ export default function ChatPage() {
           aria-hidden
         />
       )}
-      <div className={`sb-scroll absolute inset-y-0 left-0 z-20 w-72 max-w-[85vw] transform overflow-y-auto rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all duration-200 md:relative md:z-auto md:w-64 md:translate-x-0 md:border-slate-200 ${listOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"}`}>
+      <div className={`dark:border-slate-700/50 dark:bg-[#1a1a2e] sb-scroll absolute inset-y-0 left-0 z-20 w-72 max-w-[85vw] transform overflow-y-auto rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all duration-200 md:relative md:z-auto md:w-64 md:translate-x-0 ${listOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"}`}>
         <button
           onClick={() => void newConversation()}
           className="mb-3 w-full rounded-lg bg-indigo-600 py-2.5 text-xs font-semibold text-white hover:bg-indigo-700"
@@ -331,9 +349,13 @@ export default function ChatPage() {
       </div>
 
       {/* thread */}
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="gemini-gradient-bg dark:border-slate-700/50 dark:bg-[#1a1a2e] relative flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border border-slate-200 bg-white shadow-sm">
+        {/* Gemini floating orbs */}
+        <div className="gemini-orb gemini-orb-1" />
+        <div className="gemini-orb gemini-orb-2" />
+        <div className="gemini-orb gemini-orb-3" />
         {/* mobile thread header */}
-        <div className="flex items-center justify-between gap-2 border-b border-slate-100 px-3 py-2 md:hidden">
+        <div className="dark:border-slate-700/50 flex items-center justify-between gap-2 border-b border-slate-100 px-3 py-2 md:hidden">
           <button
             onClick={() => setListOpen(true)}
             aria-label="Show conversations"
@@ -353,20 +375,34 @@ export default function ChatPage() {
         </div>
         <div className="scroll-touch flex-1 space-y-4 overflow-y-auto px-3 py-4 sm:px-6">
           {!activeConv ? (
-            <div className="flex h-full items-center justify-center text-center text-sm text-slate-400">
-              Start a new conversation to ask about your documents.
+            <div className="relative z-10 flex h-full items-center justify-center text-center">
+              <div>
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 dark:from-indigo-400/30 dark:to-purple-400/30">
+                  <MessagesSquare className="h-8 w-8 text-indigo-500 dark:text-indigo-400" />
+                </div>
+                <p className="dark:text-slate-300 text-sm font-medium text-slate-600">Start a new conversation</p>
+                <p className="dark:text-slate-500 mt-1 text-xs text-slate-400">Ask about your documents and get AI-powered answers</p>
+              </div>
             </div>
           ) : messages.length === 0 ? (
-            <div className="flex h-full items-center justify-center text-center text-sm text-slate-400">
-              Ask anything about the documents in this workspace.
+            <div className="relative z-10 flex h-full items-center justify-center text-center">
+              <div>
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 dark:from-indigo-400/30 dark:to-purple-400/30">
+                  <svg className="h-8 w-8 text-indigo-500 dark:text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                  </svg>
+                </div>
+                <p className="dark:text-slate-300 text-sm font-medium text-slate-600">Ask anything</p>
+                <p className="dark:text-slate-500 mt-1 text-xs text-slate-400">Get answers from your documents, powered by AI</p>
+              </div>
             </div>
           ) : (
             messages.map((m, i) => (
               <div key={i}>
                 <div
-                  className={`inline-block max-w-[92%] whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-sm sm:max-w-[85%] sm:px-4 ${
+                  className={`relative z-10 inline-block max-w-[92%] whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-sm sm:max-w-[85%] sm:px-4 ${
                     m.role === "user"
-                      ? "ml-auto block rounded-br-md bg-indigo-600 text-white" : "block rounded-bl-md border border-slate-200 bg-white"
+                      ? "ml-auto block rounded-br-md bg-indigo-600 text-white" : "dark:border-slate-700/50 dark:bg-[#242424] block rounded-bl-md border border-slate-200 bg-white"
                   }`}
                 >
                   {m.content}
@@ -382,7 +418,7 @@ export default function ChatPage() {
                         <button
                           key={ci}
                           onClick={() => setShowCitations(m.citations!)}
-                          className="flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:border-indigo-400 hover:text-indigo-700"
+                          className="dark:border-slate-600 dark:bg-[#2a2a2a] dark:text-slate-300 dark:hover:border-indigo-500 dark:hover:text-indigo-400 flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:border-indigo-400 hover:text-indigo-700"
                         >
                           <FileText className="h-3 w-3" />
                           {c.document_title}
@@ -478,10 +514,10 @@ export default function ChatPage() {
             value={input}
             onChange={setInput}
             onSend={(text, attachments) => void sendWithText(text, attachments)}
-            disabled={!activeConv}
+            disabled={false}
             busy={busy}
-            placeholder={activeConv ? "Ask a question…" : "Start a conversation first"}
-            showAttach={Boolean(activeConv)}
+            placeholder="Ask a question…"
+            showAttach={true}
           />
         </div>
       </div>

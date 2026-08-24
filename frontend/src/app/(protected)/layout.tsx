@@ -29,7 +29,7 @@ export default function ProtectedLayout({
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-slate-500">
+      <div className="dark:bg-[#121212] flex min-h-screen items-center justify-center text-slate-500">
         Loading…
       </div>
     );
@@ -40,14 +40,14 @@ export default function ProtectedLayout({
     <WorkspaceProvider>
       <TopNavbar onMenu={() => setDrawerOpen(true)} />
 
-      <div className="flex min-h-[100dvh] pt-14">
+      <div className="dark:bg-[#121212] flex min-h-[100dvh] pt-14 transition-colors">
         <Sidebar
           mobileOpen={drawerOpen}
           onCloseMobile={() => setDrawerOpen(false)}
           width={width}
           setWidth={setWidth}
         />
-        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-clip p-4 md:p-6">
+        <main className="dark:bg-[#121212] min-w-0 flex-1 overflow-y-auto overflow-x-clip p-4 transition-colors md:p-6">
           <WelcomeModal />
           <CommandPalette />
           {children}

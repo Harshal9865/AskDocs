@@ -269,6 +269,20 @@ export const api = {
     );
   },
 
+  uploadChatAttachments: async (convId: string, files: File[]) => {
+    const results: { filename: string; text_excerpt?: string }[] = [];
+    for (const file of files) {
+      try {
+        const uploaded = await api.uploadChatAttachment(file);
+        results.push({ filename: uploaded.filename });
+      } catch {
+        // If upload fails, just record the filename
+        results.push({ filename: file.name });
+      }
+    }
+    return results;
+  },
+
   // ---- hide / unhide ----
   hideConversation: (chatId: string) =>
     request<{ status: string }>(`/team-chats/${chatId}/hide`, { method: "DELETE" }),

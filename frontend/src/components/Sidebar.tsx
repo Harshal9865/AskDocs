@@ -175,7 +175,7 @@ export default function Sidebar({
       <aside
         ref={asideRef}
         style={{ width: collapsed ? 68 : `min(${width}px, 85vw)` }}
-        className={`sb-aside fixed left-0 top-14 bottom-0 z-40 flex shrink-0 flex-col border-r border-slate-200 bg-white md:sticky md:top-14 md:h-[calc(100dvh-3.5rem)] md:z-auto md:translate-x-0 md:overflow-visible ${
+        className={`dark:border-slate-700/50 dark:bg-[#1a1a2e] sb-aside fixed left-0 top-14 bottom-0 z-40 flex shrink-0 flex-col border-r border-slate-200 bg-white transition-colors md:sticky md:top-14 md:h-[calc(100dvh-3.5rem)] md:z-auto md:translate-x-0 md:overflow-visible ${
           mobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         } ${collapsed ? "sb-collapsed shadow-xl" : ""}`}
       >
@@ -191,7 +191,7 @@ export default function Sidebar({
           </svg>
         </button>
 
-        <div className="flex items-center justify-between border-b border-slate-100 p-4">
+        <div className="dark:border-slate-700/50 flex items-center justify-between border-b border-slate-100 p-4">
           <Link
             href="/dashboard"
             onClick={onCloseMobile}
@@ -212,7 +212,7 @@ export default function Sidebar({
             ✕
           </button>
         </div>
-        <div className="sb-hide shrink-0 border-b border-slate-100 p-4">
+        <div className="sb-hide dark:border-slate-700/50 shrink-0 border-b border-slate-100 p-4">
           <div className="mt-3 flex items-center gap-1.5">
           <select
             value={workspace?.id ?? ""}
@@ -220,7 +220,7 @@ export default function Sidebar({
               const ws = workspaces.find((w) => w.id === e.target.value);
               if (ws) select(ws);
             }}
-            className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm"
+            className="dark:border-slate-600 dark:bg-[#242424] dark:text-white min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm"
             aria-label="Active workspace"
           >
             {workspaces.length === 0 && <option value="">No workspace</option>}
@@ -256,7 +256,7 @@ export default function Sidebar({
           <button
             onClick={() => setCreating(true)}
             aria-label="New workspace"
-            className="mt-2 w-full rounded-lg border border-dashed border-slate-300 py-2.5 text-xs text-slate-600 hover:border-indigo-400 hover:text-indigo-700"
+            className="dark:border-slate-600 dark:text-slate-400 dark:hover:border-indigo-500 dark:hover:text-indigo-400 mt-2 w-full rounded-lg border border-dashed border-slate-300 py-2.5 text-xs text-slate-600 hover:border-indigo-400 hover:text-indigo-700"
           >
             + New workspace
           </button>
@@ -303,8 +303,8 @@ export default function Sidebar({
                 collapsed ? "justify-center px-0" : ""
               } ${
                 active
-                  ? "bg-white text-indigo-700 shadow-sm ring-1 ring-slate-900/5"
-                  : "text-slate-600 hover:bg-slate-900/5"
+                  ? "dark:bg-slate-800 dark:text-indigo-400 bg-white text-indigo-700 shadow-sm ring-1 ring-slate-900/5"
+                  : "dark:text-slate-400 dark:hover:bg-slate-800/50 text-slate-600 hover:bg-slate-900/5"
               }`}
             >
               <Icon
@@ -332,8 +332,8 @@ export default function Sidebar({
                 collapsed ? "justify-center px-0" : ""
               } ${
                 active
-                  ? "bg-white text-indigo-700 shadow-sm ring-1 ring-slate-900/5"
-                  : "text-slate-600 hover:bg-slate-900/5"
+                  ? "dark:bg-slate-800 dark:text-indigo-400 bg-white text-indigo-700 shadow-sm ring-1 ring-slate-900/5"
+                  : "dark:text-slate-400 dark:hover:bg-slate-800/50 text-slate-600 hover:bg-slate-900/5"
               }`}
             >
               <Icon
@@ -349,11 +349,11 @@ export default function Sidebar({
         </div>
       </nav>
 
-      <div className={`border-t border-slate-100 p-4 ${collapsed ? "px-2" : ""}`}>
+      <div className="dark:border-slate-700/50 border-t border-slate-100 p-4">
         <div className="flex items-center justify-between">
           <div className="min-w-0">
-            <div className="sb-label truncate text-sm font-medium">{user?.name}</div>
-            <div className="sb-label truncate text-xs text-slate-500">{user?.email}</div>
+            <div className="sb-label dark:text-slate-300 truncate text-sm font-medium">{user?.name}</div>
+            <div className="sb-label dark:text-slate-500 truncate text-xs text-slate-500">{user?.email}</div>
             <span
               title={`${user?.name} (${user?.email})`}
               className="sb-collapsed-show sb-center mx-auto h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold uppercase text-slate-700"
@@ -370,7 +370,7 @@ export default function Sidebar({
           }}
           aria-label="Sign out"
           title="Sign out"
-          className="mt-3 w-full rounded-lg border border-slate-300 py-2 text-xs text-slate-600 hover:bg-slate-50"
+          className="dark:border-slate-600 dark:text-slate-400 dark:hover:bg-slate-800 mt-3 w-full rounded-lg border border-slate-300 py-2 text-xs text-slate-600 hover:bg-slate-50"
         >
           <span className="sb-label">Sign out</span>
           <span className="sb-collapsed-show sb-center">
