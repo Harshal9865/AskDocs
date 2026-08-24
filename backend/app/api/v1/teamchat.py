@@ -515,6 +515,19 @@ async def unhide_conversation(conversation_id: uuid.UUID, db: DbSession, user: C
 async def delete_team_chat(conversation_id: uuid.UUID, db: DbSession, user: CurrentUser):
     """Delete/leave a chat for the requesting user only — other participants unaffected."""
     conv = await _get_team_conversation_checked(db, conversation_id, user)
+    # Clean up this user's hidden/read state regardless of chat type
+    await db.execute(
+        delete(ConversationHidden).where(
+            ConversationHidden.conversation_id == conv.id,
+            ConversationHidden.user_id == user.id,
+        )
+    )
+    await db.execute(
+        delete(ConversationReadState).where(
+            ConversationReadState.conversation_id == conv.id,
+            ConversationReadState.user_id == user.id,
+        )
+    )
     if conv.type == "group":
         # Leave group: remove this user's participant row
         await db.execute(
@@ -523,38 +536,51 @@ async def delete_team_chat(conversation_id: uuid.UUID, db: DbSession, user: Curr
                 ConversationParticipant.user_id == user.id,
             )
         )
-        # Also clean up hidden/read state for this user
-        await db.execute(
-            delete(ConversationHidden).where(
-                ConversationHidden.conversation_id == conv.id,
-                ConversationHidden.user_id == user.id,
-            )
-        )
-        await db.execute(
-            delete(ConversationReadState).where(
-                ConversationReadState.conversation_id == conv.id,
-                ConversationReadState.user_id == user.id,
-            )
-        )
         # If no participants remain, delete the conversation entirely
         remaining = await db.execute(
-            select(ConversationParticipant).where(
+            select(ConversationParticipant.id).where(
                 ConversationParticipant.conversation_id == conv.id
-            )
+            ).limit(1)
         )
-        if remaining.scalar_one_or_none() is None:
+        if remaining.first() is None:
+            # Delete children first (FKs have no ON DELETE CASCADE)
+            await db.execute(
+                delete(MessageAttachment).where(
+                    MessageAttachment.message_id.in_(
+                        select(Message.id).where(Message.conversation_id == conv.id)
+                    )
+                )
+            )
+            await db.execute(
+                delete(Message).where(Message.conversation_id == conv.id)
+            )
+            await db.execute(
+                delete(ConversationParticipant).where(
+                    ConversationParticipant.conversation_id == conv.id
+                )
+            )
+            await db.execute(
+                delete(ConversationHidden).where(
+                    ConversationHidden.conversation_id == conv.id
+                )
+            )
+            await db.execute(
+                delete(ConversationReadState).where(
+                    ConversationReadState.conversation_id == conv.id
+                )
+            )
             await db.delete(conv)
         await db.commit()
         return {"status": "deleted"}
     else:
         # Direct: per-user hide (soft delete) — other participant still sees it
         existing = await db.execute(
-            select(ConversationHidden).where(
+            select(ConversationHidden.id).where(
                 ConversationHidden.conversation_id == conv.id,
                 ConversationHidden.user_id == user.id,
-            )
+            ).limit(1)
         )
-        if existing.scalar_one_or_none() is None:
+        if existing.first() is None:
             db.add(ConversationHidden(conversation_id=conv.id, user_id=user.id))
             await db.commit()
         return {"status": "deleted"}
