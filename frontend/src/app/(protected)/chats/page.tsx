@@ -343,14 +343,14 @@ export default function ChatsPage() {
               <div ref={threadEnd} />
             </div>
 
-            <form onSubmit={send} className="border-t border-slate-200 p-3 pb-safe sm:p-4">
+<form onSubmit={send} className="border-t border-slate-200 p-3 pb-safe sm:p-4">
               <div className="flex gap-2">
                 <input
                   id="team-chat-input"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Write a message…"
-                  className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:px-4"
+                  className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 sm:px-4 text-sm outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:px-4"
                 />
                 <button
                   type="submit"

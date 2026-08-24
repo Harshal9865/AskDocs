@@ -487,7 +487,7 @@ export default function ChatPage() {
             <button
               type="submit"
               disabled={!activeConv || busy || !input.trim()}
-              className="rounded-lg bg-indigo-600 px-5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-40"
+              className="shrink-0 rounded-lg bg-indigo-600 px-5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-40"
             >
               {busy ? "…" : "Send"}
             </button>
