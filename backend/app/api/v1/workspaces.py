@@ -184,7 +184,7 @@ async def upload_brand_photo(
     ext = {".png": ".png"}.get("", "")
     ext = ".png" if file.content_type == "image/png" else ".jpg" if file.content_type == "image/jpeg" else ".webp"
     storage = DbStorage()
-    key = storage.save(f"brands/{membership.workspace_id}", f"logo{ext}", data)
+    key = await storage.save(f"brands/{membership.workspace_id}", f"logo{ext}", data)
 
     ws = await db.get(Workspace, membership.workspace_id)
     ws.brand_kind = "upload"

@@ -34,6 +34,23 @@ async def startup():
     await start_slack_bot()
 
 
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request, exc: Exception):
+    """Return CORS-headed JSON on unhandled errors instead of a bare 500,
+    so the browser surfaces the real status code rather than a CORS error."""
+    import logging
+    import traceback
+
+    logging.error("Unhandled error on %s: %s\n%s", request.url.path, exc, traceback.format_exc())
+    from fastapi.responses import JSONResponse
+
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error"},
+        headers={"Access-Control-Allow-Origin": "*"},
+    )
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}

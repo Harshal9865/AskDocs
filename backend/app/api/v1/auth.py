@@ -122,7 +122,7 @@ async def upload_avatar_photo(
 
     ext = ".png" if file.content_type == "image/png" else ".jpg" if file.content_type == "image/jpeg" else ".webp"
     storage = DbStorage()
-    key = storage.save(f"avatars/{user.id}", f"photo{ext}", data)
+    key = await storage.save(f"avatars/{user.id}", f"photo{ext}", data)
 
     user.avatar_kind = "upload"
     user.avatar_value = key
