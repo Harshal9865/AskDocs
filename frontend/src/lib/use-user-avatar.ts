@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 
+// Module-level cache to prevent repeated 404 fetches that flood console
+const failedAvatarIds = new Set<string>();
+const avatarCache = new Map<string, string>(); // userId -> objectUrl
+
 /**
  * Resolves another user's avatar display info.
  * Returns { src, stickerId } — src is an object URL for uploads,
@@ -20,6 +24,15 @@ export function useUserAvatar(
       setSrc(null);
       return;
     }
+    // Serve from cache if we already fetched this user
+    if (avatarCache.has(userId)) {
+      setSrc(avatarCache.get(userId) ?? null);
+      return;
+    }
+    if (failedAvatarIds.has(userId)) {
+      setSrc(null);
+      return;
+    }
     let cancelled = false;
     let objectUrl: string | null = null;
     api
@@ -27,15 +40,21 @@ export function useUserAvatar(
       .then((blob) => {
         if (!cancelled) {
           objectUrl = URL.createObjectURL(blob);
+          avatarCache.set(userId, objectUrl);
           setSrc(objectUrl);
         }
       })
       .catch(() => {
-        if (!cancelled) setSrc(null);
+        if (!cancelled) {
+          failedAvatarIds.add(userId);
+          setSrc(null);
+        }
       });
     return () => {
       cancelled = true;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      // Don't revoke cached URLs on unmount — keep them for reuse
+      // Only revoke the temporary one if it wasn't cached
+      if (objectUrl && !avatarCache.has(userId)) URL.revokeObjectURL(objectUrl);
     };
   }, [userId, avatarKind, avatarValue]);
 
