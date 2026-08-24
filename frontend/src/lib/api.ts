@@ -66,6 +66,12 @@ async function request<T>(
   path: string,
   init: RequestInit & { retry?: boolean } = {},
 ): Promise<T> {
+  // If we only have a refresh token (page just loaded), silently refresh first
+  // so uploads/posts never fire with an empty access token.
+  if (!init.retry && tokens && !tokens.access && tokens.refresh) {
+    await refreshTokens();
+  }
+
   const headers = new Headers(init.headers);
   if (tokens?.access) headers.set("Authorization", `Bearer ${tokens.access}`);
   if (init.body && !(init.body instanceof FormData)) {
