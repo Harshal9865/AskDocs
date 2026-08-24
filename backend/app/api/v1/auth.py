@@ -157,6 +157,7 @@ async def get_user_avatar(user_id: uuid.UUID, db: DbSession, user: CurrentUser):
     """Serve another user's uploaded profile photo (workspace members only)."""
     import mimetypes
 
+    from app.models.file import FileBlob
     from app.models.workspace import WorkspaceMember
     from fastapi.responses import Response
 
