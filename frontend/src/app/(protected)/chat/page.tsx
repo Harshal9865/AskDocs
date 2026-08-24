@@ -8,6 +8,7 @@ import { useWorkspace } from "@/lib/workspace-context";
 import ChatComposer from "@/components/ChatComposer";
 import type { Citation, Conversation, Message } from "@/lib/types";
 import {
+  ArrowDownCircle,
   ArrowLeft,
   FileText,
   MessagesSquare,
@@ -172,6 +173,8 @@ export default function ChatPage() {
 
   const [askedIdx, setAskedIdx] = useState<number | null>(null);
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
+  const [showJump, setShowJump] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   async function askColleague(colleague: SuggestedColleague, question: string, idx: number) {
     if (!workspace) return;
@@ -300,7 +303,7 @@ export default function ChatPage() {
     <div className="relative mx-auto flex h-[var(--chat-h)] max-w-5xl flex-col gap-0 overflow-hidden md:flex-row md:gap-4 md:overflow-visible">
       {/* ============ CONVERSATION LIST (full-screen mobile, card desktop) ============ */}
       <div
-        className={`gemini-gradient-bg sb-scroll absolute inset-0 z-20 flex-col overflow-y-auto rounded-none bg-white p-3 md:relative md:inset-auto md:z-auto md:flex md:w-64 md:translate-x-0 md:rounded-xl md:border md:border-slate-200 md:shadow-sm dark:bg-[#0b0f14] md:dark:border-white/10 ${
+        className={`gemini-gradient-bg sb-scroll absolute inset-0 z-20 flex-col overflow-y-auto rounded-none bg-white p-3 md:relative md:inset-auto md:z-auto md:flex md:w-64 md:translate-x-0 md:rounded-xl md:border md:border-indigo-200/60 md:shadow-sm dark:bg-[#0d0d1f] md:dark:border-[rgba(129,140,248,0.16)] ${
           activeConv ? "hidden" : "flex"
         }`}
       >
@@ -312,15 +315,15 @@ export default function ChatPage() {
           <button
             onClick={() => void newConversation()}
             aria-label="New conversation"
-            className="rounded-full bg-[#1DB954] px-3.5 py-1.5 text-xs font-bold text-black transition-colors hover:bg-[#1ed760]"
+            className="rounded-full bg-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-indigo-500"
           >
             + New
           </button>
         </div>
         {conversations.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center py-16 text-center">
-            <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5">
-              <MessagesSquare className="h-8 w-8 text-slate-300 dark:text-zinc-600" />
+            <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-500/10">
+              <MessagesSquare className="h-8 w-8 text-indigo-300 dark:text-indigo-500/60" />
             </div>
             <p className="text-sm font-medium text-slate-600 dark:text-zinc-300">No conversations yet</p>
             <p className="mt-1 text-xs text-slate-400 dark:text-zinc-500">
@@ -333,8 +336,8 @@ export default function ChatPage() {
               <li key={c.id} className="group flex items-center">
                 <button
                   onClick={() => void openConversation(c)}
-                  className={`wa-row min-w-0 flex-1 rounded-lg px-3 py-3 text-left ${
-                    activeConv?.id === c.id ? "wa-row-active" : ""
+                  className={`min-w-0 flex-1 rounded-lg px-3 py-3 text-left transition-colors hover:bg-indigo-50 dark:hover:bg-indigo-500/10 ${
+                    activeConv?.id === c.id ? "ai-row-active" : ""
                   }`}
                   title={c.title}
                 >
@@ -364,7 +367,7 @@ export default function ChatPage() {
 
       {/* thread */}
       <div
-        className={`gemini-gradient-bg relative min-h-0 min-w-0 flex-1 flex-col rounded-none border-0 bg-white md:flex md:rounded-xl md:border md:border-slate-200 md:shadow-sm dark:bg-[#181818] ${
+        className={`gemini-gradient-bg relative min-h-0 min-w-0 flex-1 flex-col rounded-none border-0 bg-white md:flex md:rounded-xl md:border md:border-indigo-200/60 md:shadow-sm dark:bg-[#13132b] md:dark:border-[rgba(129,140,248,0.16)] ${
           activeConv ? "flex" : "hidden"
         }`}
       >
@@ -394,7 +397,14 @@ export default function ChatPage() {
             <div className="truncate text-[11px] text-[#1DB954]">AI · answers from your documents</div>
           </div>
         </div>
-        <div className="scroll-touch wa-thread relative z-10 flex-1 space-y-3 overflow-y-auto px-3 py-4 sm:px-6">
+        <div
+          ref={scrollRef}
+          onScroll={(e) => {
+            const el = e.currentTarget;
+            setShowJump(el.scrollHeight - el.scrollTop - el.clientHeight > 300);
+          }}
+          className="scroll-touch ai-thread relative z-10 flex-1 space-y-3 overflow-y-auto px-3 py-4 sm:px-6"
+        >
           {!activeConv ? (
             <div className="relative z-10 flex h-full items-center justify-center text-center">
               <div>
@@ -429,8 +439,8 @@ export default function ChatPage() {
                   <div
                     className={`relative z-10 inline-block max-w-full whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-sm ${
                       m.role === "user"
-                        ? "wa-bubble-mine ml-auto block rounded-br-md"
-                        : "wa-bubble-theirs block rounded-bl-md"
+                        ? "ai-bubble-mine ml-auto block rounded-br-md"
+                        : "ai-bubble-theirs block rounded-bl-md"
                     }`}
                   >
                     {m.content}
@@ -446,7 +456,7 @@ export default function ChatPage() {
                         <button
                           key={ci}
                           onClick={() => setShowCitations(m.citations!)}
-                          className="dark:border-slate-600 dark:bg-[#2a2a2a] dark:text-slate-300 dark:hover:border-indigo-500 dark:hover:text-indigo-400 flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:border-indigo-400 hover:text-indigo-700"
+                          className="dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-300 dark:hover:border-indigo-400 dark:hover:text-indigo-200 flex items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:border-indigo-400 hover:text-indigo-700"
                         >
                           <FileText className="h-3 w-3" />
                           {c.document_title}
@@ -536,8 +546,19 @@ export default function ChatPage() {
           <div ref={threadEnd} />
         </div>
 
-        {/* composer — lifted from bottom border, compact height */}
-        <div className="border-t border-slate-100/60 px-3 pb-4 pt-3 dark:border-white/5 sm:px-4 sm:pb-5 sm:pt-3">
+        {/* jump to bottom */}
+        {showJump && (
+          <button
+            onClick={() => threadEnd.current?.scrollIntoView({ behavior: "smooth" })}
+            aria-label="Jump to latest"
+            className="absolute bottom-28 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-indigo-200/60 bg-white text-indigo-600 shadow-lg transition-transform hover:scale-105 dark:border-indigo-500/30 dark:bg-[#23233d] dark:text-indigo-300 md:bottom-32"
+          >
+            <ArrowDownCircle className="h-5 w-5" />
+          </button>
+        )}
+
+        {/* composer — aurora glow, lifted from bottom border */}
+        <div className="relative z-10 border-t border-indigo-100/60 px-3 pb-4 pt-3 dark:border-indigo-500/10 sm:px-4 sm:pb-5 sm:pt-3">
           <ChatComposer
             inputId="chat-input"
             value={input}
@@ -547,6 +568,7 @@ export default function ChatPage() {
             busy={busy}
             placeholder="Ask a question…"
             showAttach={true}
+            variant="aurora"
           />
         </div>
       </div>

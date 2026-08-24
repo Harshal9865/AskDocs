@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, LayoutDashboard, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText } from "lucide-react";
+import { ChevronDown, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -18,6 +18,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
   const { workspace } = useWorkspace();
   const [q, setQ] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [brandSrc, setBrandSrc] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const { dark, toggle } = useTheme();
@@ -94,7 +95,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         </span>
       </button>
 
-      {/* desktop nav — fills the empty middle */}
+      {/* desktop nav — fills the empty middle (collapses to More sheet <lg) */}
       <nav className="hidden items-center gap-1 lg:flex">
         {[
           { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
@@ -119,12 +120,70 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           );
         })}
         {workspace && (
-          <span className="ml-2 hidden items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 xl:flex">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            {workspace.name}
+          <span
+            title={`Workspace: ${workspace.name}`}
+            className="ml-2 flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300"
+          >
+            <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+            <span className="hidden max-w-[120px] truncate xl:inline">{workspace.name}</span>
+            <span className="xl:hidden">{(workspace.name || "?").slice(0, 1).toUpperCase()}</span>
           </span>
         )}
       </nav>
+
+      {/* compact More menu — same links, never disappears */}
+      <div className="relative lg:hidden">
+        <button
+          onClick={() => setMoreOpen((o) => !o)}
+          aria-label="More pages"
+          aria-expanded={moreOpen}
+          className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
+            moreOpen
+              ? "bg-slate-900 text-white dark:bg-white dark:text-black"
+              : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
+          }`}
+        >
+          <MoreHorizontal className="h-5 w-5" />
+        </button>
+        {moreOpen && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setMoreOpen(false)} />
+            <div className="dark:border-white/10 dark:bg-[#242424] absolute left-0 z-50 mt-2 w-48 rounded-xl border border-slate-200 bg-white p-1 shadow-xl">
+              {[
+                { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
+                { href: "/chat", label: "AI Chat", Icon: Sparkles },
+                { href: "/chats", label: "Office Chats", Icon: MessagesSquare },
+                { href: "/documents", label: "Documents", Icon: FileText },
+              ].map(({ href, label, Icon }) => {
+                const active = pathname === href || pathname.startsWith(href + "/");
+                return (
+                  <button
+                    key={href}
+                    onClick={() => {
+                      setMoreOpen(false);
+                      router.push(href);
+                    }}
+                    className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors ${
+                      active
+                        ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300"
+                        : "text-slate-700 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {label}
+                  </button>
+                );
+              })}
+              {workspace && (
+                <div className="dark:border-white/10 mt-1 flex items-center gap-2 border-t border-slate-100 px-3 pb-1.5 pt-2 text-xs text-slate-500 dark:text-zinc-400">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                  <span className="truncate">{workspace.name}</span>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
 
       {/* global search */}
       <form

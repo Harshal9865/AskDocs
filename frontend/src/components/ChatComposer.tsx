@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, FileText, ImageIcon, Paperclip, Plus, X } from "lucide-react";
+import { ArrowUp, FileText, ImageIcon, Paperclip, Plus, Smile, X } from "lucide-react";
 
 export interface AttachedFile {
   file: File;
   previewUrl?: string; // for images
 }
+
+const EMOJIS = ["😀", "😂", "🥹", "😍", "🤔", "👍", "🙏", "🔥", "❤️", "🎉", "😅", "😮", "😢", "😡", "👏", "💯", "🚀", "✅", "❌", "⚡", "🌟", "💡", "📎", "☕"];
 
 export default function ChatComposer({
   value,
@@ -18,6 +20,7 @@ export default function ChatComposer({
   busy,
   showAttach = false,
   inputId,
+  variant = "default",
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -28,14 +31,18 @@ export default function ChatComposer({
   busy?: boolean;
   showAttach?: boolean;
   inputId?: string;
+  variant?: "default" | "aurora" | "green";
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const emojiRef = useRef<HTMLDivElement>(null);
   const [attachments, setAttachments] = useState<AttachedFile[]>([]);
   const [dragOver, setDragOver] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [emojiOpen, setEmojiOpen] = useState(false);
+  const aurora = variant === "aurora" || variant === "green";
 
   // auto-grow textarea
   useEffect(() => {
@@ -45,14 +52,18 @@ export default function ChatComposer({
     el.style.height = Math.min(el.scrollHeight, 120) + "px";
   }, [value]);
 
-  // close menu on outside click / Escape
+  // close menu / emoji picker on outside click / Escape
   useEffect(() => {
-    if (!menuOpen) return;
+    if (!menuOpen && !emojiOpen) return;
     const onClick = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+      if (emojiRef.current && !emojiRef.current.contains(e.target as Node)) setEmojiOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMenuOpen(false);
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+        setEmojiOpen(false);
+      }
     };
     window.addEventListener("mousedown", onClick);
     window.addEventListener("keydown", onKey);
@@ -60,7 +71,13 @@ export default function ChatComposer({
       window.removeEventListener("mousedown", onClick);
       window.removeEventListener("keydown", onKey);
     };
-  }, [menuOpen]);
+  }, [menuOpen, emojiOpen]);
+
+  function insertEmoji(emo: string) {
+    onChange(value + emo);
+    setEmojiOpen(false);
+    textareaRef.current?.focus();
+  }
 
   function send() {
     const text = value.trim();
@@ -120,12 +137,19 @@ export default function ChatComposer({
         setDragOver(false);
         handleFiles(e.dataTransfer.files);
       }}
-      className={`dark:border-white/10 dark:bg-[#242424] relative rounded-2xl border bg-white shadow-sm transition-all ${
-        dragOver
-          ? "border-[#1DB954] ring-2 ring-[#1DB954]/20 dark:border-[#1DB954]"
-          : "border-slate-200 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 dark:focus-within:border-[#1DB954] dark:focus-within:ring-[#1DB954]/20"
-      }`}
+      className={
+        aurora
+          ? `aurora-frame rounded-2xl ${variant === "green" ? "aurora-frame--green" : ""}`
+          : `dark:border-white/10 dark:bg-[#242424] relative rounded-2xl border bg-white shadow-sm transition-all ${
+              dragOver
+                ? "border-[#1DB954] ring-2 ring-[#1DB954]/20 dark:border-[#1DB954]"
+                : "border-slate-200 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 dark:focus-within:border-[#1DB954] dark:focus-within:ring-[#1DB954]/20"
+            }`
+      }
     >
+      <div
+        className={`aurora-card bg-white dark:bg-[#0d0d1a] ${aurora ? "shadow-sm" : ""}`}
+      >
       {/* attachment previews */}
       {attachments.length > 0 && (
         <div className="flex flex-wrap gap-2 px-3 pt-3">
@@ -241,6 +265,34 @@ export default function ChatComposer({
           </div>
         )}
 
+        {/* emoji picker */}
+        <div className="relative shrink-0" ref={emojiRef}>
+          <button
+            onClick={() => !disabled && setEmojiOpen((o) => !o)}
+            disabled={disabled}
+            aria-label="Emoji"
+            title="Emoji"
+            className="dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-amber-300 flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-amber-500 disabled:opacity-40"
+          >
+            <Smile className="h-5 w-5" />
+          </button>
+          {emojiOpen && (
+            <div className="dark:border-white/10 dark:bg-[#282828] absolute bottom-full left-0 z-50 mb-2 w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
+              <div className="grid grid-cols-8 gap-1">
+                {EMOJIS.map((emo) => (
+                  <button
+                    key={emo}
+                    onClick={() => insertEmoji(emo)}
+                    className="rounded-lg p-1 text-lg transition-transform hover:scale-125 hover:bg-slate-100 dark:hover:bg-white/10"
+                  >
+                    {emo}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         <textarea
           ref={textareaRef}
           rows={1}
@@ -259,7 +311,9 @@ export default function ChatComposer({
           aria-label="Send message"
           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all ${
             canSend
-              ? "bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 dark:bg-[#1DB954] dark:text-black dark:hover:bg-[#1ed760]"
+              ? variant === "green"
+                ? "bg-[#1DB954] text-black shadow-sm hover:bg-[#1ed760]"
+                : "bg-indigo-600 text-white shadow-sm hover:bg-indigo-700"
               : "bg-slate-200 text-slate-400 dark:bg-white/10 dark:text-zinc-500"
           } disabled:opacity-40`}
         >
@@ -269,6 +323,7 @@ export default function ChatComposer({
             <ArrowUp className="h-4 w-4" />
           )}
         </button>
+      </div>
       </div>
     </div>
   );

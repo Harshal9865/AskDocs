@@ -153,12 +153,17 @@ body {
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(255, 255, 255, 0.1);
   --sidebar-ring: #1DB954;
-  /* Chat surfaces (WhatsApp-on-Spotify) */
-  --chat-shell: #0b0f14;
+  /* Chat surfaces — Office = WhatsApp-green, AI = Indigo */
+  --chat-shell: #070b0e;
   --chat-thread: #0b141a;
   --chat-bubble-mine: #005c4b;
   --chat-bubble-theirs: #202c33;
   --chat-list-hover: #202c33;
+  --ai-shell: #0d0d1f;
+  --ai-thread: #13132b;
+  --ai-bubble-mine: #4f46e5;
+  --ai-bubble-theirs: #23233d;
+  --ai-border: rgba(129, 140, 248, 0.16);
 }
 
 @layer base {
@@ -376,9 +381,9 @@ button.bg-indigo-600:hover {
   background-color: #1ed760 !important;
   box-shadow: 0 6px 16px rgba(29, 185, 84, 0.45);
 }
-/* Cards / surfaces in dark */
+/* Cards / surfaces in dark — deeper Spotify */
 .dark .bg-white {
-  background-color: #181818;
+  background-color: #121212;
 }
 .dark .border-slate-200 {
   border-color: rgba(255, 255, 255, 0.08);
@@ -430,11 +435,155 @@ button.bg-indigo-600:hover {
   background: #2a3942;
 }
 
-/* Mobile: WhatsApp-flat — no gradient orbs on phones */
+/* ---------- AI Chat theme (indigo identity) ---------- */
+.ai-thread {
+  background: #ffffff;
+}
+.dark .ai-thread {
+  background: var(--ai-thread);
+}
+.ai-bubble-mine {
+  background: #eef2ff;
+  color: #1e1b4b;
+}
+.dark .ai-bubble-mine {
+  background: var(--ai-bubble-mine);
+  color: #ffffff;
+}
+.ai-bubble-theirs {
+  background: #ffffff;
+  color: #1e1b4b;
+  border: 1px solid rgba(99, 102, 241, 0.18);
+}
+.dark .ai-bubble-theirs {
+  background: var(--ai-bubble-theirs);
+  color: #e0e7ff;
+  border-color: var(--ai-border);
+}
+.ai-row-active {
+  background: #eef2ff;
+}
+.dark .ai-row-active {
+  background: rgba(99, 102, 241, 0.15);
+}
+
+/* ---------- Aurora glow composer ---------- */
+@property --aurora-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes aurora-spin {
+  to {
+    --aurora-angle: 360deg;
+  }
+}
+.aurora-frame {
+  position: relative;
+  border-radius: 1rem;
+  isolation: isolate;
+}
+.aurora-frame::before,
+.aurora-frame::after {
+  content: "";
+  position: absolute;
+  border-radius: 1.3rem;
+  background: conic-gradient(
+    from var(--aurora-angle),
+    #6366f1,
+    #a855f7,
+    #ec4899,
+    #22d3ee,
+    #fbbf24,
+    #6366f1
+  );
+  animation: aurora-spin 7s linear infinite;
+  pointer-events: none;
+}
+.aurora-frame::before {
+  inset: -10%;
+  z-index: 0;
+  filter: blur(16px);
+  opacity: 0.4;
+}
+.aurora-frame::after {
+  inset: -3%;
+  z-index: 0;
+  filter: blur(30px);
+  opacity: 0.25;
+}
+.dark .aurora-frame::before {
+  opacity: 0.6;
+}
+.dark .aurora-frame::after {
+  opacity: 0.4;
+}
+.aurora-frame:focus-within::before {
+  opacity: 0.8;
+}
+.aurora-frame:focus-within::after {
+  opacity: 0.55;
+}
+/* Green variant for office chats */
+.aurora-frame--green::before,
+.aurora-frame--green::after {
+  background: conic-gradient(
+    from var(--aurora-angle),
+    #1db954,
+    #22d3ee,
+    #34d399,
+    #fbbf24,
+    #1db954
+  );
+}
+.aurora-card {
+  position: relative;
+  z-index: 1;
+  border-radius: calc(1rem - 1.5px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .aurora-frame::before,
+  .aurora-frame::after {
+    animation: none;
+  }
+}
+
+/* ---------- Instagram heart pop ---------- */
+@keyframes heart-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1.25);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1.1);
+    opacity: 0;
+  }
+}
+.heart-pop {
+  animation: heart-pop 0.7s ease-out forwards;
+}
+
+/* Mobile: flat shells, keep one subtle orb for life */
 @media (max-width: 767px) {
-  .gemini-gradient-bg::before,
-  .gemini-orb {
+  .gemini-gradient-bg::before {
     display: none;
+  }
+  .gemini-orb {
+    filter: blur(55px);
+  }
+  .gemini-orb-2,
+  .gemini-orb-3 {
+    display: none;
+  }
+  .gemini-orb-1 {
+    opacity: 0.5;
   }
   .gemini-gradient-bg {
     background: #ffffff;

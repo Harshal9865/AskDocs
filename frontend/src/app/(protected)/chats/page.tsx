@@ -8,6 +8,7 @@ import ChatComposer from "@/components/ChatComposer";
 import { useUserAvatar } from "@/lib/use-user-avatar";
 import Avatar from "@/components/Avatar";
 import {
+  ArrowDownCircle,
   ArrowLeft,
   Check,
   CheckCheck,
@@ -79,24 +80,13 @@ function ChatAvatar({
 }
 
 function GroupAvatar({ chat, size = 40 }: { chat: TeamChat; size?: number }) {
-  const others = chat.participants.slice(0, 3);
+  // WhatsApp-style: single rounded-square tile with group glyph
   return (
-    <span className="relative inline-block shrink-0" style={{ width: size, height: size }}>
-      {others.map((p, i) => (
-        <span
-          key={p.user_id}
-          className="absolute rounded-full ring-2 ring-white dark:ring-[#111b21]"
-          style={{
-            width: size * 0.62,
-            height: size * 0.62,
-            top: i === 0 ? 0 : i === 1 ? 0 : size * 0.38,
-            left: i === 0 ? 0 : i === 1 ? size * 0.38 : size * 0.19,
-            zIndex: 3 - i,
-          }}
-        >
-          <ChatAvatar user={p} size={size * 0.62} />
-        </span>
-      ))}
+    <span
+      className="flex shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400/30 to-emerald-700/40 text-emerald-600 ring-1 ring-emerald-500/20 dark:from-emerald-500/20 dark:to-emerald-900/50 dark:text-emerald-400 dark:ring-emerald-400/20"
+      style={{ width: size, height: size }}
+    >
+      <UsersRound style={{ width: size * 0.5, height: size * 0.5 }} />
     </span>
   );
 }
@@ -153,6 +143,14 @@ function fmtTime(iso: string | null): string {
   return d.toLocaleDateString([], { day: "2-digit", month: "short" });
 }
 
+function dayLabel(d: Date): string {
+  const today = new Date();
+  const yesterday = new Date(Date.now() - 86400000);
+  if (d.toDateString() === today.toDateString()) return "TODAY";
+  if (d.toDateString() === yesterday.toDateString()) return "YESTERDAY";
+  return d.toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" });
+}
+
 export default function ChatsPage() {
   const { workspace } = useWorkspace();
   const { user } = useAuth();
@@ -166,6 +164,9 @@ export default function ChatsPage() {
   const [groupTitle, setGroupTitle] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [filter, setFilter] = useState<ChipFilter>("all");
+  const [showJump, setShowJump] = useState(false);
+  const [heart, setHeart] = useState<{ id: string; k: number } | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const threadEnd = useRef<HTMLDivElement>(null);
 
   const loadChats = useCallback(async () => {
@@ -486,7 +487,11 @@ export default function ChatsPage() {
                         )}
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center justify-between gap-2">
-                            <span className="truncate text-sm font-semibold text-slate-900 dark:text-white">
+                            <span
+                              className={`truncate text-slate-900 dark:text-white ${
+                                chat.unread_count > 0 ? "text-sm font-bold" : "text-sm font-semibold opacity-90"
+                              }`}
+                            >
                               {chatTitle(chat, user?.email)}
                             </span>
                             <span className="shrink-0 text-[11px] text-slate-400 dark:text-zinc-500">
@@ -602,7 +607,14 @@ export default function ChatsPage() {
             </div>
 
             {/* messages */}
-            <div className="scroll-touch wa-thread relative z-10 flex-1 space-y-1.5 overflow-y-auto px-3 py-4 sm:px-6">
+            <div
+              ref={scrollRef}
+              onScroll={(e) => {
+                const el = e.currentTarget;
+                setShowJump(el.scrollHeight - el.scrollTop - el.clientHeight > 300);
+              }}
+              className="scroll-touch wa-thread relative z-10 flex-1 space-y-1.5 overflow-y-auto px-3 py-4 sm:px-6"
+            >
               {messages.length === 0 ? (
                 <div className="flex h-full flex-col items-center justify-center text-center">
                   <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5">
@@ -611,76 +623,114 @@ export default function ChatsPage() {
                   <p className="text-sm text-slate-400 dark:text-zinc-500">No messages yet — say hello!</p>
                 </div>
               ) : (
-                messages.map((msg) => {
+                messages.map((msg, i) => {
                   const mine = msg.sender_id === user?.id;
                   const sender = activeChat.participants.find(
                     (p) => p.user_id === msg.sender_id,
                   );
+                  const prev = i > 0 ? messages[i - 1] : null;
+                  const showDay =
+                    !prev ||
+                    new Date(prev.created_at).toDateString() !==
+                      new Date(msg.created_at).toDateString();
                   return (
-                    <div
-                      key={msg.id}
-                      className={`group/msg flex items-end gap-1.5 ${mine ? "justify-end" : ""}`}
-                    >
-                      {mine && (
-                        <button
-                          onClick={() => void deleteMessage(msg.id)}
-                          title="Delete message"
-                          className="rounded-full p-1 text-slate-400 opacity-60 hover:bg-red-50 hover:text-red-600 dark:text-zinc-500 dark:hover:bg-red-900/20 md:opacity-0 md:group-hover/msg:opacity-100"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      )}
-                      {!mine && activeChat.type === "group" && sender && (
-                        <ChatAvatar user={sender} size={26} />
-                      )}
-                      <div className={`min-w-0 max-w-[80%] ${mine ? "text-right" : ""}`}>
-                        {!mine && activeChat.type === "group" && (
-                          <div className="mb-0.5 pl-1 text-[11px] font-medium text-[#1DB954]">
-                            {senderName(msg.sender_id)}
-                          </div>
-                        )}
-                        <div
-                          className={`inline-block max-w-full whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm ${
-                            mine
-                              ? "wa-bubble-mine rounded-br-md"
-                              : "wa-bubble-theirs rounded-bl-md"
-                          }`}
-                        >
-                          {msg.content}
-                          {msg.attachments?.length > 0 && (
-                            <div className="mt-1">
-                              {msg.attachments.map((att) => (
-                                <AttachmentThumbnail key={att.id} att={att} />
-                              ))}
-                            </div>
-                          )}
-                          <span
-                            className={`mt-0.5 flex items-center justify-end gap-1 text-[10px] ${
-                              mine ? "text-black/45 dark:text-white/50" : "text-slate-400 dark:text-zinc-500"
-                            }`}
-                          >
-                            {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                            {mine && (
-                              <ReadTicks
-                                readBy={msg.read_by ?? []}
-                                myId={user?.id ?? ""}
-                                participantCount={activeChat.participants.length}
-                              />
-                            )}
+                    <div key={msg.id}>
+                      {showDay && (
+                        <div className="my-3 flex justify-center">
+                          <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:bg-white/5 dark:text-zinc-400">
+                            {dayLabel(new Date(msg.created_at))}
                           </span>
                         </div>
-                      </div>
-                      {!mine && activeChat.type === "direct" && sender && (
-                        <span title={sender.name} className="hidden sm:block">
-                          <ChatAvatar user={sender} size={26} />
-                        </span>
                       )}
+                      <div
+                        className={`group/msg flex items-end gap-1.5 ${mine ? "justify-end" : ""}`}
+                      >
+                        {mine && (
+                          <button
+                            onClick={() => void deleteMessage(msg.id)}
+                            title="Delete message"
+                            className="rounded-full p-1 text-slate-400 opacity-60 hover:bg-red-50 hover:text-red-600 dark:text-zinc-500 dark:hover:bg-red-900/20 md:opacity-0 md:group-hover/msg:opacity-100"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                        {!mine && activeChat.type === "group" && sender && (
+                          <ChatAvatar user={sender} size={26} />
+                        )}
+                        <div
+                          className={`relative min-w-0 max-w-[80%] ${mine ? "text-right" : ""}`}
+                          onDoubleClick={() => {
+                            setHeart({ id: msg.id, k: Date.now() });
+                            setTimeout(() => setHeart(null), 750);
+                          }}
+                        >
+                          {heart?.id === msg.id && (
+                            <span
+                              key={heart.k}
+                              className="heart-pop pointer-events-none absolute inset-0 z-10 flex items-center justify-center text-4xl"
+                            >
+                              ❤️
+                            </span>
+                          )}
+                          {!mine && activeChat.type === "group" && (
+                            <div className="mb-0.5 pl-1 text-[11px] font-medium text-[#1DB954]">
+                              {senderName(msg.sender_id)}
+                            </div>
+                          )}
+                          <div
+                            className={`inline-block max-w-full select-none whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm ${
+                              mine
+                                ? "wa-bubble-mine rounded-br-md"
+                                : "wa-bubble-theirs rounded-bl-md"
+                            }`}
+                          >
+                            {msg.content}
+                            {msg.attachments?.length > 0 && (
+                              <div className="mt-1">
+                                {msg.attachments.map((att) => (
+                                  <AttachmentThumbnail key={att.id} att={att} />
+                                ))}
+                              </div>
+                            )}
+                            <span
+                              className={`mt-0.5 flex items-center justify-end gap-1 text-[10px] ${
+                                mine ? "text-black/45 dark:text-white/50" : "text-slate-400 dark:text-zinc-500"
+                              }`}
+                            >
+                              {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                              {mine && (
+                                <ReadTicks
+                                  readBy={msg.read_by ?? []}
+                                  myId={user?.id ?? ""}
+                                  participantCount={activeChat.participants.length}
+                                />
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                        {!mine && activeChat.type === "direct" && sender && (
+                          <span title={sender.name} className="hidden sm:block">
+                            <ChatAvatar user={sender} size={26} />
+                          </span>
+                        )}
+                      </div>
                     </div>
                   );
                 })
               )}
               <div ref={threadEnd} />
             </div>
+
+            {/* jump to bottom */}
+            {showJump && (
+              <button
+                onClick={() => threadEnd.current?.scrollIntoView({ behavior: "smooth" })}
+                aria-label="Jump to latest"
+                className="absolute bottom-24 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-emerald-500/30 bg-white text-[#1DB954] shadow-lg transition-transform hover:scale-105 dark:border-emerald-500/20 dark:bg-[#2a3942] md:bottom-28"
+              >
+                <ArrowDownCircle className="h-5 w-5" />
+              </button>
+            )}
 
             {/* composer */}
             <div className="relative z-10 border-t border-slate-100/60 px-2 pb-2 pt-2 dark:border-white/5 sm:px-4 sm:pb-4 sm:pt-3">
@@ -696,6 +746,7 @@ export default function ChatsPage() {
                 busy={sending}
                 placeholder="Write a message…"
                 showAttach={Boolean(activeChat)}
+                variant="green"
               />
             </div>
           </>
