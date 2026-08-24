@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, FileText, ImageIcon, Paperclip, Plus, X } from "lucide-react";
+import { ArrowUp, Paperclip, Plus, X } from "lucide-react";
 
 export interface AttachedFile {
   file: File;
@@ -30,44 +30,23 @@ export default function ChatComposer({
   inputId?: string;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const imageRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
   const [attachments, setAttachments] = useState<AttachedFile[]>([]);
   const [dragOver, setDragOver] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   // auto-grow textarea
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = "0px";
-    el.style.height = Math.min(el.scrollHeight, 120) + "px";
+    el.style.height = Math.min(el.scrollHeight, 160) + "px";
   }, [value]);
-
-  // close menu on outside click / Escape
-  useEffect(() => {
-    if (!menuOpen) return;
-    const onClick = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMenuOpen(false);
-    };
-    window.addEventListener("mousedown", onClick);
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("mousedown", onClick);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [menuOpen]);
 
   function send() {
     const text = value.trim();
     if ((!text && attachments.length === 0) || disabled || busy) return;
     onSend(text, attachments);
     setAttachments([]);
-    setMenuOpen(false);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
   }
 
@@ -90,7 +69,6 @@ export default function ChatComposer({
     }
     setAttachments((prev) => [...prev, ...arr]);
     onAttach?.(Array.from(files));
-    setMenuOpen(false);
   }
 
   function removeAttachment(idx: number) {
@@ -120,10 +98,10 @@ export default function ChatComposer({
         setDragOver(false);
         handleFiles(e.dataTransfer.files);
       }}
-      className={`dark:border-white/10 dark:bg-[#242424] relative rounded-2xl border bg-white shadow-sm transition-all ${
+      className={`dark:border-slate-700/50 dark:bg-[#242424] rounded-2xl border bg-white shadow-sm transition-all ${
         dragOver
-          ? "border-[#1DB954] ring-2 ring-[#1DB954]/20 dark:border-[#1DB954]"
-          : "border-slate-200 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 dark:focus-within:border-[#1DB954] dark:focus-within:ring-[#1DB954]/20"
+          ? "border-indigo-400 ring-2 ring-indigo-100"
+          : "border-slate-200 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100"
       }`}
     >
       {/* attachment previews */}
@@ -132,7 +110,7 @@ export default function ChatComposer({
           {attachments.map((a, i) => (
             <div
               key={i}
-              className="dark:border-white/10 dark:bg-[#2a2a2a] group relative flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5"
+              className="dark:bg-[#2a2a2a] group relative flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5"
             >
               {a.previewUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -142,15 +120,15 @@ export default function ChatComposer({
                   className="h-8 w-8 rounded object-cover"
                 />
               ) : (
-                <Paperclip className="dark:text-zinc-400 h-3.5 w-3.5 text-slate-400" />
+                <Paperclip className="dark:text-slate-400 h-3.5 w-3.5 text-slate-400" />
               )}
-              <span className="dark:text-zinc-200 max-w-[140px] truncate text-xs text-slate-600">
+              <span className="dark:text-slate-300 max-w-[140px] truncate text-xs text-slate-600">
                 {a.file.name}
               </span>
               <button
                 onClick={() => removeAttachment(i)}
                 aria-label={`Remove ${a.file.name}`}
-                className="dark:text-zinc-500 dark:hover:text-zinc-200 rounded-full p-0.5 text-slate-400 hover:bg-slate-200 hover:text-slate-700 dark:hover:bg-white/10"
+                className="dark:text-slate-500 dark:hover:text-slate-300 rounded-full p-0.5 text-slate-400 hover:bg-slate-200 hover:text-slate-700"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -160,85 +138,27 @@ export default function ChatComposer({
       )}
 
       {/* input row */}
-      <div className="flex items-end gap-1.5 px-2 py-1.5">
+      <div className="flex items-end gap-1.5 p-2">
         {showAttach && (
-          <div className="relative shrink-0" ref={menuRef}>
+          <>
             <button
-              onClick={() => !disabled && setMenuOpen((o) => !o)}
+              onClick={() => fileRef.current?.click()}
               disabled={disabled}
-              aria-label="Add attachment"
-              aria-expanded={menuOpen}
-              aria-haspopup="menu"
-              title="Add photos & files"
-              className="dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-indigo-600 disabled:opacity-40 dark:data-[open=true]:bg-white/10"
-              data-open={menuOpen}
+              aria-label="Attach file"
+              title="Attach image, PDF, or text file"
+              className="dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-indigo-400 shrink-0 rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-indigo-600 disabled:opacity-40"
             >
-              <Plus className={`h-5 w-5 transition-transform ${menuOpen ? "rotate-45" : ""}`} />
+              <Plus className="h-5 w-5" />
             </button>
-
-            {menuOpen && (
-              <div
-                role="menu"
-                className="dark:border-white/10 dark:bg-[#282828] absolute bottom-full left-0 z-50 mb-2 w-64 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl"
-              >
-                <div className="dark:text-zinc-400 px-3 pb-1 pt-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                  Add to chat
-                </div>
-                <button
-                  role="menuitem"
-                  onClick={() => imageRef.current?.click()}
-                  className="dark:hover:bg-white/10 dark:text-white flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-slate-700 transition-colors hover:bg-slate-100"
-                >
-                  <span className="dark:bg-white/10 flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:text-[#1DB954]">
-                    <ImageIcon className="h-4 w-4" />
-                  </span>
-                  <span className="flex-1">
-                    <span className="block text-sm font-medium">Photos & images</span>
-                    <span className="block text-xs text-slate-500 dark:text-zinc-400">JPG, PNG, GIF, WebP</span>
-                  </span>
-                </button>
-                <button
-                  role="menuitem"
-                  onClick={() => fileRef.current?.click()}
-                  className="dark:hover:bg-white/10 dark:text-white flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-slate-700 transition-colors hover:bg-slate-100"
-                >
-                  <span className="dark:bg-white/10 flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:text-zinc-300">
-                    <FileText className="h-4 w-4" />
-                  </span>
-                  <span className="flex-1">
-                    <span className="block text-sm font-medium">Files & documents</span>
-                    <span className="block text-xs text-slate-500 dark:text-zinc-400">PDF, TXT, CSV, DOC</span>
-                  </span>
-                </button>
-                <div className="dark:border-white/10 mt-1 border-t border-slate-100 px-3 py-1.5 text-[11px] text-slate-400 dark:text-zinc-500">
-                  Tip: you can also drag & drop files here
-                </div>
-              </div>
-            )}
-
-            <input
-              ref={imageRef}
-              type="file"
-              multiple
-              accept="image/*"
-              hidden
-              onChange={(e) => {
-                handleFiles(e.target.files);
-                e.target.value = "";
-              }}
-            />
             <input
               ref={fileRef}
               type="file"
               multiple
-              accept=".pdf,.txt,.csv,.doc,.docx,image/*"
+              accept="image/*,.pdf,.txt,.csv,.doc,.docx"
               hidden
-              onChange={(e) => {
-                handleFiles(e.target.files);
-                e.target.value = "";
-              }}
+              onChange={(e) => handleFiles(e.target.files)}
             />
-          </div>
+          </>
         )}
 
         <textarea
@@ -248,23 +168,23 @@ export default function ChatComposer({
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={disabled}
-          placeholder={placeholder ?? "Ask a question…"}
+          placeholder={placeholder ?? "Type a message…"}
           id={inputId}
-          className="dark:text-white dark:placeholder:text-zinc-500 max-h-28 min-h-[36px] flex-1 resize-none border-0 bg-transparent px-1 py-2 text-[14px] leading-5 placeholder:text-slate-400 focus:ring-0 disabled:text-slate-400"
+          className="dark:text-white dark:placeholder:text-slate-500 min-h-[44px] max-h-40 flex-1 resize-none border-0 bg-transparent p-2 text-sm placeholder:text-slate-400 focus:ring-0 disabled:text-slate-400"
         />
 
         <button
           onClick={send}
           disabled={!canSend}
           aria-label="Send message"
-          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all ${
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all ${
             canSend
-              ? "bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 dark:bg-[#1DB954] dark:text-black dark:hover:bg-[#1ed760]"
-              : "bg-slate-200 text-slate-400 dark:bg-white/10 dark:text-zinc-500"
-          } disabled:opacity-40`}
+              ? "bg-indigo-600 text-white shadow-sm hover:bg-indigo-700"
+              : "bg-slate-200 text-slate-400 opacity-40"
+          }`}
         >
           {busy ? (
-            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent dark:border-black dark:border-t-transparent" />
+            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
           ) : (
             <ArrowUp className="h-4 w-4" />
           )}
