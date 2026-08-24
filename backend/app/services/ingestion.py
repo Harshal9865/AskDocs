@@ -9,7 +9,12 @@ from app.core.config import get_settings
 from app.models.document import Chunk, Document
 
 
+IMAGE_TYPES = {"png", "jpg", "jpeg", "webp", "gif"}
+
+
 def extract_text(data: bytes, file_type: str) -> str:
+    if file_type in IMAGE_TYPES:
+        return f"[Image: {file_type.upper()} file uploaded. Visual content not indexed for search yet.]"
     if file_type == "pdf":
         reader = PdfReader(io.BytesIO(data))
         return "\n\n".join(page.extract_text() or "" for page in reader.pages)

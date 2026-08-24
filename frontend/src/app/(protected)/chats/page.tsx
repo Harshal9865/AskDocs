@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
+import ChatComposer from "@/components/ChatComposer";
 import Avatar from "@/components/Avatar";
 import { UsersRound } from "lucide-react";
 import type { Member, TeamChat, TeamMessage } from "@/lib/types";
@@ -281,7 +282,7 @@ export default function ChatsPage() {
           </div>
         ) : (
           <>
-            <div className={`border-b border-slate-100 ${"px-4 py-3 sm:px-6"} hidden md:block`}>
+            <div className="hidden border-b border-slate-100 px-4 py-3 sm:px-6 md:block">
               <div className="flex items-center gap-2 text-sm font-semibold">
                 {activeChat.type === "direct" && (
                   <PresenceDot
@@ -343,24 +344,34 @@ export default function ChatsPage() {
               <div ref={threadEnd} />
             </div>
 
-<form onSubmit={send} className="border-t border-slate-200 p-3 pb-safe sm:p-4">
-              <div className="flex gap-2">
-                <input
-                  id="team-chat-input"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Write a message…"
-                  className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 sm:px-4 text-sm outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:px-4"
-                />
-                <button
-                  type="submit"
-                  disabled={sending || !input.trim()}
-                  className="shrink-0 rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-40 sm:px-5"
-                >
-                  Send
-                </button>
-              </div>
-            </form>
+            <div className="px-3 pb-3 pb-safe sm:px-4 sm:pb-4">
+              <ChatComposer
+                inputId="team-chat-input"
+                value={input}
+                onChange={setInput}
+                onSend={(text) => {
+                  setInput("");
+                  void (async () => {
+                    if (!activeChat || sending) return;
+                    setSending(true);
+                    try {
+                      await api.sendTeamMessage(activeChat.id, text);
+                      const msgs = await api.listTeamMessages(activeChat.id);
+                      setMessages(msgs);
+                      await loadChats();
+                    } catch (err) {
+                      alert((err as Error).message);
+                    } finally {
+                      setSending(false);
+                    }
+                  })();
+                }}
+                disabled={!activeChat}
+                busy={sending}
+                placeholder="Write a message…"
+                showAttach={Boolean(activeChat)}
+              />
+            </div>
           </>
         )}
       </div>

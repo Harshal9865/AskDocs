@@ -20,7 +20,15 @@ from app.storage.db_storage import get_storage
 
 router = APIRouter()
 
-ALLOWED_CONTENT_TYPES = {"application/pdf", "text/markdown", "text/plain"}
+ALLOWED_CONTENT_TYPES = {
+    "application/pdf",
+    "text/markdown",
+    "text/plain",
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+    "image/gif",
+}
 
 
 class DocumentOut(BaseModel):
@@ -36,12 +44,14 @@ class DocumentOut(BaseModel):
 
 def _detect_file_type(filename: str, content_type: str | None) -> str | None:
     ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
-    if ext in ("pdf", "docx", "md", "txt"):
+    if ext in ("pdf", "docx", "md", "txt", "png", "jpg", "jpeg", "webp", "gif"):
         return ext
     if content_type == "application/pdf":
         return "pdf"
     if content_type in ("text/markdown", "text/plain"):
         return "md" if content_type == "text/markdown" else "txt"
+    if content_type in ("image/png", "image/jpeg", "image/webp", "image/gif"):
+        return ext or "png"
     return None
 
 

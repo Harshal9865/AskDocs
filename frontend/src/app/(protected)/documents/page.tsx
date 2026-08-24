@@ -113,7 +113,7 @@ export default function DocumentsPage() {
           ref={fileInput}
           type="file"
           multiple
-          accept=".pdf,.docx,.md,.txt"
+          accept=".pdf,.docx,.md,.txt,.png,.jpg,.jpeg,.webp,.gif"
           hidden
           onChange={(e) => void upload(e.target.files)}
         />
@@ -122,7 +122,9 @@ export default function DocumentsPage() {
         ) : (
           <>
             <p className="text-sm font-medium">Drop files here or click to browse</p>
-            <p className="mt-1 text-xs text-slate-500">PDF Â· DOCX Â· MD Â· TXT Â· â‰¤ 20 MB</p>
+            <p className="mt-1 text-xs text-slate-500">
+              PDF · DOCX · MD · TXT · PNG · JPG · WEBP · GIF · ≤ 20 MB
+            </p>
           </>
         )}
       </div>
@@ -151,7 +153,7 @@ export default function DocumentsPage() {
                   {d.error_msg ? ` Â· ${d.error_msg}` : ""}
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
                 <span
                   className={`rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_STYLES[d.status]}`}
                 >

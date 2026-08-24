@@ -5,6 +5,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
+import ChatComposer from "@/components/ChatComposer";
 import type { Citation, Conversation, Message } from "@/lib/types";
 import {
   ChevronDown,
@@ -197,8 +198,12 @@ export default function ChatPage() {
 
   async function send() {
     if (!activeConv || !input.trim() || busy) return;
-    const question = input.trim();
+    await sendWithText(input.trim(), []);
     setInput("");
+  }
+
+  async function sendWithText(question: string, _attachments: unknown[]) {
+    if (!activeConv || !question || busy) return;
     setBusy(true);
 
     setMessages((prev) => [
@@ -466,33 +471,19 @@ export default function ChatPage() {
           <div ref={threadEnd} />
         </div>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            void send();
-          }}
-          className="border-t border-slate-200 p-3 pb-safe sm:p-4"
-        >
-          <div className="flex gap-2">
-            <input
-              id="chat-input"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              disabled={!activeConv || busy}
-              placeholder={
-                activeConv ? "Ask a question…" : "Start a conversation first"
-              }
-              className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-50 disabled:text-slate-400"
-            />
-            <button
-              type="submit"
-              disabled={!activeConv || busy || !input.trim()}
-              className="shrink-0 rounded-lg bg-indigo-600 px-5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-40"
-            >
-              {busy ? "…" : "Send"}
-            </button>
-          </div>
-        </form>
+        {/* composer — GPT style pill, never touches card border */}
+        <div className="px-3 pb-3 pb-safe sm:px-4 sm:pb-4">
+          <ChatComposer
+            inputId="chat-input"
+            value={input}
+            onChange={setInput}
+            onSend={(text) => void sendWithText(text, [])}
+            disabled={!activeConv}
+            busy={busy}
+            placeholder={activeConv ? "Ask a question…" : "Start a conversation first"}
+            showAttach={Boolean(activeConv)}
+          />
+        </div>
       </div>
 
       {showCitations && (
