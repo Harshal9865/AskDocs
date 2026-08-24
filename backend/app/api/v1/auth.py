@@ -160,35 +160,41 @@ async def get_user_avatar(user_id: uuid.UUID, db: DbSession, user: CurrentUser):
     from app.models.workspace import WorkspaceMember
     from fastapi.responses import Response
 
-    target = await db.get(User, user_id)
-    if (
-        target is None
-        or target.avatar_kind != "upload"
-        or not target.avatar_value
-    ):
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "No uploaded photo")
-    # verify caller shares at least one workspace with the target
-    shared = await db.execute(
-        select(WorkspaceMember.workspace_id).where(
-            WorkspaceMember.user_id == user.id,
-            WorkspaceMember.workspace_id.in_(
-                select(WorkspaceMember.workspace_id).where(
-                    WorkspaceMember.user_id == user_id
-                )
-            ),
+    try:
+        target = await db.get(User, user_id)
+        if (
+            target is None
+            or target.avatar_kind != "upload"
+            or not target.avatar_value
+        ):
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "No uploaded photo")
+        # verify caller shares at least one workspace with the target
+        # Use two simple queries + set intersection to avoid SQLAlchemy `in_(select(...))` pitfalls
+        my_ws_rows = await db.execute(
+            select(WorkspaceMember.workspace_id).where(WorkspaceMember.user_id == user.id)
         )
-    )
-    if shared.first() is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Not found")
+        target_ws_rows = await db.execute(
+            select(WorkspaceMember.workspace_id).where(WorkspaceMember.user_id == user_id)
+        )
+        my_ws = {r for (r,) in my_ws_rows.all()}
+        target_ws = {r for (r,) in target_ws_rows.all()}
+        if not my_ws or not target_ws or my_ws.isdisjoint(target_ws):
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Not found")
 
-    row = await db.execute(
-        select(FileBlob.data).where(FileBlob.key == target.avatar_value)
-    )
-    data = row.scalar_one_or_none()
-    if data is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Photo not found")
-    media = mimetypes.guess_type(target.avatar_value)[0] or "application/octet-stream"
-    return Response(content=bytes(data), media_type=media)
+        row = await db.execute(
+            select(FileBlob.data).where(FileBlob.key == target.avatar_value)
+        )
+        data = row.scalar_one_or_none()
+        if data is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Photo not found")
+        media = mimetypes.guess_type(target.avatar_value)[0] or "application/octet-stream"
+        return Response(content=bytes(data), media_type=media)
+    except HTTPException:
+        raise
+    except Exception as e:
+        import logging
+        logging.error("get_user_avatar failed for %s: %s", user_id, e)
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Not found")
 
 
 class ProfileUpdate(BaseModel):

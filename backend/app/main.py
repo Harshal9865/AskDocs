@@ -27,10 +27,11 @@ app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG, lifespan=lifespan)
 
 allow_all = "*" in settings.CORS_ORIGINS
 
+# Always allow Vercel previews + wildcard; `allow_credentials` must be False when using "*"
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"] if allow_all else settings.CORS_ORIGINS,
-    allow_credentials=not allow_all,
+    allow_origins=["*"] if allow_all else settings.CORS_ORIGINS + ["https://*.vercel.app"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -53,7 +54,11 @@ async def unhandled_exception_handler(request, exc: Exception):
     return JSONResponse(
         status_code=500,
         content={"detail": "Internal server error"},
-        headers={"Access-Control-Allow-Origin": "*"},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT",
+            "Access-Control-Allow-Headers": "*",
+        },
     )
 
 
