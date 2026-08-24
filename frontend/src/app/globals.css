@@ -501,16 +501,20 @@ button.bg-indigo-600:hover {
   pointer-events: none;
 }
 .aurora-frame::before {
-  inset: -10%;
+  inset: -30%;
   z-index: 0;
-  filter: blur(16px);
-  opacity: 0.4;
+  filter: blur(38px);
+  opacity: 0.45;
+  -webkit-mask-image: radial-gradient(ellipse 60% 80% at center, black 40%, transparent 78%);
+  mask-image: radial-gradient(ellipse 60% 80% at center, black 40%, transparent 78%);
 }
 .aurora-frame::after {
-  inset: -3%;
+  inset: -12%;
   z-index: 0;
-  filter: blur(30px);
-  opacity: 0.25;
+  filter: blur(55px);
+  opacity: 0.3;
+  -webkit-mask-image: radial-gradient(ellipse 55% 90% at center, black 35%, transparent 80%);
+  mask-image: radial-gradient(ellipse 55% 90% at center, black 35%, transparent 80%);
 }
 .dark .aurora-frame::before {
   opacity: 0.6;
