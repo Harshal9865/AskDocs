@@ -507,8 +507,8 @@ export default function ChatPage() {
           <div ref={threadEnd} />
         </div>
 
-        {/* composer — GPT style pill, never touches card border */}
-        <div className="px-3 pb-2 pb-safe sm:px-4 sm:pb-2">
+        {/* composer — lifted from bottom border, compact height */}
+        <div className="border-t border-slate-100/60 px-3 pb-4 pt-3 dark:border-white/5 sm:px-4 sm:pb-5 sm:pt-3">
           <ChatComposer
             inputId="chat-input"
             value={input}

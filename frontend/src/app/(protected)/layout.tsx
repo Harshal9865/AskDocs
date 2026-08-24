@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { WorkspaceProvider } from "@/lib/workspace-context";
 import Sidebar from "@/components/Sidebar";
@@ -14,8 +14,10 @@ export default function ProtectedLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [width, setWidth] = useState(264);
+  const hideSidebar = pathname === "/chat" || pathname.startsWith("/chat/");
 
   useEffect(() => {
     if (!loading && !user) router.replace("/login");
@@ -38,15 +40,17 @@ export default function ProtectedLayout({
 
   return (
     <WorkspaceProvider>
-      <TopNavbar onMenu={() => setDrawerOpen(true)} />
+      <TopNavbar onMenu={hideSidebar ? undefined : () => setDrawerOpen(true)} />
 
       <div className="dark:bg-[#121212] flex min-h-[100dvh] pt-14 transition-colors">
-        <Sidebar
-          mobileOpen={drawerOpen}
-          onCloseMobile={() => setDrawerOpen(false)}
-          width={width}
-          setWidth={setWidth}
-        />
+        {!hideSidebar && (
+          <Sidebar
+            mobileOpen={drawerOpen}
+            onCloseMobile={() => setDrawerOpen(false)}
+            width={width}
+            setWidth={setWidth}
+          />
+        )}
         <main className="dark:bg-[#121212] min-w-0 flex-1 overflow-y-auto overflow-x-clip p-4 transition-colors md:p-6">
           <WelcomeModal />
           <CommandPalette />
