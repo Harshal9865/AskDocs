@@ -1,14 +1,23 @@
 import uuid
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, File, HTTPException, UploadFile, status
 from pydantic import BaseModel, field_validator
-from sqlalchemy import select
+from sqlalchemy import select, func, delete
 
 from app.core.deps import CurrentUser, DbSession
 from app.models.base import utcnow
-from app.models.chat import Conversation, ConversationParticipant, Message
+from app.models.chat import (
+    Conversation,
+    ConversationHidden,
+    ConversationParticipant,
+    ConversationReadState,
+    Message,
+    MessageAttachment,
+)
+from app.models.file import FileBlob
 from app.models.user import User
 from app.models.workspace import Role, WorkspaceMember
+from app.storage.db_storage import DbStorage
 
 router = APIRouter()
 
@@ -39,6 +48,7 @@ class GroupChatCreate(BaseModel):
 
 class TeamMessageCreate(BaseModel):
     content: str
+    attachment_ids: list[str] = []
 
     @field_validator("content")
     @classmethod
@@ -56,6 +66,14 @@ class ParticipantOut(BaseModel):
     online: bool = False
 
 
+class AttachmentOut(BaseModel):
+    id: uuid.UUID
+    filename: str
+    content_type: str
+    size_bytes: int
+    url: str
+
+
 class TeamConversationOut(BaseModel):
     id: uuid.UUID
     type: str
@@ -64,6 +82,7 @@ class TeamConversationOut(BaseModel):
     participants: list[ParticipantOut]
     last_message_at: object | None = None
     last_message_preview: str | None = None
+    unread_count: int = 0
 
 
 class TeamMessageOut(BaseModel):
@@ -71,6 +90,8 @@ class TeamMessageOut(BaseModel):
     sender_id: uuid.UUID | None
     content: str
     created_at: object
+    attachments: list[AttachmentOut] = []
+    read_by: list[str] = []
 
     class Config:
         from_attributes = True
@@ -106,7 +127,7 @@ async def _get_team_conversation_checked(
     return conv
 
 
-async def _build_conv_out(db, conv: Conversation) -> TeamConversationOut:
+async def _build_conv_out(db, conv: Conversation, user_id: uuid.UUID | None = None) -> TeamConversationOut:
     rows = await db.execute(
         select(ConversationParticipant, User)
         .join(User, User.id == ConversationParticipant.user_id)
@@ -130,6 +151,34 @@ async def _build_conv_out(db, conv: Conversation) -> TeamConversationOut:
         .limit(1)
     )
     last = last_msg_result.scalar_one_or_none()
+
+    unread = 0
+    if user_id:
+        read_state_result = await db.execute(
+            select(ConversationReadState).where(
+                ConversationReadState.conversation_id == conv.id,
+                ConversationReadState.user_id == user_id,
+            )
+        )
+        read_state = read_state_result.scalar_one_or_none()
+        if read_state:
+            count_result = await db.execute(
+                select(func.count(Message.id)).where(
+                    Message.conversation_id == conv.id,
+                    Message.created_at > read_state.last_read_at,
+                    Message.sender_id != user_id,
+                )
+            )
+            unread = count_result.scalar() or 0
+        else:
+            count_result = await db.execute(
+                select(func.count(Message.id)).where(
+                    Message.conversation_id == conv.id,
+                    Message.sender_id != user_id,
+                )
+            )
+            unread = count_result.scalar() or 0
+
     return TeamConversationOut(
         id=conv.id,
         type=conv.type,
@@ -138,6 +187,42 @@ async def _build_conv_out(db, conv: Conversation) -> TeamConversationOut:
         participants=participants,
         last_message_at=last.created_at if last else None,
         last_message_preview=last.content[:80] if last else None,
+        unread_count=unread,
+    )
+
+
+async def _build_message_out(db, msg: Message, user_id: uuid.UUID | None = None) -> TeamMessageOut:
+    attachments_result = await db.execute(
+        select(MessageAttachment).where(MessageAttachment.message_id == msg.id)
+    )
+    atts = [
+        AttachmentOut(
+            id=a.id,
+            filename=a.filename,
+            content_type=a.content_type,
+            size_bytes=a.size_bytes,
+            url=f"/team-chats/attachments/{a.id}",
+        )
+        for a in attachments_result.scalars().all()
+    ]
+
+    read_by: list[str] = []
+    if user_id:
+        read_result = await db.execute(
+            select(ConversationReadState.user_id).where(
+                ConversationReadState.conversation_id == msg.conversation_id,
+                ConversationReadState.last_read_at >= msg.created_at,
+            )
+        )
+        read_by = [str(uid) for (uid,) in read_result.all() if str(uid) != str(msg.sender_id)]
+
+    return TeamMessageOut(
+        id=msg.id,
+        sender_id=msg.sender_id,
+        content=msg.content,
+        created_at=msg.created_at,
+        attachments=atts,
+        read_by=read_by,
     )
 
 
@@ -152,10 +237,7 @@ async def create_direct_chat(
     if payload.user_id == user.id:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Cannot DM yourself")
 
-    # target must be a workspace member
-    result = await db.execute(
-        select(User).where(User.id == payload.user_id)
-    )
+    result = await db.execute(select(User).where(User.id == payload.user_id))
     other = result.scalar_one_or_none()
     if other is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
@@ -167,9 +249,6 @@ async def create_direct_chat(
     )
     if other_member.scalar_one_or_none() is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "User is not in this workspace")
-
-    # find existing DM between the two (DMs are 1:1 per workspace)
-    from sqlalchemy import func
 
     existing = await db.execute(
         select(Conversation.id)
@@ -188,10 +267,15 @@ async def create_direct_chat(
     conv_existing_id = existing.scalar_one_or_none()
     if conv_existing_id is not None:
         conv_existing = await db.get(Conversation, conv_existing_id)
-        out = await _build_conv_out(db, conv_existing)
-        # existing chat: return 200 instead of the route's default 201
+        # unhide for both users
+        await db.execute(
+            delete(ConversationHidden).where(
+                ConversationHidden.conversation_id == conv_existing.id,
+            )
+        )
+        await db.commit()
+        out = await _build_conv_out(db, conv_existing, user.id)
         from fastapi.responses import JSONResponse
-
         return JSONResponse(status_code=200, content=out.model_dump(mode="json"))
 
     conv = Conversation(
@@ -205,7 +289,7 @@ async def create_direct_chat(
     db.add(ConversationParticipant(conversation_id=conv.id, user_id=user.id))
     db.add(ConversationParticipant(conversation_id=conv.id, user_id=payload.user_id))
     await db.commit()
-    return await _build_conv_out(db, conv)
+    return await _build_conv_out(db, conv, user.id)
 
 
 @router.post("/workspaces/{workspace_id}/team-chats/group", response_model=TeamConversationOut, status_code=201)
@@ -217,7 +301,6 @@ async def create_group_chat(
 ):
     await _require_ws_member(db, workspace_id, user)
 
-    # all listed members must belong to the workspace
     valid_members = await db.execute(
         select(WorkspaceMember.user_id).where(
             WorkspaceMember.workspace_id == workspace_id,
@@ -240,7 +323,7 @@ async def create_group_chat(
     for uid in {user.id, *payload.member_ids}:
         db.add(ConversationParticipant(conversation_id=conv.id, user_id=uid))
     await db.commit()
-    return await _build_conv_out(db, conv)
+    return await _build_conv_out(db, conv, user.id)
 
 
 @router.get("/workspaces/{workspace_id}/team-chats", response_model=list[TeamConversationOut])
@@ -249,22 +332,26 @@ async def list_team_chats(workspace_id: uuid.UUID, db: DbSession, user: CurrentU
     my_convs = select(ConversationParticipant.conversation_id).where(
         ConversationParticipant.user_id == user.id
     )
+    hidden_convs = select(ConversationHidden.conversation_id).where(
+        ConversationHidden.user_id == user.id
+    )
     result = await db.execute(
         select(Conversation)
         .where(
             Conversation.workspace_id == workspace_id,
             Conversation.type != "docs_qa",
             Conversation.id.in_(my_convs),
+            Conversation.id.notin_(hidden_convs),
         )
         .order_by(Conversation.created_at.desc())
     )
-    return [await _build_conv_out(db, c) for c in result.scalars().all()]
+    return [await _build_conv_out(db, c, user.id) for c in result.scalars().all()]
 
 
 @router.get("/team-chats/{conversation_id}", response_model=TeamConversationOut)
 async def get_team_chat(conversation_id: uuid.UUID, db: DbSession, user: CurrentUser):
     conv = await _get_team_conversation_checked(db, conversation_id, user)
-    return await _build_conv_out(db, conv)
+    return await _build_conv_out(db, conv, user.id)
 
 
 @router.get("/team-chats/{conversation_id}/messages", response_model=list[TeamMessageOut])
@@ -275,7 +362,24 @@ async def get_team_messages(conversation_id: uuid.UUID, db: DbSession, user: Cur
         .where(Message.conversation_id == conv.id)
         .order_by(Message.created_at)
     )
-    return list(result.scalars().all())
+    messages = list(result.scalars().all())
+
+    # upsert read state
+    now = utcnow()
+    existing = await db.execute(
+        select(ConversationReadState).where(
+            ConversationReadState.conversation_id == conv.id,
+            ConversationReadState.user_id == user.id,
+        )
+    )
+    rs = existing.scalar_one_or_none()
+    if rs:
+        rs.last_read_at = now
+    else:
+        db.add(ConversationReadState(conversation_id=conv.id, user_id=user.id, last_read_at=now))
+    await db.commit()
+
+    return [await _build_message_out(db, m, user.id) for m in messages]
 
 
 @router.post("/team-chats/{conversation_id}/messages", response_model=TeamMessageOut, status_code=201)
@@ -294,10 +398,114 @@ async def send_team_message(
         content=payload.content,
     )
     db.add(msg)
+    await db.flush()
+
+    # link any uploaded attachments
+    if payload.attachment_ids:
+        for aid in payload.attachment_ids:
+            try:
+                att_id = uuid.UUID(aid)
+            except ValueError:
+                continue
+            att_result = await db.execute(
+                select(MessageAttachment).where(MessageAttachment.id == att_id)
+            )
+            att = att_result.scalar_one_or_none()
+            if att:
+                att.message_id = msg.id
+
+    # unhide for all participants (new message reappears conversation)
+    await db.execute(
+        delete(ConversationHidden).where(
+            ConversationHidden.conversation_id == conv.id,
+        )
+    )
+
     await db.commit()
     await db.refresh(msg)
 
-    # bump my presence while chatting
+    # bump my presence
     user.last_seen_at = utcnow()
     await db.commit()
-    return msg
+    return await _build_message_out(db, msg, user.id)
+
+
+@router.post("/team-chats/upload", status_code=201)
+async def upload_chat_attachment(
+    db: DbSession,
+    user: CurrentUser,
+    file: UploadFile = File(...),
+):
+    allowed = ("image/png", "image/jpeg", "image/webp", "image/gif")
+    if file.content_type not in allowed:
+        raise HTTPException(400, "Only PNG, JPEG, WebP, GIF images are allowed")
+    data = await file.read()
+    if len(data) > 20 * 1024 * 1024:
+        raise HTTPException(413, "File too large (max 20 MB)")
+
+    storage = DbStorage()
+    key = await storage.save(f"chat-attachments/{user.id}", file.filename or "image.png", data)
+
+    att = MessageAttachment(
+        message_id=uuid.uuid4(),  # placeholder, will be linked on send
+        storage_key=key,
+        filename=file.filename or "image.png",
+        content_type=file.content_type,
+        size_bytes=len(data),
+    )
+    db.add(att)
+    await db.commit()
+    await db.refresh(att)
+    return {
+        "id": str(att.id),
+        "filename": att.filename,
+        "content_type": att.content_type,
+        "size_bytes": att.size_bytes,
+    }
+
+
+@router.get("/team-chats/attachments/{attachment_id}")
+async def get_chat_attachment(attachment_id: uuid.UUID, db: DbSession, user: CurrentUser):
+    import mimetypes
+    from fastapi.responses import Response
+
+    att = await db.get(MessageAttachment, attachment_id)
+    if att is None:
+        raise HTTPException(404, "Attachment not found")
+
+    row = await db.execute(select(FileBlob.data).where(FileBlob.key == att.storage_key))
+    data = row.scalar_one_or_none()
+    if data is None:
+        raise HTTPException(404, "File not found")
+    media = mimetypes.guess_type(att.filename)[0] or att.content_type
+    return Response(content=bytes(data), media_type=media)
+
+
+@router.delete("/team-chats/{conversation_id}/hide")
+async def hide_conversation(conversation_id: uuid.UUID, db: DbSession, user: CurrentUser):
+    conv = await _get_team_conversation_checked(db, conversation_id, user)
+    existing = await db.execute(
+        select(ConversationHidden).where(
+            ConversationHidden.conversation_id == conv.id,
+            ConversationHidden.user_id == user.id,
+        )
+    )
+    if existing.scalar_one_or_none():
+        return {"status": "already_hidden"}
+    hidden = ConversationHidden(conversation_id=conv.id, user_id=user.id)
+    db.add(hidden)
+    await db.commit()
+    return {"status": "hidden"}
+
+
+@router.post("/team-chats/{conversation_id}/unhide")
+async def unhide_conversation(conversation_id: uuid.UUID, db: DbSession, user: CurrentUser):
+    conv = await _get_team_conversation_checked(db, conversation_id, user)
+    await db.execute(
+        delete(ConversationHidden).where(
+            ConversationHidden.conversation_id == conv.id,
+            ConversationHidden.user_id == user.id,
+        )
+    )
+    await db.commit()
+    return {"status": "unhidden"}

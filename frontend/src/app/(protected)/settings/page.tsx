@@ -9,19 +9,10 @@ import PasswordInput from "@/components/PasswordInput";
 import Avatar from "@/components/Avatar";
 import type { User } from "@/lib/types";
 
-const STICKER_SETS = [
-  {
-    label: "Male",
-    ids: ["male-1", "male-2", "male-3", "male-4"],
-  },
-  {
-    label: "Female",
-    ids: ["female-1", "female-2", "female-3", "female-4"],
-  },
-  {
-    label: "Cute",
-    ids: ["cute-1", "cute-2", "cute-3", "cute-4"],
-  },
+const STICKER_IDS = [
+  "male-1", "male-2", "male-3", "male-4",
+  "female-1", "female-2", "female-3", "female-4",
+  "cute-1", "cute-2", "cute-3", "cute-4",
 ];
 
 function Section({
@@ -257,38 +248,31 @@ export default function SettingsPage() {
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
             Or choose a sticker
           </p>
-          {STICKER_SETS.map((set) => (
-            <div key={set.label}>
-              <p className="mb-1.5 text-xs font-medium capitalize text-slate-500">
-                {set.label}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {set.ids.map((id) => {
-                  const selected = previewSticker === id;
-                  return (
-                    <button
-                      key={id}
-                      onClick={() => void pickSticker(id)}
-                      disabled={avatarBusy}
-                      aria-label={`Choose ${id} sticker`}
-                      title={`Choose ${id}`}
-                      className={`relative overflow-hidden rounded-full ring-offset-2 transition-all hover:scale-105 ${
-                        selected ? "ring-2 ring-indigo-600" : "ring-1 ring-slate-200"
-                      } ${avatarBusy ? "opacity-60" : ""}`}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={`/stickers/${id}.svg`} alt={id} className="h-12 w-12" />
-                      {selected && (
-                        <span className="absolute inset-0 flex items-center justify-center bg-indigo-600/30">
-                          <Check className="h-5 w-5 rounded-full bg-white p-0.5 text-indigo-700" />
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+          <div className="flex flex-wrap gap-2">
+            {STICKER_IDS.map((id) => {
+              const selected = previewSticker === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => void pickSticker(id)}
+                  disabled={avatarBusy}
+                  aria-label={`Choose ${id} sticker`}
+                  title={`Choose ${id}`}
+                  className={`relative overflow-hidden rounded-full ring-offset-2 transition-all hover:scale-105 ${
+                    selected ? "ring-2 ring-indigo-600" : "ring-1 ring-slate-200"
+                  } ${avatarBusy ? "opacity-60" : ""}`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={`/stickers/${id}.svg`} alt={id} className="h-12 w-12" />
+                  {selected && (
+                    <span className="absolute inset-0 flex items-center justify-center bg-indigo-600/30">
+                      <Check className="h-5 w-5 rounded-full bg-white p-0.5 text-indigo-700" />
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </Section>
 

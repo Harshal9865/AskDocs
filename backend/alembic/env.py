@@ -67,3 +67,4 @@ if context.is_offline_mode():
 else:
     run_migrations_online()
 import app.models.join_request  # noqa: F401
+import app.models.friend  # noqa: F401

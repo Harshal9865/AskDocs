@@ -169,7 +169,7 @@ export default function ChatComposer({
           disabled={disabled}
           placeholder={placeholder ?? "Type a message…"}
           id={inputId}
-          className="max-h-40 min-h-[24px] flex-1 resize-none border-0 bg-transparent px-2 py-2 text-sm outline-none placeholder:text-slate-400 disabled:text-slate-400"
+          className="min-h-[44px] max-h-40 flex-1 resize-none border-0 bg-transparent p-2 text-sm placeholder:text-slate-400 focus:ring-0 disabled:text-slate-400"
         />
 
         <button
@@ -179,7 +179,7 @@ export default function ChatComposer({
           className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all ${
             canSend
               ? "bg-indigo-600 text-white shadow-sm hover:bg-indigo-700"
-              : "bg-slate-200 text-slate-400"
+              : "bg-slate-200 text-slate-400 opacity-40"
           }`}
         >
           {busy ? (

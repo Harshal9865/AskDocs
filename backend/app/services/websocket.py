@@ -257,8 +257,28 @@ async def handle_new_message(websocket, data, user, db):
 
 
 async def handle_typing(websocket, data, user):
-    """Handle typing indicator."""
-    pass
+    """Handle typing indicator — broadcast to workspace."""
+    payload = data.get("payload", {})
+    workspace_id = payload.get("workspace_id")
+    conversation_id = payload.get("conversation_id")
+    if not workspace_id or not conversation_id:
+        return
+    try:
+        ws_id = uuid.UUID(workspace_id)
+    except ValueError:
+        return
+    await manager.broadcast_to_workspace(
+        ws_id,
+        {
+            "type": "typing",
+            "payload": {
+                "user_id": str(user.id),
+                "user_name": user.name,
+                "conversation_id": conversation_id,
+            },
+        },
+        exclude_user=user.id,
+    )
 
 
 async def handle_read_receipt(payload, user):
@@ -318,34 +338,3 @@ ws_app.websocket("/ws/{workspace_id}")(websocket_endpoint)
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(ws_app, host="0.0.0.0", port=8001)
-
-
-# Helper functions for message handling
-async def handle_new_message(websocket, data, user, db):
-    """Handle new message event."""
-    pass
-
-
-async def handle_typing(websocket, data, user):
-    """Handle typing indicator."""
-    pass
-
-
-async def handle_read_receipt(payload, user):
-    """Handle read receipt."""
-    pass
-
-
-async def handle_presence(websocket, payload, user):
-    """Handle presence updates."""
-    pass
-
-
-async def handle_join_room(payload, user):
-    """Handle joining a conversation room."""
-    pass
-
-
-async def handle_leave_room(payload, user):
-    """Handle leaving a room."""
-    pass

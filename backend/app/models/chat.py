@@ -5,7 +5,7 @@ from sqlalchemy import DateTime, Enum, ForeignKey, String, Text, UniqueConstrain
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models.base import BaseModel
+from app.models.base import BaseModel, utcnow
 
 MessageRoleEnum = Enum("user", "assistant", name="message_role")
 ConversationTypeEnum = Enum("docs_qa", "direct", "group", name="conversation_type")
@@ -45,4 +45,42 @@ class ConversationParticipant(BaseModel):
         ForeignKey("conversations.id"), index=True
     )
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), index=True)
+
+
+class MessageAttachment(BaseModel):
+    __tablename__ = "message_attachments"
+
+    message_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("messages.id", ondelete="CASCADE"), index=True
+    )
+    storage_key: Mapped[str] = mapped_column(String(500))
+    filename: Mapped[str] = mapped_column(String(300))
+    content_type: Mapped[str] = mapped_column(String(100))
+    size_bytes: Mapped[int]
+
+
+class ConversationHidden(BaseModel):
+    __tablename__ = "conversation_hidden"
+    __table_args__ = (UniqueConstraint("conversation_id", "user_id"),)
+
+    conversation_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("conversations.id", ondelete="CASCADE"), index=True
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    hidden_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ConversationReadState(BaseModel):
+    __tablename__ = "conversation_read_states"
+    __table_args__ = (UniqueConstraint("conversation_id", "user_id"),)
+
+    conversation_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("conversations.id", ondelete="CASCADE"), index=True
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    last_read_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 

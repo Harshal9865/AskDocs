@@ -5,7 +5,22 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
 import Avatar from "@/components/Avatar";
+import { useUserAvatar } from "@/lib/use-user-avatar";
 import type { Member } from "@/lib/types";
+
+function ColleagueAvatar({ m }: { m: Member }) {
+  const { src, stickerId } = useUserAvatar(m.user_id, m.avatar_kind, m.avatar_value);
+  return (
+    <Avatar
+      name={m.name || m.email}
+      size={28}
+      showPresence
+      online={m.online}
+      src={src}
+      stickerId={stickerId}
+    />
+  );
+}
 
 export default function Colleagues() {
   const { workspace } = useWorkspace();
@@ -64,7 +79,7 @@ export default function Colleagues() {
               className="flex items-center gap-2 rounded-lg px-2 py-1.5"
               title={m.online ? `${m.name} — Online` : `${m.name} — Offline`}
             >
-              <Avatar name={m.name || m.email} size={28} showPresence online={m.online} />
+              <ColleagueAvatar m={m} />
               <span className="truncate text-[13px] text-slate-700">{m.name || m.email}</span>
             </div>
           </li>

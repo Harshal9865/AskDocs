@@ -472,12 +472,12 @@ export default function ChatPage() {
         </div>
 
         {/* composer — GPT style pill, never touches card border */}
-        <div className="px-3 pb-3 pb-safe sm:px-4 sm:pb-4">
+        <div className="px-3 pb-2 pb-safe sm:px-4 sm:pb-2">
           <ChatComposer
             inputId="chat-input"
             value={input}
             onChange={setInput}
-            onSend={(text) => void sendWithText(text, [])}
+            onSend={(text, attachments) => void sendWithText(text, attachments)}
             disabled={!activeConv}
             busy={busy}
             placeholder={activeConv ? "Ask a question…" : "Start a conversation first"}

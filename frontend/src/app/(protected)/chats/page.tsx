@@ -2,14 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { api } from "@/lib/api";
+import { api, API_BASE } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
 import ChatComposer from "@/components/ChatComposer";
 import { useUserAvatar } from "@/lib/use-user-avatar";
 import Avatar from "@/components/Avatar";
-import { UsersRound } from "lucide-react";
-import type { Member, TeamChat, TeamMessage } from "@/lib/types";
+import { UsersRound, EyeOff, Check, CheckCheck } from "lucide-react";
+import type { Member, TeamChat, TeamMessage, ChatAttachment } from "@/lib/types";
 
 function chatTitle(chat: TeamChat, myEmail?: string): string {
   if (chat.type === "group") return chat.title;
@@ -56,6 +56,38 @@ function PresenceDot({ online }: { online: boolean }) {
   );
 }
 
+function ReadTicks({ readBy, myId, participantCount }: { readBy: string[]; myId: string; participantCount: number }) {
+  const othersRead = readBy.filter((id) => id !== myId).length;
+  if (othersRead === 0) return <Check className="h-3 w-3 text-slate-400" />;
+  if (othersRead >= participantCount - 1) return <CheckCheck className="h-3 w-3 text-sky-500" />;
+  return <CheckCheck className="h-3 w-3 text-slate-400" />;
+}
+
+function AttachmentThumbnail({ att }: { att: ChatAttachment }) {
+  const isImage = att.content_type.startsWith("image/");
+  return (
+    <a
+      href={`${API_BASE}${att.url}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="mt-1 inline-block"
+    >
+      {isImage ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={`${API_BASE}${att.url}`}
+          alt={att.filename}
+          className="max-h-40 max-w-[240px] rounded-lg object-cover"
+        />
+      ) : (
+        <span className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600">
+          {att.filename}
+        </span>
+      )}
+    </a>
+  );
+}
+
 export default function ChatsPage() {
   const { workspace } = useWorkspace();
   const { user } = useAuth();
@@ -96,11 +128,10 @@ export default function ChatsPage() {
     setMessages([]);
     void loadChats();
     void loadColleagues();
-    const t = setInterval(() => void loadColleagues(), 30000); // presence dots
+    const t = setInterval(() => void loadColleagues(), 30000);
     return () => clearInterval(t);
   }, [loadChats, loadColleagues]);
 
-  // poll active thread for new messages
   useEffect(() => {
     if (!activeChat) return;
     let cancelled = false;
@@ -153,14 +184,30 @@ export default function ChatsPage() {
     }
   }
 
-  async function send(e: React.FormEvent) {
-    e.preventDefault();
-    if (!activeChat || !input.trim() || sending) return;
-    const content = input.trim();
-    setInput("");
+  async function hideChat(chatId: string) {
+    if (!confirm("Hide for you? Others still see it.")) return;
+    try {
+      await api.hideConversation(chatId);
+      if (activeChat?.id === chatId) {
+        setActiveChat(null);
+        setMessages([]);
+      }
+      await loadChats();
+    } catch (err) {
+      alert((err as Error).message);
+    }
+  }
+
+  async function handleSend(text: string, attachments: { file: File; previewUrl?: string }[]) {
+    if (!activeChat || sending) return;
     setSending(true);
     try {
-      await api.sendTeamMessage(activeChat.id, content);
+      const attachmentIds: string[] = [];
+      for (const a of attachments) {
+        const result = await api.uploadChatAttachment(a.file);
+        attachmentIds.push(result.id);
+      }
+      await api.sendTeamMessage(activeChat.id, text, attachmentIds);
       const msgs = await api.listTeamMessages(activeChat.id);
       setMessages(msgs);
       await loadChats();
@@ -253,10 +300,10 @@ export default function ChatsPage() {
                         : "hover:bg-slate-100"
                     }`}
                   >
-                    <span className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       {chat.type === "direct" && <PresenceDot online={online} />}
                       <span
-                        className={`truncate text-sm ${
+                        className={`min-w-0 flex-1 truncate text-sm ${
                           activeChat?.id === chat.id
                             ? "font-semibold text-indigo-900"
                             : "text-slate-600"
@@ -264,7 +311,12 @@ export default function ChatsPage() {
                       >
                         {chatTitle(chat, user?.email)}
                       </span>
-                    </span>
+                      {chat.unread_count > 0 && (
+                        <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500 px-1.5 text-[10px] font-bold text-white">
+                          {chat.unread_count}
+                        </span>
+                      )}
+                    </div>
                     {chat.last_message_preview && (
                       <span className="mt-0.5 block truncate text-xs text-slate-400">
                         {chat.last_message_preview}
@@ -309,15 +361,24 @@ export default function ChatsPage() {
         ) : (
           <>
             <div className="hidden border-b border-slate-100 px-4 py-3 sm:px-6 md:block">
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                {activeChat.type === "direct" && (
-                  <PresenceDot
-                    online={
-                      otherParticipant(activeChat, user?.email)?.online ?? false
-                    }
-                  />
-                )}
-                {chatTitle(activeChat, user?.email)}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  {activeChat.type === "direct" && (
+                    <PresenceDot
+                      online={
+                        otherParticipant(activeChat, user?.email)?.online ?? false
+                      }
+                    />
+                  )}
+                  {chatTitle(activeChat, user?.email)}
+                </div>
+                <button
+                  onClick={() => void hideChat(activeChat.id)}
+                  title="Hide chat"
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                >
+                  <EyeOff className="h-4 w-4" />
+                </button>
               </div>
               {activeChat.type === "group" && (
                 <div className="text-xs text-slate-500">
@@ -361,6 +422,25 @@ export default function ChatsPage() {
                           }`}
                         >
                           {msg.content}
+                          {msg.attachments?.length > 0 && (
+                            <div className="mt-1">
+                              {msg.attachments.map((att) => (
+                                <AttachmentThumbnail key={att.id} att={att} />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div className={`mt-0.5 flex items-center gap-1 ${mine ? "justify-end" : ""}`}>
+                          <span className="text-[10px] text-slate-400">
+                            {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                          {mine && (
+                            <ReadTicks
+                              readBy={msg.read_by ?? []}
+                              myId={user?.id ?? ""}
+                              participantCount={activeChat.participants.length}
+                            />
+                          )}
                         </div>
                       </div>
                     </div>
@@ -370,27 +450,14 @@ export default function ChatsPage() {
               <div ref={threadEnd} />
             </div>
 
-            <div className="px-3 pb-3 pb-safe sm:px-4 sm:pb-4">
+            <div className="px-3 pb-2 pb-safe sm:px-4 sm:pb-2">
               <ChatComposer
                 inputId="team-chat-input"
                 value={input}
                 onChange={setInput}
-                onSend={(text) => {
+                onSend={(text, attachments) => {
                   setInput("");
-                  void (async () => {
-                    if (!activeChat || sending) return;
-                    setSending(true);
-                    try {
-                      await api.sendTeamMessage(activeChat.id, text);
-                      const msgs = await api.listTeamMessages(activeChat.id);
-                      setMessages(msgs);
-                      await loadChats();
-                    } catch (err) {
-                      alert((err as Error).message);
-                    } finally {
-                      setSending(false);
-                    }
-                  })();
+                  void handleSend(text, attachments);
                 }}
                 disabled={!activeChat}
                 busy={sending}
@@ -471,7 +538,3 @@ export default function ChatsPage() {
     </div>
   );
 }
-
-
-
-

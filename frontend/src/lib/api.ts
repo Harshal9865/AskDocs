@@ -184,7 +184,7 @@ export const api = {
     return URL.createObjectURL(blob);
   },
   /** Fetch another user's uploaded avatar photo as object URL (binary-safe) */
-  getUserAvatarUrl: (userId: string) => requestBlob(`/users/${userId}/avatar`),
+  getUserAvatarUrl: (userId: string) => requestBlob(`/auth/users/${userId}/avatar`),
 
   // ---- workspaces ----
   createWorkspace: (name: string) =>
@@ -253,11 +253,46 @@ export const api = {
     });
     return { chat, msg };
   },
-  sendTeamMessage: (chatId: string, content: string) =>
+  sendTeamMessage: (chatId: string, content: string, attachmentIds?: string[]) =>
     request<TeamMessage>(`/team-chats/${chatId}/messages`, {
       method: "POST",
-      ...json({ content }),
+      ...json({ content, attachment_ids: attachmentIds ?? [] }),
     }),
+
+  // ---- chat attachments ----
+  uploadChatAttachment: (file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return request<{ id: string; filename: string; content_type: string; size_bytes: number }>(
+      "/team-chats/upload",
+      { method: "POST", body: form },
+    );
+  },
+
+  // ---- hide / unhide ----
+  hideConversation: (chatId: string) =>
+    request<{ status: string }>(`/team-chats/${chatId}/hide`, { method: "DELETE" }),
+  unhideConversation: (chatId: string) =>
+    request<{ status: string }>(`/team-chats/${chatId}/unhide`, { method: "POST" }),
+
+  // ---- friends ----
+  sendFriendRequest: (userId: string) =>
+    request<{ id: string; status: string }>("/friends/request", {
+      method: "POST",
+      ...json({ user_id: userId }),
+    }),
+  listFriendRequests: () => request<Member[]>("/friends/requests"),
+  listFriends: () => request<Member[]>("/friends"),
+  acceptFriend: (friendId: string) =>
+    request<{ status: string }>(`/friends/${friendId}/accept`, { method: "POST" }),
+  declineFriend: (friendId: string) =>
+    request<{ status: string }>(`/friends/${friendId}/decline`, { method: "POST" }),
+  blockFriend: (friendId: string) =>
+    request<{ status: string }>(`/friends/${friendId}/block`, { method: "POST" }),
+  unfriend: (friendId: string) =>
+    request<{ status: string }>(`/friends/${friendId}`, { method: "DELETE" }),
+  friendSuggestions: (wsId: string) =>
+    request<Member[]>(`/friends/suggestions?workspace_id=${wsId}`),
 
   // ---- profile / settings ----
   updateMe: (name: string) =>
