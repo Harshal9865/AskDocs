@@ -80,10 +80,6 @@ body {
   letter-spacing: -0.01em;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
-.dark body {
-  background-color: #121212;
-  color: #e1e1e1;
-}
 
 ::selection {
   @apply bg-indigo-200 text-indigo-950;
@@ -125,9 +121,10 @@ body {
 }
 
 .dark {
+  /* Deep Spotify system */
   --background: #121212;
   --foreground: #ffffff;
-  --card: #181818;
+  --card: #121212;
   --card-foreground: #ffffff;
   --popover: #282828;
   --popover-foreground: #ffffff;
@@ -140,7 +137,7 @@ body {
   --accent: #282828;
   --accent-foreground: #ffffff;
   --destructive: oklch(0.65 0.22 25);
-  --border: rgba(255, 255, 255, 0.1);
+  --border: rgba(255, 255, 255, 0.08);
   --input: rgba(255, 255, 255, 0.14);
   --ring: #1DB954;
   --chart-1: #1DB954;
@@ -156,6 +153,12 @@ body {
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(255, 255, 255, 0.1);
   --sidebar-ring: #1DB954;
+  /* Chat surfaces (WhatsApp-on-Spotify) */
+  --chat-shell: #0b0f14;
+  --chat-thread: #0b141a;
+  --chat-bubble-mine: #005c4b;
+  --chat-bubble-theirs: #202c33;
+  --chat-list-hover: #202c33;
 }
 
 @layer base {
@@ -385,6 +388,61 @@ button.bg-indigo-600:hover {
 .dark .text-slate-600 { color: #b3b3b3; }
 .dark .text-slate-500 { color: #727272; }
 .dark .text-slate-400 { color: #727272; }
+
+/* ---------- Chat utility classes (light + dark) ---------- */
+.wa-thread {
+  background: #ffffff;
+}
+.dark .wa-thread {
+  background: var(--chat-thread);
+}
+.wa-bubble-mine {
+  background: #d9fdd3;
+  color: #111b21;
+}
+.dark .wa-bubble-mine {
+  background: var(--chat-bubble-mine);
+  color: #ffffff;
+}
+.wa-bubble-theirs {
+  background: #ffffff;
+  color: #111b21;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+.dark .wa-bubble-theirs {
+  background: var(--chat-bubble-theirs);
+  color: #e9edef;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+.wa-row {
+  transition: background-color 0.15s ease;
+}
+.wa-row:hover {
+  background: rgba(15, 23, 42, 0.04);
+}
+.dark .wa-row:hover {
+  background: var(--chat-list-hover);
+}
+.wa-row-active {
+  background: #f0f2f5;
+}
+.dark .wa-row-active {
+  background: #2a3942;
+}
+
+/* Mobile: WhatsApp-flat — no gradient orbs on phones */
+@media (max-width: 767px) {
+  .gemini-gradient-bg::before,
+  .gemini-orb {
+    display: none;
+  }
+  .gemini-gradient-bg {
+    background: #ffffff;
+  }
+  .dark .gemini-gradient-bg {
+    background: var(--chat-shell);
+  }
+}
 
 /* ---------- Gemini-style flowing gradient (more visible) ---------- */
 @keyframes gradient-shift {

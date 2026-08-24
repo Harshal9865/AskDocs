@@ -80,6 +80,8 @@ export interface Participant {
   email: string;
   name: string;
   online: boolean;
+  avatar_kind?: string | null;
+  avatar_value?: string | null;
 }
 
 export interface TeamChat {

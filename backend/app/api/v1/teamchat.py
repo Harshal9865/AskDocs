@@ -64,6 +64,8 @@ class ParticipantOut(BaseModel):
     email: str
     name: str
     online: bool = False
+    avatar_kind: str | None = None
+    avatar_value: str | None = None
 
 
 class AttachmentOut(BaseModel):
@@ -141,6 +143,8 @@ async def _build_conv_out(db, conv: Conversation, user_id: uuid.UUID | None = No
             email=u.email,
             name=u.name,
             online=is_online(u.last_seen_at),
+            avatar_kind=u.avatar_kind,
+            avatar_value=u.avatar_value,
         )
         for p, u in rows.all()
     ]

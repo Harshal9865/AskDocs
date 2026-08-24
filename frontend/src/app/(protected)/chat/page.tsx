@@ -8,11 +8,10 @@ import { useWorkspace } from "@/lib/workspace-context";
 import ChatComposer from "@/components/ChatComposer";
 import type { Citation, Conversation, Message } from "@/lib/types";
 import {
-  ChevronDown,
+  ArrowLeft,
   FileText,
   MessagesSquare,
-  Paperclip,
-  Plus,
+  Sparkles,
   Trash2,
   TriangleAlert,
   UsersRound,
@@ -84,7 +83,6 @@ export default function ChatPage() {
   const [busy, setBusy] = useState(false);
   const [myRole, setMyRole] = useState<string | null>(null);
   const [showCitations, setShowCitations] = useState<Citation[] | null>(null);
-  const [listOpen, setListOpen] = useState(false);
   const threadEnd = useRef<HTMLDivElement>(null);
 
   // resolve my role in this workspace (admin => can delete any conversation)
@@ -154,7 +152,6 @@ export default function ChatPage() {
   }, [messages]);
 
   async function openConversation(conv: Conversation) {
-    setListOpen(false);
     setActiveConv(conv);
     const history = await api.listMessages(conv.id);
     setMessages(
@@ -189,7 +186,6 @@ export default function ChatPage() {
   async function newConversation() {
     if (!workspace) return;
     const conv = await api.createConversation(workspace.id);
-    setListOpen(false);
     await loadConversations();
     setActiveConv(conv);
     setMessages([]);
@@ -302,82 +298,103 @@ export default function ChatPage() {
 
   return (
     <div className="relative mx-auto flex h-[var(--chat-h)] max-w-5xl flex-col gap-0 overflow-hidden md:flex-row md:gap-4 md:overflow-visible">
-      {/* conversation list */}
-      {listOpen && (
-        <div
-          className="fixed inset-0 z-10 bg-slate-900/50 md:hidden"
-          onClick={() => setListOpen(false)}
-          aria-hidden
-        />
-      )}
-      <div className={`gemini-gradient-bg sb-scroll absolute inset-y-0 left-0 z-20 flex w-72 max-w-[85vw] transform flex-col overflow-y-auto rounded-xl bg-white p-3 shadow-sm transition-all duration-200 md:relative md:z-auto md:w-64 md:translate-x-0 dark:bg-[#181818] ${listOpen ? "translate-x-0 shadow-xl border border-slate-200 dark:border-white/10" : "-translate-x-full border-0 shadow-none md:border md:shadow-sm md:border-slate-200 md:dark:border-white/10"}`}>
+      {/* ============ CONVERSATION LIST (full-screen mobile, card desktop) ============ */}
+      <div
+        className={`gemini-gradient-bg sb-scroll absolute inset-0 z-20 flex-col overflow-y-auto rounded-none bg-white p-3 md:relative md:inset-auto md:z-auto md:flex md:w-64 md:translate-x-0 md:rounded-xl md:border md:border-slate-200 md:shadow-sm dark:bg-[#0b0f14] md:dark:border-white/10 ${
+          activeConv ? "hidden" : "flex"
+        }`}
+      >
         <div className="gemini-orb gemini-orb-1" />
         <div className="gemini-orb gemini-orb-2" />
-        <div className="relative z-10">
-        <button
-          onClick={() => void newConversation()}
-          className="mb-3 w-full rounded-lg bg-indigo-600 py-2.5 text-xs font-semibold text-white hover:bg-indigo-700 dark:bg-[#1DB954] dark:text-black dark:hover:bg-[#1ed760]"
-        >
-          + New conversation
-        </button>
-        {conversations.map((c) => (
-          <div
-            key={c.id}
-            className={`group flex items-center rounded-lg ${
-              activeConv?.id === c.id ? "bg-indigo-100" : "hover:bg-slate-100"
-            }`}
-          >
-            <button
-              onClick={() => void openConversation(c)}
-              className="min-w-0 flex-1 truncate px-3 py-2 text-left text-sm text-slate-600 group-hover:text-slate-900"
-              title={c.title}
-            >
-              {c.title}
-            </button>
-            {canDelete(c) && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  void deleteConversation(c);
-                }}
-                aria-label={`Delete conversation ${c.title}`}
-                title="Delete conversation"
-                className="mr-1 shrink-0 rounded-md p-2 text-xs text-slate-400 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-600 focus:opacity-100 group-hover:opacity-100"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            )}
-          </div>
-        ))}
-        </div>
-      </div>
-
-      {/* thread */}
-      <div className="gemini-gradient-bg dark:border-slate-700/50 dark:bg-[#1a1a2e] relative flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border border-slate-200 bg-white shadow-sm">
-        {/* Gemini floating orbs */}
-        <div className="gemini-orb gemini-orb-1" />
-        <div className="gemini-orb gemini-orb-2" />
-        <div className="gemini-orb gemini-orb-3" />
-        {/* mobile thread header */}
-        <div className="dark:border-slate-700/50 flex items-center justify-between gap-2 border-b border-slate-100 px-3 py-2 md:hidden">
-          <button
-            onClick={() => setListOpen(true)}
-            aria-label="Show conversations"
-            className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            <MessagesSquare className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
-            <span className="truncate">{activeConv ? activeConv.title : "Conversations"}</span>
-            <ChevronDown aria-hidden className="ml-auto h-4 w-4 shrink-0 text-slate-400" />
-          </button>
+        <div className="relative z-10 flex flex-col">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">AI Chat</h2>
           <button
             onClick={() => void newConversation()}
             aria-label="New conversation"
-            className="shrink-0 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white"
+            className="rounded-full bg-[#1DB954] px-3.5 py-1.5 text-xs font-bold text-black transition-colors hover:bg-[#1ed760]"
           >
             + New
           </button>
         </div>
-        <div className="scroll-touch flex-1 space-y-4 overflow-y-auto px-3 py-4 sm:px-6">
+        {conversations.length === 0 ? (
+          <div className="flex flex-1 flex-col items-center justify-center py-16 text-center">
+            <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5">
+              <MessagesSquare className="h-8 w-8 text-slate-300 dark:text-zinc-600" />
+            </div>
+            <p className="text-sm font-medium text-slate-600 dark:text-zinc-300">No conversations yet</p>
+            <p className="mt-1 text-xs text-slate-400 dark:text-zinc-500">
+              Tap + New to ask about your documents
+            </p>
+          </div>
+        ) : (
+          <ul>
+            {conversations.map((c) => (
+              <li key={c.id} className="group flex items-center">
+                <button
+                  onClick={() => void openConversation(c)}
+                  className={`wa-row min-w-0 flex-1 rounded-lg px-3 py-3 text-left ${
+                    activeConv?.id === c.id ? "wa-row-active" : ""
+                  }`}
+                  title={c.title}
+                >
+                  <span className="block truncate text-sm font-medium text-slate-900 dark:text-white">
+                    {c.title}
+                  </span>
+                </button>
+                {canDelete(c) && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      void deleteConversation(c);
+                    }}
+                    aria-label={`Delete conversation ${c.title}`}
+                    title="Delete conversation"
+                    className="mr-1 shrink-0 rounded-md p-2 text-slate-400 opacity-60 transition-opacity hover:bg-red-50 hover:text-red-600 focus:opacity-100 dark:hover:bg-red-900/20 md:opacity-0 md:group-hover:opacity-100"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+        </div>
+      </div>
+
+      {/* thread */}
+      <div
+        className={`gemini-gradient-bg relative min-h-0 min-w-0 flex-1 flex-col rounded-none border-0 bg-white md:flex md:rounded-xl md:border md:border-slate-200 md:shadow-sm dark:bg-[#181818] ${
+          activeConv ? "flex" : "hidden"
+        }`}
+      >
+        {/* Gemini floating orbs */}
+        <div className="gemini-orb gemini-orb-1" />
+        <div className="gemini-orb gemini-orb-2" />
+        <div className="gemini-orb gemini-orb-3" />
+        {/* thread header — WhatsApp style on mobile */}
+        <div className="relative z-10 flex items-center gap-2 border-b border-slate-100 px-2 py-2 dark:border-white/5 sm:px-4">
+          <button
+            onClick={() => {
+              setActiveConv(null);
+              setMessages([]);
+            }}
+            aria-label="Back to conversations"
+            className="rounded-full p-2 text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 md:hidden"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+            <Sparkles className="h-4 w-4" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-sm font-semibold text-slate-900 dark:text-white">
+              {activeConv ? activeConv.title : "AI Assistant"}
+            </div>
+            <div className="truncate text-[11px] text-[#1DB954]">AI · answers from your documents</div>
+          </div>
+        </div>
+        <div className="scroll-touch wa-thread relative z-10 flex-1 space-y-3 overflow-y-auto px-3 py-4 sm:px-6">
           {!activeConv ? (
             <div className="relative z-10 flex h-full items-center justify-center text-center">
               <div>
@@ -402,18 +419,25 @@ export default function ChatPage() {
             </div>
           ) : (
             messages.map((m, i) => (
-              <div key={i}>
-                <div
-                  className={`relative z-10 inline-block max-w-[92%] whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-sm sm:max-w-[85%] sm:px-4 ${
-                    m.role === "user"
-                      ? "ml-auto block rounded-br-md bg-indigo-600 text-white" : "dark:border-slate-700/50 dark:bg-[#242424] block rounded-bl-md border border-slate-200 bg-white"
-                  }`}
-                >
-                  {m.content}
-                  {m.streaming && (
-                    <span className="ml-1 inline-block animate-pulse">▋</span>
-                  )}
-                </div>
+              <div key={i} className={`flex items-end gap-1.5 ${m.role === "user" ? "justify-end" : ""}`}>
+                {m.role === "assistant" && (
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+                    <Sparkles className="h-3.5 w-3.5" />
+                  </span>
+                )}
+                <div className="min-w-0 max-w-[85%]">
+                  <div
+                    className={`relative z-10 inline-block max-w-full whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-sm ${
+                      m.role === "user"
+                        ? "wa-bubble-mine ml-auto block rounded-br-md"
+                        : "wa-bubble-theirs block rounded-bl-md"
+                    }`}
+                  >
+                    {m.content}
+                    {m.streaming && (
+                      <span className="ml-1 inline-block animate-pulse">▋</span>
+                    )}
+                  </div>
                 {m.role === "assistant" &&
                   m.citations &&
                   m.citations.length > 0 && (
@@ -505,6 +529,7 @@ export default function ChatPage() {
                     </div>
                   </div>
                 )}
+                </div>
               </div>
             ))
           )}
