@@ -195,13 +195,22 @@ export default function Sidebar({
           <Link
             href="/dashboard"
             onClick={onCloseMobile}
-            className="text-[15px] font-bold tracking-tight text-slate-900"
+            className="flex items-center gap-2 text-[15px] font-bold tracking-tight text-slate-900"
             aria-label="AskDocs home"
             title="Go to Dashboard"
           >
+            <span className={`flex h-7 w-7 items-center justify-center overflow-hidden rounded-lg ${collapsed ? "hidden" : ""}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo-day.svg" alt="AskDocs" className="h-7 w-7 dark:hidden" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo-night.svg" alt="AskDocs" className="hidden h-7 w-7 dark:block" />
+            </span>
             <span className={collapsed ? "hidden" : ""}>AskDocs</span>
-            <span className={`sb-collapsed-show h-9 w-9 items-center justify-center rounded-lg bg-slate-900 text-base font-bold text-white ${collapsed ? "sb-center" : ""}`}>
-              A
+            <span className={`sb-collapsed-show h-9 w-9 items-center justify-center overflow-hidden rounded-lg ${collapsed ? "sb-center" : ""}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo-day.svg" alt="AskDocs" className="h-9 w-9 dark:hidden" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo-night.svg" alt="AskDocs" className="hidden h-9 w-9 dark:block" />
             </span>
           </Link>
           <button

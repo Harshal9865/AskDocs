@@ -1,0 +1,15 @@
+<svg width="512" height="512" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AskDocs A logo">
+  <defs>
+    <linearGradient id="ad-grad-day" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="45%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#22c55e"/>
+    </linearGradient>
+  </defs>
+  <!-- A + document fold + chat tail, transparent bg -->
+  <path d="M 12 88 L 28 10 L 58 10 L 68 20 L 85 20 L 85 72 L 72 72 L 66 86 L 56 72 L 42 72 L 32 88 Z" fill="url(#ad-grad-day)"/>
+  <!-- fold line -->
+  <path d="M 58 10 L 58 20 L 68 20" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.2" stroke-linejoin="round"/>
+  <!-- chat bubble cutout (inverted triangle) -->
+  <path d="M 38 38 L 62 38 L 50 62 Z" fill="white" opacity="0.98"/>
+</svg>

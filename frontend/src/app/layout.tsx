@@ -23,6 +23,13 @@ export const metadata: Metadata = {
   title: "AskDocs — Team Knowledge Base",
   description:
     "Upload team documents and ask questions with AI-powered cited answers.",
+  icons: {
+    icon: [
+      { url: "/logo-day.svg", media: "(prefers-color-scheme: light)" },
+      { url: "/logo-night.svg", media: "(prefers-color-scheme: dark)" },
+    ],
+    apple: "/logo-night.svg",
+  },
 };
 
 export default function RootLayout({

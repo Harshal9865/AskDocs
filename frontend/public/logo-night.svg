@@ -1,0 +1,20 @@
+<svg width="512" height="512" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AskDocs A logo night">
+  <defs>
+    <linearGradient id="ad-grad-night" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#22c55e"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3.2" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  <!-- squircle bg -->
+  <rect x="6" y="6" width="88" height="88" rx="20" fill="#0a0a0a" stroke="url(#ad-grad-night)" stroke-width="1.2" opacity="0.98"/>
+  <!-- A -->
+  <g filter="url(#glow)">
+    <path d="M 18 82 L 32 18 L 56 18 L 65 27 L 80 27 L 80 68 L 68 68 L 63 80 L 54 68 L 42 68 L 34 82 Z" fill="url(#ad-grad-night)"/>
+    <path d="M 56 18 L 56 27 L 65 27" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="1" stroke-linejoin="round"/>
+    <path d="M 40 40 L 60 40 L 50 60 Z" fill="#0a0a0a"/>
+  </g>
+</svg>

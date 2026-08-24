@@ -79,7 +79,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         className="flex shrink-0 items-center gap-2"
         aria-label="AskDocs home"
       >
-        <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-lg bg-indigo-600 text-sm font-black text-white">
+        <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-lg">
           {brandSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={brandSrc} alt="Brand" className="h-full w-full object-cover" />
@@ -87,7 +87,12 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
             // eslint-disable-next-line @next/next/no-img-element
             <img src={`/stickers/${brandSticker}.svg`} alt="Brand" className="h-full w-full" />
           ) : (
-            "A"
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo-day.svg" alt="AskDocs" className="h-7 w-7 dark:hidden" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo-night.svg" alt="AskDocs" className="hidden h-7 w-7 dark:block" />
+            </>
           )}
         </span>
         <span className="dark:text-white text-[15px] font-bold tracking-tight text-slate-900">
