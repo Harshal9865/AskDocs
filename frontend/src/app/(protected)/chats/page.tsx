@@ -258,7 +258,7 @@ export default function ChatsPage() {
     "You";
 
   return (
-    <div className="relative mx-auto flex h-[var(--chat-h)] max-w-5xl flex-col gap-4 md:flex-row">
+    <div className="relative mx-auto flex h-[var(--chat-h)] max-w-5xl flex-col gap-0 overflow-hidden md:flex-row md:gap-4 md:overflow-visible">
       {listOpen && (
         <div
           className="fixed inset-0 z-10 bg-slate-900/50 md:hidden"
@@ -266,8 +266,11 @@ export default function ChatsPage() {
           aria-hidden
         />
       )}
-      {/* left panel */}
-      <div className={`sb-scroll dark:border-white/10 dark:bg-[#181818] absolute inset-y-0 left-0 z-20 flex w-72 max-w-[85vw] transform flex-col overflow-y-auto rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all duration-200 md:relative md:z-auto md:w-72 md:translate-x-0 ${listOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"}`}>
+      {/* left panel - matches right thread, no peek when closed on mobile */}
+      <div className={`gemini-gradient-bg sb-scroll absolute inset-y-0 left-0 z-20 flex w-72 max-w-[85vw] transform flex-col overflow-y-auto rounded-xl bg-white p-3 shadow-sm transition-all duration-200 md:relative md:z-auto md:w-72 md:translate-x-0 dark:bg-[#181818] ${listOpen ? "translate-x-0 shadow-xl border border-slate-200 dark:border-white/10" : "-translate-x-full border-0 shadow-none md:border md:shadow-sm md:border-slate-200 md:dark:border-white/10"}`}>
+        <div className="gemini-orb gemini-orb-1" />
+        <div className="gemini-orb gemini-orb-2" />
+        <div className="relative z-10 flex flex-col">
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-700">Office mates</h2>
           <button
@@ -365,6 +368,7 @@ export default function ChatsPage() {
             })}
           </ul>
         )}
+        </div>
       </div>
 
       {/* thread */}

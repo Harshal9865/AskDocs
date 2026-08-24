@@ -301,7 +301,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="relative mx-auto flex h-[var(--chat-h)] max-w-5xl flex-col gap-4 md:flex-row">
+    <div className="relative mx-auto flex h-[var(--chat-h)] max-w-5xl flex-col gap-0 overflow-hidden md:flex-row md:gap-4 md:overflow-visible">
       {/* conversation list */}
       {listOpen && (
         <div
@@ -310,10 +310,13 @@ export default function ChatPage() {
           aria-hidden
         />
       )}
-      <div className={`dark:border-slate-700/50 dark:bg-[#1a1a2e] sb-scroll absolute inset-y-0 left-0 z-20 w-72 max-w-[85vw] transform overflow-y-auto rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all duration-200 md:relative md:z-auto md:w-64 md:translate-x-0 ${listOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"}`}>
+      <div className={`gemini-gradient-bg sb-scroll absolute inset-y-0 left-0 z-20 flex w-72 max-w-[85vw] transform flex-col overflow-y-auto rounded-xl bg-white p-3 shadow-sm transition-all duration-200 md:relative md:z-auto md:w-64 md:translate-x-0 dark:bg-[#181818] ${listOpen ? "translate-x-0 shadow-xl border border-slate-200 dark:border-white/10" : "-translate-x-full border-0 shadow-none md:border md:shadow-sm md:border-slate-200 md:dark:border-white/10"}`}>
+        <div className="gemini-orb gemini-orb-1" />
+        <div className="gemini-orb gemini-orb-2" />
+        <div className="relative z-10">
         <button
           onClick={() => void newConversation()}
-          className="mb-3 w-full rounded-lg bg-indigo-600 py-2.5 text-xs font-semibold text-white hover:bg-indigo-700"
+          className="mb-3 w-full rounded-lg bg-indigo-600 py-2.5 text-xs font-semibold text-white hover:bg-indigo-700 dark:bg-[#1DB954] dark:text-black dark:hover:bg-[#1ed760]"
         >
           + New conversation
         </button>
@@ -346,6 +349,7 @@ export default function ChatPage() {
             )}
           </div>
         ))}
+        </div>
       </div>
 
       {/* thread */}
