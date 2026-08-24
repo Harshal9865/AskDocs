@@ -91,21 +91,21 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         </span>
       </button>
 
-      {/* global search */}
+{/* global search */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
           if (q.trim().length >= 2)
             router.push(`/search?q=${encodeURIComponent(q.trim())}`);
         }}
-        className="relative ml-auto w-40 sm:w-64"
+        className="relative ml-auto mr-2 sm:mr-4 w-40 sm:w-64 lg:w-72 xl:w-80"
       >
-        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search…"
-          className="w-full rounded-lg border border-slate-300 bg-slate-50 py-1.5 pl-8 pr-3 text-sm outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+          className="w-full rounded-lg border border-slate-300 bg-white py-1.5 pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100"
         />
       </form>
 
