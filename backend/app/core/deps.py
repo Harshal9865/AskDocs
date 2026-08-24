@@ -3,12 +3,15 @@ import uuid
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from fastapi import WebSocket, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.config import get_settings
 from app.core.security import decode_token
 from app.models.user import User
+
+import jwt
 
 settings = get_settings()
 
@@ -19,6 +22,11 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
 async def get_db():
+    async with AsyncSessionLocal() as session:
+        yield session
+
+
+async def get_db_session():
     async with AsyncSessionLocal() as session:
         yield session
 
@@ -76,3 +84,25 @@ def require_membership(min_role: str = "viewer"):
 Membership = Annotated[object, Depends(require_membership())]
 AdminMembership = Annotated[object, Depends(require_membership("admin"))]
 MemberMembership = Annotated[object, Depends(require_membership("member"))]
+
+
+async def get_current_user_ws(
+    websocket: WebSocket,
+    token: str = Query(...),
+    db: AsyncSession = Depends(get_db)
+) -> User:
+    """Authenticate WebSocket connection via JWT token from query parameter."""
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id = uuid.UUID(payload.get("sub"))
+    except (JWTError, ValueError) as e:
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Invalid token")
+        raise HTTPException(status_code=401, detail="Invalid token")
+    
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(User).where(User.id == user_id))
+        user = result.scalar_one_or_none()
+        if user is None:
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="User not found")
+            raise HTTPException(status_code=401, detail="User not found")
+        return user

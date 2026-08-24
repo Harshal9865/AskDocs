@@ -1,18 +1,29 @@
 import asyncio
 import sys
+from contextlib import asynccontextmanager
 
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.api.v1.router import api_router
 from app.core.config import get_settings
+from app.services.websocket import ws_app
 
 settings = get_settings()
 
-app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    from app.services.slack_bot import start_slack_bot
+    await start_slack_bot()
+    yield
+    # shutdown - cleanup if needed
+
+app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG, lifespan=lifespan)
 
 allow_all = "*" in settings.CORS_ORIGINS
 
@@ -25,13 +36,8 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix="/api/v1")
-
-
-@app.on_event("startup")
-async def startup():
-    from app.services.slack_bot import start_slack_bot
-
-    await start_slack_bot()
+# Mount WebSocket app
+app.mount("/ws", ws_app)
 
 
 @app.exception_handler(Exception)
