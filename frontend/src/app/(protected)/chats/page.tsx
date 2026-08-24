@@ -8,7 +8,7 @@ import { useWorkspace } from "@/lib/workspace-context";
 import ChatComposer from "@/components/ChatComposer";
 import { useUserAvatar } from "@/lib/use-user-avatar";
 import Avatar from "@/components/Avatar";
-import { UsersRound, EyeOff, Check, CheckCheck } from "lucide-react";
+import { UsersRound, EyeOff, Check, CheckCheck, Trash2 } from "lucide-react";
 import type { Member, TeamChat, TeamMessage, ChatAttachment } from "@/lib/types";
 
 function chatTitle(chat: TeamChat, myEmail?: string): string {
@@ -198,6 +198,32 @@ export default function ChatsPage() {
     }
   }
 
+  async function deleteChat(chatId: string) {
+    if (!confirm("Delete this chat for you? Others will still see it. For groups, you'll leave the group.")) return;
+    try {
+      await api.deleteTeamChat(chatId);
+      if (activeChat?.id === chatId) {
+        setActiveChat(null);
+        setMessages([]);
+      }
+      await loadChats();
+    } catch (err) {
+      alert((err as Error).message);
+    }
+  }
+
+  async function deleteMessage(messageId: string) {
+    if (!activeChat) return;
+    if (!confirm("Delete this message for everyone?")) return;
+    try {
+      await api.deleteTeamMessage(activeChat.id, messageId);
+      setMessages((prev) => prev.filter((m) => m.id !== messageId));
+      await loadChats();
+    } catch (err) {
+      alert((err as Error).message);
+    }
+  }
+
   async function handleSend(text: string, attachments: { file: File; previewUrl?: string }[]) {
     if (!activeChat || sending) return;
     setSending(true);
@@ -288,16 +314,16 @@ export default function ChatsPage() {
                   ? (otherParticipant(chat, user?.email)?.online ?? false)
                   : false;
               return (
-                <li key={chat.id}>
+                <li key={chat.id} className="group flex items-center gap-1">
                   <button
                     onClick={() => {
                       setActiveChat(chat);
                       setMessages([]);
                     }}
-                    className={`w-full rounded-lg px-3 py-2 text-left ${
+                    className={`min-w-0 flex-1 rounded-lg px-3 py-2 text-left ${
                       activeChat?.id === chat.id
-                        ? "bg-indigo-100"
-                        : "hover:bg-slate-100"
+                        ? "bg-indigo-100 dark:bg-white/10"
+                        : "hover:bg-slate-100 dark:hover:bg-white/5"
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -305,8 +331,8 @@ export default function ChatsPage() {
                       <span
                         className={`min-w-0 flex-1 truncate text-sm ${
                           activeChat?.id === chat.id
-                            ? "font-semibold text-indigo-900"
-                            : "text-slate-600"
+                            ? "font-semibold text-indigo-900 dark:text-white"
+                            : "text-slate-600 dark:text-zinc-400"
                         }`}
                       >
                         {chatTitle(chat, user?.email)}
@@ -318,10 +344,21 @@ export default function ChatsPage() {
                       )}
                     </div>
                     {chat.last_message_preview && (
-                      <span className="mt-0.5 block truncate text-xs text-slate-400">
+                      <span className="mt-0.5 block truncate text-xs text-slate-400 dark:text-zinc-500">
                         {chat.last_message_preview}
                       </span>
                     )}
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      void deleteChat(chat.id);
+                    }}
+                    aria-label={`Delete chat ${chatTitle(chat, user?.email)}`}
+                    title="Delete for you"
+                    className="shrink-0 rounded-md p-1.5 text-slate-300 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-600 focus:opacity-100 group-hover:opacity-100 dark:text-zinc-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </li>
               );
@@ -375,13 +412,22 @@ export default function ChatsPage() {
                   )}
                   {chatTitle(activeChat, user?.email)}
                 </div>
-                <button
-                  onClick={() => void hideChat(activeChat.id)}
-                  title="Hide chat"
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                >
-                  <EyeOff className="h-4 w-4" />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => void hideChat(activeChat.id)}
+                    title="Hide chat"
+                    className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-white/5"
+                  >
+                    <EyeOff className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => void deleteChat(activeChat.id)}
+                    title="Delete for you"
+                    className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
               {activeChat.type === "group" && (
                 <div className="text-xs text-slate-500">
@@ -404,8 +450,17 @@ export default function ChatsPage() {
                   return (
                     <div
                       key={msg.id}
-                      className={`flex items-end gap-2 ${mine ? "justify-end" : ""}`}
+                      className={`group/msg flex items-end gap-1 ${mine ? "justify-end" : ""}`}
                     >
+                      {mine && (
+                        <button
+                          onClick={() => void deleteMessage(msg.id)}
+                          title="Delete message"
+                          className="hidden rounded-full p-1 text-slate-300 hover:bg-red-50 hover:text-red-600 group-hover/msg:block dark:text-zinc-600 dark:hover:bg-red-900/20"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
                       {!mine && sender && (
                         <span title={sender.name}>
                           <MemberAvatarSmall user={sender} size={28} />

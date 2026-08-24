@@ -288,6 +288,10 @@ export const api = {
     request<{ status: string }>(`/team-chats/${chatId}/hide`, { method: "DELETE" }),
   unhideConversation: (chatId: string) =>
     request<{ status: string }>(`/team-chats/${chatId}/unhide`, { method: "POST" }),
+  deleteTeamChat: (chatId: string) =>
+    request<{ status: string }>(`/team-chats/${chatId}`, { method: "DELETE" }),
+  deleteTeamMessage: (chatId: string, messageId: string) =>
+    request<{ status: string }>(`/team-chats/${chatId}/messages/${messageId}`, { method: "DELETE" }),
 
   // ---- friends ----
   sendFriendRequest: (userId: string) =>

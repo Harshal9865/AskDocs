@@ -509,3 +509,77 @@ async def unhide_conversation(conversation_id: uuid.UUID, db: DbSession, user: C
     )
     await db.commit()
     return {"status": "unhidden"}
+
+
+@router.delete("/team-chats/{conversation_id}")
+async def delete_team_chat(conversation_id: uuid.UUID, db: DbSession, user: CurrentUser):
+    """Delete/leave a chat for the requesting user only — other participants unaffected."""
+    conv = await _get_team_conversation_checked(db, conversation_id, user)
+    if conv.type == "group":
+        # Leave group: remove this user's participant row
+        await db.execute(
+            delete(ConversationParticipant).where(
+                ConversationParticipant.conversation_id == conv.id,
+                ConversationParticipant.user_id == user.id,
+            )
+        )
+        # Also clean up hidden/read state for this user
+        await db.execute(
+            delete(ConversationHidden).where(
+                ConversationHidden.conversation_id == conv.id,
+                ConversationHidden.user_id == user.id,
+            )
+        )
+        await db.execute(
+            delete(ConversationReadState).where(
+                ConversationReadState.conversation_id == conv.id,
+                ConversationReadState.user_id == user.id,
+            )
+        )
+        # If no participants remain, delete the conversation entirely
+        remaining = await db.execute(
+            select(ConversationParticipant).where(
+                ConversationParticipant.conversation_id == conv.id
+            )
+        )
+        if remaining.scalar_one_or_none() is None:
+            await db.delete(conv)
+        await db.commit()
+        return {"status": "deleted"}
+    else:
+        # Direct: per-user hide (soft delete) — other participant still sees it
+        existing = await db.execute(
+            select(ConversationHidden).where(
+                ConversationHidden.conversation_id == conv.id,
+                ConversationHidden.user_id == user.id,
+            )
+        )
+        if existing.scalar_one_or_none() is None:
+            db.add(ConversationHidden(conversation_id=conv.id, user_id=user.id))
+            await db.commit()
+        return {"status": "deleted"}
+
+
+@router.delete("/team-chats/{conversation_id}/messages/{message_id}")
+async def delete_team_message(
+    conversation_id: uuid.UUID,
+    message_id: uuid.UUID,
+    db: DbSession,
+    user: CurrentUser,
+):
+    """Delete own message — individual only."""
+    conv = await _get_team_conversation_checked(db, conversation_id, user)
+    msg = await db.get(Message, message_id)
+    if msg is None or msg.conversation_id != conv.id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Message not found")
+    if msg.sender_id != user.id:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Can only delete your own messages")
+    # delete attachments first
+    atts = await db.execute(
+        select(MessageAttachment).where(MessageAttachment.message_id == msg.id)
+    )
+    for att in atts.scalars().all():
+        await db.delete(att)
+    await db.delete(msg)
+    await db.commit()
+    return {"status": "deleted"}
