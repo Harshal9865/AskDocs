@@ -539,6 +539,16 @@ button.bg-indigo-600:hover {
 }
 
 /* ---------- Aurora glow composer — flowing blobs, no rectangle ---------- */
+@property --aurora-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes aurora-spin {
+  to {
+    --aurora-angle: 360deg;
+  }
+}
 @keyframes aurora-orbit-1 {
   0% { transform: translate(-18%, -12%) scale(1); }
   33% { transform: translate(22%, -8%) scale(1.12); }
@@ -560,10 +570,34 @@ button.bg-indigo-600:hover {
   position: relative;
   border-radius: 1rem;
   isolation: isolate;
+  overflow: visible;
+}
+.ask-aurora-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -22px;
+  border-radius: 1.5rem;
+  background: conic-gradient(from var(--aurora-angle), #6366f1, #a855f7, #ec4899, #22d3ee, #fbbf24, #6366f1);
+  filter: blur(32px);
+  opacity: 0.38;
+  animation: aurora-spin 10s linear infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+.ask-aurora-wrap--green::before {
+  background: conic-gradient(from var(--aurora-angle), #1DB954, #22d3ee, #34d399, #fbbf24, #1DB954);
+  opacity: 0.32;
+}
+.dark .ask-aurora-wrap::before {
+  opacity: 0.52;
+  filter: blur(36px);
+}
+.dark .ask-aurora-wrap--green::before {
+  opacity: 0.45;
 }
 .ask-aurora-blobs {
   position: absolute;
-  inset: -14px;
+  inset: -18px;
   border-radius: 1.4rem;
   overflow: visible;
   pointer-events: none;
@@ -572,30 +606,32 @@ button.bg-indigo-600:hover {
 .ask-aurora-blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(22px);
-  opacity: 0.85;
+  filter: blur(26px);
+  opacity: 0.9;
   will-change: transform;
 }
 .ask-aurora-blob--1 {
-  width: 140px; height: 90px; top: -18px; left: -14px;
+  width: 180px; height: 110px; top: -22px; left: -18px;
   background: radial-gradient(ellipse at center, #6366f1 0%, #a855f7 55%, transparent 75%);
-  animation: aurora-orbit-1 9s ease-in-out infinite;
+  animation: aurora-orbit-1 8s ease-in-out infinite;
 }
 .ask-aurora-blob--2 {
-  width: 160px; height: 80px; bottom: -16px; right: -12px;
+  width: 200px; height: 100px; bottom: -20px; right: -16px;
   background: radial-gradient(ellipse at center, #ec4899 0%, #22d3ee 50%, transparent 75%);
-  animation: aurora-orbit-2 11s ease-in-out infinite;
+  animation: aurora-orbit-2 10s ease-in-out infinite;
 }
 .ask-aurora-blob--3 {
-  width: 120px; height: 70px; top: 50%; left: 55%;
+  width: 140px; height: 80px; top: 42%; left: 52%;
   background: radial-gradient(ellipse at center, #fbbf24 0%, #6366f1 60%, transparent 78%);
-  animation: aurora-orbit-3 13s ease-in-out infinite;
-  opacity: 0.55;
+  animation: aurora-orbit-3 12s ease-in-out infinite;
+  opacity: 0.6;
 }
-.dark .ask-aurora-blob--1 { opacity: 1; filter: blur(26px); }
-.dark .ask-aurora-blob--2 { opacity: 1; filter: blur(24px); }
-.dark .ask-aurora-blob--3 { opacity: 0.7; }
-.ask-aurora-wrap:focus-within .ask-aurora-blob { filter: blur(28px); opacity: 1; }
+.dark .ask-aurora-blob--1 { opacity: 1; filter: blur(30px); }
+.dark .ask-aurora-blob--2 { opacity: 1; filter: blur(28px); }
+.dark .ask-aurora-blob--3 { opacity: 0.75; }
+.ask-aurora-wrap:focus-within .ask-aurora-blob { filter: blur(32px); opacity: 1; }
+.ask-aurora-wrap:focus-within::before { opacity: 0.62; filter: blur(38px); }
+.dark .ask-aurora-wrap:focus-within::before { opacity: 0.72; }
 .ask-aurora-wrap--green .ask-aurora-blob--1 {
   background: radial-gradient(ellipse at center, #1DB954 0%, #22d3ee 55%, transparent 75%);
 }
