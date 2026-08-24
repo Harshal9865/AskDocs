@@ -356,7 +356,7 @@ export default function ChatsPage() {
                     }}
                     aria-label={`Delete chat ${chatTitle(chat, user?.email)}`}
                     title="Delete for you"
-                    className="shrink-0 rounded-md p-1.5 text-slate-300 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-600 focus:opacity-100 group-hover:opacity-100 dark:text-zinc-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                    className="shrink-0 rounded-md p-1.5 text-slate-400 opacity-60 transition-opacity hover:bg-red-50 hover:text-red-600 focus:opacity-100 group-hover:opacity-100 dark:text-zinc-500 dark:hover:bg-red-900/20 dark:hover:text-red-400 md:opacity-0 md:group-hover:opacity-100"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
@@ -456,7 +456,7 @@ export default function ChatsPage() {
                         <button
                           onClick={() => void deleteMessage(msg.id)}
                           title="Delete message"
-                          className="hidden rounded-full p-1 text-slate-300 hover:bg-red-50 hover:text-red-600 group-hover/msg:block dark:text-zinc-600 dark:hover:bg-red-900/20"
+                          className="rounded-full p-1 text-slate-400 opacity-60 hover:bg-red-50 hover:text-red-600 dark:text-zinc-500 dark:hover:bg-red-900/20 md:opacity-0 md:group-hover/msg:opacity-100 md:group-hover/msg:block"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
