@@ -176,7 +176,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white text-slate-900 dark:bg-[#070b0e] dark:text-white">
       {/* Top bar — HomeNavbar */}
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-200 bg-white/80 px-4 backdrop-blur dark:border-white/5 dark:bg-[#070b0e]/80 sm:px-6">
+      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-200/60 bg-white/70 px-4 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 dark:border-white/5 dark:bg-[#070b0e]/70 dark:supports-[backdrop-filter]:bg-[#070b0e]/60 sm:px-6">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-indigo-400/20 to-transparent dark:via-white/10" aria-hidden />
         <Link href="/" className="flex items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-day.svg" alt="AskDocs" className="h-7 w-7 dark:hidden" />
@@ -184,17 +185,17 @@ export default function Home() {
           <img src="/logo-night.svg" alt="AskDocs" className="hidden h-7 w-7 dark:block" />
           <span className="text-[15px] font-bold tracking-tight">AskDocs</span>
         </Link>
-        <nav className="home-nav hidden items-center gap-1 md:flex">
-          <a href="#how-it-works" className="rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10">
+        <nav className="home-nav hidden items-center gap-6 md:flex">
+          <a href="#how-it-works" className="px-1 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-zinc-300 dark:hover:text-white">
             How it works
           </a>
-          <a href="#features" className="rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10">
+          <a href="#features" className="px-1 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-zinc-300 dark:hover:text-white">
             Features
           </a>
-          <a href="#reviews" className="rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10">
+          <a href="#reviews" className="px-1 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-zinc-300 dark:hover:text-white">
             Reviews
           </a>
-          <a href="#contact" className="rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10">
+          <a href="#contact" className="px-1 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-zinc-300 dark:hover:text-white">
             Contact
           </a>
         </nav>
