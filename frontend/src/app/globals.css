@@ -690,16 +690,24 @@ button.bg-indigo-600:hover {
   }
 }
 
-/* ---------- Homepage navbar link glow ---------- */
+/* ---------- Homepage navbar link glow (theme-aware) ---------- */
 .home-nav a {
   text-decoration: none;
   transition: all 0.4s;
 }
 .home-nav a:hover {
+  /* Light mode: indigo/purple glow matching brand */
   text-shadow:
-    0 0 10px #A6A6A6,
-    0 0 20px #A6A6A6,
-    0 0 30px #A6A6A6;
+    0 0 8px #6366f1,
+    0 0 16px #8b5cf6,
+    0 0 24px #a855f7;
+}
+.dark .home-nav a:hover {
+  /* Dark mode: Spotify green glow */
+  text-shadow:
+    0 0 8px #1DB954,
+    0 0 16px #1DB954,
+    0 0 24px #1DB954;
 }
 
 /* ---------- Instagram heart pop ---------- */
