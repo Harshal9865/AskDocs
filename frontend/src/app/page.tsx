@@ -527,29 +527,104 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="border-t border-slate-100 px-4 py-8 text-center text-xs text-slate-400 dark:border-white/5 dark:text-zinc-600 sm:px-6">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 sm:flex-row">
-          <span className="flex items-center gap-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo-day.svg" alt="" className="h-5 w-5 dark:hidden" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo-night.svg" alt="" className="hidden h-5 w-5 dark:block" />
-            AskDocs © {new Date().getFullYear()}
-          </span>
-          <span className="flex gap-4">
-            <Link href="/dashboard" className="hover:text-slate-600 dark:hover:text-white">
-              Dashboard
-            </Link>
-            <Link href="/chat" className="hover:text-slate-600 dark:hover:text-white">
-              AI Chat
-            </Link>
-            <Link href="/chats" className="hover:text-slate-600 dark:hover:text-white">
-              Office Chats
-            </Link>
-            <Link href="/documents" className="hover:text-slate-600 dark:hover:text-white">
-              Documents
-            </Link>
-          </span>
+      <footer className="border-t border-slate-100 bg-slate-50/60 dark:border-white/5 dark:bg-black">
+        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+          <div className="grid gap-10 md:grid-cols-5">
+            {/* Brand */}
+            <div className="md:col-span-2">
+              <Link href="/" className="flex items-center gap-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logo-day.svg" alt="" className="h-8 w-8 dark:hidden" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logo-night.svg" alt="" className="hidden h-8 w-8 dark:block" />
+                <span className="text-[15px] font-bold tracking-tight">AskDocs</span>
+              </Link>
+              <p className="mt-3 max-w-xs text-xs leading-relaxed text-slate-500 dark:text-zinc-500">
+                Your team&apos;s knowledge, one question away. Upload documents, ask in plain language, get cited AI answers — then keep the conversation going in office chats.
+              </p>
+              <div className="mt-4 flex gap-2">
+                <a
+                  href="https://github.com/Harshal9865/AskDocs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="GitHub"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-indigo-400 hover:text-indigo-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400 dark:hover:border-[#1DB954]/40 dark:hover:text-[#1DB954]"
+                >
+                  <Globe className="h-4 w-4" />
+                </a>
+                <a
+                  href="https://twitter.com/askdocs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Twitter"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-indigo-400 hover:text-indigo-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400 dark:hover:border-[#1DB954]/40 dark:hover:text-[#1DB954]"
+                >
+                  <AtSign className="h-4 w-4" />
+                </a>
+                <a
+                  href="https://linkedin.com/company/askdocs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-indigo-400 hover:text-indigo-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400 dark:hover:border-[#1DB954]/40 dark:hover:text-[#1DB954]"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                </a>
+                <a
+                  href="mailto:hello@askdocs.app"
+                  aria-label="Email"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-indigo-400 hover:text-indigo-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400 dark:hover:border-[#1DB954]/40 dark:hover:text-[#1DB954]"
+                >
+                  <Mail className="h-4 w-4" />
+                </a>
+              </div>
+            </div>
+
+            {/* Product */}
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-white">Product</h3>
+              <ul className="mt-4 space-y-2.5 text-xs">
+                <li><Link href="/chat" className="text-slate-500 transition hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-[#1DB954]">AI Chat</Link></li>
+                <li><Link href="/chats" className="text-slate-500 transition hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-[#1DB954]">Office Chats</Link></li>
+                <li><Link href="/documents" className="text-slate-500 transition hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-[#1DB954]">Documents</Link></li>
+                <li><Link href="/search" className="text-slate-500 transition hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-[#1DB954]">Search</Link></li>
+                <li><Link href="/friends" className="text-slate-500 transition hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-[#1DB954]">Friends</Link></li>
+              </ul>
+            </div>
+
+            {/* Resources */}
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-white">Resources</h3>
+              <ul className="mt-4 space-y-2.5 text-xs">
+                <li><a href="#how-it-works" className="text-slate-500 transition hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-[#1DB954]">How it works</a></li>
+                <li><a href="#features" className="text-slate-500 transition hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-[#1DB954]">Features</a></li>
+                <li><a href="#reviews" className="text-slate-500 transition hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-[#1DB954]">Reviews</a></li>
+                <li><Link href="/help" className="text-slate-500 transition hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-[#1DB954]">Help &amp; FAQ</Link></li>
+                <li><Link href="/discover" className="text-slate-500 transition hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-[#1DB954]">Discover workspaces</Link></li>
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-white">Company</h3>
+              <ul className="mt-4 space-y-2.5 text-xs">
+                <li><a href="#contact" className="text-slate-500 transition hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-[#1DB954]">Contact</a></li>
+                <li><Link href="/settings" className="text-slate-500 transition hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-[#1DB954]">Account</Link></li>
+                <li><Link href="/members" className="text-slate-500 transition hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-[#1DB954]">Members</Link></li>
+                <li><a href="https://github.com/Harshal9865/AskDocs" target="_blank" rel="noopener noreferrer" className="text-slate-500 transition hover:text-indigo-600 dark:text-zinc-500 dark:hover:text-[#1DB954]">Source code</a></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* bottom bar */}
+          <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-slate-100 pt-6 text-xs text-slate-400 dark:border-white/5 dark:text-zinc-600 sm:flex-row">
+            <span>© {new Date().getFullYear()} AskDocs. All rights reserved.</span>
+            <span className="flex items-center gap-1.5">
+              Built with
+              <Heart className="h-3.5 w-3.5 fill-rose-500 text-rose-500" />
+              for teams who hate digging through PDFs
+            </span>
+          </div>
         </div>
       </footer>
     </div>
