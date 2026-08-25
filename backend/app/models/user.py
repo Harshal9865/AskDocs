@@ -20,3 +20,8 @@ class User(BaseModel):
         String(20), default="initials"
     )  # initials | sticker | upload
     avatar_value: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    bio: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    phone: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    status: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    location: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    pronouns: Mapped[str | None] = mapped_column(String(50), nullable=True)

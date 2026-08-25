@@ -191,36 +191,24 @@ export default function Sidebar({
           </svg>
         </button>
 
-        <div className="dark:border-slate-700/50 flex items-center justify-between border-b border-slate-100 p-4">
-          <Link
-            href="/dashboard"
-            onClick={onCloseMobile}
-            className="flex items-center gap-2 text-[15px] font-bold tracking-tight text-slate-900"
-            aria-label="AskDocs home"
-            title="Go to Dashboard"
-          >
-            <span className={`flex h-7 w-7 items-center justify-center overflow-hidden rounded-lg ${collapsed ? "hidden" : ""}`}>
+        {mobileOpen && (
+          <div className="flex items-center justify-between border-b border-slate-100 p-3 dark:border-slate-700/50 md:hidden">
+            <span className="flex items-center gap-2 text-sm font-bold">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo-day.svg" alt="AskDocs" className="h-7 w-7 dark:hidden" />
+              <img src="/logo-day.svg" alt="AskDocs" className="h-6 w-6 dark:hidden" />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo-night.svg" alt="AskDocs" className="hidden h-7 w-7 dark:block" />
+              <img src="/logo-night.svg" alt="AskDocs" className="hidden h-6 w-6 dark:block" />
+              AskDocs
             </span>
-            <span className={collapsed ? "hidden" : ""}>AskDocs</span>
-            <span className={`sb-collapsed-show h-9 w-9 items-center justify-center overflow-hidden rounded-lg ${collapsed ? "sb-center" : ""}`}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo-day.svg" alt="AskDocs" className="h-9 w-9 dark:hidden" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo-night.svg" alt="AskDocs" className="hidden h-9 w-9 dark:block" />
-            </span>
-          </Link>
-          <button
-            onClick={onCloseMobile}
-            aria-label="Close menu"
-            className={`rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-white/10 ${mobileOpen ? "" : "hidden"}`}
-          >
-            ✕
-          </button>
-        </div>
+            <button
+              onClick={onCloseMobile}
+              aria-label="Close menu"
+              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-white/10"
+            >
+              ✕
+            </button>
+          </div>
+        )}
         <div className="sb-hide dark:border-slate-700/50 shrink-0 border-b border-slate-100 p-4">
           <div className="mt-3 flex items-center gap-1.5">
           <select

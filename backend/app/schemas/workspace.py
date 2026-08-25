@@ -51,6 +51,11 @@ class MemberOut(BaseModel):
     last_seen_at: datetime | None = None
     avatar_kind: str | None = None
     avatar_value: str | None = None
+    bio: str | None = None
+    phone: str | None = None
+    status: str | None = None
+    location: str | None = None
+    pronouns: str | None = None
 
 
 class InvitationOut(BaseModel):

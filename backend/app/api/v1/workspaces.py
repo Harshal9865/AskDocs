@@ -292,6 +292,11 @@ async def list_members(workspace_id: uuid.UUID, db: DbSession, membership: Membe
             last_seen_at=u.last_seen_at,
             avatar_kind=u.avatar_kind,
             avatar_value=u.avatar_value,
+            bio=u.bio,
+            phone=u.phone,
+            status=u.status,
+            location=u.location,
+            pronouns=u.pronouns,
         )
         for m, u in result.all()
     ]

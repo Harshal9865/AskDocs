@@ -75,13 +75,14 @@ export default function Colleagues() {
       <ul className="space-y-0.5">
         {colleagues.map((m) => (
           <li key={m.user_id}>
-            <div
-              className="flex items-center gap-2 rounded-lg px-2 py-1.5"
-              title={m.online ? `${m.name} — Online` : `${m.name} — Offline`}
+            <button
+              onClick={() => (window.location.href = `/profile/${m.user_id}`)}
+              className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-slate-100 dark:hover:bg-white/5"
+              title={m.online ? `${m.name} — Online (view profile)` : `${m.name} — Offline (view profile)`}
             >
               <ColleagueAvatar m={m} />
-              <span className="truncate text-[13px] text-slate-700">{m.name || m.email}</span>
-            </div>
+              <span className="truncate text-[13px] text-slate-700 dark:text-zinc-300">{m.name || m.email}</span>
+            </button>
           </li>
         ))}
       </ul>

@@ -313,8 +313,22 @@ export const api = {
     request<Member[]>(`/friends/suggestions?workspace_id=${wsId}`),
 
   // ---- profile / settings ----
-  updateMe: (name: string) =>
-    request<User>("/auth/me", { method: "PATCH", ...json({ name }) }),
+  getUserProfile: (userId: string) => request<User>(`/auth/users/${userId}`),
+  updateMe: (
+    payload:
+      | string
+      | {
+          name?: string;
+          bio?: string | null;
+          phone?: string | null;
+          status?: string | null;
+          location?: string | null;
+          pronouns?: string | null;
+        },
+  ) => {
+    const body = typeof payload === "string" ? { name: payload } : payload;
+    return request<User>("/auth/me", { method: "PATCH", ...json(body) });
+  },
   changePassword: (currentPassword: string, newPassword: string) =>
     request<void>("/auth/change-password", {
       method: "POST",

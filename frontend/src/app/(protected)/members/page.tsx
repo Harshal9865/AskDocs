@@ -246,18 +246,21 @@ export default function MembersPage() {
           {members.map((m) => (
             <li
               key={m.user_id}
-              className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
+              className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-[#121212]"
             >
-              <div className="flex min-w-0 items-center gap-3">
+              <button
+                onClick={() => (window.location.href = `/profile/${m.user_id}`)}
+                className="flex min-w-0 flex-1 items-center gap-3 text-left hover:opacity-80"
+              >
                 <MemberAvatar member={m} size={40} />
                 <div className="min-w-0">
-                  <div className="truncate text-sm font-medium">{m.name || m.email}</div>
-                  <div className="truncate text-xs text-slate-500">
+                  <div className="truncate text-sm font-medium dark:text-white">{m.name || m.email}</div>
+                  <div className="truncate text-xs text-slate-500 dark:text-zinc-400">
                     {m.name ? `${m.email} · ` : ""}
                     {m.role}
                   </div>
                 </div>
-              </div>
+              </button>
               {isAdmin && m.email !== user?.email ? (
                 <div className="flex items-center gap-2">
                   <select

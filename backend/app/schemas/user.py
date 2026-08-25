@@ -19,6 +19,20 @@ class UserOut(BaseModel):
     created_at: datetime
     avatar_kind: str = "initials"
     avatar_value: str | None = None
+    bio: str | None = None
+    phone: str | None = None
+    status: str | None = None
+    location: str | None = None
+    pronouns: str | None = None
+
+
+class ProfileUpdate(BaseModel):
+    name: str | None = None
+    bio: str | None = None
+    phone: str | None = None
+    status: str | None = None
+    location: str | None = None
+    pronouns: str | None = None
 
 
 class TokenPair(BaseModel):

@@ -198,21 +198,58 @@ async def get_user_avatar(user_id: uuid.UUID, db: DbSession, user: CurrentUser):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Not found")
 
 
-class ProfileUpdate(BaseModel):
-    name: str
-
-
 class PasswordChange(BaseModel):
     current_password: str
     new_password: str
 
 
+# Re-export ProfileUpdate from schemas for OpenAPI
+from app.schemas.user import ProfileUpdate as SchemaProfileUpdate
+
+
 @router.patch("/me", response_model=UserOut)
-async def update_me(payload: ProfileUpdate, db: DbSession, user: CurrentUser):
-    user.name = payload.name.strip()[:200] or user.name
+async def update_me(payload: SchemaProfileUpdate, db: DbSession, user: CurrentUser):
+    if payload.name is not None:
+        user.name = payload.name.strip()[:200] or user.name
+    if payload.bio is not None:
+        user.bio = payload.bio.strip()[:500] or None
+    if payload.phone is not None:
+        # basic phone validation: allow +, digits, spaces, dashes, parentheses
+        phone = payload.phone.strip()[:32]
+        if phone and not phone.replace(" ", "").replace("-", "").replace("(", "").replace(")", "").replace("+", "").isdigit():
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Invalid phone number")
+        user.phone = phone or None
+    if payload.status is not None:
+        user.status = payload.status.strip()[:120] or None
+    if payload.location is not None:
+        user.location = payload.location.strip()[:120] or None
+    if payload.pronouns is not None:
+        user.pronouns = payload.pronouns.strip()[:50] or None
     await db.commit()
     await db.refresh(user)
     return user
+
+
+@router.get("/users/{user_id}", response_model=UserOut)
+async def get_user_profile(user_id: uuid.UUID, db: DbSession, user: CurrentUser):
+    """Get another user's profile (workspace members only)."""
+    from app.models.workspace import WorkspaceMember
+
+    target = await db.get(User, user_id)
+    if target is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+    # verify shared workspace
+    my_ws_rows = await db.execute(
+        select(WorkspaceMember.workspace_id).where(WorkspaceMember.user_id == user.id)
+    )
+    target_ws_rows = await db.execute(
+        select(WorkspaceMember.workspace_id).where(WorkspaceMember.user_id == user_id)
+    )
+    my_ws = {r for (r,) in my_ws_rows.all()}
+    target_ws = {r for (r,) in target_ws_rows.all()}
+    if not my_ws or not target_ws or my_ws.isdisjoint(target_ws):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Not found")
+    return target
 
 
 @router.post("/change-password", status_code=204)

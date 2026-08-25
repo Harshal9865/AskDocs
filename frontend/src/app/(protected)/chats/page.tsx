@@ -348,13 +348,10 @@ export default function ChatsPage() {
   ];
 
   return (
-    <div className="relative mx-auto flex h-[var(--chat-h)] max-w-5xl flex-col gap-0 overflow-hidden md:flex-row md:gap-4 md:overflow-visible">
-      {/* ============ CHAT LIST (full-screen on mobile, card on desktop) ============ */}
-      <div
-        className={`gemini-gradient-bg sb-scroll absolute inset-0 z-20 flex-col overflow-y-auto rounded-none bg-white md:relative md:inset-auto md:z-auto md:flex md:w-72 md:translate-x-0 md:rounded-xl md:border md:border-slate-200 md:shadow-sm dark:bg-[#0b0f14] md:dark:border-white/10 ${
-          activeChat ? "hidden" : "flex"
-        }`}
-      >
+    <div className="relative mx-auto flex h-[var(--chat-h)] max-w-5xl flex-row gap-2 overflow-hidden md:gap-4">
+      {/* ============ CHAT LIST — always visible, responsive (icons on small) ============ */}
+      <div className="gemini-gradient-bg sb-scroll flex w-[110px] shrink-0 flex-col overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 shadow-sm dark:border-white/10 dark:bg-[#0b0f14] sm:w-48 sm:p-3 md:w-72">
+
         <div className="gemini-orb gemini-orb-1" />
         <div className="gemini-orb gemini-orb-2" />
         <div className="relative z-10 flex flex-col">
@@ -530,12 +527,9 @@ export default function ChatsPage() {
         </div>
       </div>
 
-      {/* ============ THREAD (full-screen on mobile when chat selected) ============ */}
-      <div
-        className={`gemini-gradient-bg relative min-h-0 min-w-0 flex-1 flex-col rounded-none border-0 bg-white md:flex md:rounded-xl md:border md:border-slate-200 md:shadow-sm dark:border-white/10 dark:bg-[#181818] ${
-          activeChat ? "flex" : "hidden"
-        }`}
-      >
+      {/* ============ THREAD — always visible, responsive ============ */}
+      <div className="gemini-gradient-bg relative flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#181818]">
+
         <div className="gemini-orb gemini-orb-1" />
         <div className="gemini-orb gemini-orb-2" />
         <div className="gemini-orb gemini-orb-3" />

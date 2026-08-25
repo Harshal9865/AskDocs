@@ -300,24 +300,24 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="relative mx-auto flex h-[var(--chat-h)] max-w-5xl flex-col gap-0 overflow-hidden md:flex-row md:gap-4 md:overflow-visible">
-      {/* ============ CONVERSATION LIST (full-screen mobile, card desktop) ============ */}
-      <div
-        className={`gemini-gradient-bg sb-scroll absolute inset-0 z-20 flex-col overflow-y-auto rounded-none bg-white p-3 md:relative md:inset-auto md:z-auto md:flex md:w-64 md:translate-x-0 md:rounded-xl md:border md:border-indigo-200/60 md:shadow-sm dark:bg-[#0d0d1f] md:dark:border-[rgba(129,140,248,0.16)] ${
-          activeConv ? "hidden" : "flex"
-        }`}
-      >
+    <div className="relative mx-auto flex h-[var(--chat-h)] max-w-5xl flex-row gap-2 overflow-hidden md:gap-4">
+      {/* ============ CONVERSATION LIST — always visible, responsive (icons on small) ============ */}
+      <div className="gemini-gradient-bg sb-scroll flex w-[110px] shrink-0 flex-col overflow-y-auto rounded-xl border border-indigo-200/60 bg-white p-2 shadow-sm dark:border-[rgba(129,140,248,0.16)] dark:bg-[#0d0d1f] sm:w-48 sm:p-3 md:w-64">
         <div className="gemini-orb gemini-orb-1" />
         <div className="gemini-orb gemini-orb-2" />
         <div className="relative z-10 flex flex-col">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-base font-bold text-slate-900 dark:text-white">AI Chat</h2>
+        <div className="mb-2 flex items-center justify-between sm:mb-3">
+          <h2 className="hidden text-base font-bold text-slate-900 dark:text-white sm:block">AI Chat</h2>
+          <span className="sm:hidden">
+            <MessagesSquare className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+          </span>
           <button
             onClick={() => void newConversation()}
             aria-label="New conversation"
-            className="rounded-full bg-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-indigo-500"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white transition-colors hover:bg-indigo-500 sm:h-auto sm:w-auto sm:px-3.5 sm:py-1.5 sm:text-xs"
           >
-            + New
+            <span className="sm:hidden">+</span>
+            <span className="hidden sm:inline">+ New</span>
           </button>
         </div>
         {conversations.length === 0 ? (
@@ -365,12 +365,9 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* thread */}
-      <div
-        className={`gemini-gradient-bg relative min-h-0 min-w-0 flex-1 flex-col rounded-none border-0 bg-white md:flex md:rounded-xl md:border md:border-indigo-200/60 md:shadow-sm dark:bg-[#13132b] md:dark:border-[rgba(129,140,248,0.16)] ${
-          activeConv ? "flex" : "hidden"
-        }`}
-      >
+      {/* thread — always visible, responsive */}
+      <div className="gemini-gradient-bg relative flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border border-indigo-200/60 bg-white shadow-sm dark:border-[rgba(129,140,248,0.16)] dark:bg-[#13132b]">
+
         {/* Gemini floating orbs */}
         <div className="gemini-orb gemini-orb-1" />
         <div className="gemini-orb gemini-orb-2" />

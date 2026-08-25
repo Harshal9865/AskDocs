@@ -7,6 +7,11 @@ export interface User {
   created_at: string;
   avatar_kind?: "initials" | "sticker" | "upload";
   avatar_value?: string | null;
+  bio?: string | null;
+  phone?: string | null;
+  status?: string | null;
+  location?: string | null;
+  pronouns?: string | null;
 }
 
 export interface TokenPair {
@@ -45,6 +50,11 @@ export interface Member {
   role: Role;
   online: boolean;
   last_seen_at: string | null;
+  bio?: string | null;
+  phone?: string | null;
+  status?: string | null;
+  location?: string | null;
+  pronouns?: string | null;
 }
 
 export interface Invitation {

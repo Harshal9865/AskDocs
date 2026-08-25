@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { WorkspaceProvider } from "@/lib/workspace-context";
 import Sidebar from "@/components/Sidebar";
@@ -15,12 +15,23 @@ export default function ProtectedLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [width, setWidth] = useState(264);
 
   useEffect(() => {
     if (!loading && !user) router.replace("/login");
   }, [loading, user, router]);
+
+  // Onboarding guard: if profile incomplete and not skipped, force onboarding
+  useEffect(() => {
+    if (loading || !user) return;
+    const onboarded = typeof window !== "undefined" ? localStorage.getItem("askdocs_onboarded") : "1";
+    const hasProfile = !!(user.bio || user.phone || user.status || user.location || user.pronouns);
+    if (!onboarded && !hasProfile && pathname !== "/onboarding") {
+      router.replace("/onboarding");
+    }
+  }, [loading, user, pathname, router]);
 
   // restore saved sidebar width
   useEffect(() => {
