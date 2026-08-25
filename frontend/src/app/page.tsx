@@ -25,6 +25,9 @@ import {
   Quote,
   Activity,
   Target,
+  Lock,
+  FileKey,
+  Plug2,
 } from "lucide-react";
 
 function AuroraHeroMock() {
@@ -297,32 +300,6 @@ function Reveal({ children, dir = "up", delay = 0, className = "" }: { children:
   );
 }
 
-function ReviewCard({ review: r }: { review: (typeof REVIEWS)[number] }) {
-  return (
-    <div className="flex w-[320px] shrink-0 flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-[#121212] sm:w-[360px]">
-      <Quote className="mb-3 h-5 w-5 text-indigo-300 dark:text-indigo-500/50" />
-      <p className="flex-1 text-sm leading-relaxed text-slate-600 dark:text-zinc-300">&ldquo;{r.quote}&rdquo;</p>
-      <div className="mt-4 flex items-center gap-1">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Star
-            key={i}
-            className={`h-3.5 w-3.5 ${i < r.stars ? "fill-amber-400 text-amber-400" : "text-slate-200 dark:text-zinc-700"}`}
-          />
-        ))}
-      </div>
-      <div className="mt-4 flex items-center gap-3 border-t border-slate-100 pt-4 dark:border-white/5">
-        <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${r.color}`}>
-          {r.initials}
-        </span>
-        <span className="min-w-0">
-          <span className="block truncate text-sm font-semibold">{r.name}</span>
-          <span className="block truncate text-xs text-slate-500 dark:text-zinc-400">{r.role}</span>
-        </span>
-      </div>
-    </div>
-  );
-}
-
 export default function Home() {
   const { user } = useAuth();
   const { dark, toggle } = useTheme();
@@ -399,7 +376,7 @@ export default function Home() {
       {/* Live activity ticker — thin strip with pulse */}
       <section className="border-b border-slate-200/60 bg-white/50 dark:border-white/10 dark:bg-black" aria-label="Live activity">
         <div className="mx-auto max-w-6xl px-4 py-2 overflow-hidden">
-          <div className="flex items-center gap-4" style={{ animation: "marquee 20s linear infinite" }}>
+          <div className="flex items-center gap-4 opacity-90" style={{ animation: "marquee 50s linear infinite" }}>
             <span className="flex items-center gap-2 shrink-0 whitespace-nowrap text-xs text-slate-500 dark:text-zinc-400">
               <Activity className="h-3 w-3 text-emerald-500 animate-pulse" />
               <span>Sarah uploaded "Q3 Budget.pdf"</span>
@@ -465,25 +442,21 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trusted-by reverse marquee */}
-      <section className="overflow-hidden border-y border-slate-100 py-5 dark:border-white/5" aria-label="Trusted by">
+      {/* Trusted-by — calm static row, no auto-scroll */}
+      <section className="border-y border-slate-100 py-6 dark:border-white/5" aria-label="Trusted by">
         <p className="mb-4 text-center text-xs font-medium uppercase tracking-widest text-slate-400 dark:text-zinc-600">
           Trusted by teams at
         </p>
-        <div className="relative">
-          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-white to-transparent dark:from-[#070b0e]" aria-hidden />
-          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-white to-transparent dark:from-[#070b0e]" aria-hidden />
-          <div className="flex w-max items-center gap-14 px-7" style={{ animation: "marquee-reverse 28s linear infinite" }}>
-            {[...TRUSTED_LOGOS, ...TRUSTED_LOGOS].map((l, i) => (
-              <span
-                key={`${l.name}-${i}`}
-                className="flex shrink-0 items-center gap-2 text-lg font-bold tracking-tight text-slate-300 transition-colors hover:text-slate-500 dark:text-zinc-700 dark:hover:text-zinc-400"
-              >
-                <span className={`h-3.5 w-3.5 rounded-sm bg-gradient-to-br ${l.color}`} />
-                {l.name}
-              </span>
-            ))}
-          </div>
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-6 px-4 sm:gap-10">
+          {TRUSTED_LOGOS.map((l) => (
+            <span
+              key={l.name}
+              className="flex items-center gap-2 text-[15px] font-semibold tracking-tight text-slate-400 transition-all hover:scale-[1.02] hover:text-slate-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+            >
+              <span className={`h-3.5 w-3.5 rounded-sm bg-gradient-to-br ${l.color} opacity-80`} />
+              {l.name}
+            </span>
+          ))}
         </div>
       </section>
 
@@ -540,45 +513,30 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Infinite marquee — auto-scrolling features */}
+      {/* Features teaser — calm, swipeable row (no auto-marquee) */}
       <section id="features" className="scroll-mt-16 border-y border-slate-100 bg-slate-50/50 py-6 dark:border-white/5 dark:bg-white/[0.02]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-zinc-500">
               Everything in one place
             </h2>
+            <span className="hidden text-xs text-slate-400 sm:inline">drag to explore →</span>
           </div>
-          <div className="overflow-hidden">
-            <div className="flex gap-4" style={{ animation: "marquee 30s linear infinite" }}>
-              {FEATURE_MARQUEE.map((c) => (
+          <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-px-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {FEATURE_MARQUEE.map((c) => (
+              <div
+                key={c.title}
+                className="group min-w-[220px] max-w-[260px] flex-1 shrink-0 snap-start rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-white/10 dark:bg-[#121212]"
+              >
                 <div
-                  key={c.title}
-                  className="group min-w-[220px] max-w-[260px] flex-1 shrink-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-white/10 dark:bg-[#121212]"
+                  className={`mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${c.color} text-white`}
                 >
-                  <div
-                    className={`mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${c.color} text-white`}
-                  >
-                    <c.icon className="h-5 w-5" />
-                  </div>
-                  <div className="text-sm font-semibold">{c.title}</div>
-                  <div className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-zinc-400">{c.desc}</div>
+                  <c.icon className="h-5 w-5" />
                 </div>
-              ))}
-              {FEATURE_MARQUEE.map((c) => (
-                <div
-                  key={`${c.title}-clone`}
-                  className="group min-w-[220px] max-w-[260px] flex-1 shrink-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-white/10 dark:bg-[#121212]"
-                >
-                  <div
-                    className={`mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${c.color} text-white`}
-                  >
-                    <c.icon className="h-5 w-5" />
-                  </div>
-                  <div className="text-sm font-semibold">{c.title}</div>
-                  <div className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-zinc-400">{c.desc}</div>
-                </div>
-              ))}
-            </div>
+                <div className="text-sm font-semibold">{c.title}</div>
+                <div className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-zinc-400">{c.desc}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -649,8 +607,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Reviews — dual-direction sliding marquee */}
-      <section id="reviews" className="scroll-mt-16 overflow-hidden py-12 sm:py-16">
+      {/* Reviews — calm static grid with subtle reveal */}
+      <section id="reviews" className="scroll-mt-16 mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
         <div className="mb-2 flex items-center justify-center gap-2">
           {[1, 2, 3, 4, 5].map((s) => (
             <Star key={s} className="h-5 w-5 fill-amber-400 text-amber-400" />
@@ -658,25 +616,32 @@ export default function Home() {
         </div>
         <p className="text-center text-xs text-slate-400 dark:text-zinc-500">Loved by teams of every size</p>
         <h2 className="mt-2 text-center text-xl font-bold sm:text-2xl">What people say</h2>
-        <div className="relative mt-8 space-y-5">
-          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-white to-transparent dark:from-[#070b0e] sm:w-24" aria-hidden />
-          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-white to-transparent dark:from-[#070b0e] sm:w-24" aria-hidden />
-          {[false, true].map((reverse, row) => {
-            const items = [...REVIEWS.slice(row * 3), ...REVIEWS.slice(0, row * 3)];
-            const doubled = [...items, ...items];
-            return (
-              <div key={row} className="overflow-hidden">
-                <div
-                  className="flex w-max gap-5 px-2.5"
-                  style={{ animation: `${reverse ? "marquee-reverse" : "marquee"} ${38 + row * 6}s linear infinite` }}
-                >
-                  {doubled.map((r, i) => (
-                    <ReviewCard key={`${r.name}-${i}`} review={r} />
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {REVIEWS.map((r, i) => (
+            <Reveal key={r.name} dir={i % 2 === 0 ? "left" : "right"} delay={(i % 3) * 90}>
+              <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-[#121212]">
+                <Quote className="mb-3 h-5 w-5 text-indigo-300 dark:text-indigo-500/50" />
+                <p className="flex-1 text-sm leading-relaxed text-slate-600 dark:text-zinc-300">&ldquo;{r.quote}&rdquo;</p>
+                <div className="mt-4 flex items-center gap-1">
+                  {Array.from({ length: 5 }).map((_, j) => (
+                    <Star
+                      key={j}
+                      className={`h-3.5 w-3.5 ${j < r.stars ? "fill-amber-400 text-amber-400" : "text-slate-200 dark:text-zinc-700"}`}
+                    />
                   ))}
                 </div>
+                <div className="mt-4 flex items-center gap-3 border-t border-slate-100 pt-4 dark:border-white/5">
+                  <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${r.color}`}>
+                    {r.initials}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-semibold">{r.name}</span>
+                    <span className="block truncate text-xs text-slate-500 dark:text-zinc-400">{r.role}</span>
+                  </span>
+                </div>
               </div>
-            );
-          })}
+            </Reveal>
+          ))}
         </div>
       </section>
 
@@ -709,6 +674,109 @@ export default function Home() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* Security — new end section 1 */}
+      <section id="security" className="scroll-mt-16 border-t border-slate-100 bg-white py-12 dark:border-white/5 dark:bg-[#0a0a0f] sm:py-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <Reveal dir="left">
+            <p className="text-center text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Security & privacy</p>
+            <h2 className="mt-2 text-center text-xl font-bold sm:text-2xl">Your docs stay yours.</h2>
+            <p className="mx-auto mt-2 max-w-xl text-center text-sm text-slate-500 dark:text-zinc-400">
+              No training on your data, no hidden retention. Just encryption, access control, and a paper trail.
+            </p>
+          </Reveal>
+          <div className="mt-8 grid gap-5 sm:grid-cols-3">
+            {[
+              { icon: Lock, title: "Encrypted at rest", desc: "Files and embeddings are encrypted at rest and in transit. Bring your own key in enterprise.", color: "from-indigo-500 to-violet-500" },
+              { icon: Shield, title: "Private by default", desc: "Public or private workspaces, role-based access (admin / member / viewer) and invite-only sharing.", color: "from-emerald-500 to-teal-500" },
+              { icon: FileKey, title: "Audit everything", desc: "Soft-delete trash, version history and a full activity log — so every answer is traceable.", color: "from-amber-500 to-orange-500" },
+            ].map((c, i) => (
+              <Reveal key={c.title} dir={i === 1 ? "up" : i === 0 ? "left" : "right"} delay={i * 100}>
+                <div className="group h-full rounded-2xl border border-slate-200 bg-slate-50/60 p-5 transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/[0.04]">
+                  <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${c.color} text-white`}>
+                    <c.icon className="h-5 w-5" />
+                  </div>
+                  <div className="text-sm font-semibold">{c.title}</div>
+                  <div className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-zinc-400">{c.desc}</div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Integrations — new end section 2 */}
+      <section id="integrations" className="scroll-mt-16 border-y border-slate-100 bg-slate-50/50 py-12 dark:border-white/5 dark:bg-white/[0.02] sm:py-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="lg:flex lg:items-center lg:justify-between lg:gap-10">
+            <Reveal dir="left" className="max-w-xl">
+              <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Works with your stack</p>
+              <h2 className="mt-2 text-xl font-bold sm:text-2xl">Drop files in, get answers out. No migration.</h2>
+              <p className="mt-3 text-sm leading-relaxed text-slate-500 dark:text-zinc-400">
+                PDF, DOCX, TXT and CSV today. Slack and Drive connectors in preview. Everything you upload is auto-chunked, embedded and indexed — no tagging required.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {["PDF", "DOCX", "TXT", "CSV", "Slack (soon)", "Drive (soon)", "Notion (soon)"].map((name) => (
+                  <span
+                    key={name}
+                    className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-zinc-300"
+                  >
+                    {name}
+                  </span>
+                ))}
+              </div>
+            </Reveal>
+            <Reveal dir="right" delay={120} className="mt-8 grid w-full max-w-sm grid-cols-2 gap-3 lg:mt-0">
+              <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-500/20 dark:bg-indigo-500/10">
+                <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-300">4+</div>
+                <div className="text-xs text-indigo-700/70 dark:text-indigo-200/70">file types supported today</div>
+              </div>
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/10">
+                <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-300">Zero</div>
+                <div className="text-xs text-emerald-700/70 dark:text-emerald-200/70">manual tagging required</div>
+              </div>
+              <div className="col-span-2 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#121212]">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+                  <Plug2 className="h-5 w-5" />
+                </span>
+                <div>
+                  <div className="text-sm font-semibold">Connectors coming soon</div>
+                  <div className="text-xs text-slate-500 dark:text-zinc-400">Slack, Google Drive, Notion — join the waitlist from your dashboard.</div>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Open source — new end section 3 */}
+      <section className="mx-auto max-w-3xl px-4 py-12 text-center sm:px-6 sm:py-16">
+        <Reveal dir="up">
+          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-900 to-slate-700 text-white dark:from-white dark:to-zinc-200 dark:text-black">
+            <Globe className="h-5 w-5" />
+          </div>
+          <h2 className="mt-3 text-xl font-bold sm:text-2xl">Open in spirit, free to start</h2>
+          <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-slate-500 dark:text-zinc-400">
+            Core search and chat are open and auditable. Start free, invite your team, and only think about pricing when you outgrow the hobby limits.
+          </p>
+          <div className="mt-5 flex flex-wrap justify-center gap-3">
+            <a
+              href="https://github.com/Harshal9865/AskDocs"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium shadow-sm hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+            >
+              <Globe className="h-4 w-4" /> View source
+            </a>
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-black dark:bg-white dark:text-black"
+            >
+              Start free <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </Reveal>
       </section>
 
       {/* Contact */}
