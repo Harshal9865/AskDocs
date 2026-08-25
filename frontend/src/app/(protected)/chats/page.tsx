@@ -222,8 +222,17 @@ export default function ChatsPage() {
     };
   }, [activeChat]);
 
+  // Scroll ONLY the inner thread container — never scrollIntoView, which also
+  // scrolls ancestor containers (main) and pushes the whole chat under the navbar.
+  function scrollToBottom(smooth = true) {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: smooth ? "smooth" : "auto" });
+  }
+
   useEffect(() => {
-    threadEnd.current?.scrollIntoView({ behavior: "smooth" });
+    scrollToBottom();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
   useEffect(() => {
@@ -779,7 +788,7 @@ export default function ChatsPage() {
             {/* jump to bottom */}
             {showJump && (
               <button
-                onClick={() => threadEnd.current?.scrollIntoView({ behavior: "smooth" })}
+                onClick={() => scrollToBottom()}
                 aria-label="Jump to latest"
                 className="absolute bottom-24 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-emerald-500/30 bg-white text-[#1DB954] shadow-lg transition-transform hover:scale-105 dark:border-emerald-500/20 dark:bg-[#2a3942] md:bottom-28"
               >
