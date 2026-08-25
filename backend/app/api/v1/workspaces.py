@@ -297,6 +297,8 @@ async def list_members(workspace_id: uuid.UUID, db: DbSession, membership: Membe
             status=u.status,
             location=u.location,
             pronouns=u.pronouns,
+            job_title=u.job_title,
+            job_role=u.job_role,
         )
         for m, u in result.all()
     ]

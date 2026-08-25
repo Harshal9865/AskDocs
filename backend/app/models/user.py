@@ -25,3 +25,5 @@ class User(BaseModel):
     status: Mapped[str | None] = mapped_column(String(120), nullable=True)
     location: Mapped[str | None] = mapped_column(String(120), nullable=True)
     pronouns: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    job_title: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    job_role: Mapped[str | None] = mapped_column(String(120), nullable=True)

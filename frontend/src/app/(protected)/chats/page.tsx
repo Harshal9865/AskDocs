@@ -14,6 +14,7 @@ import {
   CheckCheck,
   EyeOff,
   MessagesSquare,
+  Search,
   Trash2,
   UsersRound,
 } from "lucide-react";
@@ -161,9 +162,13 @@ export default function ChatsPage() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [showNewGroup, setShowNewGroup] = useState(false);
+  const [showNewChat, setShowNewChat] = useState(false);
+  const [newChatQuery, setNewChatQuery] = useState("");
+  const [newChatResults, setNewChatResults] = useState<Member[]>([]);
   const [groupTitle, setGroupTitle] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [filter, setFilter] = useState<ChipFilter>("all");
+  const [query, setQuery] = useState("");
   const [showJump, setShowJump] = useState(false);
   const [heart, setHeart] = useState<{ id: string; k: number } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -220,6 +225,30 @@ export default function ChatsPage() {
   useEffect(() => {
     threadEnd.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    if (!showNewChat) return;
+    const q = newChatQuery.trim();
+    if (q.length < 2) {
+      setNewChatResults([]);
+      return;
+    }
+    let cancelled = false;
+    const t = setTimeout(() => {
+      api
+        .searchUsers(q)
+        .then((res) => {
+          if (!cancelled) setNewChatResults(res);
+        })
+        .catch(() => {
+          if (!cancelled) setNewChatResults([]);
+        });
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [newChatQuery, showNewChat]);
 
   async function openDM(member: Member) {
     if (!workspace) return;
@@ -321,6 +350,16 @@ export default function ChatsPage() {
     activeChat?.participants.find((p) => p.user_id === senderId)?.name ??
     "You";
 
+  const needle = query.trim().toLowerCase();
+  const matches = (name?: string | null, email?: string | null) =>
+    !needle ||
+    (name ?? "").toLowerCase().includes(needle) ||
+    (email ?? "").toLowerCase().includes(needle);
+
+  const filteredColleagues = colleagues.filter((m) => matches(m.name, m.email));
+  const onlineColleagues = filteredColleagues.filter((m) => m.online);
+  const unreadTotal = chats.reduce((n, c) => n + (c.unread_count > 0 ? 1 : 0), 0);
+
   const visibleChats = chats
     .filter((c) =>
       filter === "all"
@@ -331,14 +370,16 @@ export default function ChatsPage() {
             ? c.type === "group"
             : c.unread_count > 0,
     )
+    .filter(
+      (c) =>
+        matches(chatTitle(c, user?.email), null) ||
+        c.participants.some((p) => matches(p.name, p.email)),
+    )
     .sort(
       (a, b) =>
         new Date(b.last_message_at ?? b.created_at).getTime() -
         new Date(a.last_message_at ?? a.created_at).getTime(),
     );
-
-  const onlineColleagues = colleagues.filter((m) => m.online);
-  const unreadTotal = chats.reduce((n, c) => n + (c.unread_count > 0 ? 1 : 0), 0);
 
   const chips: { key: ChipFilter; label: string; count?: number }[] = [
     { key: "all", label: "All", count: chats.length },
@@ -357,19 +398,39 @@ export default function ChatsPage() {
         <div className="relative z-10 flex flex-col">
           {/* header */}
           <div className="sticky top-0 z-10 border-b border-slate-100 bg-white/95 px-3 pb-2 pt-3 backdrop-blur dark:border-white/5 dark:bg-[#0b0f14]/95">
-            <div className="mb-2 flex items-center justify-between">
+            <div className="mb-2 flex items-center justify-between gap-1">
               <h2 className="text-base font-bold text-slate-900 dark:text-white">Chats</h2>
-              <button
-                onClick={() => setShowNewGroup(true)}
-                aria-label="Create group chat"
-                title="New group chat"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1DB954] text-black transition-colors hover:bg-[#1ed760]"
-              >
-                <UsersRound className="h-4 w-4" />
-              </button>
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  onClick={() => setShowNewChat(true)}
+                  aria-label="New chat"
+                  title="New chat (search anyone)"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-white transition-colors hover:bg-black dark:bg-white dark:text-black"
+                >
+                  <MessagesSquare className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setShowNewGroup(true)}
+                  aria-label="Create group chat"
+                  title="New group chat"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1DB954] text-black transition-colors hover:bg-[#1ed760]"
+                >
+                  <UsersRound className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+            {/* mini search — WhatsApp style, filters by name or email */}
+            <div className="relative mb-2">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search name or email…"
+                className="dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-zinc-500 w-full rounded-full border border-slate-200 bg-slate-50 py-1.5 pl-8 pr-3 text-xs outline-none placeholder:text-slate-400 focus:border-[#1DB954]/40"
+              />
             </div>
             {/* chips */}
-            <div className="flex gap-1.5 overflow-x-auto pb-1">
+            <div className="flex flex-wrap gap-1.5">
               {chips.map((c) => (
                 <button
                   key={c.key}
@@ -417,13 +478,13 @@ export default function ChatsPage() {
             <div className="mb-1 px-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
               Office mates
             </div>
-            {colleagues.length === 0 ? (
+            {filteredColleagues.length === 0 ? (
               <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500 dark:bg-white/5 dark:text-zinc-400">
-                No colleagues yet — invite your team from the Members page.
+                {query ? "No matches" : "No colleagues yet — invite your team from the Members page."}
               </p>
             ) : (
               <ul>
-                {colleagues.map((m) => (
+                {filteredColleagues.map((m) => (
                   <li key={m.user_id}>
                     <button
                       onClick={() => void openDM(m)}
@@ -746,6 +807,107 @@ export default function ChatsPage() {
           </>
         )}
       </div>
+
+      {/* new chat picker — search anyone, any workspace */}
+      {showNewChat && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
+          onClick={() => {
+            setShowNewChat(false);
+            setNewChatQuery("");
+            setNewChatResults([]);
+          }}
+        >
+          <div
+            className="max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-5 shadow-xl dark:bg-[#181818]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="mb-3 text-lg font-bold text-slate-900 dark:text-white">New chat</h2>
+            <div className="relative mb-4">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                autoFocus
+                value={newChatQuery}
+                onChange={(e) => setNewChatQuery(e.target.value)}
+                placeholder="Search name or email (any workspace)…"
+                className="w-full rounded-full border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm dark:border-white/10 dark:bg-[#242424] dark:text-white"
+              />
+            </div>
+
+            {/* workspace colleagues (always shown, filtered locally) */}
+            {newChatQuery.trim().length < 2 && (
+              <>
+                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Your workspace
+                </h3>
+                {colleagues.length === 0 ? (
+                  <p className="mb-4 text-sm text-slate-500">No colleagues yet.</p>
+                ) : (
+                  <ul className="mb-4 space-y-1">
+                    {colleagues.map((m) => (
+                      <li key={m.user_id}>
+                        <button
+                          onClick={() => {
+                            setShowNewChat(false);
+                            void openDM(m);
+                          }}
+                          className="wa-row flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left"
+                        >
+                          <ChatAvatar user={m} size={36} />
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-sm font-medium text-slate-900 dark:text-white">
+                              {m.name || m.email}
+                            </span>
+                            <span className={`block text-xs ${m.online ? "text-[#1DB954]" : "text-slate-400 dark:text-zinc-500"}`}>
+                              {m.online ? "Online" : "Offline"}
+                            </span>
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
+            )}
+
+            {/* global search results (any workspace) */}
+            {newChatQuery.trim().length >= 2 && (
+              <>
+                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Global results
+                </h3>
+                {newChatResults.length === 0 ? (
+                  <p className="text-sm text-slate-500">No users found.</p>
+                ) : (
+                  <ul className="space-y-1">
+                    {newChatResults.map((m) => (
+                      <li key={m.user_id}>
+                        <button
+                          onClick={() => {
+                            setShowNewChat(false);
+                            void openDM(m);
+                          }}
+                          className="wa-row flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left"
+                        >
+                          <ChatAvatar user={m} size={36} />
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-sm font-medium text-slate-900 dark:text-white">
+                              {m.name || m.email}
+                            </span>
+                            <span className="block truncate text-xs text-slate-400 dark:text-zinc-500">
+                              {m.email}
+                            </span>
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* new group modal */}
       {showNewGroup && (

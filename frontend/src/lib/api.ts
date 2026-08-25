@@ -311,6 +311,9 @@ export const api = {
     request<{ status: string }>(`/friends/${friendId}`, { method: "DELETE" }),
   friendSuggestions: (wsId: string) =>
     request<Member[]>(`/friends/suggestions?workspace_id=${wsId}`),
+  /** Global user search across any workspace (for friends / cross-workspace DMs). */
+  searchUsers: (q: string) =>
+    request<Member[]>(`/friends/search?q=${encodeURIComponent(q)}`),
 
   // ---- profile / settings ----
   getUserProfile: (userId: string) => request<User>(`/auth/users/${userId}`),

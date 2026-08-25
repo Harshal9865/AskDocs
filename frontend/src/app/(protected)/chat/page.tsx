@@ -230,6 +230,17 @@ export default function ChatPage() {
     const fullQuestion = [question, attachmentText].filter(Boolean).join("\n\n");
 
     let done = false;
+    // Safety net: never leave the typing cursor stuck if stream events are lost
+    const streamTimeout = setTimeout(() => {
+      if (!done) {
+        setMessages((prev) => {
+          const next = [...prev];
+          const last = next[next.length - 1];
+          next[next.length - 1] = { ...last, streaming: false };
+          return next;
+        });
+      }
+    }, 45000);
     await api.askStream(
       activeConv.id,
       fullQuestion,
@@ -280,6 +291,7 @@ export default function ChatPage() {
         });
       },
     );
+    clearTimeout(streamTimeout);
     if (!done) {
       setMessages((prev) => {
         const next = [...prev];

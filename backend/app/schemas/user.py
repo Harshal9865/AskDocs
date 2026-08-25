@@ -24,6 +24,8 @@ class UserOut(BaseModel):
     status: str | None = None
     location: str | None = None
     pronouns: str | None = None
+    job_title: str | None = None
+    job_role: str | None = None
 
 
 class ProfileUpdate(BaseModel):
@@ -33,6 +35,8 @@ class ProfileUpdate(BaseModel):
     status: str | None = None
     location: str | None = None
     pronouns: str | None = None
+    job_title: str | None = None
+    job_role: str | None = None
 
 
 class TokenPair(BaseModel):

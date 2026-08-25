@@ -67,6 +67,31 @@ export default function FriendsPage() {
     void loadAll();
   }, [loadAll]);
 
+  // Global user search across any workspace (fires when query >= 2 chars)
+  const [globalResults, setGlobalResults] = useState<Member[]>([]);
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < 2) {
+      setGlobalResults([]);
+      return;
+    }
+    let cancelled = false;
+    const t = setTimeout(() => {
+      api
+        .searchUsers(q)
+        .then((res) => {
+          if (!cancelled) setGlobalResults(res);
+        })
+        .catch(() => {
+          if (!cancelled) setGlobalResults([]);
+        });
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [query]);
+
   async function act(id: string, fn: () => Promise<unknown>) {
     setBusy(id);
     try {
@@ -127,6 +152,42 @@ export default function FriendsPage() {
       <div className="mt-6 space-y-3">
         {tab === "suggested" && (
           <>
+            {/* Global search results (any workspace) when searching */}
+            {query.trim().length >= 2 && (
+              <>
+                <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Global results
+                </h2>
+                {globalResults.length === 0 ? (
+                  <p className="mb-6 rounded-xl border border-dashed p-6 text-center text-sm text-slate-500">
+                    No users found for “{query.trim()}”.
+                  </p>
+                ) : (
+                  <div className="mb-8 space-y-3">
+                    {globalResults
+                      .filter((g) => !suggested.some((s) => s.user_id === g.user_id))
+                      .map((g) => (
+                        <FriendCard
+                          key={g.user_id}
+                          member={g}
+                          action={
+                            <button
+                              disabled={busy === g.user_id}
+                              onClick={() => act(g.user_id, () => api.sendFriendRequest(g.user_id))}
+                              className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                            >
+                              <UserPlus className="h-3.5 w-3.5" /> Add
+                            </button>
+                          }
+                        />
+                      ))}
+                  </div>
+                )}
+              </>
+            )}
+            <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+              From your workspaces
+            </h2>
             {filterByQuery(suggested).length === 0 ? (
               <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-white/5">
                 No suggestions — invite colleagues from Members.

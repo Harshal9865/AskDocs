@@ -515,15 +515,15 @@ export default function Home() {
               href={user ? "/dashboard" : "/register"}
               className="rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-indigo-500 dark:bg-[#1DB954] dark:text-black"
             >
-              {user ? "Go to Dashboard" : "Create account"}
-            </Link>
-            <Link
-              href="/login"
-              className="rounded-full border border-slate-200 bg-white px-6 py-2.5 text-sm font-medium hover:bg-slate-50 dark:border-white/10 dark:bg-white/5"
-            >
-              Log in
+              {user ? "Go to Dashboard" : "Create free account"}
             </Link>
           </div>
+          <p className="mt-3 text-xs text-slate-400 dark:text-zinc-500">
+            Already have an account?{" "}
+            <Link href="/login" className="font-medium text-indigo-600 hover:underline dark:text-[#1DB954]">
+              Log in
+            </Link>
+          </p>
         </div>
       </section>
 

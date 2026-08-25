@@ -225,6 +225,16 @@ async def update_me(payload: SchemaProfileUpdate, db: DbSession, user: CurrentUs
         user.location = payload.location.strip()[:120] or None
     if payload.pronouns is not None:
         user.pronouns = payload.pronouns.strip()[:50] or None
+    if payload.job_title is not None:
+        jt = payload.job_title.strip()[:120]
+        if jt and jt.lower() in ("", "none", "null"):
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Job title cannot be empty — use “Prefer not to say”")
+        user.job_title = jt or None
+    if payload.job_role is not None:
+        jr = payload.job_role.strip()[:120]
+        if jr and jr.lower() in ("", "none", "null"):
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Job role cannot be empty — use “Prefer not to say”")
+        user.job_role = jr or None
     await db.commit()
     await db.refresh(user)
     return user
