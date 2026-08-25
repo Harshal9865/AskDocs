@@ -25,7 +25,6 @@ import { useWorkspace } from "@/lib/workspace-context";
 import Colleagues from "@/components/Colleagues";
 
 const NAV = [
-  { href: "/", label: "Home", icon: Compass },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/chat", label: "AI Chat", icon: Sparkles },
   { href: "/chats", label: "Office Chats", icon: MessagesSquare },
@@ -303,13 +302,13 @@ export default function Sidebar({
                 collapsed ? "justify-center px-0" : ""
               } ${
                 active
-                  ? "dark:bg-amber-500/10 dark:text-amber-300 bg-amber-50 text-amber-800 ring-1 ring-amber-200 dark:ring-amber-400/20"
+                  ? "dark:bg-slate-800 dark:text-indigo-400 bg-white text-indigo-700 shadow-sm ring-1 ring-slate-900/5"
                   : "dark:text-slate-400 dark:hover:bg-slate-800/50 text-slate-600 hover:bg-slate-900/5"
               }`}
             >
               <Icon
                 aria-hidden
-                className={`h-4 w-4 shrink-0 ${active ? "text-amber-600 dark:text-amber-400" : "text-slate-500"}`}
+                className={`h-4 w-4 shrink-0 ${active ? "text-indigo-600" : "text-slate-500"}`}
               />
               {!collapsed && <span className="truncate">{item.label}</span>}
             </Link>
@@ -333,13 +332,13 @@ export default function Sidebar({
                 collapsed ? "justify-center px-0" : ""
               } ${
                 active
-                  ? "dark:bg-amber-500/10 dark:text-amber-300 bg-amber-50 text-amber-800 ring-1 ring-amber-200 dark:ring-amber-400/20"
+                  ? "dark:bg-slate-800 dark:text-indigo-400 bg-white text-indigo-700 shadow-sm ring-1 ring-slate-900/5"
                   : "dark:text-slate-400 dark:hover:bg-slate-800/50 text-slate-600 hover:bg-slate-900/5"
               }`}
             >
               <Icon
                 aria-hidden
-                className={`h-4 w-4 shrink-0 ${active ? "text-amber-600 dark:text-amber-400" : "text-slate-500"}`}
+                className={`h-4 w-4 shrink-0 ${active ? "text-indigo-600" : "text-slate-500"}`}
               />
               {!collapsed && <span className="truncate">{item.label}</span>}
             </Link>

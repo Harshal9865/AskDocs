@@ -605,7 +605,10 @@ button.bg-indigo-600:hover {
 }
 .dark .ask-aurora-blob--1 { opacity: 1; filter: blur(30px); }
 .dark .ask-aurora-blob--2 { opacity: 1; filter: blur(28px); }
-.dark .ask-aurora-blob--3 { opacity: 0.75; }
+.dark .ask-aurora-blob--3 {
+  opacity: 0.75;
+  background: radial-gradient(ellipse at center, #22d3ee 0%, #1DB954 60%, transparent 78%);
+}
 .ask-aurora-wrap:focus-within .ask-aurora-blob { filter: blur(32px); opacity: 1; }
 .ask-aurora-wrap--green .ask-aurora-blob--1 {
   background: radial-gradient(ellipse at center, #1DB954 0%, #22d3ee 55%, transparent 75%);
