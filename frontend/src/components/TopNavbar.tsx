@@ -58,7 +58,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
   }, [menuOpen]);
 
   return (
-    <header className="dark:border-slate-700/50 dark:bg-[#181818] fixed inset-x-0 top-0 z-30 flex h-14 items-center gap-3 border-b border-slate-200 bg-white px-3 transition-colors sm:px-5">
+    <header className="dark:border-amber-500/10 dark:bg-[#121212] fixed inset-x-0 top-0 z-30 flex h-14 items-center gap-3 border-b border-slate-200 bg-white px-3 shadow-[0_1px_0_0_rgba(251,191,36,0.08)] transition-colors dark:shadow-[0_1px_0_0_rgba(251,191,36,0.12)] sm:px-5">
       {/* mobile hamburger */}
       {onMenu && (
         <button
@@ -117,11 +117,11 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
               href={href}
               className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
                 active
-                  ? "bg-slate-900 text-white dark:bg-white dark:text-black"
+                  ? "bg-amber-100 text-amber-900 ring-1 ring-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-400/25"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white"
               }`}
             >
-              <Icon className="h-3.5 w-3.5" />
+              <Icon className={`h-3.5 w-3.5 ${active ? "text-amber-600 dark:text-amber-400" : ""}`} />
               {label}
             </Link>
           );
@@ -129,9 +129,9 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         {workspace && (
           <span
             title={`Workspace: ${workspace.name}`}
-            className="ml-2 flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300"
+            className="ml-2 flex items-center gap-1.5 rounded-full border border-amber-200/60 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-300"
           >
-            <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+            <span className="h-2 w-2 shrink-0 rounded-full bg-amber-400" />
             <span className="hidden max-w-[120px] truncate xl:inline">{workspace.name}</span>
             <span className="xl:hidden">{(workspace.name || "?").slice(0, 1).toUpperCase()}</span>
           </span>
@@ -174,18 +174,18 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
                     }}
                     className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors ${
                       active
-                        ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300"
+                        ? "bg-amber-50 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300"
                         : "text-slate-700 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
                     }`}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className={`h-4 w-4 ${active ? "text-amber-600 dark:text-amber-400" : ""}`} />
                     {label}
                   </button>
                 );
               })}
               {workspace && (
                 <div className="dark:border-white/10 mt-1 flex items-center gap-2 border-t border-slate-100 px-3 pb-1.5 pt-2 text-xs text-slate-500 dark:text-zinc-400">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                  <span className="h-2 w-2 rounded-full bg-amber-400" />
                   <span className="truncate">{workspace.name}</span>
                 </div>
               )}
@@ -208,7 +208,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search…"
-          className="dark:border-slate-600 dark:bg-[#242424] dark:text-white dark:placeholder:text-slate-500 dark:focus:border-indigo-500 dark:focus:bg-[#2a2a2a] w-full rounded-lg border border-slate-300 bg-white py-1.5 pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-500/20"
+          className="dark:border-slate-600 dark:bg-[#242424] dark:text-white dark:placeholder:text-slate-500 dark:focus:border-amber-400 dark:focus:bg-[#2a2a2a] w-full rounded-lg border border-slate-300 bg-white py-1.5 pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-slate-400 focus:border-amber-400 focus:bg-white focus:ring-2 focus:ring-amber-100 dark:focus:ring-amber-500/20"
         />
       </form>
 
