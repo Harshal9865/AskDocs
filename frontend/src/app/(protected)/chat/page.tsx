@@ -581,7 +581,10 @@ export default function ChatPage() {
             inputId="chat-input"
             value={input}
             onChange={setInput}
-            onSend={(text, attachments) => void sendWithText(text, attachments)}
+            onSend={(text, attachments) => {
+              setInput("");
+              void sendWithText(text, attachments);
+            }}
             disabled={false}
             busy={busy}
             placeholder="Ask a question…"
