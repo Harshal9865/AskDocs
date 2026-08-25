@@ -6,6 +6,24 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import Avatar from "@/components/Avatar";
 
+const JOB_TITLES = [
+  "Intern",
+  "Junior Engineer",
+  "Mid-level Engineer",
+  "Senior Engineer",
+  "Staff Engineer",
+  "Lead Engineer",
+  "Principal Engineer",
+  "Engineering Manager",
+  "Product Manager",
+  "Product Designer",
+  "UI/UX Designer",
+  "Data Scientist",
+  "Prefer not to say",
+];
+const JOB_ROLES = ["Engineering", "Design", "Product", "Marketing", "Sales", "Operations", "HR", "Finance", "Support", "Research", "Prefer not to say"];
+const PRONOUNS = ["he/him", "she/her", "they/them", "he/they", "she/they", "any", "Prefer not to say"];
+
 export default function OnboardingPage() {
   const { user, refreshUser } = useAuth();
   const router = useRouter();
@@ -14,6 +32,8 @@ export default function OnboardingPage() {
   const [status, setStatus] = useState("");
   const [location, setLocation] = useState("");
   const [pronouns, setPronouns] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [jobRole, setJobRole] = useState("");
   const [busy, setBusy] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -25,8 +45,17 @@ export default function OnboardingPage() {
       setStatus(user.status || "");
       setLocation(user.location || "");
       setPronouns(user.pronouns || "");
+      setJobTitle(user.job_title || "");
+      setJobRole(user.job_role || "");
     }
   }, [user]);
+
+  const mandatoryOk =
+    bio.trim().length > 0 &&
+    status.trim().length > 0 &&
+    pronouns.trim().length > 0 &&
+    jobTitle.trim().length > 0 &&
+    jobRole.trim().length > 0;
 
   async function handleSave(skip = false) {
     if (skip) {
@@ -39,7 +68,15 @@ export default function OnboardingPage() {
       if (avatarFile) {
         await api.uploadAvatarPhoto(avatarFile);
       }
-      await api.updateMe({ bio: bio || null, phone: phone || null, status: status || null, location: location || null, pronouns: pronouns || null });
+      await api.updateMe({
+        bio: bio || null,
+        phone: phone || null,
+        status: status || null,
+        location: location || null,
+        pronouns: pronouns || null,
+        job_title: jobTitle || null,
+        job_role: jobRole || null,
+      });
       await refreshUser();
       localStorage.setItem("askdocs_onboarded", "1");
       router.replace("/dashboard");
@@ -88,7 +125,9 @@ export default function OnboardingPage() {
 
         <div className="mt-6 space-y-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">Status</label>
+            <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">
+              Status <span className="text-red-500">*</span>
+            </label>
             <input
               value={status}
               onChange={(e) => setStatus(e.target.value)}
@@ -98,7 +137,9 @@ export default function OnboardingPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">Bio</label>
+            <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">
+              Bio <span className="text-red-500">*</span>
+            </label>
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
@@ -110,7 +151,45 @@ export default function OnboardingPage() {
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">Phone</label>
+              <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">
+                Job Title <span className="text-red-500">*</span>
+              </label>
+              <input
+                list="job-titles"
+                value={jobTitle}
+                onChange={(e) => setJobTitle(e.target.value)}
+                placeholder="e.g. Senior Engineer"
+                maxLength={120}
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#181818] dark:text-white"
+              />
+              <datalist id="job-titles">
+                {JOB_TITLES.map((t) => (
+                  <option key={t} value={t} />
+                ))}
+              </datalist>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">
+                Job Role / Domain <span className="text-red-500">*</span>
+              </label>
+              <input
+                list="job-roles"
+                value={jobRole}
+                onChange={(e) => setJobRole(e.target.value)}
+                placeholder="e.g. Engineering"
+                maxLength={120}
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#181818] dark:text-white"
+              />
+              <datalist id="job-roles">
+                {JOB_ROLES.map((r) => (
+                  <option key={r} value={r} />
+                ))}
+              </datalist>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">Phone <span className="text-slate-400 font-normal">(optional)</span></label>
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
@@ -120,18 +199,28 @@ export default function OnboardingPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">Pronouns</label>
+              <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">
+                Pronouns <span className="text-red-500">*</span>
+              </label>
               <input
+                list="pronouns-list"
                 value={pronouns}
                 onChange={(e) => setPronouns(e.target.value)}
                 placeholder="he/him, she/her, they/them"
                 maxLength={50}
                 className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#181818] dark:text-white"
               />
+              <datalist id="pronouns-list">
+                {PRONOUNS.map((p) => (
+                  <option key={p} value={p} />
+                ))}
+              </datalist>
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">Location</label>
+            <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">
+              Location <span className="text-slate-400 font-normal">(optional)</span>
+            </label>
             <input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
@@ -142,6 +231,11 @@ export default function OnboardingPage() {
           </div>
         </div>
 
+        {!mandatoryOk && (
+          <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+            * Please fill all mandatory fields (bio, status, pronouns, job title &amp; role). You can use “Prefer not to say” to skip a field.
+          </p>
+        )}
         <div className="mt-8 flex justify-between gap-3">
           <button
             onClick={() => handleSave(true)}
@@ -152,7 +246,7 @@ export default function OnboardingPage() {
           </button>
           <button
             onClick={() => handleSave(false)}
-            disabled={busy}
+            disabled={busy || !mandatoryOk}
             className="rounded-full bg-slate-900 px-6 py-2 text-sm font-medium text-white hover:bg-black disabled:opacity-50 dark:bg-white dark:text-black"
           >
             {busy ? "Saving…" : "Save & continue"}

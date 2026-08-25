@@ -12,6 +12,8 @@ export interface User {
   status?: string | null;
   location?: string | null;
   pronouns?: string | null;
+  job_title?: string | null;
+  job_role?: string | null;
 }
 
 export interface TokenPair {
@@ -55,6 +57,8 @@ export interface Member {
   status?: string | null;
   location?: string | null;
   pronouns?: string | null;
+  job_title?: string | null;
+  job_role?: string | null;
 }
 
 export interface Invitation {
@@ -92,6 +96,13 @@ export interface Participant {
   online: boolean;
   avatar_kind?: string | null;
   avatar_value?: string | null;
+  bio?: string | null;
+  phone?: string | null;
+  status?: string | null;
+  location?: string | null;
+  pronouns?: string | null;
+  job_title?: string | null;
+  job_role?: string | null;
 }
 
 export interface TeamChat {

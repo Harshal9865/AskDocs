@@ -373,7 +373,7 @@ export default function ChatPage() {
         <div className="gemini-orb gemini-orb-2" />
         <div className="gemini-orb gemini-orb-3" />
         {/* thread header — WhatsApp style on mobile */}
-        <div className="relative z-10 flex items-center gap-2 border-b border-slate-100 px-2 py-2 dark:border-white/5 sm:px-4">
+        <div className="relative z-10 flex items-center gap-2 rounded-t-xl border-b border-slate-100 bg-white px-2 py-2 dark:border-white/5 dark:bg-[#13132b] sm:px-4">
           <button
             onClick={() => {
               setActiveConv(null);
@@ -555,7 +555,7 @@ export default function ChatPage() {
         )}
 
         {/* composer — aurora glow, lifted from bottom border */}
-        <div className="relative z-10 border-t border-indigo-100/60 px-3 pb-4 pt-3 dark:border-indigo-500/10 sm:px-4 sm:pb-5 sm:pt-3">
+        <div className="relative z-10 rounded-b-xl border-t border-indigo-100/60 bg-white px-3 pb-4 pt-3 dark:border-indigo-500/10 dark:bg-[#13132b] sm:px-4 sm:pb-5 sm:pt-3">
           <ChatComposer
             inputId="chat-input"
             value={input}

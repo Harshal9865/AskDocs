@@ -389,11 +389,11 @@ button.bg-indigo-600:hover {
 /* Centralized chat viewport height (single source of truth).
    Accounts for: fixed navbar h-14 + main padding. */
 :root {
-  --chat-h: calc(100dvh - 3.5rem - 2rem);
+  --chat-h: calc(100dvh - 3.5rem - 2rem - 1px);
 }
 @media (min-width: 768px) {
   :root {
-    --chat-h: calc(100vh - 3.5rem - 3rem);
+    --chat-h: calc(100dvh - 3.5rem - 3rem - 1px);
   }
 }
 

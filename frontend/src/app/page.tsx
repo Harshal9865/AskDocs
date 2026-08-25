@@ -71,7 +71,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white text-slate-900 dark:bg-[#070b0e] dark:text-white">
-      {/* Top bar */}
+      {/* Top bar — HomeNavbar */}
       <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-200 bg-white/80 px-4 backdrop-blur dark:border-white/5 dark:bg-[#070b0e]/80 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -80,14 +80,34 @@ export default function Home() {
           <img src="/logo-night.svg" alt="AskDocs" className="hidden h-7 w-7 dark:block" />
           <span className="text-[15px] font-bold tracking-tight">AskDocs</span>
         </Link>
+        <nav className="hidden items-center gap-1 md:flex">
+          <a href="#how-it-works" className="rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10">
+            How it works
+          </a>
+          <a href="#features" className="rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10">
+            Features
+          </a>
+          <Link href="/#reviews" className="rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10">
+            Reviews
+          </Link>
+          <a href="#contact" className="rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10">
+            Contact
+          </a>
+        </nav>
         <div className="flex items-center gap-2">
           <ThemeToggle dark={dark} onToggle={toggle} />
+          <Link
+            href="/dashboard"
+            className="hidden rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-white sm:inline"
+          >
+            Workspace
+          </Link>
           {user ? (
             <Link
               href="/dashboard"
               className="rounded-full bg-slate-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-black dark:bg-white dark:text-black dark:hover:bg-zinc-100"
             >
-              Go to Dashboard
+              Dashboard
             </Link>
           ) : (
             <>

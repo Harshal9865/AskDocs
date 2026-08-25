@@ -25,9 +25,11 @@ import { useWorkspace } from "@/lib/workspace-context";
 import Colleagues from "@/components/Colleagues";
 
 const NAV = [
+  { href: "/", label: "Home", icon: Compass },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/chat", label: "AI Chat", icon: Sparkles },
   { href: "/chats", label: "Office Chats", icon: MessagesSquare },
+  { href: "/friends", label: "Friends", icon: UsersRound },
   { href: "/documents", label: "Documents", icon: FileText },
   { href: "/search", label: "Search", icon: Search },
   { href: "/discover", label: "Discover", icon: Compass },
@@ -193,13 +195,13 @@ export default function Sidebar({
 
         {mobileOpen && (
           <div className="flex items-center justify-between border-b border-slate-100 p-3 dark:border-slate-700/50 md:hidden">
-            <span className="flex items-center gap-2 text-sm font-bold">
+            <Link href="/" onClick={onCloseMobile} className="flex items-center gap-2 text-sm font-bold">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo-day.svg" alt="AskDocs" className="h-6 w-6 dark:hidden" />
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo-night.svg" alt="AskDocs" className="hidden h-6 w-6 dark:block" />
               AskDocs
-            </span>
+            </Link>
             <button
               onClick={onCloseMobile}
               aria-label="Close menu"

@@ -29,19 +29,22 @@ class FriendOut(BaseModel):
     created_at: object
 
 
-def _user_to_friend(u: User, status: str, created_at: object) -> FriendOut:
+def _user_to_friend(u: User, friendship: Friendship | None, status: str | None = None, created_at: object | None = None) -> FriendOut:
     from app.api.v1.presence import is_online
 
+    fid = friendship.id if friendship else uuid.uuid4()
+    st = friendship.status if friendship else (status or "none")
+    ca = friendship.created_at if friendship else created_at
     return FriendOut(
-        id=uuid.uuid4(),
+        id=fid,
         user_id=u.id,
         name=u.name,
         email=u.email,
         avatar_kind=u.avatar_kind,
         avatar_value=u.avatar_value,
         online=is_online(u.last_seen_at),
-        status=status,
-        created_at=created_at,
+        status=st,
+        created_at=ca,
     )
 
 
@@ -106,7 +109,7 @@ async def list_friend_requests(db: DbSession, user: CurrentUser):
         .join(User, User.id == Friendship.requester_id)
         .where(Friendship.addressee_id == user.id, Friendship.status == "pending")
     )
-    return [_user_to_friend(u, "pending", f.created_at) for f, u in result.all()]
+    return [_user_to_friend(u, f) for f, u in result.all()]
 
 
 @router.get("/friends")
@@ -121,7 +124,7 @@ async def list_friends(db: DbSession, user: CurrentUser):
             .where(Friendship.addressee_id == user.id, Friendship.status == "accepted")
         )
     )
-    return [_user_to_friend(u, "accepted", f.created_at) for f, u in result.all()]
+    return [_user_to_friend(u, f) for f, u in result.all()]
 
 
 @router.post("/friends/{friend_id}/accept")
@@ -230,4 +233,33 @@ async def friend_suggestions(
         )
     )
     users = result.scalars().all()
-    return [_user_to_friend(u, "none", None) for u in users]
+    return [_user_to_friend(u, None, "none", None) for u in users]
+
+
+@router.get("/friends/search")
+async def search_users(q: str, db: DbSession, user: CurrentUser):
+    """Global user search for friends — any workspace."""
+    if not q or len(q.strip()) < 2:
+        return []
+    like = f"%{q.strip()}%"
+    result = await db.execute(
+        select(User).where(
+            User.id != user.id,
+            (User.name.ilike(like) | User.email.ilike(like)),
+        ).limit(20)
+    )
+    users = result.scalars().all()
+    # annotate with existing friendship status if any
+    out = []
+    for u in users:
+        fr = await db.execute(
+            select(Friendship).where(
+                or_(
+                    (Friendship.requester_id == user.id) & (Friendship.addressee_id == u.id),
+                    (Friendship.requester_id == u.id) & (Friendship.addressee_id == user.id),
+                )
+            )
+        )
+        f = fr.scalar_one_or_none()
+        out.append(_user_to_friend(u, f, f.status if f else "none", f.created_at if f else None) if f else _user_to_friend(u, None, "none", None))
+    return out

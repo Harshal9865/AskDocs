@@ -324,6 +324,8 @@ export const api = {
           status?: string | null;
           location?: string | null;
           pronouns?: string | null;
+          job_title?: string | null;
+          job_role?: string | null;
         },
   ) => {
     const body = typeof payload === "string" ? { name: payload } : payload;
@@ -513,6 +515,22 @@ export const api = {
           } catch {
             /* skip malformed line */
           }
+        }
+      }
+      // Flush any remaining buffered event (handles streams that end without trailing \n\n)
+      if (buffer.trim().startsWith("data: ")) {
+        try {
+          const event = JSON.parse(buffer.trim().slice(6));
+          if (event.type === "done")
+            onDone(
+              event.citations ?? [],
+              event.suggested_colleagues ?? [],
+              event.conflict ?? null,
+              event.freshness ?? null,
+            );
+          else if (event.type === "error") onError?.(event.message);
+        } catch {
+          /* ignore */
         }
       }
     } catch (err) {

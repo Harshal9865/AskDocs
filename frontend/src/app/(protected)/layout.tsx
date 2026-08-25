@@ -23,11 +23,17 @@ export default function ProtectedLayout({
     if (!loading && !user) router.replace("/login");
   }, [loading, user, router]);
 
-  // Onboarding guard: if profile incomplete and not skipped, force onboarding
+  // Onboarding guard: mandatory = bio, status, pronouns, job_title, job_role
   useEffect(() => {
     if (loading || !user) return;
     const onboarded = typeof window !== "undefined" ? localStorage.getItem("askdocs_onboarded") : "1";
-    const hasProfile = !!(user.bio || user.phone || user.status || user.location || user.pronouns);
+    const hasProfile = !!(
+      user.bio &&
+      user.status &&
+      user.pronouns &&
+      (user as unknown as { job_title?: string | null }).job_title &&
+      (user as unknown as { job_role?: string | null }).job_role
+    );
     if (!onboarded && !hasProfile && pathname !== "/onboarding") {
       router.replace("/onboarding");
     }

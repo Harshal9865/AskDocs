@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText } from "lucide-react";
+import { ChevronDown, Compass, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, UsersRound } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -75,7 +75,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
       )}
       {/* brand */}
       <button
-        onClick={() => router.push("/dashboard")}
+        onClick={() => router.push("/")}
         className="flex shrink-0 items-center gap-2"
         aria-label="AskDocs home"
       >
@@ -103,9 +103,11 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
       {/* desktop nav — fills the empty middle (collapses to More sheet <lg) */}
       <nav className="hidden items-center gap-1 lg:flex">
         {[
+          { href: "/", label: "Home", Icon: Compass },
           { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
           { href: "/chat", label: "AI Chat", Icon: Sparkles },
           { href: "/chats", label: "Office Chats", Icon: MessagesSquare },
+          { href: "/friends", label: "Friends", Icon: UsersRound },
           { href: "/documents", label: "Documents", Icon: FileText },
         ].map(({ href, label, Icon }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
@@ -155,9 +157,11 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
             <div className="fixed inset-0 z-40" onClick={() => setMoreOpen(false)} />
             <div className="dark:border-white/10 dark:bg-[#242424] absolute left-0 z-50 mt-2 w-48 rounded-xl border border-slate-200 bg-white p-1 shadow-xl">
               {[
+                { href: "/", label: "Home", Icon: Compass },
                 { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
                 { href: "/chat", label: "AI Chat", Icon: Sparkles },
                 { href: "/chats", label: "Office Chats", Icon: MessagesSquare },
+                { href: "/friends", label: "Friends", Icon: UsersRound },
                 { href: "/documents", label: "Documents", Icon: FileText },
               ].map(({ href, label, Icon }) => {
                 const active = pathname === href || pathname.startsWith(href + "/");
