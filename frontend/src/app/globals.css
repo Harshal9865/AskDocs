@@ -690,24 +690,36 @@ button.bg-indigo-600:hover {
   }
 }
 
-/* ---------- Homepage navbar link glow (theme-aware) ---------- */
+/* ---------- Homepage navbar link animated underline (theme-aware) ---------- */
 .home-nav a {
+  position: relative;
   text-decoration: none;
-  transition: all 0.4s;
+  color: inherit;
+  transition: color 0.2s ease;
 }
+.home-nav a::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #6366f1, #a855f7);
+  transform: translateX(-50%) scaleX(0);
+  transition: width 0.3s ease, transform 0.3s ease;
+  border-radius: 1px;
+}
+.home-nav a:hover::after {
+  width: 100%;
+  transform: translateX(-50%) scaleX(1);
+}
+.dark .home-nav a:hover::after {
+  background: linear-gradient(90deg, #1DB954, #34d399);
+}
+/* slight lift on hover for premium feel */
 .home-nav a:hover {
-  /* Light mode: indigo/purple glow matching brand */
-  text-shadow:
-    0 0 8px #6366f1,
-    0 0 16px #8b5cf6,
-    0 0 24px #a855f7;
-}
-.dark .home-nav a:hover {
-  /* Dark mode: Spotify green glow */
-  text-shadow:
-    0 0 8px #1DB954,
-    0 0 16px #1DB954,
-    0 0 24px #1DB954;
+  transform: translateY(-1px);
+  transition: transform 0.2s ease;
 }
 
 /* ---------- Instagram heart pop ---------- */
