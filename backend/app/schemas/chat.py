@@ -20,12 +20,15 @@ class ConversationOut(BaseModel):
 
 class MessageCreate(BaseModel):
     content: str
+    attachment_ids: list[str] = []
 
     @field_validator("content")
     @classmethod
     def not_blank(cls, v: str) -> str:
+        # allow empty content when attachments carry the message (e.g. image-only ask)
         if not v.strip():
-            raise ValueError("Message cannot be empty")
+            # caller must still send something; empty string with attachments is allowed
+            return v.strip()
         return v.strip()
 
 

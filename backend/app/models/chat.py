@@ -50,13 +50,15 @@ class ConversationParticipant(BaseModel):
 class MessageAttachment(BaseModel):
     __tablename__ = "message_attachments"
 
-    message_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("messages.id", ondelete="CASCADE"), index=True
+    # Nullable: attachments are uploaded before the message exists, then linked on send.
+    message_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("messages.id", ondelete="CASCADE"), index=True, nullable=True
     )
     storage_key: Mapped[str] = mapped_column(String(500))
     filename: Mapped[str] = mapped_column(String(300))
     content_type: Mapped[str] = mapped_column(String(100))
     size_bytes: Mapped[int]
+    text_excerpt: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
 class ConversationHidden(BaseModel):

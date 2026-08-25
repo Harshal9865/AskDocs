@@ -6,6 +6,7 @@ import { ArrowUp, FileText, ImageIcon, Paperclip, Plus, Smile, X } from "lucide-
 export interface AttachedFile {
   file: File;
   previewUrl?: string; // for images
+  videoUrl?: string; // for videos
 }
 
 const EMOJIS = ["😀", "😂", "🥹", "😍", "🤔", "👍", "🙏", "🔥", "❤️", "🎉", "😅", "😮", "😢", "😡", "👏", "💯", "🚀", "✅", "❌", "⚡", "🌟", "💡", "📎", "☕"];
@@ -100,9 +101,11 @@ export default function ChatComposer({
     const arr: AttachedFile[] = [];
     for (const f of Array.from(files)) {
       const isImg = f.type.startsWith("image/");
+      const isVid = f.type.startsWith("video/");
       arr.push({
         file: f,
         previewUrl: isImg ? URL.createObjectURL(f) : undefined,
+        videoUrl: isVid ? URL.createObjectURL(f) : undefined,
       });
     }
     setAttachments((prev) => [...prev, ...arr]);
@@ -180,6 +183,8 @@ export default function ChatComposer({
                   alt={a.file.name}
                   className="h-8 w-8 rounded object-cover"
                 />
+              ) : a.videoUrl ? (
+                <video src={a.videoUrl} className="h-8 w-8 rounded object-cover" muted />
               ) : (
                 <Paperclip className="dark:text-zinc-400 h-3.5 w-3.5 text-slate-400" />
               )}
@@ -245,8 +250,8 @@ export default function ChatComposer({
                     <FileText className="h-4 w-4" />
                   </span>
                   <span className="flex-1">
-                    <span className="block text-sm font-medium">Files & documents</span>
-                    <span className="block text-xs text-slate-500 dark:text-zinc-400">PDF, TXT, CSV, DOC</span>
+                    <span className="block text-sm font-medium">Files, docs & video</span>
+                    <span className="block text-xs text-slate-500 dark:text-zinc-400">PDF, TXT, CSV, DOC, MP4</span>
                   </span>
                 </button>
                 <div className="dark:border-white/10 mt-1 border-t border-slate-100 px-3 py-1.5 text-[11px] text-slate-400 dark:text-zinc-500">
@@ -270,7 +275,7 @@ export default function ChatComposer({
               ref={fileRef}
               type="file"
               multiple
-              accept=".pdf,.txt,.csv,.doc,.docx,image/*"
+              accept=".pdf,.txt,.csv,.md,.doc,.docx,image/*,video/mp4,video/webm,video/quicktime"
               hidden
               onChange={(e) => {
                 handleFiles(e.target.files);

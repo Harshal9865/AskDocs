@@ -32,6 +32,8 @@ interface ChatMessage {
   conflict?: { is_conflict: boolean; note: string } | null;
   freshness?: { oldest_days: number; document_title: string } | null;
   streaming?: boolean;
+  previews?: string[]; // image blob URLs for own attachments
+  fileChips?: string[]; // non-image attachment filenames
 }
 
 function CitationsModal({
@@ -216,21 +218,39 @@ export default function ChatPage() {
     if (!activeConv || (!question && attachments.length === 0) || busy) return;
     setBusy(true);
 
+    // Optimistic user bubble — real thumbnails for images, chip for docs
+    const imgPreviews = attachments.filter((a) => a.previewUrl).map((a) => a.previewUrl!);
+    const fileNames = attachments.filter((a) => !a.previewUrl).map((a) => a.file.name);
+    const previewLabel =
+      question ||
+      (attachments.length > 0
+        ? attachments.map((a) => (a.previewUrl ? "🖼️" : `📄 ${a.file.name}`)).join(" ")
+        : "");
     setMessages((prev) => [
       ...prev,
-      { role: "user", content: question || (attachments.length > 0 ? `📎 ${attachments.map(a => a.file.name).join(", ")}` : "") },
+      {
+        role: "user",
+        content: previewLabel,
+        previews: imgPreviews.length > 0 ? imgPreviews : undefined,
+        fileChips: fileNames.length > 0 ? fileNames : undefined,
+      },
       { role: "assistant", content: "", streaming: true },
     ]);
 
-    // Upload attachments first, then send the message
+    // Upload attachments — collect ids (vision) + excerpts (pdf/doc context)
     let attachmentText = "";
+    let attachmentIds: string[] = [];
     if (attachments.length > 0) {
       try {
-        const uploaded = await api.uploadChatAttachments(activeConv.id, attachments.map(a => a.file));
-        attachmentText = uploaded.map((a: { filename: string; text_excerpt?: string }) => {
-          if (a.text_excerpt) return `[File: ${a.filename}]\n${a.text_excerpt}`;
-          return `[File: ${a.filename}]`;
-        }).join("\n\n");
+        const uploaded = await api.uploadChatAttachments(
+          activeConv.id,
+          attachments.map((a) => a.file),
+        );
+        attachmentIds = uploaded.filter((u) => u.id).map((u) => u.id);
+        attachmentText = uploaded
+          .filter((u) => u.text_excerpt)
+          .map((u) => `[File: ${u.filename}]\n${u.text_excerpt}`)
+          .join("\n\n");
       } catch {
         // silently continue — text-only ask
       }
@@ -299,6 +319,8 @@ export default function ChatPage() {
           return next;
         });
       },
+      undefined, // signal
+      attachmentIds,
     );
     clearTimeout(streamTimeout);
     if (!done) {
@@ -461,6 +483,31 @@ export default function ChatPage() {
                         : "ai-bubble-theirs block rounded-bl-md"
                     }`}
                   >
+                    {m.previews && m.previews.length > 0 && (
+                      <span className="mb-1.5 flex flex-wrap gap-1.5">
+                        {m.previews.map((p, pi) => (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            key={pi}
+                            src={p}
+                            alt="attachment"
+                            className="max-h-44 max-w-[220px] rounded-xl object-cover"
+                          />
+                        ))}
+                      </span>
+                    )}
+                    {m.fileChips && m.fileChips.length > 0 && (
+                      <span className="mb-1.5 flex flex-wrap gap-1.5">
+                        {m.fileChips.map((fn, fi) => (
+                          <span
+                            key={fi}
+                            className="flex items-center gap-1 rounded-lg bg-white/60 px-2 py-1 text-xs dark:bg-white/10"
+                          >
+                            <FileText className="h-3 w-3" /> {fn}
+                          </span>
+                        ))}
+                      </span>
+                    )}
                     {m.content}
                     {m.streaming && (
                       <span className="ml-1 inline-block animate-pulse">▋</span>

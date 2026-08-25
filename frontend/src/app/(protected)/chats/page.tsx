@@ -112,6 +112,7 @@ function ReadTicks({ readBy, myId, participantCount }: { readBy: string[]; myId:
 
 function AttachmentThumbnail({ att }: { att: ChatAttachment }) {
   const isImage = att.content_type.startsWith("image/");
+  const isVideo = att.content_type.startsWith("video/");
   return (
     <a
       href={`${API_BASE}${att.url}`}
@@ -125,6 +126,13 @@ function AttachmentThumbnail({ att }: { att: ChatAttachment }) {
           src={`${API_BASE}${att.url}`}
           alt={att.filename}
           className="max-h-40 max-w-[240px] rounded-lg object-cover"
+        />
+      ) : isVideo ? (
+        <video
+          src={`${API_BASE}${att.url}`}
+          controls
+          preload="metadata"
+          className="max-h-48 max-w-[260px] rounded-lg"
         />
       ) : (
         <span className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300">
@@ -331,11 +339,19 @@ export default function ChatsPage() {
     setSending(true);
     try {
       const attachmentIds: string[] = [];
+      const failed: string[] = [];
       for (const a of attachments) {
-        const result = await api.uploadChatAttachment(a.file);
-        attachmentIds.push(result.id);
+        try {
+          const result = await api.uploadChatAttachment(a.file);
+          attachmentIds.push(result.id);
+        } catch {
+          failed.push(a.file.name);
+        }
       }
       await api.sendTeamMessage(activeChat.id, text, attachmentIds);
+      if (failed.length > 0) {
+        alert(`Couldn't upload: ${failed.join(", ")}`);
+      }
       const msgs = await api.listTeamMessages(activeChat.id);
       setMessages(msgs);
       await loadChats();

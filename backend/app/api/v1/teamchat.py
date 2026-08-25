@@ -434,28 +434,64 @@ async def send_team_message(
     return await _build_message_out(db, msg, user.id)
 
 
+IMAGE_TYPES = ("image/png", "image/jpeg", "image/webp", "image/gif")
+DOC_TYPES = (
+    "application/pdf",
+    "text/plain",
+    "text/csv",
+    "text/markdown",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+)
+VIDEO_TYPES = ("video/mp4", "video/webm", "video/quicktime")
+ALLOWED_UPLOAD_TYPES = IMAGE_TYPES + DOC_TYPES + VIDEO_TYPES
+MAX_UPLOAD_SIZE = 20 * 1024 * 1024  # 20 MB for images/docs
+MAX_VIDEO_SIZE = 50 * 1024 * 1024  # 50 MB for videos
+MAX_EXCERPT_CHARS = 6000
+
+
+def _extract_excerpt(data: bytes, content_type: str, filename: str) -> str | None:
+    """Extract text from text-like attachments so the AI can read them."""
+    try:
+        if content_type in DOC_TYPES:
+            from app.services.ingestion import extract_text
+
+            text = extract_text(data, content_type) or ""
+            text = text.strip()
+            if text and not text.startswith("[Image:"):
+                return text[:MAX_EXCERPT_CHARS]
+        return None
+    except Exception:
+        return None
+
+
 @router.post("/team-chats/upload", status_code=201)
 async def upload_chat_attachment(
     db: DbSession,
     user: CurrentUser,
     file: UploadFile = File(...),
 ):
-    allowed = ("image/png", "image/jpeg", "image/webp", "image/gif")
-    if file.content_type not in allowed:
-        raise HTTPException(400, "Only PNG, JPEG, WebP, GIF images are allowed")
+    if file.content_type not in ALLOWED_UPLOAD_TYPES:
+        raise HTTPException(
+            400,
+            "Unsupported file type. Allowed: images (PNG/JPEG/WebP/GIF), PDF, TXT, CSV, MD, DOCX, video (MP4/WebM/MOV)",
+        )
     data = await file.read()
-    if len(data) > 20 * 1024 * 1024:
-        raise HTTPException(413, "File too large (max 20 MB)")
+    limit = MAX_VIDEO_SIZE if file.content_type in VIDEO_TYPES else MAX_UPLOAD_SIZE
+    if len(data) > limit:
+        raise HTTPException(413, f"File too large (max {limit // (1024 * 1024)} MB)")
 
     storage = DbStorage()
-    key = await storage.save(f"chat-attachments/{user.id}", file.filename or "image.png", data)
+    key = await storage.save(f"chat-attachments/{user.id}", file.filename or "file", data)
+
+    excerpt = _extract_excerpt(data, file.content_type, file.filename or "")
 
     att = MessageAttachment(
-        message_id=uuid.uuid4(),  # placeholder, will be linked on send
+        message_id=None,  # linked to the message on send
         storage_key=key,
-        filename=file.filename or "image.png",
+        filename=file.filename or "file",
         content_type=file.content_type,
         size_bytes=len(data),
+        text_excerpt=excerpt,
     )
     db.add(att)
     await db.commit()
@@ -465,6 +501,7 @@ async def upload_chat_attachment(
         "filename": att.filename,
         "content_type": att.content_type,
         "size_bytes": att.size_bytes,
+        "text_excerpt": att.text_excerpt,
     }
 
 

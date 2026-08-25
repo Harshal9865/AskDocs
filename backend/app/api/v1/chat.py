@@ -6,7 +6,8 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy import delete, select
 
 from app.core.deps import AsyncSessionLocal, CurrentUser, DbSession, Membership
-from app.models.chat import Conversation, Message
+from app.models.chat import Conversation, Message, MessageAttachment
+from app.models.file import FileBlob
 from app.models.workspace import Role, WorkspaceMember
 from app.schemas.chat import (
     ConversationCreate,
@@ -26,6 +27,62 @@ from app.services.retrieval import (
 router = APIRouter()
 
 REFUSAL = "I couldn't find an answer to this in the uploaded documents."
+
+MAX_VISION_IMAGES = 4
+
+
+async def _resolve_attachments(db, attachment_ids: list[str], user_id) -> tuple[list, str, list[MessageAttachment]]:
+    """Resolve uploaded attachment ids into (gemini_image_parts, doc_context_text, atts).
+
+    - Images -> Gemini vision parts (bytes inline, capped at MAX_VISION_IMAGES)
+    - PDFs/docs -> text_excerpt becomes prompt context
+    - Videos -> noted as attached (playback only, not analyzable)
+    """
+    from google.genai import types as gtypes
+
+    image_parts: list = []
+    doc_blocks: list[str] = []
+    atts: list[MessageAttachment] = []
+    video_names: list[str] = []
+
+    for aid in attachment_ids[:8]:
+        try:
+            att_id = uuid.UUID(str(aid))
+        except (ValueError, AttributeError):
+            continue
+        att = await db.get(MessageAttachment, att_id)
+        if att is None:
+            continue
+        atts.append(att)
+
+        if att.content_type.startswith("image/"):
+            if len(image_parts) >= MAX_VISION_IMAGES:
+                continue
+            row = await db.execute(select(FileBlob.data).where(FileBlob.key == att.storage_key))
+            data = row.scalar_one_or_none()
+            if data is not None:
+                image_parts.append(
+                    gtypes.Part.from_bytes(data=bytes(data), mime_type=att.content_type)
+                )
+        elif att.text_excerpt:
+            doc_blocks.append(f"[Attached file: {att.filename}]\n{att.text_excerpt}")
+        elif att.content_type.startswith("video/"):
+            video_names.append(att.filename)
+
+    doc_context = ""
+    if doc_blocks:
+        doc_context = (
+            "\n\nThe user also attached these files. Use their contents to answer:\n\n"
+            + "\n\n".join(doc_blocks)
+        )
+    if video_names:
+        doc_context += (
+            "\n\n(The user attached video file(s): "
+            + ", ".join(video_names)
+            + ". You cannot watch videos — acknowledge them and answer any text question.)"
+        )
+
+    return image_parts, doc_context, atts
 
 
 async def _get_conversation_checked(
@@ -226,13 +283,31 @@ async def ask_question_stream(
     if conv.user_id != user.id and role == "viewer":
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Viewers can only use their own conversations")
 
-    db.add(Message(conversation_id=conv.id, role="user", content=payload.content))
+    # Resolve attachments (images -> vision parts, docs -> text context)
+    image_parts, doc_context, atts = await _resolve_attachments(
+        db, payload.attachment_ids or [], user.id
+    )
+
+    # Link attachments to the conversation (message_id set after user msg saved)
+    user_content = payload.content.strip()
+    if not user_content and atts:
+        user_content = "Please analyze the attached file(s)."
+
+    user_msg = Message(conversation_id=conv.id, role="user", content=user_content)
+    db.add(user_msg)
+    await db.flush()
+    for att in atts:
+        att.message_id = user_msg.id
     if conv.title == "New conversation":
-        conv.title = payload.content[:80]
+        conv.title = (user_content or "Attachment question")[:80]
     await db.commit()
 
     llm = get_llm()
-    query_embedding = (await llm.embed([payload.content]))[0]
+    # Embed the question (or attachment excerpt if question is empty)
+    embed_text = user_content
+    if not embed_text and atts and atts[0].text_excerpt:
+        embed_text = atts[0].text_excerpt[:1000]
+    query_embedding = (await llm.embed([embed_text or user_content]))[0]
     chunks = await search_chunks(db, conv.workspace_id, query_embedding)
     suggestions = (
         await suggest_colleagues(db, conv.workspace_id, chunks)
@@ -241,20 +316,24 @@ async def ask_question_stream(
     )
     history = await conversation_history(db, conv.id)
 
+    # If attachments carry text (pdf/doc) and no RAG chunks, still answer from them
+    has_attachment_context = bool(doc_context) or bool(image_parts)
+
     async def event_stream():
         answer_parts: list[str] = []
         try:
-            if not chunks:
+            if not chunks and not has_attachment_context:
                 yield f"data: {json.dumps({'type': 'answer', 'text': REFUSAL})}\n\n"
                 answer_parts.append(REFUSAL)
                 conflict = None
                 freshness = None
             else:
-                async for token in llm.stream_answer(payload.content, chunks, history):
+                question_with_ctx = payload.content.strip() + doc_context
+                async for token in llm.stream_answer(question_with_ctx, chunks, history, image_parts):
                     answer_parts.append(token)
                     yield f"data: {json.dumps({'type': 'answer', 'text': token})}\n\n"
-                conflict = await llm.detect_conflict(chunks)
-                freshness = await get_freshness(db, chunks)
+                conflict = await llm.detect_conflict(chunks) if chunks else None
+                freshness = await get_freshness(db, chunks) if chunks else None
             citations = _citations_json(chunks)
             yield f"data: {json.dumps({'type': 'done', 'citations': citations, 'suggested_colleagues': suggestions, 'conflict': conflict, 'freshness': freshness})}\n\n"
 

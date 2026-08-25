@@ -263,21 +263,39 @@ export const api = {
   uploadChatAttachment: (file: File) => {
     const form = new FormData();
     form.append("file", file);
-    return request<{ id: string; filename: string; content_type: string; size_bytes: number }>(
-      "/team-chats/upload",
-      { method: "POST", body: form },
-    );
+    return request<{
+      id: string;
+      filename: string;
+      content_type: string;
+      size_bytes: number;
+      text_excerpt?: string | null;
+    }>("/team-chats/upload", { method: "POST", body: form });
   },
 
   uploadChatAttachments: async (convId: string, files: File[]) => {
-    const results: { filename: string; text_excerpt?: string }[] = [];
+    const results: {
+      id: string;
+      filename: string;
+      content_type: string;
+      text_excerpt?: string | null;
+    }[] = [];
     for (const file of files) {
       try {
         const uploaded = await api.uploadChatAttachment(file);
-        results.push({ filename: uploaded.filename });
+        results.push({
+          id: uploaded.id,
+          filename: uploaded.filename,
+          content_type: uploaded.content_type,
+          text_excerpt: uploaded.text_excerpt ?? null,
+        });
       } catch {
-        // If upload fails, just record the filename
-        results.push({ filename: file.name });
+        // Upload failed — record filename so the send can still proceed
+        results.push({
+          id: "",
+          filename: file.name,
+          content_type: file.type || "application/octet-stream",
+          text_excerpt: null,
+        });
       }
     }
     return results;
@@ -473,6 +491,7 @@ export const api = {
     onSaved?: (messageId: string) => void,
     onError?: (message: string) => void,
     signal?: AbortSignal,
+    attachmentIds?: string[],
   ) {
     try {
       const res = await fetch(
@@ -483,7 +502,10 @@ export const api = {
             "Content-Type": "application/json",
             ...(tokens?.access ? { Authorization: `Bearer ${tokens.access}` } : {}),
           },
-          body: JSON.stringify({ content }),
+          body: JSON.stringify({
+            content,
+            attachment_ids: attachmentIds ?? [],
+          }),
           signal,
         },
       );

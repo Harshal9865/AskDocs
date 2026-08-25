@@ -29,12 +29,26 @@ class LLMProvider(ABC):
         """Embed a batch of texts."""
 
     @abstractmethod
-    async def answer(self, question: str, contexts: list[RetrievedChunk], history: list[dict] | None = None) -> str:
-        """Answer a question grounded in the given context chunks."""
+    async def answer(
+        self,
+        question: str,
+        contexts: list[RetrievedChunk],
+        history: list[dict] | None = None,
+        image_parts: list | None = None,
+    ) -> str:
+        """Answer a question grounded in the given context chunks.
+        image_parts: optional provider-native multimodal parts (e.g. images)."""
 
     @abstractmethod
-    async def stream_answer(self, question: str, contexts: list[RetrievedChunk], history: list[dict] | None = None):
-        """Yield answer tokens one by one."""
+    async def stream_answer(
+        self,
+        question: str,
+        contexts: list[RetrievedChunk],
+        history: list[dict] | None = None,
+        image_parts: list | None = None,
+    ):
+        """Yield answer tokens one by one.
+        image_parts: optional provider-native multimodal parts (e.g. images)."""
 
     async def detect_conflict(self, contexts: list[RetrievedChunk]) -> dict | None:
         """Check whether top excerpts from different documents contradict each
