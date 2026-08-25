@@ -184,7 +184,7 @@ export default function Home() {
           <img src="/logo-night.svg" alt="AskDocs" className="hidden h-7 w-7 dark:block" />
           <span className="text-[15px] font-bold tracking-tight">AskDocs</span>
         </Link>
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="home-nav hidden items-center gap-1 md:flex">
           <a href="#how-it-works" className="rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10">
             How it works
           </a>
