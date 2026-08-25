@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import ThemeToggle, { useTheme } from "@/components/ThemeToggle";
+import Avatar from "@/components/Avatar";
 import {
   Sparkles,
   MessagesSquare,
@@ -13,6 +14,13 @@ import {
   Zap,
   ArrowRight,
   Check,
+  Star,
+  Mail,
+  Globe,
+  AtSign,
+  MessageCircle,
+  Heart,
+  Quote,
 } from "lucide-react";
 
 function AuroraHeroMock() {
@@ -65,6 +73,102 @@ function AuroraHeroMock() {
   );
 }
 
+const REVIEWS = [
+  {
+    name: "Aarav Mehta",
+    role: "Engineering Lead, FintechCo",
+    quote:
+      "We dumped 200+ PDFs into AskDocs and now onboarding new engineers takes days, not weeks. The cited answers mean I never second-guess the AI.",
+    stars: 5,
+    initials: "AM",
+    color: "bg-indigo-500",
+  },
+  {
+    name: "Sofia Reyes",
+    role: "Product Manager",
+    quote:
+      "The office chats feel exactly like WhatsApp — my team actually uses them. Presence dots and read receipts were the killer detail for us.",
+    stars: 5,
+    initials: "SR",
+    color: "bg-emerald-500",
+  },
+  {
+    name: "Daniel Kim",
+    role: "Founder, 12-person startup",
+    quote:
+      "Ask anything, get a source. That's the whole pitch and it delivers. We killed our internal wiki because of this tool.",
+    stars: 5,
+    initials: "DK",
+    color: "bg-purple-500",
+  },
+  {
+    name: "Priya Nair",
+    role: "HR Manager",
+    quote:
+      "Policy questions used to eat hours of my week. Now people ask AskDocs and only come to me for the edge cases. The conflict warnings are genius.",
+    stars: 4,
+    initials: "PN",
+    color: "bg-rose-500",
+  },
+  {
+    name: "Tomás Oliveira",
+    role: "CTO, HealthTech",
+    quote:
+      "Spotify-dark UI that engineers actually love, and the aurora ask box makes it feel alive. Underneath it's serious retrieval infrastructure.",
+    stars: 5,
+    initials: "TO",
+    color: "bg-amber-500",
+  },
+  {
+    name: "Emily Chen",
+    role: "Operations, Logistics",
+    quote:
+      "Cross-workspace friends + chat means our contractors and full-timers finally talk in one place. Setup took 10 minutes.",
+    stars: 5,
+    initials: "EC",
+    color: "bg-sky-500",
+  },
+];
+
+const FEATURES = [
+  {
+    icon: FileText,
+    title: "Smart Documents",
+    desc: "Upload PDFs, DOCX, TXT & CSV. AskDocs auto-chunks, embeds and indexes every paragraph so nothing is lost.",
+    color: "from-indigo-500 to-violet-500",
+  },
+  {
+    icon: Sparkles,
+    title: "Cited AI Answers",
+    desc: "Every answer links back to the exact document and chunk. Conflict detection warns when sources disagree.",
+    color: "from-violet-500 to-fuchsia-500",
+  },
+  {
+    icon: MessagesSquare,
+    title: "WhatsApp-style Chats",
+    desc: "DMs, group chats, presence dots, read receipts (✓✓), typing indicators and emoji — your team already knows it.",
+    color: "from-emerald-500 to-teal-500",
+  },
+  {
+    icon: UsersRound,
+    title: "Friends, Any Workspace",
+    desc: "Add friends across workspaces, see who's online, jump into a DM — Instagram-style management, zero friction.",
+    color: "from-sky-500 to-cyan-500",
+  },
+  {
+    icon: Search,
+    title: "Semantic Search",
+    desc: "Search by meaning, not keywords. Find the paragraph you half-remember across every document you own.",
+    color: "from-amber-500 to-orange-500",
+  },
+  {
+    icon: Shield,
+    title: "Private Workspaces",
+    desc: "Public or private spaces, role-based access (admin / member / viewer), soft-delete trash and full activity log.",
+    color: "from-rose-500 to-red-500",
+  },
+];
+
 export default function Home() {
   const { user } = useAuth();
   const { dark, toggle } = useTheme();
@@ -87,9 +191,9 @@ export default function Home() {
           <a href="#features" className="rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10">
             Features
           </a>
-          <Link href="/#reviews" className="rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10">
+          <a href="#reviews" className="rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10">
             Reviews
-          </Link>
+          </a>
           <a href="#contact" className="rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10">
             Contact
           </a>
@@ -103,11 +207,14 @@ export default function Home() {
             Workspace
           </Link>
           {user ? (
-            <Link
-              href="/dashboard"
-              className="rounded-full bg-slate-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-black dark:bg-white dark:text-black dark:hover:bg-zinc-100"
-            >
-              Dashboard
+            <Link href={`/profile/${user.id}`} className="flex items-center gap-2 rounded-full border border-slate-200 bg-white p-0.5 pr-2.5 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10" title="Your profile">
+              <Avatar
+                name={user.name}
+                size={28}
+                src={user.avatar_kind === "upload" ? undefined : undefined}
+                stickerId={user.avatar_kind === "sticker" ? user.avatar_value ?? null : null}
+              />
+              <span className="hidden max-w-[80px] truncate text-xs font-medium sm:inline">{user.name.split(" ")[0]}</span>
             </Link>
           ) : (
             <>
@@ -155,15 +262,15 @@ export default function Home() {
               >
                 {user ? "Open Dashboard" : "Start for free"} <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link
-                href="/chat"
+              <a
+                href="#how-it-works"
                 className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
               >
                 <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                Try AI Chat
-              </Link>
+                See how it works
+              </a>
             </div>
-            <div className="mt-6 flex items-center gap-4 text-xs text-slate-500 dark:text-zinc-500">
+            <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-zinc-500">
               <span className="flex items-center gap-1.5">
                 <Shield className="h-3.5 w-3.5" /> Private workspaces
               </span>
@@ -181,8 +288,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Sliding boxes */}
-      <section className="border-y border-slate-100 bg-slate-50/50 py-6 dark:border-white/5 dark:bg-white/[0.02]">
+      {/* Sliding boxes — features teaser */}
+      <section id="features" className="scroll-mt-16 border-y border-slate-100 bg-slate-50/50 py-6 dark:border-white/5 dark:bg-white/[0.02]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-zinc-500">
@@ -216,6 +323,18 @@ export default function Home() {
                 desc: "Find any paragraph across all docs.",
                 color: "from-amber-500 to-orange-500",
               },
+              {
+                icon: UsersRound,
+                title: "Friends",
+                desc: "Cross-workspace friends with online status.",
+                color: "from-sky-500 to-cyan-500",
+              },
+              {
+                icon: Shield,
+                title: "Workspaces",
+                desc: "Public or private, roles, trash & activity log.",
+                color: "from-rose-500 to-red-500",
+              },
             ].map((c) => (
               <div
                 key={c.title}
@@ -234,29 +353,152 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How it works */}
+      {/* Features deep-dive */}
       <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-        <h2 className="text-center text-xl font-bold sm:text-2xl">How it works</h2>
+        <h2 className="text-center text-xl font-bold sm:text-2xl">Built for how teams actually work</h2>
         <p className="mx-auto mt-2 max-w-xl text-center text-sm text-slate-500 dark:text-zinc-400">
-          Three steps from upload to insight. No setup, just ask.
+          Six pillars that make AskDocs feel less like software and more like a teammate.
         </p>
-        <div className="mt-8 grid gap-6 sm:grid-cols-3">
-          {[
-            { n: "01", t: "Create workspace", d: "Name your team space and invite colleagues." },
-            { n: "02", t: "Upload docs", d: "Drop PDFs or docs. We chunk & index them." },
-            { n: "03", t: "Ask & chat", d: "AI cites sources. Continue in office chats." },
-          ].map((s) => (
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map((f) => (
             <div
-              key={s.n}
-              className="rounded-2xl border border-slate-200 bg-white p-5 text-center dark:border-white/10 dark:bg-[#121212]"
+              key={f.title}
+              className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-[#121212]"
             >
-              <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white dark:bg-white dark:text-black">
-                {s.n}
+              <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${f.color} text-white`}>
+                <f.icon className="h-5 w-5" />
               </div>
-              <div className="text-sm font-semibold">{s.t}</div>
-              <div className="mt-1 text-xs text-slate-500 dark:text-zinc-400">{s.d}</div>
+              <div className="text-sm font-semibold">{f.title}</div>
+              <div className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-zinc-400">{f.desc}</div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="how-it-works" className="scroll-mt-16 border-y border-slate-100 bg-slate-50/50 py-12 dark:border-white/5 dark:bg-white/[0.02] sm:py-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <h2 className="text-center text-xl font-bold sm:text-2xl">How it works</h2>
+          <p className="mx-auto mt-2 max-w-xl text-center text-sm text-slate-500 dark:text-zinc-400">
+            From zero to cited answers in under five minutes.
+          </p>
+          <div className="mt-8 grid gap-6 sm:grid-cols-3">
+            {[
+              { n: "01", t: "Create your workspace", d: "Sign up, name your team space, and invite colleagues by email — they get a notification to accept." },
+              { n: "02", t: "Upload your documents", d: "Drag in PDFs, DOCX, TXT or CSV. AskDocs chunks, embeds and indexes every page automatically." },
+              { n: "03", t: "Ask & collaborate", d: "Ask in plain language and get answers with citations. Disagreements? Continue the thread in office chats." },
+            ].map((s) => (
+              <div
+                key={s.n}
+                className="relative rounded-2xl border border-slate-200 bg-white p-5 text-center dark:border-white/10 dark:bg-[#121212]"
+              >
+                <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white dark:bg-white dark:text-black">
+                  {s.n}
+                </div>
+                <div className="text-sm font-semibold">{s.t}</div>
+                <div className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-zinc-400">{s.d}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 grid grid-cols-3 gap-4 text-center">
+            {[
+              { v: "< 5 min", l: "to first answer" },
+              { v: "100%", l: "answers cited" },
+              { v: "∞", l: "documents per workspace" },
+            ].map((s) => (
+              <div key={s.l} className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-[#121212]">
+                <div className="bg-gradient-to-r from-indigo-600 to-emerald-500 bg-clip-text text-xl font-bold text-transparent dark:from-indigo-400 dark:to-emerald-400 sm:text-2xl">
+                  {s.v}
+                </div>
+                <div className="mt-1 text-xs text-slate-500 dark:text-zinc-400">{s.l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Reviews */}
+      <section id="reviews" className="scroll-mt-16 mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+        <div className="mb-2 flex items-center justify-center gap-2">
+          {[1, 2, 3, 4, 5].map((s) => (
+            <Star key={s} className="h-5 w-5 fill-amber-400 text-amber-400" />
+          ))}
+        </div>
+        <p className="text-center text-xs text-slate-400 dark:text-zinc-500">Loved by teams of every size</p>
+        <h2 className="mt-2 text-center text-xl font-bold sm:text-2xl">What people say</h2>
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {REVIEWS.map((r) => (
+            <div
+              key={r.name}
+              className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-[#121212]"
+            >
+              <Quote className="mb-3 h-5 w-5 text-indigo-300 dark:text-indigo-500/50" />
+              <p className="flex-1 text-sm leading-relaxed text-slate-600 dark:text-zinc-300">“{r.quote}”</p>
+              <div className="mt-4 flex items-center gap-1">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`h-3.5 w-3.5 ${i < r.stars ? "fill-amber-400 text-amber-400" : "text-slate-200 dark:text-zinc-700"}`}
+                  />
+                ))}
+              </div>
+              <div className="mt-4 flex items-center gap-3 border-t border-slate-100 pt-4 dark:border-white/5">
+                <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${r.color}`}>
+                  {r.initials}
+                </span>
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-semibold">{r.name}</span>
+                  <span className="block truncate text-xs text-slate-500 dark:text-zinc-400">{r.role}</span>
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Contact */}
+      <section id="contact" className="scroll-mt-16 border-y border-slate-100 bg-slate-50/50 py-12 dark:border-white/5 dark:bg-white/[0.02] sm:py-16">
+        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
+          <Heart className="mx-auto mb-3 h-6 w-6 text-rose-500" />
+          <h2 className="text-xl font-bold sm:text-2xl">Talk to us</h2>
+          <p className="mx-auto mt-2 max-w-xl text-sm text-slate-500 dark:text-zinc-400">
+            Questions, feedback, or a feature your team needs? We read everything and ship fast.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <a
+              href="mailto:hello@askdocs.app"
+              className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-black dark:bg-white dark:text-black"
+            >
+              <Mail className="h-4 w-4" /> hello@askdocs.app
+            </a>
+            <a
+              href="https://github.com/Harshal9865/AskDocs"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+            >
+              <Globe className="h-4 w-4" /> GitHub
+            </a>
+            <a
+              href="https://twitter.com/askdocs"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+            >
+              <AtSign className="h-4 w-4" /> Twitter
+            </a>
+            <a
+              href="https://linkedin.com/company/askdocs"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+            >
+              <MessageCircle className="h-4 w-4" /> LinkedIn
+            </a>
+          </div>
+          <p className="mt-6 text-xs text-slate-400 dark:text-zinc-500">
+            Typical response time: under 24 hours. We’re a small team building in public — say hi.
+          </p>
         </div>
       </section>
 
