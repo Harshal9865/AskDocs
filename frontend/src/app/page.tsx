@@ -1,5 +1,7 @@
 ﻿"use client";
 
+/* eslint-disable react/no-unescaped-entities */
+import React from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import ThemeToggle, { useTheme } from "@/components/ThemeToggle";
@@ -21,6 +23,8 @@ import {
   MessageCircle,
   Heart,
   Quote,
+  Activity,
+  Target,
 } from "lucide-react";
 
 function AuroraHeroMock() {
@@ -169,6 +173,156 @@ const FEATURES = [
   },
 ];
 
+const FEATURE_MARQUEE = [
+  { icon: FileText, title: "Documents", desc: "Upload PDFs, DOCs, TXTs. Auto-chunked & embedded.", color: "from-indigo-500 to-violet-500" },
+  { icon: Sparkles, title: "AI Chat", desc: "Ask anything. Cited answers with sources.", color: "from-violet-500 to-fuchsia-500" },
+  { icon: MessagesSquare, title: "Office Chats", desc: "WhatsApp-style DMs & groups with presence.", color: "from-emerald-500 to-teal-500" },
+  { icon: Search, title: "Semantic Search", desc: "Find any paragraph across all docs.", color: "from-amber-500 to-orange-500" },
+  { icon: UsersRound, title: "Friends", desc: "Cross-workspace friends with online status.", color: "from-sky-500 to-cyan-500" },
+  { icon: Shield, title: "Workspaces", desc: "Public or private, roles, trash & activity log.", color: "from-rose-500 to-red-500" },
+];
+
+const TRUSTED_LOGOS = [
+  { name: "FintechCo", color: "from-indigo-400 to-indigo-600" },
+  { name: "HealthTech", color: "from-emerald-400 to-teal-600" },
+  { name: "LogiStack", color: "from-amber-400 to-orange-600" },
+  { name: "DevHive", color: "from-sky-400 to-cyan-600" },
+  { name: "Nimbus Labs", color: "from-violet-400 to-purple-600" },
+  { name: "PixelForge", color: "from-rose-400 to-red-600" },
+  { name: "Quantumly", color: "from-fuchsia-400 to-pink-600" },
+];
+
+const FAQS = [
+  {
+    q: "How does AskDocs cite its answers?",
+    a: "Every answer is generated from retrieved chunks of your documents. AskDocs attaches the source document, page and paragraph to each claim, so you can verify anything in one click.",
+  },
+  {
+    q: "Which file types are supported?",
+    a: "PDF, DOCX, TXT and CSV today — with more formats landing regularly. Files are chunked, embedded and indexed automatically on upload.",
+  },
+  {
+    q: "Can I chat with my team inside AskDocs?",
+    a: "Yes. Office Chats give you WhatsApp-style DMs and groups with presence dots, read receipts, typing indicators and emoji reactions — no context switch needed.",
+  },
+  {
+    q: "Is my data private?",
+    a: "Workspaces can be public or private with role-based access (admin / member / viewer). Deleted items go to a recoverable trash, and every action is recorded in the activity log.",
+  },
+  {
+    q: "Do answers warn me when sources disagree?",
+    a: "Yes — conflict detection flags when two documents contradict each other so your team never acts on stale information.",
+  },
+  {
+    q: "How long does setup take?",
+    a: "Under five minutes: create a workspace, invite colleagues by email, drag in documents, and ask your first question.",
+  },
+];
+
+function StatCounter({ value, suffix, label, icon: Icon, color }: { value: number; suffix: string; label: string; icon: React.ComponentType<{ className?: string }>; color: string }) {
+  const [count, setCount] = React.useState(0);
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          let current = 0;
+          const duration = 2000;
+          const step = value / (duration / 16);
+          const timer = setInterval(() => {
+            current += step;
+            if (current >= value) {
+              setCount(value);
+              clearInterval(timer);
+            } else {
+              setCount(Math.floor(current));
+            }
+          }, 16);
+          return () => clearInterval(timer);
+        }
+      },
+      { threshold: 0.5 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [value]);
+
+  return (
+    <div ref={ref} className="text-center">
+      <Icon className={`mx-auto mb-2 h-6 w-6 ${color}`} />
+      <div className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+        <span className={color}>{count.toLocaleString()}</span><span className="text-slate-500 dark:text-zinc-400">{suffix}</span>
+      </div>
+      <div className="mt-1 text-xs text-slate-500 dark:text-zinc-400">{label}</div>
+    </div>
+  );
+}
+
+function Reveal({ children, dir = "up", delay = 0, className = "" }: { children: React.ReactNode; dir?: "left" | "right" | "up"; delay?: number; className?: string }) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = React.useState(false);
+
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  const hidden =
+    dir === "left"
+      ? "opacity-0 -translate-x-16"
+      : dir === "right"
+      ? "opacity-0 translate-x-16"
+      : "opacity-0 translate-y-10";
+
+  return (
+    <div
+      ref={ref}
+      className={`${className} transition-all duration-700 ease-out will-change-transform ${visible ? "opacity-100 translate-x-0 translate-y-0" : hidden}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function ReviewCard({ review: r }: { review: (typeof REVIEWS)[number] }) {
+  return (
+    <div className="flex w-[320px] shrink-0 flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-[#121212] sm:w-[360px]">
+      <Quote className="mb-3 h-5 w-5 text-indigo-300 dark:text-indigo-500/50" />
+      <p className="flex-1 text-sm leading-relaxed text-slate-600 dark:text-zinc-300">&ldquo;{r.quote}&rdquo;</p>
+      <div className="mt-4 flex items-center gap-1">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Star
+            key={i}
+            className={`h-3.5 w-3.5 ${i < r.stars ? "fill-amber-400 text-amber-400" : "text-slate-200 dark:text-zinc-700"}`}
+          />
+        ))}
+      </div>
+      <div className="mt-4 flex items-center gap-3 border-t border-slate-100 pt-4 dark:border-white/5">
+        <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${r.color}`}>
+          {r.initials}
+        </span>
+        <span className="min-w-0">
+          <span className="block truncate text-sm font-semibold">{r.name}</span>
+          <span className="block truncate text-xs text-slate-500 dark:text-zinc-400">{r.role}</span>
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const { user } = useAuth();
   const { dark, toggle } = useTheme();
@@ -194,6 +348,12 @@ export default function Home() {
           </a>
           <a href="#reviews" className="px-1 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-zinc-300 dark:hover:text-white">
             Reviews
+          </a>
+          <Link href="/about" className="px-1 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-zinc-300 dark:hover:text-white">
+            About us
+          </Link>
+          <a href="#faq" className="px-1 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-zinc-300 dark:hover:text-white">
+            FAQ
           </a>
           <a href="#contact" className="px-1 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-zinc-300 dark:hover:text-white">
             Contact
@@ -236,12 +396,103 @@ export default function Home() {
         </div>
       </header>
 
+      {/* Live activity ticker — thin strip with pulse */}
+      <section className="border-b border-slate-200/60 bg-white/50 dark:border-white/10 dark:bg-black" aria-label="Live activity">
+        <div className="mx-auto max-w-6xl px-4 py-2 overflow-hidden">
+          <div className="flex items-center gap-4" style={{ animation: "marquee 20s linear infinite" }}>
+            <span className="flex items-center gap-2 shrink-0 whitespace-nowrap text-xs text-slate-500 dark:text-zinc-400">
+              <Activity className="h-3 w-3 text-emerald-500 animate-pulse" />
+              <span>Sarah uploaded "Q3 Budget.pdf"</span>
+            </span>
+            <span className="flex items-center gap-2 shrink-0 whitespace-nowrap text-xs text-slate-500 dark:text-zinc-400">
+              <Activity className="h-3 w-3 text-indigo-500 animate-pulse" />
+              <span>Mike asked "What&apos;s the leave policy?"</span>
+            </span>
+            <span className="flex items-center gap-2 shrink-0 whitespace-nowrap text-xs text-slate-500 dark:text-zinc-400">
+              <Activity className="h-3 w-3 text-amber-500 animate-pulse" />
+              <span>AI answered with 3 citations</span>
+            </span>
+            <span className="flex items-center gap-2 shrink-0 whitespace-nowrap text-xs text-slate-500 dark:text-zinc-400">
+              <Activity className="h-3 w-3 text-rose-500 animate-pulse" />
+              <span>New document "Q3 Roadmap.pdf" uploaded</span>
+            </span>
+            <span className="flex items-center gap-2 shrink-0 whitespace-nowrap text-xs text-slate-500 dark:text-zinc-400">
+              <Activity className="h-3 w-3 text-sky-500 animate-pulse" />
+              <span>Team "Engineering" created workspace</span>
+            </span>
+            <span className="flex items-center gap-2 shrink-0 whitespace-nowrap text-xs text-slate-500 dark:text-zinc-400">
+              <Activity className="h-3 w-3 text-violet-500 animate-pulse" />
+              <span>5 new friends added this hour</span>
+            </span>
+            <span className="flex items-center gap-2 shrink-0 whitespace-nowrap text-xs text-slate-500 dark:text-zinc-400">
+              <Activity className="h-3 w-3 text-emerald-500 animate-pulse" />
+              <span>Sarah uploaded "Q3 Budget.pdf"</span>
+            </span>
+            <span className="flex items-center gap-2 shrink-0 whitespace-nowrap text-xs text-slate-500 dark:text-zinc-400">
+              <Activity className="h-3 w-3 text-indigo-500 animate-pulse" />
+              <span>Mike asked "What&apos;s the leave policy?"</span>
+            </span>
+            <span className="flex items-center gap-2 shrink-0 whitespace-nowrap text-xs text-slate-500 dark:text-zinc-400">
+              <Activity className="h-3 w-3 text-amber-500 animate-pulse" />
+              <span>AI answered with 3 citations</span>
+            </span>
+            <span className="flex items-center gap-2 shrink-0 whitespace-nowrap text-xs text-slate-500 dark:text-zinc-400">
+              <Activity className="h-3 w-3 text-rose-500 animate-pulse" />
+              <span>New document "Q3 Roadmap.pdf" uploaded</span>
+            </span>
+            <span className="flex items-center gap-2 shrink-0 whitespace-nowrap text-xs text-slate-500 dark:text-zinc-400">
+              <Activity className="h-3 w-3 text-sky-500 animate-pulse" />
+              <span>Team "Engineering" created workspace</span>
+            </span>
+            <span className="flex items-center gap-2 shrink-0 whitespace-nowrap text-xs text-slate-500 dark:text-zinc-400">
+              <Activity className="h-3 w-3 text-violet-500 animate-pulse" />
+              <span>5 new friends added this hour</span>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats counter — count-up on scroll */}
+      <section className="relative py-10 overflow-hidden" aria-label="Statistics">
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 via-transparent to-emerald-500/5" aria-hidden />
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
+            <StatCounter value={50000} suffix="+" label="Documents indexed" icon={FileText} color="text-indigo-500" />
+            <StatCounter value={12000} suffix="+" label="Teams onboarded" icon={UsersRound} color="text-emerald-500" />
+            <StatCounter value={99} suffix="%" label="Answer accuracy" icon={Target} color="text-amber-500" />
+            <StatCounter value={2} suffix="s" label="Avg response time" icon={Zap} color="text-rose-500" />
+          </div>
+        </div>
+      </section>
+
+      {/* Trusted-by reverse marquee */}
+      <section className="overflow-hidden border-y border-slate-100 py-5 dark:border-white/5" aria-label="Trusted by">
+        <p className="mb-4 text-center text-xs font-medium uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+          Trusted by teams at
+        </p>
+        <div className="relative">
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-white to-transparent dark:from-[#070b0e]" aria-hidden />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-white to-transparent dark:from-[#070b0e]" aria-hidden />
+          <div className="flex w-max items-center gap-14 px-7" style={{ animation: "marquee-reverse 28s linear infinite" }}>
+            {[...TRUSTED_LOGOS, ...TRUSTED_LOGOS].map((l, i) => (
+              <span
+                key={`${l.name}-${i}`}
+                className="flex shrink-0 items-center gap-2 text-lg font-bold tracking-tight text-slate-300 transition-colors hover:text-slate-500 dark:text-zinc-700 dark:hover:text-zinc-400"
+              >
+                <span className={`h-3.5 w-3.5 rounded-sm bg-gradient-to-br ${l.color}`} />
+                {l.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Hero */}
       <section className="gemini-gradient-bg relative overflow-hidden border-b border-slate-100 dark:border-white/5">
         <div className="gemini-orb gemini-orb-1" />
         <div className="gemini-orb gemini-orb-2" />
         <div className="relative z-10 mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:flex lg:items-center lg:gap-10 lg:py-20">
-          <div className="max-w-xl flex-1">
+          <Reveal dir="left" className="max-w-xl flex-1">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-300">
               <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
               AI + Team Knowledge, cited &amp; searchable
@@ -282,74 +533,52 @@ export default function Home() {
                 <UsersRound className="h-3.5 w-3.5" /> Team chats
               </span>
             </div>
-          </div>
-          <div className="mt-8 flex flex-1 justify-center lg:mt-0">
+          </Reveal>
+          <Reveal dir="right" delay={150} className="mt-8 flex flex-1 justify-center lg:mt-0">
             <AuroraHeroMock />
-          </div>
+          </Reveal>
         </div>
       </section>
 
-      {/* Sliding boxes — features teaser */}
+      {/* Infinite marquee — auto-scrolling features */}
       <section id="features" className="scroll-mt-16 border-y border-slate-100 bg-slate-50/50 py-6 dark:border-white/5 dark:bg-white/[0.02]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-zinc-500">
               Everything in one place
             </h2>
-            <span className="text-xs text-slate-400">Slide →</span>
           </div>
-          <div className="flex gap-4 overflow-x-auto pb-2">
-            {[
-              {
-                icon: FileText,
-                title: "Documents",
-                desc: "Upload PDFs, DOCs, TXTs. Auto-chunked & embedded.",
-                color: "from-indigo-500 to-violet-500",
-              },
-              {
-                icon: Sparkles,
-                title: "AI Chat",
-                desc: "Ask anything. Cited answers with sources.",
-                color: "from-violet-500 to-fuchsia-500",
-              },
-              {
-                icon: MessagesSquare,
-                title: "Office Chats",
-                desc: "WhatsApp-style DMs & groups with presence.",
-                color: "from-emerald-500 to-teal-500",
-              },
-              {
-                icon: Search,
-                title: "Semantic Search",
-                desc: "Find any paragraph across all docs.",
-                color: "from-amber-500 to-orange-500",
-              },
-              {
-                icon: UsersRound,
-                title: "Friends",
-                desc: "Cross-workspace friends with online status.",
-                color: "from-sky-500 to-cyan-500",
-              },
-              {
-                icon: Shield,
-                title: "Workspaces",
-                desc: "Public or private, roles, trash & activity log.",
-                color: "from-rose-500 to-red-500",
-              },
-            ].map((c) => (
-              <div
-                key={c.title}
-                className="group min-w-[220px] max-w-[260px] flex-1 shrink-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-white/10 dark:bg-[#121212]"
-              >
+          <div className="overflow-hidden">
+            <div className="flex gap-4" style={{ animation: "marquee 30s linear infinite" }}>
+              {FEATURE_MARQUEE.map((c) => (
                 <div
-                  className={`mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${c.color} text-white`}
+                  key={c.title}
+                  className="group min-w-[220px] max-w-[260px] flex-1 shrink-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-white/10 dark:bg-[#121212]"
                 >
-                  <c.icon className="h-5 w-5" />
+                  <div
+                    className={`mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${c.color} text-white`}
+                  >
+                    <c.icon className="h-5 w-5" />
+                  </div>
+                  <div className="text-sm font-semibold">{c.title}</div>
+                  <div className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-zinc-400">{c.desc}</div>
                 </div>
-                <div className="text-sm font-semibold">{c.title}</div>
-                <div className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-zinc-400">{c.desc}</div>
-              </div>
-            ))}
+              ))}
+              {FEATURE_MARQUEE.map((c) => (
+                <div
+                  key={`${c.title}-clone`}
+                  className="group min-w-[220px] max-w-[260px] flex-1 shrink-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-white/10 dark:bg-[#121212]"
+                >
+                  <div
+                    className={`mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${c.color} text-white`}
+                  >
+                    <c.icon className="h-5 w-5" />
+                  </div>
+                  <div className="text-sm font-semibold">{c.title}</div>
+                  <div className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-zinc-400">{c.desc}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -361,17 +590,18 @@ export default function Home() {
           Six pillars that make AskDocs feel less like software and more like a teammate.
         </p>
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((f) => (
-            <div
-              key={f.title}
-              className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-[#121212]"
-            >
-              <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${f.color} text-white`}>
-                <f.icon className="h-5 w-5" />
+          {FEATURES.map((f, i) => (
+            <Reveal key={f.title} dir={i % 2 === 0 ? "left" : "right"} delay={(i % 3) * 100}>
+              <div
+                className="group h-full rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-[#121212]"
+              >
+                <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${f.color} text-white`}>
+                  <f.icon className="h-5 w-5" />
+                </div>
+                <div className="text-sm font-semibold">{f.title}</div>
+                <div className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-zinc-400">{f.desc}</div>
               </div>
-              <div className="text-sm font-semibold">{f.title}</div>
-              <div className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-zinc-400">{f.desc}</div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -388,17 +618,18 @@ export default function Home() {
               { n: "01", t: "Create your workspace", d: "Sign up, name your team space, and invite colleagues by email — they get a notification to accept." },
               { n: "02", t: "Upload your documents", d: "Drag in PDFs, DOCX, TXT or CSV. AskDocs chunks, embeds and indexes every page automatically." },
               { n: "03", t: "Ask & collaborate", d: "Ask in plain language and get answers with citations. Disagreements? Continue the thread in office chats." },
-            ].map((s) => (
-              <div
-                key={s.n}
-                className="relative rounded-2xl border border-slate-200 bg-white p-5 text-center dark:border-white/10 dark:bg-[#121212]"
-              >
-                <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white dark:bg-white dark:text-black">
-                  {s.n}
+            ].map((s, i) => (
+              <Reveal key={s.n} dir="up" delay={i * 120}>
+                <div
+                  className="relative h-full rounded-2xl border border-slate-200 bg-white p-5 text-center dark:border-white/10 dark:bg-[#121212]"
+                >
+                  <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white dark:bg-white dark:text-black">
+                    {s.n}
+                  </div>
+                  <div className="text-sm font-semibold">{s.t}</div>
+                  <div className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-zinc-400">{s.d}</div>
                 </div>
-                <div className="text-sm font-semibold">{s.t}</div>
-                <div className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-zinc-400">{s.d}</div>
-              </div>
+              </Reveal>
             ))}
           </div>
           <div className="mt-10 grid grid-cols-3 gap-4 text-center">
@@ -418,8 +649,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Reviews */}
-      <section id="reviews" className="scroll-mt-16 mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+      {/* Reviews — dual-direction sliding marquee */}
+      <section id="reviews" className="scroll-mt-16 overflow-hidden py-12 sm:py-16">
         <div className="mb-2 flex items-center justify-center gap-2">
           {[1, 2, 3, 4, 5].map((s) => (
             <Star key={s} className="h-5 w-5 fill-amber-400 text-amber-400" />
@@ -427,33 +658,56 @@ export default function Home() {
         </div>
         <p className="text-center text-xs text-slate-400 dark:text-zinc-500">Loved by teams of every size</p>
         <h2 className="mt-2 text-center text-xl font-bold sm:text-2xl">What people say</h2>
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {REVIEWS.map((r) => (
-            <div
-              key={r.name}
-              className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-[#121212]"
-            >
-              <Quote className="mb-3 h-5 w-5 text-indigo-300 dark:text-indigo-500/50" />
-              <p className="flex-1 text-sm leading-relaxed text-slate-600 dark:text-zinc-300">“{r.quote}”</p>
-              <div className="mt-4 flex items-center gap-1">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`h-3.5 w-3.5 ${i < r.stars ? "fill-amber-400 text-amber-400" : "text-slate-200 dark:text-zinc-700"}`}
-                  />
-                ))}
+        <div className="relative mt-8 space-y-5">
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-white to-transparent dark:from-[#070b0e] sm:w-24" aria-hidden />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-white to-transparent dark:from-[#070b0e] sm:w-24" aria-hidden />
+          {[false, true].map((reverse, row) => {
+            const items = [...REVIEWS.slice(row * 3), ...REVIEWS.slice(0, row * 3)];
+            const doubled = [...items, ...items];
+            return (
+              <div key={row} className="overflow-hidden">
+                <div
+                  className="flex w-max gap-5 px-2.5"
+                  style={{ animation: `${reverse ? "marquee-reverse" : "marquee"} ${38 + row * 6}s linear infinite` }}
+                >
+                  {doubled.map((r, i) => (
+                    <ReviewCard key={`${r.name}-${i}`} review={r} />
+                  ))}
+                </div>
               </div>
-              <div className="mt-4 flex items-center gap-3 border-t border-slate-100 pt-4 dark:border-white/5">
-                <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${r.color}`}>
-                  {r.initials}
-                </span>
-                <span className="min-w-0">
-                  <span className="block truncate text-sm font-semibold">{r.name}</span>
-                  <span className="block truncate text-xs text-slate-500 dark:text-zinc-400">{r.role}</span>
-                </span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="scroll-mt-16 border-t border-slate-100 bg-slate-50/50 py-12 dark:border-white/5 dark:bg-white/[0.02] sm:py-16">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
+          <Reveal dir="left">
+            <h2 className="text-center text-xl font-bold sm:text-2xl">Frequently asked questions</h2>
+            <p className="mx-auto mt-2 max-w-md text-center text-sm text-slate-500 dark:text-zinc-400">
+              Everything teams ask before switching. Still curious?{" "}
+              <a href="#contact" className="font-medium text-indigo-600 hover:underline dark:text-[#1DB954]">
+                Talk to us
+              </a>
+              .
+            </p>
+          </Reveal>
+          <div className="mt-8 space-y-3">
+            {FAQS.map((f, i) => (
+              <Reveal key={f.q} dir={i % 2 === 0 ? "left" : "right"} delay={i * 60}>
+                <details className="group rounded-2xl border border-slate-200 bg-white shadow-sm transition open:shadow-md dark:border-white/10 dark:bg-[#121212]">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-semibold [&::-webkit-details-marker]:hidden">
+                    {f.q}
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-transform group-open:rotate-45 dark:bg-white/10 dark:text-zinc-300">
+                      +
+                    </span>
+                  </summary>
+                  <p className="px-4 pb-4 text-sm leading-relaxed text-slate-500 dark:text-zinc-400">{f.a}</p>
+                </details>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 
