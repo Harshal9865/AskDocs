@@ -28,6 +28,7 @@ import {
   Lock,
   FileKey,
   Plug2,
+  ArrowUp,
 } from "lucide-react";
 
 function AuroraHeroMock() {
@@ -309,11 +310,23 @@ function Reveal({ children, dir = "up", delay = 0, className = "" }: { children:
 export default function Home() {
   const { user } = useAuth();
   const { dark, toggle } = useTheme();
+  const [scrolled, setScrolled] = React.useState(false);
+
+  React.useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <div className="min-h-screen bg-white text-slate-900 dark:bg-[#070b0e] dark:text-white">
       {/* Top bar — HomeNavbar */}
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-200/60 bg-white/70 px-4 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 dark:border-white/5 dark:bg-[#070b0e]/70 dark:supports-[backdrop-filter]:bg-[#070b0e]/60 sm:px-6">
+      <header className={`sticky top-0 z-30 flex h-14 items-center justify-between border-b px-4 transition-colors duration-300 sm:px-6 ${
+        scrolled
+          ? "border-slate-200/60 bg-white/70 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 dark:border-white/5 dark:bg-[#070b0e]/70 dark:supports-[backdrop-filter]:bg-[#070b0e]/60"
+          : "border-transparent bg-white dark:bg-[#070b0e]"
+      }`}>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-indigo-400/20 to-transparent dark:via-white/10" aria-hidden />
         <Link href="/" className="flex items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1154,6 +1167,17 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Scroll to top */}
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        className={`fixed bottom-6 right-6 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg transition-all duration-300 hover:bg-indigo-600 hover:scale-110 dark:bg-white dark:text-black dark:hover:bg-indigo-400 ${
+          scrolled ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+        }`}
+        aria-label="Scroll to top"
+      >
+        <ArrowUp className="h-5 w-5" />
+      </button>
     </div>
   );
 }
