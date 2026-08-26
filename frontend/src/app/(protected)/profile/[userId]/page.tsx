@@ -6,7 +6,8 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import Avatar from "@/components/Avatar";
 import { useUserAvatar } from "@/lib/use-user-avatar";
-import { ArrowLeft, Mail, Phone, MapPin, MessageCircle } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, MessageCircle, Briefcase, Pencil } from "lucide-react";
+import EditProfileModal from "@/components/EditProfileModal";
 import type { User } from "@/lib/types";
 
 export default function ProfilePage() {
@@ -86,14 +87,27 @@ export default function ProfilePage() {
               />
             </button>
             <div className="min-w-0 flex-1 pb-1">
-              <h1 className="truncate text-xl font-bold">
-                {profile.name}{" "}
-                {profile.pronouns && (
-                  <span className="text-sm font-normal text-slate-500 dark:text-zinc-400">({profile.pronouns})</span>
+              <div className="flex items-center gap-2">
+                <h1 className="truncate text-xl font-bold">
+                  {profile.name}{" "}
+                  {profile.pronouns && (
+                    <span className="text-sm font-normal text-slate-500 dark:text-zinc-400">({profile.pronouns})</span>
+                  )}
+                </h1>
+                {isMe && (
+                  <EditProfileModal
+                    trigger={
+                      <button
+                        className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-zinc-400 dark:hover:bg-white/5"
+                      >
+                        <Pencil className="h-3 w-3" /> Edit
+                      </button>
+                    }
+                  />
                 )}
-              </h1>
+              </div>
               <p className="truncate text-sm text-slate-500 dark:text-zinc-400">{profile.email}</p>
-              {profile.status && <p className="mt-1 text-sm italic text-slate-600 dark:text-zinc-300">“{profile.status}”</p>}
+              {profile.status && <p className="mt-1 text-sm italic text-slate-600 dark:text-zinc-300">&ldquo;{profile.status}&rdquo;</p>}
             </div>
           </div>
 
@@ -105,6 +119,18 @@ export default function ProfilePage() {
               </div>
             )}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {profile.job_title && (
+                <div className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 dark:border-white/10">
+                  <Briefcase className="h-4 w-4 text-slate-400" />
+                  <span className="text-sm">{profile.job_title}</span>
+                </div>
+              )}
+              {profile.job_role && (
+                <div className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 dark:border-white/10">
+                  <span className="text-xs font-semibold text-slate-400">Role</span>
+                  <span className="text-sm">{profile.job_role}</span>
+                </div>
+              )}
               {profile.phone && (
                 <div className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 dark:border-white/10">
                   <Phone className="h-4 w-4 text-slate-400" />

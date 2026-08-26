@@ -1,7 +1,8 @@
 ﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, Check, ImagePlus, RotateCcw } from "lucide-react";
+import { Camera, Check, ImagePlus, RotateCcw, Pencil, Trash2 } from "lucide-react";
+import EditProfileModal from "@/components/EditProfileModal";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -297,6 +298,20 @@ export default function SettingsPage() {
         </form>
       </Section>
 
+      {/* ---------- Profile details ---------- */}
+      <Section title="Profile details">
+        <p className="mb-4 text-xs text-slate-500">
+          Edit your bio, status, job title, pronouns, phone and location.
+        </p>
+        <EditProfileModal
+          trigger={
+            <button className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700">
+              <Pencil className="h-4 w-4" /> Edit profile
+            </button>
+          }
+        />
+      </Section>
+
       {/* ---------- Change password ---------- */}
       <Section title="Change password">
         <form onSubmit={savePassword} className="space-y-4">
@@ -415,6 +430,70 @@ export default function SettingsPage() {
           {brandMsg && <p className="mt-3 text-xs font-medium text-indigo-600">{brandMsg}</p>}
         </Section>
       )}
+
+      {/* ---------- Danger zone ---------- */}
+      <DeleteAccountSection />
     </div>
+  );
+}
+
+function DeleteAccountSection() {
+  const { logout } = useAuth();
+  const [confirmStep, setConfirmStep] = useState(0);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleDelete() {
+    if (confirmStep === 0) {
+      setConfirmStep(1);
+      return;
+    }
+    if (confirmStep === 1) {
+      setConfirmStep(2);
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      await api.deleteMe();
+      logout();
+      window.location.href = "/login";
+    } catch (err) {
+      setError((err as Error).message);
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="mb-6 rounded-xl border border-red-200 bg-red-50/50 p-5 dark:border-red-900/30 dark:bg-red-950/10 sm:p-6">
+      <h2 className="mb-2 text-sm font-semibold text-red-700 dark:text-red-400">Danger zone</h2>
+      <p className="mb-4 text-xs text-red-600/80 dark:text-red-400/70">
+        Permanently delete your account and all associated data. This action cannot be undone.
+      </p>
+      {confirmStep > 0 && (
+        <p className="mb-3 text-xs font-medium text-red-700 dark:text-red-400">
+          {confirmStep === 1
+            ? "Are you sure? This will delete all your data."
+            : "Type your understanding: this is PERMANENT and cannot be reversed."}
+        </p>
+      )}
+      {error && (
+        <p className="mb-3 text-xs font-medium text-red-700">{error}</p>
+      )}
+      <button
+        onClick={() => void handleDelete()}
+        disabled={busy}
+        className="flex items-center gap-2 rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 shadow-sm transition-colors hover:bg-red-50 disabled:opacity-50 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
+      >
+        <Trash2 className="h-4 w-4" />
+        {busy
+          ? "Deleting…"
+          : confirmStep === 0
+            ? "Delete account"
+            : confirmStep === 1
+              ? "Yes, I'm sure"
+              : "Confirm permanent deletion"}
+      </button>
+    </section>
   );
 }

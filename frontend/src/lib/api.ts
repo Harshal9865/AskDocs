@@ -363,6 +363,8 @@ export const api = {
       method: "POST",
       ...json({ current_password: currentPassword, new_password: newPassword }),
     }),
+  deleteMe: () =>
+    request<void>("/auth/me", { method: "DELETE" }),
   renameWorkspace: (wsId: string, name: string) =>
     request<Workspace>(`/workspaces/${wsId}`, { method: "PATCH", ...json({ name }) }),
   setWorkspaceVisibility: (wsId: string, isPublic: boolean) =>

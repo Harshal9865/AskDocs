@@ -3,13 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, Compass, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, UsersRound } from "lucide-react";
+import { ChevronDown, Compass, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, UsersRound, Pencil } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
 import NotificationBell from "@/components/NotificationBell";
 import Avatar from "@/components/Avatar";
 import ThemeToggle, { useTheme } from "@/components/ThemeToggle";
+import EditProfileModal from "@/components/EditProfileModal";
 
 export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
   const pathname = usePathname();
@@ -20,6 +21,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [brandSrc, setBrandSrc] = useState<string | null>(null);
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { dark, toggle } = useTheme();
 
@@ -58,6 +60,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
   }, [menuOpen]);
 
   return (
+    <>
     <header className="dark:border-slate-700/50 dark:bg-[#181818] fixed inset-x-0 top-0 z-30 flex h-14 items-center gap-3 border-b border-slate-200 bg-white px-3 transition-colors sm:px-5">
       {/* mobile hamburger */}
       {onMenu && (
@@ -249,6 +252,16 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
                   <div className="dark:text-slate-400 truncate text-xs text-slate-500">{user?.email}</div>
                 </div>
                 <div className="p-1">
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setEditProfileOpen(true);
+                    }}
+                    className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors dark:text-slate-300 dark:hover:bg-slate-700/50 text-slate-700 hover:bg-slate-100"
+                  >
+                    <Pencil className="h-4 w-4" />
+                    Edit profile
+                  </button>
                   <MenuItem
                     icon={<Settings className="h-4 w-4" />}
                     label="Account settings"
@@ -283,6 +296,8 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         </div>
       </div>
     </header>
+    <EditProfileModal open={editProfileOpen} onOpenChange={setEditProfileOpen} />
+    </>
   );
 }
 

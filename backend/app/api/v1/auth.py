@@ -274,6 +274,34 @@ async def change_password(payload: PasswordChange, db: DbSession, user: CurrentU
     await db.commit()
 
 
+@router.delete("/me", status_code=204)
+async def delete_me(db: DbSession, user: CurrentUser):
+    """Delete the current user's account and all associated data."""
+    from app.models.workspace import WorkspaceMember, Workspace
+    from app.models.document import Document
+    from app.models.file import FileBlob
+    from app.models.chat import Conversation, Message
+    from sqlalchemy import delete as sa_delete
+
+    uid = user.id
+
+    # Remove from all workspaces
+    await db.execute(sa_delete(WorkspaceMember).where(WorkspaceMember.user_id == uid))
+
+    # Delete messages by user
+    await db.execute(sa_delete(Message).where(Message.user_id == uid))
+
+    # Delete conversations owned by user
+    await db.execute(sa_delete(Conversation).where(Conversation.user_id == uid))
+
+    # Delete documents owned by user
+    await db.execute(sa_delete(Document).where(Document.user_id == uid))
+
+    # Delete the user
+    await db.delete(user)
+    await db.commit()
+
+
 # ---------- Plan ----------
 
 class PlanOut(BaseModel):
