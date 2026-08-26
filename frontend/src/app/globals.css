@@ -213,7 +213,7 @@ body {
 /* Never allow sideways scrolling off-screen */
 html,
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Slim, unobtrusive scrollbars */
