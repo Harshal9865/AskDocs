@@ -16,6 +16,7 @@ from app.core.deps import AdminMembership, CurrentUser, DbSession, MemberMembers
 from app.models.activity import log_activity
 from app.models.document import Chunk, Document
 from app.services.ingestion import ingest_document
+from app.services.plan_enforcement import check_document_limit
 from app.storage.db_storage import get_storage
 
 router = APIRouter()
@@ -83,6 +84,9 @@ async def upload_document(
     if len(data) > settings.MAX_UPLOAD_BYTES:
         raise HTTPException(413, "File too large (max 20 MB)")
 
+    # Check plan limits
+    await check_document_limit(db, user)
+
     storage = get_storage()
     key = await storage.save(str(membership.workspace_id), file.filename or "untitled.txt", data)
 
@@ -112,6 +116,18 @@ async def list_documents(
     result = await db.execute(
         select(Document)
         .where(Document.workspace_id == membership.workspace_id)
+        .where(Document.deleted_at.is_(None))
+        .order_by(Document.created_at.desc())
+    )
+    return list(result.scalars().all())
+
+
+@router.get("/documents/mine", response_model=list[DocumentOut])
+async def list_my_documents(db: DbSession, user: CurrentUser):
+    """Return all non-deleted documents uploaded by the current user across all workspaces."""
+    result = await db.execute(
+        select(Document)
+        .where(Document.uploader_id == user.id)
         .where(Document.deleted_at.is_(None))
         .order_by(Document.created_at.desc())
     )

@@ -892,3 +892,67 @@ button.bg-indigo-600:hover {
     animation: none !important;
   }
 }
+
+/* ---------- Glow card utility ---------- */
+.glow-card {
+  --glow-color: rgba(99, 102, 241, 0.35);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.glow-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(ellipse at 50% 0%, var(--glow-color) 0%, transparent 70%);
+}
+.glow-card:hover::before {
+  opacity: 1;
+}
+.glow-card > * {
+  position: relative;
+  z-index: 1;
+}
+@media (hover: hover) {
+  .glow-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px -8px var(--glow-color);
+  }
+}
+@media (hover: none) {
+  .glow-card::before { display: none; }
+}
+
+/* Glow color variants */
+.glow-indigo { --glow-color: rgba(99, 102, 241, 0.35); }
+.glow-violet { --glow-color: rgba(139, 92, 246, 0.35); }
+.glow-emerald { --glow-color: rgba(16, 185, 129, 0.35); }
+.glow-sky { --glow-color: rgba(14, 165, 233, 0.35); }
+.glow-amber { --glow-color: rgba(245, 158, 11, 0.35); }
+.glow-rose { --glow-color: rgba(244, 63, 94, 0.35); }
+.glow-fuchsia { --glow-color: rgba(217, 70, 239, 0.35); }
+.glow-teal { --glow-color: rgba(20, 184, 166, 0.35); }
+.glow-cyan { --glow-color: rgba(6, 182, 212, 0.35); }
+.glow-red { --glow-color: rgba(239, 68, 68, 0.35); }
+.glow-orange { --glow-color: rgba(249, 115, 22, 0.35); }
+.glow-white { --glow-color: rgba(255, 255, 255, 0.2); }
+
+/* Newsletter input glow */
+.glow-input {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.glow-input:focus {
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2), 0 0 20px rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+/* Section divider glow */
+.glow-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2), rgba(16, 185, 129, 0.2), transparent);
+}

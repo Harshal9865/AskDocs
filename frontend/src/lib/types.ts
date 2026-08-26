@@ -14,6 +14,9 @@ export interface User {
   pronouns?: string | null;
   job_title?: string | null;
   job_role?: string | null;
+  plan?: string;
+  documents_used?: number;
+  questions_used?: number;
 }
 
 export interface TokenPair {
@@ -159,4 +162,14 @@ export interface Message {
   conflict?: ConflictWarning | null;
   freshness?: FreshnessWarning | null;
   created_at: string;
+}
+
+export interface PlanInfo {
+  plan: string;
+  documents_used: number;
+  questions_used: number;
+  documents_limit: number;
+  questions_limit: number;
+  workspaces_limit: number;
+  plan_reset_at: string | null;
 }

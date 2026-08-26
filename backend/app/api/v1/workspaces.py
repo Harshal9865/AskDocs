@@ -22,6 +22,7 @@ from app.schemas.workspace import (
     WorkspaceCreate,
     WorkspaceOut,
 )
+from app.services.plan_enforcement import check_workspace_limit
 
 router = APIRouter()
 
@@ -35,6 +36,7 @@ def _slugify(name: str) -> str:
 
 @router.post("", response_model=WorkspaceOut, status_code=201)
 async def create_workspace(payload: WorkspaceCreate, db: DbSession, user: CurrentUser):
+    await check_workspace_limit(db, user)
     slug = _slugify(payload.name)
     existing = await db.execute(select(Workspace).where(Workspace.slug == slug))
     if existing.scalar_one_or_none():

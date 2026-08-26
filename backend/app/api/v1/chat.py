@@ -23,6 +23,7 @@ from app.services.retrieval import (
     search_chunks,
     suggest_colleagues,
 )
+from app.services.plan_enforcement import check_question_limit
 
 router = APIRouter()
 
@@ -282,6 +283,9 @@ async def ask_question_stream(
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Conversation not found")
     if conv.user_id != user.id and role == "viewer":
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Viewers can only use their own conversations")
+
+    # Check question limit
+    await check_question_limit(db, user)
 
     # Resolve attachments (images -> vision parts, docs -> text context)
     image_parts, doc_context, atts = await _resolve_attachments(

@@ -30,6 +30,7 @@ const NAV = [
   { href: "/chats", label: "Office Chats", icon: MessagesSquare },
   { href: "/friends", label: "Friends", icon: UsersRound },
   { href: "/documents", label: "Documents", icon: FileText },
+  { href: "/my-documents", label: "My Documents", icon: FileText },
   { href: "/search", label: "Search", icon: Search },
   { href: "/discover", label: "Discover", icon: Compass },
 ];
@@ -68,6 +69,7 @@ export default function Sidebar({
   const [myRole, setMyRole] = useState<string | null>(null);
   const asideRef = useRef<HTMLElement>(null);
   const [collapsed, setCollapsed] = useState(false);
+  const planBadge = user?.plan === "pro" ? "bg-gradient-to-r from-amber-400 to-orange-500 text-white" : user?.plan === "enterprise" ? "bg-gradient-to-r from-violet-500 to-purple-600 text-white" : "bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-zinc-400";
 
   useEffect(() => {
     setCollapsed(localStorage.getItem("askdocs_sb_collapsed") === "1");
@@ -354,6 +356,9 @@ export default function Sidebar({
           <div className="min-w-0">
             <div className="sb-label dark:text-slate-300 truncate text-sm font-medium">{user?.name}</div>
             <div className="sb-label dark:text-slate-500 truncate text-xs text-slate-500">{user?.email}</div>
+            <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${planBadge}`}>
+              {user?.plan || "free"}
+            </span>
             <span
               title={`${user?.name} (${user?.email})`}
               className="sb-collapsed-show sb-center mx-auto h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold uppercase text-slate-700"

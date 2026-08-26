@@ -42,6 +42,14 @@ class Settings(BaseSettings):
     CHUNK_OVERLAP_TOKENS: int = 50
     TOP_K: int = 6
 
+    # Plan limits
+    FREE_MAX_DOCUMENTS: int = 10
+    FREE_MAX_QUESTIONS: int = 50
+    FREE_MAX_WORKSPACES: int = 2
+    PRO_MAX_DOCUMENTS: int = 100
+    PRO_MAX_QUESTIONS: int = 500
+    PRO_MAX_WORKSPACES: int = 10
+
 
 @lru_cache
 def get_settings() -> Settings:

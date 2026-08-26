@@ -8,6 +8,7 @@
   JoinRequest,
   Member,
   Message,
+  PlanInfo,
   Role,
   TeamChat,
   TeamMessage,
@@ -152,6 +153,11 @@ export const api = {
     });
   },
   me: () => request<User>("/auth/me"),
+
+  // ---- plan ----
+  getPlan: () => request<PlanInfo>("/auth/plan"),
+  upgradePlan: (plan: string) =>
+    request<PlanInfo>("/auth/plan/upgrade", { method: "POST", ...json({ plan }) }),
 
   // ---- avatar & brand ----
   setAvatar: (kind: "initials" | "sticker", value?: string) =>
@@ -453,6 +459,8 @@ export const api = {
   },
   listDocuments: (wsId: string) =>
     request<DocumentItem[]>(`/workspaces/${wsId}/documents`),
+  listMyDocuments: () =>
+    request<DocumentItem[]>("/documents/mine"),
   deleteDocument: (wsId: string, docId: string) =>
     request<void>(`/workspaces/${wsId}/documents/${docId}`, { method: "DELETE" }),
 

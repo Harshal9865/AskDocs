@@ -17,6 +17,7 @@ from app.core.security import (
 )
 from app.models.user import User
 from app.schemas.user import RefreshRequest, TokenPair, UserCreate, UserOut
+from app.services.plan_enforcement import get_plan_limits
 
 router = APIRouter()
 
@@ -270,3 +271,52 @@ async def change_password(payload: PasswordChange, db: DbSession, user: CurrentU
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "New password must be at least 8 characters")
     user.password_hash = hash_password(payload.new_password)
     await db.commit()
+
+
+# ---------- Plan ----------
+
+class PlanOut(BaseModel):
+    plan: str
+    documents_used: int
+    questions_used: int
+    documents_limit: int
+    questions_limit: int
+    workspaces_limit: int
+    plan_reset_at: datetime | None = None
+
+
+@router.get("/plan", response_model=PlanOut)
+async def get_plan(user: CurrentUser):
+    limits = get_plan_limits(user.plan)
+    return PlanOut(
+        plan=user.plan,
+        documents_used=user.documents_used or 0,
+        questions_used=user.questions_used or 0,
+        documents_limit=limits["documents"],
+        questions_limit=limits["questions"],
+        workspaces_limit=limits["workspaces"],
+        plan_reset_at=user.plan_reset_at,
+    )
+
+
+class PlanUpgrade(BaseModel):
+    plan: str  # "pro" or "enterprise"
+
+
+@router.post("/plan/upgrade", response_model=PlanOut)
+async def upgrade_plan(payload: PlanUpgrade, db: DbSession, user: CurrentUser):
+    if payload.plan not in ("free", "pro", "enterprise"):
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Invalid plan")
+    user.plan = payload.plan
+    await db.commit()
+    await db.refresh(user)
+    limits = get_plan_limits(user.plan)
+    return PlanOut(
+        plan=user.plan,
+        documents_used=user.documents_used or 0,
+        questions_used=user.questions_used or 0,
+        documents_limit=limits["documents"],
+        questions_limit=limits["questions"],
+        workspaces_limit=limits["workspaces"],
+        plan_reset_at=user.plan_reset_at,
+    )

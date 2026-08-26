@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, String
+from sqlalchemy import DateTime, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import BaseModel
@@ -27,3 +27,11 @@ class User(BaseModel):
     pronouns: Mapped[str | None] = mapped_column(String(50), nullable=True)
     job_title: Mapped[str | None] = mapped_column(String(120), nullable=True)
     job_role: Mapped[str | None] = mapped_column(String(120), nullable=True)
+
+    # Plan fields
+    plan: Mapped[str] = mapped_column(String(20), default="free", server_default="free")  # free | pro | enterprise
+    documents_used: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    questions_used: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    plan_reset_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, default=None
+    )
