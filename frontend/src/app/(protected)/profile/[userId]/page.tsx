@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import Avatar from "@/components/Avatar";
 import { useUserAvatar } from "@/lib/use-user-avatar";
-import { ArrowLeft, Mail, Phone, MapPin, MessageCircle, Briefcase, Pencil } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, MessageCircle, Briefcase, Pencil, UserPlus, UserCheck, Clock, X, Trash2 } from "lucide-react";
 import EditProfileModal from "@/components/EditProfileModal";
 import type { User } from "@/lib/types";
 
@@ -24,6 +24,8 @@ export default function ProfilePage() {
     profile?.avatar_value,
   );
   const [lightbox, setLightbox] = useState(false);
+  const [friendBusy, setFriendBusy] = useState(false);
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,6 +43,135 @@ export default function ProfilePage() {
       cancelled = true;
     };
   }, [userId, isMe, me]);
+
+  async function handleSendRequest() {
+    setFriendBusy(true);
+    try {
+      await api.sendFriendRequest(userId);
+      setProfile((p) => p ? { ...p, friendship_status: "pending", friendship_id: null, friendship_by_me: true } : p);
+    } catch (err) {
+      alert((err as Error).message);
+    } finally {
+      setFriendBusy(false);
+    }
+  }
+
+  async function handleAccept() {
+    if (!profile?.friendship_id) return;
+    setFriendBusy(true);
+    try {
+      await api.acceptFriend(profile.friendship_id);
+      setProfile((p) => p ? { ...p, friendship_status: "accepted" } : p);
+    } catch (err) {
+      alert((err as Error).message);
+    } finally {
+      setFriendBusy(false);
+    }
+  }
+
+  async function handleDecline() {
+    if (!profile?.friendship_id) return;
+    setFriendBusy(true);
+    try {
+      await api.declineFriend(profile.friendship_id);
+      setProfile((p) => p ? { ...p, friendship_status: "none", friendship_id: null } : p);
+    } catch (err) {
+      alert((err as Error).message);
+    } finally {
+      setFriendBusy(false);
+    }
+  }
+
+  async function handleRemoveFriend() {
+    if (!profile?.friendship_id) return;
+    setFriendBusy(true);
+    try {
+      await api.unfriend(profile.friendship_id);
+      setProfile((p) => p ? { ...p, friendship_status: "none", friendship_id: null } : p);
+      setShowRemoveConfirm(false);
+    } catch (err) {
+      alert((err as Error).message);
+    } finally {
+      setFriendBusy(false);
+    }
+  }
+
+  function renderFriendButton() {
+    if (isMe || !profile) return null;
+    const fs = profile.friendship_status;
+
+    if (fs === "accepted") {
+      if (showRemoveConfirm) {
+        return (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-red-600 dark:text-red-400">Remove friend?</span>
+            <button
+              onClick={() => void handleRemoveFriend()}
+              disabled={friendBusy}
+              className="flex items-center gap-1.5 rounded-full bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
+            >
+              <Trash2 className="h-3 w-3" /> {friendBusy ? "Removing…" : "Yes, remove"}
+            </button>
+            <button
+              onClick={() => setShowRemoveConfirm(false)}
+              className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:text-zinc-400 dark:hover:bg-white/5"
+            >
+              Cancel
+            </button>
+          </div>
+        );
+      }
+      return (
+        <button
+          onClick={() => setShowRemoveConfirm(true)}
+          className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-red-500/10 hover:text-red-600 dark:text-emerald-400 dark:hover:text-red-400"
+        >
+          <UserCheck className="h-3.5 w-3.5" /> Friends
+        </button>
+      );
+    }
+
+    if (fs === "pending" && profile.friendship_id) {
+      if (!profile.friendship_by_me) {
+        return (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => void handleAccept()}
+              disabled={friendBusy}
+              className="flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+            >
+              <UserCheck className="h-3.5 w-3.5" /> {friendBusy ? "Accepting…" : "Accept"}
+            </button>
+            <button
+              onClick={() => void handleDecline()}
+              disabled={friendBusy}
+              className="flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:text-zinc-400 dark:hover:bg-white/5 disabled:opacity-50"
+            >
+              <X className="h-3.5 w-3.5" /> Decline
+            </button>
+          </div>
+        );
+      }
+      return (
+        <button
+          disabled
+          className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400"
+        >
+          <Clock className="h-3.5 w-3.5" /> Request Sent
+        </button>
+      );
+    }
+
+    return (
+      <button
+        onClick={() => void handleSendRequest()}
+        disabled={friendBusy}
+        className="flex items-center gap-1.5 rounded-full bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+      >
+        <UserPlus className="h-3.5 w-3.5" /> {friendBusy ? "Sending…" : "Add Friend"}
+      </button>
+    );
+  }
 
   if (loading) {
     return (
@@ -84,6 +215,8 @@ export default function ProfilePage() {
                 size={96}
                 src={src}
                 stickerId={stickerId}
+                showPresence={!isMe}
+                online={profile.online ?? false}
               />
             </button>
             <div className="min-w-0 flex-1 pb-1">
@@ -94,6 +227,12 @@ export default function ProfilePage() {
                     <span className="text-sm font-normal text-slate-500 dark:text-zinc-400">({profile.pronouns})</span>
                   )}
                 </h1>
+                {!isMe && (
+                  <span
+                    className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${profile.online ? "bg-emerald-500" : "bg-slate-300 dark:bg-zinc-600"}`}
+                    title={profile.online ? "Online" : "Offline"}
+                  />
+                )}
                 {isMe && (
                   <EditProfileModal
                     trigger={
@@ -155,12 +294,15 @@ export default function ProfilePage() {
               )}
             </div>
             {!isMe && (
-              <button
-                onClick={() => router.push("/chats")}
-                className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#1DB954] px-4 py-2.5 text-sm font-medium text-black hover:bg-[#1ed760]"
-              >
-                <MessageCircle className="h-4 w-4" /> Message
-              </button>
+              <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                {renderFriendButton()}
+                <button
+                  onClick={() => router.push("/chats")}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#1DB954] px-4 py-2.5 text-sm font-medium text-black hover:bg-[#1ed760]"
+                >
+                  <MessageCircle className="h-4 w-4" /> Message
+                </button>
+              </div>
             )}
           </div>
         </div>

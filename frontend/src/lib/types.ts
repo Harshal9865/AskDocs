@@ -17,6 +17,10 @@ export interface User {
   plan?: string;
   documents_used?: number;
   questions_used?: number;
+  online?: boolean;
+  friendship_status?: string;
+  friendship_id?: string | null;
+  friendship_by_me?: boolean;
 }
 
 export interface TokenPair {

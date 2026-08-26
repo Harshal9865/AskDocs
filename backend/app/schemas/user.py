@@ -26,6 +26,10 @@ class UserOut(BaseModel):
     pronouns: str | None = None
     job_title: str | None = None
     job_role: str | None = None
+    online: bool = False
+    friendship_status: str = "none"
+    friendship_id: str | None = None
+    friendship_by_me: bool = False
 
 
 class ProfileUpdate(BaseModel):

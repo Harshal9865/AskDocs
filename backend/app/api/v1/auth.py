@@ -246,6 +246,9 @@ async def update_me(payload: SchemaProfileUpdate, db: DbSession, user: CurrentUs
 async def get_user_profile(user_id: uuid.UUID, db: DbSession, user: CurrentUser):
     """Get another user's profile (workspace members only)."""
     from app.models.workspace import WorkspaceMember
+    from app.models.friend import Friendship
+    from app.api.v1.presence import is_online
+    from sqlalchemy import or_
 
     target = await db.get(User, user_id)
     if target is None:
@@ -261,7 +264,29 @@ async def get_user_profile(user_id: uuid.UUID, db: DbSession, user: CurrentUser)
     target_ws = {r for (r,) in target_ws_rows.all()}
     if not my_ws or not target_ws or my_ws.isdisjoint(target_ws):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Not found")
-    return target
+
+    # check friendship status
+    fr = await db.execute(
+        select(Friendship).where(
+            or_(
+                (Friendship.requester_id == user.id) & (Friendship.addressee_id == user_id),
+                (Friendship.requester_id == user_id) & (Friendship.addressee_id == user.id),
+            )
+        )
+    )
+    friendship = fr.scalar_one_or_none()
+
+    out = UserOut.model_validate(target)
+    out.online = is_online(target.last_seen_at)
+    if friendship:
+        out.friendship_status = friendship.status
+        out.friendship_id = str(friendship.id)
+        out.friendship_by_me = friendship.requester_id == user.id
+    else:
+        out.friendship_status = "none"
+        out.friendship_id = None
+        out.friendship_by_me = False
+    return out
 
 
 @router.post("/change-password", status_code=204)
