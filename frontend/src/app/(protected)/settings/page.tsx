@@ -301,15 +301,23 @@ export default function SettingsPage() {
       {/* ---------- Profile details ---------- */}
       <Section title="Profile details">
         <p className="mb-4 text-xs text-slate-500">
-          Edit your bio, status, job title, pronouns, phone and location.
+          Bio, status, job title, pronouns, phone and location — visible to your team on your profile.
         </p>
-        <EditProfileModal
-          trigger={
-            <button className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700">
-              <Pencil className="h-4 w-4" /> Edit profile
-            </button>
-          }
-        />
+        <div className="flex flex-wrap gap-2">
+          <EditProfileModal
+            trigger={
+              <button className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 dark:bg-[#1DB954] dark:text-black">
+                <Pencil className="h-4 w-4" /> Edit profile
+              </button>
+            }
+          />
+          <a
+            href={user ? `/profile/${user.id}` : "#"}
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300"
+          >
+            View public profile →
+          </a>
+        </div>
       </Section>
 
       {/* ---------- Change password ---------- */}
