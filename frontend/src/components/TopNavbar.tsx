@@ -98,7 +98,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
             </>
           )}
         </span>
-        <span className="dark:text-white text-[15px] font-bold tracking-tight text-slate-900">
+        <span className="hidden sm:inline dark:text-white text-[15px] font-bold tracking-tight text-slate-900">
           AskDocs
         </span>
       </button>
@@ -141,8 +141,8 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         )}
       </nav>
 
-      {/* compact More menu — same links, never disappears */}
-      <div className="relative lg:hidden">
+      {/* compact More menu — hidden on phones (rail already shows icons), only for tablet gap md..lg */}
+      <div className="relative hidden md:block lg:hidden">
         <button
           onClick={() => setMoreOpen((o) => !o)}
           aria-label="More pages"
@@ -197,14 +197,14 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         )}
       </div>
 
-      {/* global search */}
+      {/* global search — hidden on phones, icon navigates to /search to save space */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
           if (q.trim().length >= 2)
             router.push(`/search?q=${encodeURIComponent(q.trim())}`);
         }}
-        className="relative ml-auto mr-2 sm:mr-4 w-40 sm:w-64 lg:w-72 xl:w-80"
+        className="relative ml-auto mr-2 hidden sm:flex sm:mr-4 sm:w-64 lg:w-72 xl:w-80"
       >
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         <input
@@ -214,6 +214,13 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           className="dark:border-slate-600 dark:bg-[#242424] dark:text-white dark:placeholder:text-slate-500 dark:focus:border-indigo-500 dark:focus:bg-[#2a2a2a] w-full rounded-lg border border-slate-300 bg-white py-1.5 pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-500/20"
         />
       </form>
+      <button
+        onClick={() => router.push("/search")}
+        aria-label="Search"
+        className="ml-auto flex h-9 w-9 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 sm:hidden"
+      >
+        <Search className="h-5 w-5" />
+      </button>
 
       {/* right side */}
       <div className="flex items-center gap-1 sm:gap-2">
@@ -237,7 +244,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
               }
             />
             <ChevronDown
-              className={`h-3.5 w-3.5 text-slate-400 transition-transform ${menuOpen ? "rotate-180" : ""}`}
+              className={`hidden h-3.5 w-3.5 text-slate-400 transition-transform sm:block ${menuOpen ? "rotate-180" : ""}`}
             />
           </button>
 

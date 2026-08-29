@@ -343,9 +343,13 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="relative mx-auto flex h-[var(--chat-h)] max-w-5xl flex-row gap-2 overflow-hidden md:gap-4">
-      {/* ============ CONVERSATION LIST — always visible, responsive (icons on small) ============ */}
-      <div className="gemini-gradient-bg sb-scroll flex w-[110px] shrink-0 flex-col overflow-y-auto rounded-xl border border-indigo-200/60 bg-white p-2 shadow-sm dark:border-[rgba(129,140,248,0.16)] dark:bg-[#0d0d1f] sm:w-48 sm:p-3 md:w-64">
+    <div className="relative mx-auto flex h-[var(--chat-h)] max-w-5xl overflow-hidden rounded-[20px] md:rounded-xl md:flex-row md:gap-4">
+      {/* ============ CONVERSATION LIST — WhatsApp on mobile (full when no conv) ============ */}
+      <div
+        className={`gemini-gradient-bg sb-scroll flex flex-col overflow-y-auto border bg-white shadow-sm dark:border-[rgba(129,140,248,0.16)] dark:bg-[#0d0d1f] md:rounded-xl md:border md:shadow-sm absolute inset-0 md:relative md:inset-auto w-full md:w-64 shrink-0 p-2 sm:p-3 rounded-[16px] md:rounded-xl transition-transform duration-300 ease-in-out will-change-transform ${
+          activeConv ? "-translate-x-full md:translate-x-0" : "translate-x-0"
+        }`}
+      >
         <div className="gemini-orb gemini-orb-1" />
         <div className="gemini-orb gemini-orb-2" />
         <div className="relative z-10 flex flex-col">
@@ -408,8 +412,12 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* thread — always visible, responsive */}
-      <div className="gemini-gradient-bg relative flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border border-indigo-200/60 bg-white shadow-sm dark:border-[rgba(129,140,248,0.16)] dark:bg-[#13132b]">
+      {/* thread — WhatsApp full on mobile when conv active */}
+      <div
+        className={`gemini-gradient-bg relative flex min-h-0 w-full flex-1 flex-col overflow-hidden border bg-white shadow-sm dark:border-[rgba(129,140,248,0.16)] dark:bg-[#13132b] md:rounded-xl rounded-[16px] md:border absolute inset-0 md:relative md:inset-auto md:w-auto transition-transform duration-300 ease-in-out will-change-transform ${
+          activeConv ? "translate-x-0" : "translate-x-full md:translate-x-0"
+        }`}
+      >
 
         {/* Gemini floating orbs */}
         <div className="gemini-orb gemini-orb-1" />
@@ -622,8 +630,8 @@ export default function ChatPage() {
           </button>
         )}
 
-        {/* composer — aurora glow, lifted from bottom border */}
-        <div className="relative z-10 rounded-b-xl border-t border-indigo-100/60 bg-white px-3 pb-4 pt-3 dark:border-indigo-500/10 dark:bg-[#13132b] sm:px-4 sm:pb-5 sm:pt-3">
+        {/* composer — aurora glow, pb-safe for notched phones */}
+        <div className="relative z-10 rounded-b-xl border-t border-indigo-100/60 bg-white px-3 pb-4 pt-3 pb-safe dark:border-indigo-500/10 dark:bg-[#13132b] sm:px-4 sm:pb-5 sm:pt-3">
           <ChatComposer
             inputId="chat-input"
             value={input}

@@ -956,3 +956,9 @@ button.bg-indigo-600:hover {
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2), rgba(16, 185, 129, 0.2), transparent);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .will-change-transform {
+    transition: none !important;
+  }
+}

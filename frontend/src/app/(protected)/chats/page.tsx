@@ -414,9 +414,15 @@ export default function ChatsPage() {
   ];
 
   return (
-    <div className="relative mx-auto flex h-[var(--chat-h)] max-w-5xl flex-row gap-2 overflow-hidden md:gap-4">
-      {/* ============ CHAT LIST — always visible, responsive (icons on small) ============ */}
-      <div className="gemini-gradient-bg sb-scroll flex w-[110px] shrink-0 flex-col overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 shadow-sm dark:border-white/10 dark:bg-[#0b0f14] sm:w-48 sm:p-3 md:w-72">
+    <div className="relative mx-auto flex h-[var(--chat-h)] max-w-5xl overflow-hidden rounded-[20px] md:rounded-xl md:flex-row md:gap-4">
+      {/* ============ CHAT LIST — WhatsApp on mobile (full when no chat), sidebar rail 68px always ============ */}
+      <div
+        className={`gemini-gradient-bg sb-scroll flex flex-col overflow-y-auto border bg-white shadow-sm dark:border-white/10 dark:bg-[#0b0f14] md:rounded-xl md:border md:shadow-sm
+          absolute inset-0 md:relative md:inset-auto w-full md:w-72 shrink-0 p-2 sm:p-3 rounded-[16px] md:rounded-xl
+          transition-transform duration-300 ease-in-out will-change-transform
+          ${activeChat ? "-translate-x-full md:translate-x-0" : "translate-x-0"}`}
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
 
         <div className="gemini-orb gemini-orb-1" />
         <div className="gemini-orb gemini-orb-2" />
@@ -613,8 +619,13 @@ export default function ChatsPage() {
         </div>
       </div>
 
-      {/* ============ THREAD — always visible, responsive ============ */}
-      <div className="gemini-gradient-bg relative flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#181818]">
+      {/* ============ THREAD — WhatsApp full on mobile when chat active, aurora/green distinct ============ */}
+      <div
+        className={`gemini-gradient-bg relative flex min-h-0 w-full flex-1 flex-col overflow-hidden border bg-white shadow-sm dark:border-white/10 dark:bg-[#181818] md:rounded-xl rounded-[16px] md:border
+          absolute inset-0 md:relative md:inset-auto md:w-auto
+          transition-transform duration-300 ease-in-out will-change-transform
+          ${activeChat ? "translate-x-0" : "translate-x-full md:translate-x-0"}`}
+      >
 
         <div className="gemini-orb gemini-orb-1" />
         <div className="gemini-orb gemini-orb-2" />
@@ -812,8 +823,8 @@ export default function ChatsPage() {
               </button>
             )}
 
-            {/* composer */}
-            <div className="relative z-10 border-t border-slate-100/60 px-2 pb-2 pt-2 dark:border-white/5 sm:px-4 sm:pb-4 sm:pt-3">
+            {/* composer — pb-safe for notched phones */}
+            <div className="relative z-10 border-t border-slate-100/60 px-2 pb-2 pt-2 pb-safe dark:border-white/5 sm:px-4 sm:pb-4 sm:pt-3">
               <ChatComposer
                 inputId="team-chat-input"
                 value={input}
