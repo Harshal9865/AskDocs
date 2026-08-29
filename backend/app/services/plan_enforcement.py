@@ -11,8 +11,8 @@ from app.models.workspace import Workspace, WorkspaceMember
 
 
 PLAN_LIMITS = {
-    "free": {"documents": 10, "questions": 50, "workspaces": 2},
-    "pro": {"documents": 100, "questions": 500, "workspaces": 10},
+    "free": {"documents": 100, "questions": 200, "workspaces": 5},
+    "pro": {"documents": 500, "questions": 2000, "workspaces": 20},
     "enterprise": {"documents": -1, "questions": -1, "workspaces": -1},  # -1 = unlimited
 }
 
