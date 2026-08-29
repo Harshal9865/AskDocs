@@ -1,7 +1,5 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
-
 export default function HelpPage() {
   const faqs: { q: string; a: React.ReactNode }[] = [
     {
@@ -48,19 +46,25 @@ export default function HelpPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="mb-1 text-xl font-bold">Help & FAQ</h1>
-      <p className="mb-6 text-sm text-slate-500">Everything you need to know about AskDocs.</p>
-      <div className="space-y-2">
+      <h1 className="mb-1 text-xl font-bold dark:text-white">Help & FAQ</h1>
+      <p className="mb-6 text-sm text-slate-500 dark:text-zinc-400">Everything you need to know about AskDocs.</p>
+      <div className="space-y-3">
         {faqs.map((f) => (
           <details
             key={f.q}
-            className="group rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm transition-shadow open:shadow-md"
+            className="group glow-card glow-indigo rounded-2xl dark:bg-[#121212]"
           >
-            <summary className="flex cursor-pointer list-none items-center gap-3 text-sm font-semibold text-slate-800 [&::-webkit-details-marker]:hidden">
-              <ChevronDown className="h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 group-open:rotate-180" />
-              {f.q}
-            </summary>
-            <div className="mt-2 pl-7 text-sm leading-relaxed text-slate-600">{f.a}</div>
+            <div className="rounded-2xl border border-slate-200/60 bg-white transition-all duration-300 group-open:border-indigo-200/50 group-open:shadow-xl dark:border-white/10 dark:bg-[#121212] dark:group-open:border-indigo-500/20">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-5 text-sm font-semibold text-slate-900 dark:text-white [&::-webkit-details-marker]:hidden">
+                <span>{f.q}</span>
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-white transition-all duration-300 group-open:rotate-45">
+                  +
+                </span>
+              </summary>
+              <div className="px-5 pb-5">
+                <p className="text-sm leading-relaxed text-slate-600 dark:text-zinc-300">{f.a}</p>
+              </div>
+            </div>
           </details>
         ))}
       </div>
