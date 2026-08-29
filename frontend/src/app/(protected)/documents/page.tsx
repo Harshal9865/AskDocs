@@ -195,9 +195,10 @@ export default function DocumentsPage() {
   }
 
   async function remove(docId: string, title: string) {
-    if (!workspace) return;
+    const wsId = workspace?.id ?? docs.find((d) => d.id === docId)?.workspace_id;
+    if (!wsId) return;
     try {
-      await api.deleteDocument(workspace.id, docId);
+      await api.deleteDocument(wsId, docId);
       setDocs((prev) => prev.filter((d) => d.id !== docId));
       setTotalCount((c) => c - 1);
       showToast("success", `"${title}" moved to trash`);
@@ -207,9 +208,10 @@ export default function DocumentsPage() {
   }
 
   async function retryDoc(docId: string) {
-    if (!workspace) return;
+    const wsId = workspace?.id ?? docs.find((d) => d.id === docId)?.workspace_id;
+    if (!wsId) return;
     try {
-      await api.retryDocument(workspace.id, docId);
+      await api.retryDocument(wsId, docId);
       setDocs((prev) => prev.map((d) => d.id === docId ? { ...d, status: "pending", error_msg: null } : d));
       showToast("success", "Reprocessing document");
     } catch (err) {
@@ -536,7 +538,7 @@ export default function DocumentsPage() {
                         <RotateCcw className="h-4 w-4" />
                       </button>
                     )}
-                    {myRole === "admin" && (
+                    {(myRole === "admin" || viewMode === "mine") && (
                       <button
                         onClick={(e) => { e.preventDefault(); if (confirm(`Delete "${d.title}"?`)) void remove(d.id, d.title); }}
                         className="rounded-lg p-1.5 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100 dark:text-zinc-600 dark:hover:bg-red-950/30 dark:hover:text-red-400"
