@@ -136,7 +136,7 @@ export default function EditProfileModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="max-h-[60vh] space-y-4 overflow-y-auto pr-1">
+        <div className="max-h-[60vh] space-y-4 overflow-y-auto px-1 py-1 -mx-1">
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">
               Status
@@ -146,7 +146,7 @@ export default function EditProfileModal({
               onChange={(e) => setStatus(e.target.value)}
               placeholder="Hey there! I'm on AskDocs"
               maxLength={120}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#181818] dark:text-white"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#181818] dark:text-white dark:focus:border-[#1DB954] dark:focus:ring-[#1DB954]/20"
             />
           </div>
 
@@ -160,7 +160,7 @@ export default function EditProfileModal({
               placeholder="Tell your team about yourself"
               maxLength={500}
               rows={3}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#181818] dark:text-white"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#181818] dark:text-white dark:focus:border-[#1DB954] dark:focus:ring-[#1DB954]/20"
             />
           </div>
 
@@ -175,7 +175,7 @@ export default function EditProfileModal({
                 onChange={(e) => setJobTitle(e.target.value)}
                 placeholder="e.g. Senior Engineer"
                 maxLength={120}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#181818] dark:text-white"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#181818] dark:text-white dark:focus:border-[#1DB954] dark:focus:ring-[#1DB954]/20"
               />
               <datalist id="edit-job-titles">
                 {JOB_TITLES.map((t) => (
@@ -193,7 +193,7 @@ export default function EditProfileModal({
                 onChange={(e) => setJobRole(e.target.value)}
                 placeholder="e.g. Engineering"
                 maxLength={120}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#181818] dark:text-white"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#181818] dark:text-white dark:focus:border-[#1DB954] dark:focus:ring-[#1DB954]/20"
               />
               <datalist id="edit-job-roles">
                 {JOB_ROLES.map((r) => (
@@ -213,7 +213,7 @@ export default function EditProfileModal({
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+1 555 123 4567"
                 maxLength={32}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#181818] dark:text-white"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#181818] dark:text-white dark:focus:border-[#1DB954] dark:focus:ring-[#1DB954]/20"
               />
             </div>
             <div>
@@ -226,7 +226,7 @@ export default function EditProfileModal({
                 onChange={(e) => setPronouns(e.target.value)}
                 placeholder="he/him, she/her, they/them"
                 maxLength={50}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#181818] dark:text-white"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#181818] dark:text-white dark:focus:border-[#1DB954] dark:focus:ring-[#1DB954]/20"
               />
               <datalist id="edit-pronouns">
                 {PRONOUNS.map((p) => (
@@ -245,7 +245,7 @@ export default function EditProfileModal({
               onChange={(e) => setLocation(e.target.value)}
               placeholder="San Francisco, CA"
               maxLength={120}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-[#181818] dark:text-white"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#181818] dark:text-white dark:focus:border-[#1DB954] dark:focus:ring-[#1DB954]/20"
             />
           </div>
         </div>

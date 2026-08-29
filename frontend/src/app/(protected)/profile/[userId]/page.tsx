@@ -221,15 +221,15 @@ export default function ProfilePage() {
             </button>
             <div className="min-w-0 flex-1 pb-1">
               <div className="flex items-center gap-2">
-                <h1 className="truncate text-xl font-bold">
+                <h1 className="truncate text-xl font-bold text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.7)]">
                   {profile.name}{" "}
                   {profile.pronouns && (
-                    <span className="text-sm font-normal text-slate-500 dark:text-zinc-400">({profile.pronouns})</span>
+                    <span className="text-sm font-normal text-white/80">({profile.pronouns})</span>
                   )}
                 </h1>
                 {!isMe && (
                   <span
-                    className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${profile.online ? "bg-emerald-500" : "bg-slate-300 dark:bg-zinc-600"}`}
+                    className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full border-2 border-white/80 shadow-sm ${profile.online ? "bg-emerald-500" : "bg-slate-300"}`}
                     title={profile.online ? "Online" : "Offline"}
                   />
                 )}
@@ -237,7 +237,7 @@ export default function ProfilePage() {
                   <EditProfileModal
                     trigger={
                       <button
-                        className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-zinc-400 dark:hover:bg-white/5"
+                        className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-white/30 bg-white/90 px-2.5 py-1 text-xs font-medium text-slate-700 shadow-sm backdrop-blur hover:bg-white dark:border-white/10 dark:bg-[#1a1a1a] dark:text-zinc-300 dark:hover:bg-white/10"
                       >
                         <Pencil className="h-3 w-3" /> Edit
                       </button>
@@ -245,51 +245,51 @@ export default function ProfilePage() {
                   />
                 )}
               </div>
-              <p className="truncate text-sm text-slate-500 dark:text-zinc-400">{profile.email}</p>
-              {profile.status && <p className="mt-1 text-sm italic text-slate-600 dark:text-zinc-300">&ldquo;{profile.status}&rdquo;</p>}
+              <p className="truncate text-sm font-medium text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">{profile.email}</p>
+              {profile.status && <p className="mt-1 text-sm italic font-medium text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">&ldquo;{profile.status}&rdquo;</p>}
             </div>
           </div>
 
           <div className="mt-6 grid gap-4">
             {profile.bio && (
-              <div className="rounded-xl bg-slate-50 p-4 dark:bg-white/5">
-                <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Bio</div>
-                <p className="mt-1 whitespace-pre-wrap text-sm">{profile.bio}</p>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/[0.04]">
+                <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Bio</div>
+                <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-800 dark:text-zinc-200">{profile.bio}</p>
               </div>
             )}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {profile.job_title && (
-                <div className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 dark:border-white/10">
-                  <Briefcase className="h-4 w-4 text-slate-400" />
-                  <span className="text-sm">{profile.job_title}</span>
+                <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
+                  <Briefcase className="h-4 w-4 text-slate-500 dark:text-zinc-400" />
+                  <span className="text-sm font-medium text-slate-800 dark:text-zinc-200">{profile.job_title}</span>
                 </div>
               )}
               {profile.job_role && (
-                <div className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 dark:border-white/10">
-                  <span className="text-xs font-semibold text-slate-400">Role</span>
-                  <span className="text-sm">{profile.job_role}</span>
+                <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
+                  <span className="text-xs font-semibold text-slate-500 dark:text-zinc-400">Role</span>
+                  <span className="text-sm font-medium text-slate-800 dark:text-zinc-200">{profile.job_role}</span>
                 </div>
               )}
               {profile.phone && (
-                <div className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 dark:border-white/10">
-                  <Phone className="h-4 w-4 text-slate-400" />
-                  <span className="text-sm">{profile.phone}</span>
+                <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
+                  <Phone className="h-4 w-4 text-slate-500 dark:text-zinc-400" />
+                  <span className="text-sm font-medium text-slate-800 dark:text-zinc-200">{profile.phone}</span>
                 </div>
               )}
               {profile.location && (
-                <div className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 dark:border-white/10">
-                  <MapPin className="h-4 w-4 text-slate-400" />
-                  <span className="text-sm">{profile.location}</span>
+                <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
+                  <MapPin className="h-4 w-4 text-slate-500 dark:text-zinc-400" />
+                  <span className="text-sm font-medium text-slate-800 dark:text-zinc-200">{profile.location}</span>
                 </div>
               )}
-              <div className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 dark:border-white/10">
-                <Mail className="h-4 w-4 text-slate-400" />
-                <span className="truncate text-sm">{profile.email}</span>
+              <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
+                <Mail className="h-4 w-4 text-slate-500 dark:text-zinc-400" />
+                <span className="truncate text-sm font-medium text-slate-800 dark:text-zinc-200">{profile.email}</span>
               </div>
               {profile.pronouns && (
-                <div className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 dark:border-white/10">
-                  <span className="text-xs font-semibold text-slate-400">Pronouns</span>
-                  <span className="text-sm">{profile.pronouns}</span>
+                <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
+                  <span className="text-xs font-semibold text-slate-500 dark:text-zinc-400">Pronouns</span>
+                  <span className="text-sm font-medium text-slate-800 dark:text-zinc-200">{profile.pronouns}</span>
                 </div>
               )}
             </div>

@@ -23,6 +23,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
 import Colleagues from "@/components/Colleagues";
+import FriendsQuickAccess from "@/components/FriendsQuickAccess";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -411,8 +412,9 @@ export default function Sidebar({
             </Link>
           );
         })}
-        <div className="sb-hide mt-4 -mx-2">
+        <div className="sb-hide mt-4 -mx-2 space-y-0">
           <Colleagues />
+          <FriendsQuickAccess />
         </div>
       </nav>
 
