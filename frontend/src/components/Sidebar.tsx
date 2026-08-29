@@ -30,7 +30,6 @@ const NAV = [
   { href: "/chats", label: "Office Chats", icon: MessagesSquare },
   { href: "/friends", label: "Friends", icon: UsersRound },
   { href: "/documents", label: "Documents", icon: FileText },
-  { href: "/my-documents", label: "My Documents", icon: FileText },
   { href: "/search", label: "Search", icon: Search },
   { href: "/discover", label: "Discover", icon: Compass },
 ];

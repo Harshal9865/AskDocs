@@ -40,6 +40,23 @@ class GeminiProvider(LLMProvider):
         )
         return [list(e.values) for e in result.embeddings]
 
+    async def ocr_image(self, image_bytes: bytes, mime_type: str = "image/png") -> str:
+        """Extract text from an image using Gemini vision."""
+        prompt = (
+            "Extract ALL text from this image. "
+            "If the image contains handwritten notes, transcribe them exactly as written. "
+            "If there are tables, preserve their structure using pipe delimiters. "
+            "Return only the extracted text, no commentary."
+        )
+        image_part = types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
+        response = await asyncio.to_thread(
+            lambda: self.client.models.generate_content(
+                model=self.settings.GEMINI_CHAT_MODEL,
+                contents=[prompt, image_part],
+            ).text
+        )
+        return response or ""
+
     def _build_prompt(self, question: str, contexts: list[RetrievedChunk], history: list[dict] | None) -> list[str]:
         parts = []
         for i, turn in enumerate(history or [], 1):

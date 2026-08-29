@@ -88,6 +88,7 @@ export default function DocumentsPage() {
   const [myRole, setMyRole] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [viewMode, setViewMode] = useState<"workspace" | "mine">("workspace");
 
   // upload state
   const [uploadQueue, setUploadQueue] = useState<UploadItem[]>([]);
@@ -97,23 +98,30 @@ export default function DocumentsPage() {
   let uploadId = useRef(0);
 
   const load = useCallback(async () => {
-    if (!workspace) return;
     try {
-      const [docsResult, countResult] = await Promise.all([
-        api.listDocuments(workspace.id),
-        api.documentCount(workspace.id),
-      ]);
-      setDocs(docsResult);
-      setTotalCount(countResult.count);
+      if (viewMode === "mine") {
+        const mine = await api.listMyDocuments();
+        setDocs(mine);
+        setTotalCount(mine.length);
+      } else {
+        if (!workspace) return;
+        const [docsResult, countResult] = await Promise.all([
+          api.listDocuments(workspace.id),
+          api.documentCount(workspace.id),
+        ]);
+        setDocs(docsResult);
+        setTotalCount(countResult.count);
+      }
       setError(null);
     } catch (err) {
       setError((err as Error).message);
     } finally {
       setLoading(false);
     }
-  }, [workspace]);
+  }, [workspace, viewMode]);
 
   useEffect(() => {
+    setLoading(true);
     void load();
   }, [load]);
 
@@ -127,7 +135,10 @@ export default function DocumentsPage() {
 
   // resolve role
   useEffect(() => {
-    if (!workspace || !user) return;
+    if (!workspace || !user || viewMode === "mine") {
+      setMyRole(null);
+      return;
+    }
     let cancelled = false;
     (async () => {
       try {
@@ -260,7 +271,7 @@ export default function DocumentsPage() {
     }
   }
 
-  if (!workspace) {
+  if (!workspace && viewMode === "workspace") {
     return (
       <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-sm text-zinc-500 shadow-sm">
         Create or select a workspace first.
@@ -272,14 +283,39 @@ export default function DocumentsPage() {
     <div className="mx-auto max-w-4xl">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold">Documents</h1>
+          <h1 className="text-xl font-bold">{viewMode === "mine" ? "My Uploads" : "Documents"}</h1>
           <p className="mt-0.5 text-sm text-slate-500">
-            {totalCount} document{totalCount !== 1 ? "s" : ""} in this workspace
+            {viewMode === "mine"
+              ? `${totalCount} document${totalCount !== 1 ? "s" : ""} you uploaded`
+              : `${totalCount} document${totalCount !== 1 ? "s" : ""} in this workspace`}
           </p>
+        </div>
+        <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-0.5 dark:border-white/10 dark:bg-[#1a1a1a]">
+          <button
+            onClick={() => { setViewMode("workspace"); setPage(0); setSelected(new Set()); }}
+            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+              viewMode === "workspace"
+                ? "bg-indigo-600 text-white"
+                : "text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-white/5"
+            }`}
+          >
+            Workspace
+          </button>
+          <button
+            onClick={() => { setViewMode("mine"); setPage(0); setSelected(new Set()); }}
+            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+              viewMode === "mine"
+                ? "bg-indigo-600 text-white"
+                : "text-slate-600 hover:bg-slate-50 dark:text-zinc-400 dark:hover:bg-white/5"
+            }`}
+          >
+            My Uploads
+          </button>
         </div>
       </div>
 
-      {/* Upload zone */}
+      {/* Upload zone - only in workspace mode */}
+      {viewMode === "workspace" && (
       <div
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
@@ -324,11 +360,12 @@ export default function DocumentsPage() {
               Drop files here or click to browse
             </p>
             <p className="mt-1 text-xs text-slate-400">
-              PDF, DOCX, MD, TXT, PNG, JPG, WEBP, GIF \u00b7 Max 20 MB \u00b7 Upload up to 3 at once
+              PDF (incl. scanned/handwritten), DOCX, MD, TXT, PNG, JPG, WEBP, GIF \u00b7 Max 20 MB
             </p>
           </>
         )}
       </div>
+      )}
 
       {error && (
         <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">{error}</p>
@@ -460,7 +497,7 @@ export default function DocumentsPage() {
                   <div className="shrink-0">{getFileIcon(d.file_type)}</div>
                   <div className="min-w-0 flex-1">
                     <Link
-                      href={`/documents/${workspace.id}/${d.id}`}
+                      href={workspace ? `/documents/${workspace.id}/${d.id}` : "#"}
                       className="truncate text-sm font-medium text-slate-800 hover:text-indigo-600 dark:text-zinc-200 dark:hover:text-indigo-400"
                     >
                       {d.title}

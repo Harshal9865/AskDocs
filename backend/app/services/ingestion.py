@@ -11,13 +11,53 @@ from app.models.document import Chunk, Document
 
 IMAGE_TYPES = {"png", "jpg", "jpeg", "webp", "gif"}
 
+MIME_MAP = {
+    "png": "image/png",
+    "jpg": "image/jpeg",
+    "jpeg": "image/jpeg",
+    "webp": "image/webp",
+    "gif": "image/gif",
+}
+
+
+def _pdf_has_text(data: bytes) -> bool:
+    """Check if a PDF has extractable text (not just a scanned image)."""
+    reader = PdfReader(io.BytesIO(data))
+    for page in reader.pages[:5]:  # sample first 5 pages
+        text = page.extract_text() or ""
+        # consider it "has text" if there's meaningful content beyond whitespace
+        stripped = text.strip()
+        if len(stripped) > 50:
+            return True
+    return False
+
+
+def _pdf_to_images(data: bytes, dpi: int = 150) -> list[bytes]:
+    """Convert PDF pages to PNG images using pymupdf."""
+    import fitz  # pymupdf
+
+    doc = fitz.open(stream=data, filetype="pdf")
+    images = []
+    zoom = dpi / 72
+    mat = fitz.Matrix(zoom, zoom)
+    for page in doc:
+        pix = page.get_pixmap(matrix=mat)
+        images.append(pix.tobytes("png"))
+    doc.close()
+    return images
+
 
 def extract_text(data: bytes, file_type: str) -> str:
+    """Extract text from a document. For images and scanned PDFs, returns
+    a sentinel value -- the caller must run Gemini OCR."""
     if file_type in IMAGE_TYPES:
-        return f"[Image: {file_type.upper()} file uploaded. Visual content not indexed for search yet.]"
+        return ""  # signal: needs OCR
     if file_type == "pdf":
         reader = PdfReader(io.BytesIO(data))
-        return "\n\n".join(page.extract_text() or "" for page in reader.pages)
+        text = "\n\n".join(page.extract_text() or "" for page in reader.pages)
+        if text.strip():
+            return text
+        return ""  # signal: scanned PDF, needs OCR
     if file_type == "docx":
         doc = DocxDocument(io.BytesIO(data))
         parts = [p.text for p in doc.paragraphs]
@@ -65,13 +105,33 @@ def chunk_text(text: str) -> list[str]:
     return [c for c in chunks if len(c) > 20]
 
 
+async def _ocr_with_gemini(data: bytes, file_type: str) -> str:
+    """Use Gemini vision to extract text from images or scanned PDFs."""
+    from app.services.llm.gemini_provider import get_llm
+
+    llm = get_llm()
+
+    if file_type in IMAGE_TYPES:
+        mime = MIME_MAP.get(file_type, "image/png")
+        return await llm.ocr_image(data, mime)
+
+    if file_type == "pdf":
+        images = _pdf_to_images(data)
+        parts = []
+        for i, img_bytes in enumerate(images):
+            text = await llm.ocr_image(img_bytes, "image/png")
+            parts.append(f"--- Page {i + 1} ---\n{text}")
+        return "\n\n".join(parts)
+
+    return ""
+
+
 async def ingest_document(db: AsyncSession, document_id: uuid.UUID):
     """Full pipeline: extract -> chunk -> embed -> store. Updates status."""
     document = await db.get(Document, document_id)
     if document is None:
         return
     from app.storage.db_storage import get_storage
-    from app.services.llm.gemini_provider import get_llm
 
     try:
         document.status = "processing"
@@ -81,9 +141,18 @@ async def ingest_document(db: AsyncSession, document_id: uuid.UUID):
         data = await storage.open(document.storage_key)
         text = extract_text(data, document.file_type)
 
+        # fallback to Gemini OCR for images and scanned PDFs
+        if not text.strip() and document.file_type in (IMAGE_TYPES | {"pdf"}):
+            text = await _ocr_with_gemini(data, document.file_type)
+
         pieces = chunk_text(text)
         if not pieces:
-            raise ValueError("No extractable text found in document")
+            raise ValueError(
+                "No extractable text found. "
+                "The file may be empty or contain only images without text."
+            )
+
+        from app.services.llm.gemini_provider import get_llm
 
         llm = get_llm()
         embeddings = await llm.embed(pieces)
