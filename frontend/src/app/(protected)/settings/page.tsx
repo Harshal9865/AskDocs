@@ -8,7 +8,6 @@ import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
 import PasswordInput from "@/components/PasswordInput";
 import Avatar from "@/components/Avatar";
-import type { User } from "@/lib/types";
 
 const STICKER_IDS = [
   "male-1", "male-2", "male-3", "male-4",

@@ -197,7 +197,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         )}
       </div>
 
-      {/* global search — hidden on phones, icon navigates to /search to save space */}
+      {/* Search — hidden on phones, icon navigates to /search to save space */}
       <form
         onSubmit={(e) => {
           e.preventDefault();

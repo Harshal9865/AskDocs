@@ -19,7 +19,6 @@ import {
   RotateCcw,
   ArrowUpDown,
   ChevronDown,
-  X,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -171,7 +170,7 @@ export default function DocumentsPage() {
       }
     })();
     return () => { cancelled = true; };
-  }, [workspace, user]);
+  }, [workspace, user, viewMode]);
 
   // parallel upload
   async function runUploadQueue(queue: UploadItem[]) {

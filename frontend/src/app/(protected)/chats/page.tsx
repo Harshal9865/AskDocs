@@ -18,7 +18,7 @@ import {
   Trash2,
   UsersRound,
 } from "lucide-react";
-import type { Member, Participant, TeamChat, TeamMessage, ChatAttachment } from "@/lib/types";
+import type { Member, TeamChat, TeamMessage, ChatAttachment } from "@/lib/types";
 
 type ChipFilter = "all" | "direct" | "group" | "unread";
 
@@ -80,7 +80,8 @@ function ChatAvatar({
   );
 }
 
-function GroupAvatar({ chat, size = 40 }: { chat: TeamChat; size?: number }) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function GroupAvatar({ chat: _chat, size = 40 }: { chat: TeamChat; size?: number }) {
   // WhatsApp-style: single rounded-square tile with group glyph
   return (
     <span
@@ -240,7 +241,6 @@ export default function ChatsPage() {
 
   useEffect(() => {
     scrollToBottom();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
   useEffect(() => {
@@ -906,7 +906,7 @@ export default function ChatsPage() {
               </>
             )}
 
-            {/* global search results (any workspace) */}
+            {/* Search results (any workspace) */}
             {newChatQuery.trim().length >= 2 && (
               <>
                 <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">

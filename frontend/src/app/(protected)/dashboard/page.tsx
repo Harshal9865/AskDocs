@@ -14,10 +14,7 @@ import {
   Shield,
   Target,
   LayoutDashboard,
-  Clock,
   Check,
-  ArrowRight,
-  Zap,
   Plus,
   X,
 } from "lucide-react";
@@ -279,7 +276,6 @@ export default function DashboardPage() {
   }
 
   const docCount = docs.length;
-  const readyCount = docs.filter((d) => d.status === "ready").length;
   const processingCount = docs.filter((d) => d.status === "pending" || d.status === "processing").length;
   const memberCount = members.length;
   const onlineCount = members.filter((m) => m.online).length;

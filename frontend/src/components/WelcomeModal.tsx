@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { FileText, FolderKanban, MessagesSquare, Upload, UsersRound } from "lucide-react";
+import { FolderKanban, MessagesSquare, Upload, UsersRound } from "lucide-react";
 import { useWorkspace } from "@/lib/workspace-context";
 
 const STEPS = [

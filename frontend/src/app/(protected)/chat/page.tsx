@@ -160,7 +160,6 @@ export default function ChatPage() {
 
   useEffect(() => {
     scrollToBottom();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
   async function openConversation(conv: Conversation) {
@@ -206,12 +205,6 @@ export default function ChatPage() {
     setInput("");
     // focus input for immediate typing
     document.getElementById("chat-input")?.focus();
-  }
-
-  async function send() {
-    if (!activeConv || !input.trim() || busy) return;
-    await sendWithText(input.trim(), []);
-    setInput("");
   }
 
   async function sendWithText(question: string, attachments: { file: File; previewUrl?: string }[]) {

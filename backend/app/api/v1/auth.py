@@ -196,22 +196,21 @@ async def get_user_avatar(user_id: uuid.UUID, db: DbSession, user: CurrentUser):
             )
             if fr.scalar_one_or_none() is None:
                 raise HTTPException(status.HTTP_404_NOT_FOUND, "Not found")
-        # blocked cannot view
-        else:
-            from app.models.friend import Friendship
-            from sqlalchemy import or_
+        # blocked cannot view - always check
+        from app.models.friend import Friendship as _Friendship2
+        from sqlalchemy import or_ as _or2
 
-            blocked = await db.execute(
-                select(Friendship).where(
-                    Friendship.status == "blocked",
-                    or_(
-                        (Friendship.requester_id == user.id) & (Friendship.addressee_id == user_id),
-                        (Friendship.requester_id == user_id) & (Friendship.addressee_id == user.id),
+        blocked = await db.execute(
+                select(_Friendship2).where(
+                    _Friendship2.status == "blocked",
+                    _or2(
+                        (_Friendship2.requester_id == user.id) & (_Friendship2.addressee_id == user_id),
+                        (_Friendship2.requester_id == user_id) & (_Friendship2.addressee_id == user.id),
                     ),
                 )
             )
-            if blocked.scalar_one_or_none():
-                raise HTTPException(status.HTTP_403_FORBIDDEN, "Blocked")
+        if blocked.scalar_one_or_none():
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Blocked")
 
         row = await db.execute(
             select(FileBlob.data).where(FileBlob.key == target.avatar_value)
