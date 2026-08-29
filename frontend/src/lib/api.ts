@@ -331,6 +331,9 @@ export const api = {
     request<{ status: string }>(`/friends/${friendId}/decline`, { method: "POST" }),
   blockFriend: (friendId: string) =>
     request<{ status: string }>(`/friends/${friendId}/block`, { method: "POST" }),
+  unblockFriend: (friendId: string) =>
+    request<{ status: string }>(`/friends/${friendId}/unblock`, { method: "POST" }),
+  listBlocked: () => request<Member[]>("/friends/blocked"),
   unfriend: (friendId: string) =>
     request<{ status: string }>(`/friends/${friendId}`, { method: "DELETE" }),
   friendSuggestions: (wsId: string) =>

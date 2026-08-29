@@ -61,7 +61,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
 
   return (
     <>
-    <header className="dark:border-slate-700/50 dark:bg-[#181818] fixed inset-x-0 top-0 z-30 flex h-14 items-center gap-3 border-b border-slate-200 bg-white px-3 transition-colors sm:px-5">
+    <header className="dark:border-slate-700/50 dark:bg-[#181818] sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-3 transition-colors sm:px-5">
       {/* mobile hamburger */}
       {onMenu && (
         <button

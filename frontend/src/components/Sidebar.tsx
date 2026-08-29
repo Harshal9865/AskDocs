@@ -67,6 +67,7 @@ export default function Sidebar({
   const [busy, setBusy] = useState(false);
   const [myRole, setMyRole] = useState<string | null>(null);
   const [docCount, setDocCount] = useState<number | null>(null);
+  const [friendReqCount, setFriendReqCount] = useState<number>(0);
   const asideRef = useRef<HTMLElement>(null);
   const [collapsed, setCollapsed] = useState(false);
   const planBadge = user?.plan === "pro" ? "bg-gradient-to-r from-amber-400 to-orange-500 text-white" : user?.plan === "enterprise" ? "bg-gradient-to-r from-violet-500 to-purple-600 text-white" : "bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-zinc-400";
@@ -154,6 +155,26 @@ export default function Sidebar({
       cancelled = true;
     };
   }, [workspace]);
+
+  // friend requests badge — polling 30s
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    const fetchReq = async () => {
+      try {
+        const reqs = await api.listFriendRequests();
+        if (!cancelled) setFriendReqCount(reqs.length);
+      } catch {
+        /* ignore */
+      }
+    };
+    void fetchReq();
+    const t = setInterval(() => void fetchReq(), 30000);
+    return () => {
+      cancelled = true;
+      clearInterval(t);
+    };
+  }, [user]);
 
   async function createWorkspace(e: React.FormEvent) {
     e.preventDefault();
@@ -316,9 +337,9 @@ export default function Sidebar({
 
       <nav className="scrollbar-thin min-h-0 flex-1 overflow-y-auto p-2">
         {NAV.map((item) => {
-          const active = pathname === item.href;
+          const active = pathname === item.href || (item.href === "/friends" && pathname.startsWith("/friends")) || (item.href === "/documents" && pathname.startsWith("/documents"));
           const Icon = item.icon;
-          const count = item.href === "/documents" ? docCount : null;
+          const count = item.href === "/documents" ? docCount : item.href === "/friends" ? (friendReqCount > 0 ? friendReqCount : null) : null;
           return (
             <Link
               key={item.href}
@@ -326,7 +347,7 @@ export default function Sidebar({
               onClick={onCloseMobile}
               title={item.label}
               aria-label={item.label}
-              className={`mb-0.5 flex h-8 items-center gap-2 rounded-md px-2 text-[13px] font-medium transition-colors ${
+              className={`relative mb-0.5 flex h-8 items-center gap-2 rounded-md px-2 text-[13px] font-medium transition-colors ${
                 collapsed ? "justify-center px-0" : ""
               } ${
                 active
@@ -338,15 +359,24 @@ export default function Sidebar({
                 aria-hidden
                 className={`h-4 w-4 shrink-0 ${active ? "text-indigo-600" : "text-slate-500"}`}
               />
-              {!collapsed && (
+              {!collapsed ? (
                 <>
                   <span className="truncate">{item.label}</span>
                   {count !== null && count > 0 && (
-                    <span className="ml-auto rounded-full bg-slate-200 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-white/10 dark:text-zinc-400">
+                    <span
+                      className={`ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+                        item.href === "/friends"
+                          ? "bg-red-500 text-white"
+                          : "bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-zinc-400"
+                      }`}
+                    >
                       {count}
                     </span>
                   )}
                 </>
+              ) : (
+                item.href === "/friends" &&
+                friendReqCount > 0 && <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-black" />
               )}
             </Link>
           );

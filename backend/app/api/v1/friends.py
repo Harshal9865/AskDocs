@@ -184,6 +184,41 @@ async def block_friend(friend_id: uuid.UUID, db: DbSession, user: CurrentUser):
     return {"status": "blocked"}
 
 
+@router.post("/friends/{friend_id}/unblock")
+async def unblock_friend(friend_id: uuid.UUID, db: DbSession, user: CurrentUser):
+    result = await db.execute(
+        select(Friendship).where(
+            Friendship.id == friend_id,
+            Friendship.status == "blocked",
+            or_(
+                Friendship.addressee_id == user.id,
+                Friendship.requester_id == user.id,
+            ),
+        )
+    )
+    f = result.scalar_one_or_none()
+    if f is None:
+        raise HTTPException(404, "Blocked user not found")
+    await db.delete(f)
+    await db.commit()
+    return {"status": "unblocked"}
+
+
+@router.get("/friends/blocked")
+async def list_blocked(db: DbSession, user: CurrentUser):
+    result = await db.execute(
+        select(Friendship, User)
+        .join(User, User.id == Friendship.addressee_id)
+        .where(Friendship.requester_id == user.id, Friendship.status == "blocked")
+        .union(
+            select(Friendship, User)
+            .join(User, User.id == Friendship.requester_id)
+            .where(Friendship.addressee_id == user.id, Friendship.status == "blocked")
+        )
+    )
+    return [_user_to_friend(u, f) for f, u in result.all()]
+
+
 @router.delete("/friends/{friend_id}")
 async def unfriend(friend_id: uuid.UUID, db: DbSession, user: CurrentUser):
     result = await db.execute(
