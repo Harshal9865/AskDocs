@@ -18,6 +18,7 @@ class WorkspaceOut(BaseModel):
     brand_kind: str | None = None
     brand_value: str | None = None
     is_public: bool = False
+    member_count: int | None = None
 
 
 class JoinRequestOut(BaseModel):
@@ -25,10 +26,12 @@ class JoinRequestOut(BaseModel):
 
     id: uuid.UUID
     workspace_id: uuid.UUID
+    workspace_name: str | None = None
     user_id: uuid.UUID
     message: str | None = None
     status: str
     created_at: datetime
+    reviewed_at: datetime | None = None
     user_email: str | None = None
     user_name: str | None = None
 

@@ -131,11 +131,13 @@ async def global_search(
     q: str,
     db: DbSession,
     membership: Membership,
+    limit: int = 10,
+    offset: int = 0,
 ):
     """Search across documents (title + content) and docs-QA messages."""
     query = q.strip()
     if len(query) < 2:
-        return {"documents": [], "messages": []}
+        return {"documents": [], "messages": [], "excerpts": []}
     like = f"%{query}%"
 
     docs = await db.execute(
@@ -145,7 +147,9 @@ async def global_search(
             Document.deleted_at.is_(None),
             Document.title.ilike(like),
         )
-        .limit(10)
+        .order_by(Document.created_at.desc())
+        .limit(min(limit, 20))
+        .offset(max(offset, 0))
     )
     doc_hits = [
         {"id": str(d.id), "title": d.title, "file_type": d.file_type}
@@ -162,7 +166,8 @@ async def global_search(
             Message.content.ilike(like),
         )
         .order_by(Message.created_at.desc())
-        .limit(10)
+        .limit(min(limit, 20))
+        .offset(max(offset, 0))
     )
     msg_hits = []
     for m in msgs.scalars().all():
@@ -177,28 +182,45 @@ async def global_search(
             }
         )
 
-    # also match inside chunk content (top 5 raw excerpts)
-    chunks = await db.execute(
-        select(Chunk)
-        .join(Document, Document.id == Chunk.document_id)
-        .where(
-            Chunk.workspace_id == membership.workspace_id,
-            Document.deleted_at.is_(None),
-            Chunk.content.ilike(like),
-        )
-        .limit(5)
-    )
-    chunk_hits = [
-        {
-            "id": str(c.id),
-            "document_title": next(
-                (d["title"] for d in doc_hits), ""
+    # chunk excerpts — ILIKE plus vector rank if available
+    excerpts: list[dict] = []
+    try:
+        from app.services.llm.gemini_provider import get_llm
+
+        llm = get_llm()
+        q_emb = (await llm.embed([query]))[0]
+        from sqlalchemy import text as sql_text
+
+        vec_rows = await db.execute(
+            sql_text(
+                "SELECT c.id, c.content, d.title as doc_title, 1 - (c.embedding <=> CAST(:emb AS vector)) as score "
+                "FROM chunks c JOIN documents d ON d.id = c.document_id "
+                "WHERE c.workspace_id = :wsid AND d.deleted_at IS NULL "
+                "ORDER BY c.embedding <=> CAST(:emb AS vector) LIMIT 5"
             ),
-            "snippet": c.content[:200],
-        }
-        for c in chunks.scalars().all()
-    ]
-    return {"documents": doc_hits, "messages": msg_hits, "excerpts": chunk_hits}
+            {"emb": str(q_emb), "wsid": str(membership.workspace_id)},
+        )
+        for r in vec_rows.mappings().all():
+            if r["score"] is not None and r["score"] > 0.2:
+                excerpts.append({"id": str(r["id"]), "document_title": r["doc_title"] or "", "snippet": r["content"][:220], "score": round(float(r["score"]), 3)})
+    except Exception:
+        pass
+
+    if not excerpts:
+        chunks = await db.execute(
+            select(Chunk, Document.title)
+            .join(Document, Document.id == Chunk.document_id)
+            .where(
+                Chunk.workspace_id == membership.workspace_id,
+                Document.deleted_at.is_(None),
+                Chunk.content.ilike(like),
+            )
+            .order_by(Chunk.ordinal)
+            .limit(5)
+        )
+        for c, doc_title in chunks.all():
+            excerpts.append({"id": str(c.id), "document_title": doc_title or "", "snippet": c.content[:220]})
+    return {"documents": doc_hits, "messages": msg_hits, "excerpts": excerpts}
 
 
 # ---------------- Insights ----------------

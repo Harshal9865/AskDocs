@@ -37,15 +37,18 @@ export interface Workspace {
   brand_kind?: "default" | "sticker" | "upload";
   brand_value?: string | null;
   is_public?: boolean;
+  member_count?: number | null;
 }
 
 export interface JoinRequest {
   id: string;
   workspace_id: string;
+  workspace_name?: string | null;
   user_id: string;
   message: string | null;
   status: "pending" | "approved" | "rejected" | "cancelled";
   created_at: string;
+  reviewed_at?: string | null;
   user_email?: string | null;
   user_name?: string | null;
 }

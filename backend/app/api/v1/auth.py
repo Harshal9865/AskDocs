@@ -156,7 +156,7 @@ async def avatar_image(db: DbSession, user: CurrentUser):
 
 @router.get("/users/{user_id}/avatar")
 async def get_user_avatar(user_id: uuid.UUID, db: DbSession, user: CurrentUser):
-    """Serve another user's uploaded profile photo (workspace members only)."""
+    """Serve another user's uploaded profile photo (workspace members or friends)."""
     import mimetypes
 
     from app.models.file import FileBlob
@@ -171,8 +171,7 @@ async def get_user_avatar(user_id: uuid.UUID, db: DbSession, user: CurrentUser):
             or not target.avatar_value
         ):
             raise HTTPException(status.HTTP_404_NOT_FOUND, "No uploaded photo")
-        # verify caller shares at least one workspace with the target
-        # Use two simple queries + set intersection to avoid SQLAlchemy `in_(select(...))` pitfalls
+        # verify caller shares at least one workspace with the target OR are friends
         my_ws_rows = await db.execute(
             select(WorkspaceMember.workspace_id).where(WorkspaceMember.user_id == user.id)
         )
@@ -181,8 +180,38 @@ async def get_user_avatar(user_id: uuid.UUID, db: DbSession, user: CurrentUser):
         )
         my_ws = {r for (r,) in my_ws_rows.all()}
         target_ws = {r for (r,) in target_ws_rows.all()}
-        if not my_ws or not target_ws or my_ws.isdisjoint(target_ws):
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "Not found")
+        has_shared = my_ws and target_ws and not my_ws.isdisjoint(target_ws)
+        if not has_shared:
+            from app.models.friend import Friendship
+            from sqlalchemy import or_
+
+            fr = await db.execute(
+                select(Friendship).where(
+                    Friendship.status == "accepted",
+                    or_(
+                        (Friendship.requester_id == user.id) & (Friendship.addressee_id == user_id),
+                        (Friendship.requester_id == user_id) & (Friendship.addressee_id == user.id),
+                    ),
+                )
+            )
+            if fr.scalar_one_or_none() is None:
+                raise HTTPException(status.HTTP_404_NOT_FOUND, "Not found")
+        # blocked cannot view
+        else:
+            from app.models.friend import Friendship
+            from sqlalchemy import or_
+
+            blocked = await db.execute(
+                select(Friendship).where(
+                    Friendship.status == "blocked",
+                    or_(
+                        (Friendship.requester_id == user.id) & (Friendship.addressee_id == user_id),
+                        (Friendship.requester_id == user_id) & (Friendship.addressee_id == user.id),
+                    ),
+                )
+            )
+            if blocked.scalar_one_or_none():
+                raise HTTPException(status.HTTP_403_FORBIDDEN, "Blocked")
 
         row = await db.execute(
             select(FileBlob.data).where(FileBlob.key == target.avatar_value)
@@ -244,7 +273,7 @@ async def update_me(payload: SchemaProfileUpdate, db: DbSession, user: CurrentUs
 
 @router.get("/users/{user_id}", response_model=UserOut)
 async def get_user_profile(user_id: uuid.UUID, db: DbSession, user: CurrentUser):
-    """Get another user's profile (workspace members only)."""
+    """Get another user's profile (workspace members or friends)."""
     from app.models.workspace import WorkspaceMember
     from app.models.friend import Friendship
     from app.api.v1.presence import is_online
@@ -253,7 +282,7 @@ async def get_user_profile(user_id: uuid.UUID, db: DbSession, user: CurrentUser)
     target = await db.get(User, user_id)
     if target is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
-    # verify shared workspace
+    # verify shared workspace OR friendship
     my_ws_rows = await db.execute(
         select(WorkspaceMember.workspace_id).where(WorkspaceMember.user_id == user.id)
     )
@@ -262,8 +291,30 @@ async def get_user_profile(user_id: uuid.UUID, db: DbSession, user: CurrentUser)
     )
     my_ws = {r for (r,) in my_ws_rows.all()}
     target_ws = {r for (r,) in target_ws_rows.all()}
-    if not my_ws or not target_ws or my_ws.isdisjoint(target_ws):
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Not found")
+    has_shared = my_ws and target_ws and not my_ws.isdisjoint(target_ws)
+    if not has_shared:
+        fr_any = await db.execute(
+            select(Friendship).where(
+                or_(
+                    (Friendship.requester_id == user.id) & (Friendship.addressee_id == user_id),
+                    (Friendship.requester_id == user_id) & (Friendship.addressee_id == user.id),
+                )
+            )
+        )
+        if fr_any.scalar_one_or_none() is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Not found")
+    # blocked check
+    blocked = await db.execute(
+        select(Friendship).where(
+            Friendship.status == "blocked",
+            or_(
+                (Friendship.requester_id == user.id) & (Friendship.addressee_id == user_id),
+                (Friendship.requester_id == user_id) & (Friendship.addressee_id == user.id),
+            ),
+        )
+    )
+    if blocked.scalar_one_or_none():
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Blocked")
 
     # check friendship status
     fr = await db.execute(

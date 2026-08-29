@@ -74,7 +74,9 @@ async def list_public_workspaces(
 
     query = select(Workspace).where(Workspace.is_public == True)  # noqa: E712
     if q:
-        like = f"%{q.strip()}%"
+        # escape %_ for ilike
+        safe = q.strip().replace("%", r"\%").replace("_", r"\_")
+        like = f"%{safe}%"
         query = query.where(Workspace.name.ilike(like) | Workspace.slug.ilike(like))
     query = query.order_by(Workspace.created_at.desc()).limit(min(limit, 50)).offset(offset)
     result = await db.execute(query)
@@ -82,7 +84,16 @@ async def list_public_workspaces(
     # exclude already member
     member_ids = await db.execute(select(WorkspaceMember.workspace_id).where(WorkspaceMember.user_id == user.id))
     joined = {wid for (wid,) in member_ids.all()}
-    return [w for w in all_public if w.id not in joined]
+    filtered = [w for w in all_public if w.id not in joined]
+    # add member counts
+    out: list[WorkspaceOut] = []
+    for w in filtered:
+        cnt = await db.execute(select(func.count(WorkspaceMember.user_id)).where(WorkspaceMember.workspace_id == w.id))
+        wc = cnt.scalar() or 0
+        wo = WorkspaceOut.model_validate(w)
+        wo.member_count = wc
+        out.append(wo)
+    return out
 
 
 @router.get("/join-requests/me", response_model=list[JoinRequestOut])
@@ -102,19 +113,37 @@ async def my_join_requests(db: DbSession, user: CurrentUser):
             JoinRequestOut(
                 id=r.id,
                 workspace_id=r.workspace_id,
+                workspace_name=ws.name if ws else None,
                 user_id=r.user_id,
                 message=r.message,
                 status=r.status,
                 created_at=r.created_at,
+                reviewed_at=r.reviewed_at,
                 user_email=user.email,
                 user_name=user.name,
             )
         )
-    # enrich with workspace name via separate query is done above per item; for batch, we already have ws per item
-    # For list, we need workspace name not in schema, but keep as above; frontend will fetch workspace name separately
     return out
 
 
+
+
+@router.delete("/join-requests/{request_id}", status_code=204)
+async def withdraw_join_request(request_id: uuid.UUID, db: DbSession, user: CurrentUser):
+    from app.models.join_request import WorkspaceJoinRequest
+
+    result = await db.execute(
+        select(WorkspaceJoinRequest).where(
+            WorkspaceJoinRequest.id == request_id,
+            WorkspaceJoinRequest.user_id == user.id,
+            WorkspaceJoinRequest.status == "pending",
+        )
+    )
+    req = result.scalar_one_or_none()
+    if req is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Join request not found")
+    await db.delete(req)
+    await db.commit()
 
 
 @router.get("/{workspace_id}", response_model=WorkspaceOut)

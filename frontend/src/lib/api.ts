@@ -377,10 +377,13 @@ export const api = {
     }),
 
   // ---- discover & join requests ----
-  discoverWorkspaces: (q?: string) =>
-    request<Workspace[]>(
-      q ? `/workspaces/public?q=${encodeURIComponent(q)}` : "/workspaces/public",
-    ),
+  discoverWorkspaces: (q?: string, limit = 20, offset = 0) => {
+    const p = new URLSearchParams();
+    if (q) p.set("q", q);
+    p.set("limit", String(limit));
+    p.set("offset", String(offset));
+    return request<Workspace[]>(`/workspaces/public?${p.toString()}`);
+  },
   createJoinRequest: (wsId: string, message?: string) =>
     request<JoinRequest>(`/workspaces/${wsId}/join-requests`, {
       method: "POST",
@@ -397,6 +400,8 @@ export const api = {
     request<JoinRequest>(`/workspaces/${wsId}/join-requests/${reqId}/reject`, {
       method: "POST",
     }),
+  withdrawJoinRequest: (reqId: string) =>
+    request<void>(`/workspaces/join-requests/${reqId}`, { method: "DELETE" }),
 
   // ---- document detail ----
   getDocumentChunks: (wsId: string, docId: string) =>

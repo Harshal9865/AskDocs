@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy import select, or_
 
 from app.core.deps import CurrentUser, DbSession, MemberMembership
+from app.models.activity import log_activity
 from app.models.friend import Friendship
 from app.models.user import User
 from app.models.workspace import WorkspaceMember
@@ -99,6 +100,15 @@ async def send_friend_request(
     db.add(friendship)
     await db.commit()
     await db.refresh(friendship)
+    # best-effort activity log to first workspace if any
+    try:
+        ws_row = await db.execute(select(WorkspaceMember.workspace_id).where(WorkspaceMember.user_id == user.id).limit(1))
+        wsid = ws_row.scalar_one_or_none()
+        if wsid:
+            await log_activity(db, wsid, user.id, "friend.requested", target.email)
+            await db.commit()
+    except Exception:
+        pass
     return {"id": str(friendship.id), "status": "pending"}
 
 
@@ -154,6 +164,15 @@ async def accept_friend(friend_id: uuid.UUID, db: DbSession, user: CurrentUser):
     from app.models.base import utcnow
     f.accepted_at = utcnow()
     await db.commit()
+    try:
+        ws_row = await db.execute(select(WorkspaceMember.workspace_id).where(WorkspaceMember.user_id == user.id).limit(1))
+        wsid = ws_row.scalar_one_or_none()
+        if wsid:
+            rq = await db.get(User, f.requester_id)
+            await log_activity(db, wsid, user.id, "friend.accepted", rq.email if rq else str(f.requester_id))
+            await db.commit()
+    except Exception:
+        pass
     return {"status": "accepted"}
 
 
@@ -192,6 +211,16 @@ async def block_friend(friend_id: uuid.UUID, db: DbSession, user: CurrentUser):
         raise HTTPException(404, "Friend request not found")
     f.status = "blocked"
     await db.commit()
+    try:
+        ws_row = await db.execute(select(WorkspaceMember.workspace_id).where(WorkspaceMember.user_id == user.id).limit(1))
+        wsid = ws_row.scalar_one_or_none()
+        if wsid:
+            other_id = f.requester_id if f.addressee_id == user.id else f.addressee_id
+            other = await db.get(User, other_id)
+            await log_activity(db, wsid, user.id, "friend.blocked", other.email if other else str(other_id))
+            await db.commit()
+    except Exception:
+        pass
     return {"status": "blocked"}
 
 
@@ -253,8 +282,23 @@ async def unfriend(friend_id: uuid.UUID, db: DbSession, user: CurrentUser):
     f = result.scalar_one_or_none()
     if f is None:
         raise HTTPException(404, "Friend not found")
+    other_id = f.requester_id if f.addressee_id == user.id else f.addressee_id
+    other_email = None
+    try:
+        other_u = await db.get(User, other_id)
+        other_email = other_u.email if other_u else str(other_id)
+    except Exception:
+        pass
     await db.delete(f)
     await db.commit()
+    try:
+        ws_row = await db.execute(select(WorkspaceMember.workspace_id).where(WorkspaceMember.user_id == user.id).limit(1))
+        wsid = ws_row.scalar_one_or_none()
+        if wsid and other_email:
+            await log_activity(db, wsid, user.id, "friend.removed", other_email)
+            await db.commit()
+    except Exception:
+        pass
     return {"status": "deleted"}
 
 
@@ -293,16 +337,31 @@ async def friend_suggestions(
 
 @router.get("/friends/search")
 async def search_users(q: str, db: DbSession, user: CurrentUser):
-    """Global user search for friends — any workspace."""
+    """Global user search for friends — any workspace. Hides blocked users."""
     if not q or len(q.strip()) < 2:
         return []
     like = f"%{q.strip()}%"
-    result = await db.execute(
-        select(User).where(
-            User.id != user.id,
-            (User.name.ilike(like) | User.email.ilike(like)),
-        ).limit(20)
+    # blocked ids to exclude
+    blocked_rows = await db.execute(
+        select(Friendship).where(
+            Friendship.status == "blocked",
+            or_(
+                Friendship.requester_id == user.id,
+                Friendship.addressee_id == user.id,
+            ),
+        )
     )
+    blocked_ids: set[uuid.UUID] = set()
+    for fr in blocked_rows.scalars().all():
+        other = fr.addressee_id if fr.requester_id == user.id else fr.requester_id
+        blocked_ids.add(other)
+    base_q = select(User).where(
+        User.id != user.id,
+        (User.name.ilike(like) | User.email.ilike(like)),
+    )
+    if blocked_ids:
+        base_q = base_q.where(User.id.notin_(blocked_ids))
+    result = await db.execute(base_q.limit(20))
     users = result.scalars().all()
     # annotate with existing friendship status if any
     out = []

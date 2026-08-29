@@ -6,8 +6,9 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import Avatar from "@/components/Avatar";
 import { useUserAvatar } from "@/lib/use-user-avatar";
-import { ArrowLeft, Mail, Phone, MapPin, MessageCircle, Briefcase, Pencil, UserPlus, UserCheck, Clock, X, Trash2 } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, MessageCircle, Briefcase, Pencil, UserPlus, UserCheck, Clock, X, Trash2, Shield, UserSearch } from "lucide-react";
 import EditProfileModal from "@/components/EditProfileModal";
+import { showToast } from "@/components/Toast";
 import type { User } from "@/lib/types";
 
 export default function ProfilePage() {
@@ -49,8 +50,9 @@ export default function ProfilePage() {
     try {
       await api.sendFriendRequest(userId);
       setProfile((p) => p ? { ...p, friendship_status: "pending", friendship_id: null, friendship_by_me: true } : p);
+      showToast("success", "Request sent");
     } catch (err) {
-      alert((err as Error).message);
+      showToast("error", (err as Error).message);
     } finally {
       setFriendBusy(false);
     }
@@ -62,8 +64,9 @@ export default function ProfilePage() {
     try {
       await api.acceptFriend(profile.friendship_id);
       setProfile((p) => p ? { ...p, friendship_status: "accepted" } : p);
+      showToast("success", "You are now friends");
     } catch (err) {
-      alert((err as Error).message);
+      showToast("error", (err as Error).message);
     } finally {
       setFriendBusy(false);
     }
@@ -75,8 +78,9 @@ export default function ProfilePage() {
     try {
       await api.declineFriend(profile.friendship_id);
       setProfile((p) => p ? { ...p, friendship_status: "none", friendship_id: null } : p);
+      showToast("success", "Declined");
     } catch (err) {
-      alert((err as Error).message);
+      showToast("error", (err as Error).message);
     } finally {
       setFriendBusy(false);
     }
@@ -89,8 +93,23 @@ export default function ProfilePage() {
       await api.unfriend(profile.friendship_id);
       setProfile((p) => p ? { ...p, friendship_status: "none", friendship_id: null } : p);
       setShowRemoveConfirm(false);
+      showToast("success", "Removed");
     } catch (err) {
-      alert((err as Error).message);
+      showToast("error", (err as Error).message);
+    } finally {
+      setFriendBusy(false);
+    }
+  }
+
+  async function handleUnblock() {
+    if (!profile?.friendship_id) return;
+    setFriendBusy(true);
+    try {
+      await api.unblockFriend(profile.friendship_id);
+      setProfile((p) => p ? { ...p, friendship_status: "none", friendship_id: null } : p);
+      showToast("success", "Unblocked");
+    } catch (err) {
+      showToast("error", (err as Error).message);
     } finally {
       setFriendBusy(false);
     }
@@ -99,6 +118,17 @@ export default function ProfilePage() {
   function renderFriendButton() {
     if (isMe || !profile) return null;
     const fs = profile.friendship_status;
+    if (fs === "blocked") {
+      return (
+        <button
+          onClick={() => void handleUnblock()}
+          disabled={friendBusy}
+          className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300"
+        >
+          <Shield className="h-3.5 w-3.5" /> {friendBusy ? "Unblocking…" : "Unblock"}
+        </button>
+      );
+    }
 
     if (fs === "accepted") {
       if (showRemoveConfirm) {
@@ -175,17 +205,29 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex h-[var(--chat-h)] items-center justify-center">
-        <p className="text-sm text-slate-500">Loading profile…</p>
+      <div className="mx-auto max-w-2xl">
+        <div className="mb-4 h-8 w-20 animate-pulse rounded-full bg-slate-200 dark:bg-white/10" />
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#121212]">
+          <div className="h-32 animate-pulse bg-slate-200 dark:bg-white/5" />
+          <div className="px-6 pb-6">
+            <div className="-mt-12 h-24 w-24 animate-pulse rounded-full bg-slate-200 dark:bg-white/10" />
+            <div className="mt-4 space-y-3">
+              <div className="h-4 w-1/3 animate-pulse rounded bg-slate-200 dark:bg-white/10" />
+              <div className="h-3 w-1/2 animate-pulse rounded bg-slate-100 dark:bg-white/5" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!profile) {
     return (
-      <div className="flex h-[var(--chat-h)] flex-col items-center justify-center p-8 text-center">
-        <p className="text-sm font-medium">Profile not found</p>
-        <button onClick={() => router.back()} className="mt-3 text-sm text-indigo-600 hover:underline">
+      <div className="mx-auto max-w-2xl rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center dark:border-white/10 dark:bg-[#121212]">
+        <UserSearch className="mx-auto mb-3 h-8 w-8 text-slate-300 dark:text-zinc-600" />
+        <p className="text-sm font-medium text-slate-700 dark:text-zinc-200">Profile not found</p>
+        <p className="mx-auto mt-1 max-w-sm text-xs text-slate-500">They may have no shared workspace or friendship.</p>
+        <button onClick={() => router.back()} className="mt-4 rounded-full border border-slate-200 px-4 py-2 text-sm hover:bg-slate-50 dark:border-white/10 dark:text-white">
           Go back
         </button>
       </div>
@@ -271,10 +313,10 @@ export default function ProfilePage() {
                 </div>
               )}
               {profile.phone && (
-                <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
+                <a href={`tel:${profile.phone}`} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm transition-colors hover:border-indigo-200 hover:bg-indigo-50/50 dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/5">
                   <Phone className="h-4 w-4 text-slate-500 dark:text-zinc-400" />
                   <span className="text-sm font-medium text-slate-800 dark:text-zinc-200">{profile.phone}</span>
-                </div>
+                </a>
               )}
               {profile.location && (
                 <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
@@ -282,10 +324,10 @@ export default function ProfilePage() {
                   <span className="text-sm font-medium text-slate-800 dark:text-zinc-200">{profile.location}</span>
                 </div>
               )}
-              <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
+              <a href={`mailto:${profile.email}`} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm transition-colors hover:border-indigo-200 hover:bg-indigo-50/50 dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/5">
                 <Mail className="h-4 w-4 text-slate-500 dark:text-zinc-400" />
-                <span className="truncate text-sm font-medium text-slate-800 dark:text-zinc-200">{profile.email}</span>
-              </div>
+                <span className="truncate text-sm font-medium text-indigo-600 hover:underline dark:text-[#1DB954]">{profile.email}</span>
+              </a>
               {profile.pronouns && (
                 <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
                   <span className="text-xs font-semibold text-slate-500 dark:text-zinc-400">Pronouns</span>

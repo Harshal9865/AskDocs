@@ -72,8 +72,8 @@ export default function Avatar({
       {showPresence && (
         <span className="absolute -bottom-0.5 -right-0.5">
           <span
-            className={`block rounded-full border-2 border-white ${
-              online ? "bg-emerald-500" : "bg-slate-300"
+            className={`block rounded-full border-2 border-white dark:border-[#121212] ${
+              online ? "bg-emerald-500" : "bg-slate-300 dark:bg-zinc-600"
             }`}
             style={{ width: Math.max(10, size * 0.3), height: Math.max(10, size * 0.3) }}
             title={online ? "Online" : "Offline"}

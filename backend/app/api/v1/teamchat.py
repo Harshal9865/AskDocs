@@ -252,7 +252,33 @@ async def create_direct_chat(
         )
     )
     if other_member.scalar_one_or_none() is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "User is not in this workspace")
+        # allow cross-workspace DM if they are friends (accepted)
+        from app.models.friend import Friendship
+        from sqlalchemy import or_
+
+        fr = await db.execute(
+            select(Friendship).where(
+                Friendship.status == "accepted",
+                or_(
+                    (Friendship.requester_id == user.id) & (Friendship.addressee_id == payload.user_id),
+                    (Friendship.requester_id == payload.user_id) & (Friendship.addressee_id == user.id),
+                ),
+            )
+        )
+        if fr.scalar_one_or_none() is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "User is not in this workspace")
+        # blocked check
+        blocked = await db.execute(
+            select(Friendship).where(
+                Friendship.status == "blocked",
+                or_(
+                    (Friendship.requester_id == user.id) & (Friendship.addressee_id == payload.user_id),
+                    (Friendship.requester_id == payload.user_id) & (Friendship.addressee_id == user.id),
+                ),
+            )
+        )
+        if blocked.scalar_one_or_none():
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Cannot message a blocked user")
 
     existing = await db.execute(
         select(Conversation.id)
