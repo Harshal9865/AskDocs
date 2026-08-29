@@ -461,6 +461,8 @@ export const api = {
   },
   listDocuments: (wsId: string) =>
     request<DocumentItem[]>(`/workspaces/${wsId}/documents`),
+  getDocument: (wsId: string, docId: string) =>
+    request<DocumentItem>(`/workspaces/${wsId}/documents/${docId}`),
   listMyDocuments: () =>
     request<DocumentItem[]>("/documents/mine"),
   deleteDocument: (wsId: string, docId: string) =>

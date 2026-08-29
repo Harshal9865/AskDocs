@@ -67,6 +67,7 @@ export default function Sidebar({
   const [newName, setNewName] = useState("");
   const [busy, setBusy] = useState(false);
   const [myRole, setMyRole] = useState<string | null>(null);
+  const [docCount, setDocCount] = useState<number | null>(null);
   const asideRef = useRef<HTMLElement>(null);
   const [collapsed, setCollapsed] = useState(false);
   const planBadge = user?.plan === "pro" ? "bg-gradient-to-r from-amber-400 to-orange-500 text-white" : user?.plan === "enterprise" ? "bg-gradient-to-r from-violet-500 to-purple-600 text-white" : "bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-zinc-400";
@@ -129,6 +130,26 @@ export default function Sidebar({
       cancelled = true;
     };
   }, [workspace, user]);
+
+  // fetch document count for badge
+  useEffect(() => {
+    if (!workspace) {
+      setDocCount(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const docs = await api.listDocuments(workspace.id);
+        if (!cancelled) setDocCount(docs.length);
+      } catch {
+        if (!cancelled) setDocCount(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [workspace]);
 
   async function createWorkspace(e: React.FormEvent) {
     e.preventDefault();
@@ -293,6 +314,7 @@ export default function Sidebar({
         {NAV.map((item) => {
           const active = pathname === item.href;
           const Icon = item.icon;
+          const count = item.href === "/documents" ? docCount : null;
           return (
             <Link
               key={item.href}
@@ -312,7 +334,16 @@ export default function Sidebar({
                 aria-hidden
                 className={`h-4 w-4 shrink-0 ${active ? "text-indigo-600" : "text-slate-500"}`}
               />
-              {!collapsed && <span className="truncate">{item.label}</span>}
+              {!collapsed && (
+                <>
+                  <span className="truncate">{item.label}</span>
+                  {count !== null && count > 0 && (
+                    <span className="ml-auto rounded-full bg-slate-200 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-white/10 dark:text-zinc-400">
+                      {count}
+                    </span>
+                  )}
+                </>
+              )}
             </Link>
           );
         })}

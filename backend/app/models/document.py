@@ -10,7 +10,7 @@ from app.models.base import BaseModel
 from app.models.workspace import Workspace, WorkspaceMember  # noqa: F401 (mappers)
 
 StatusEnum = Enum("pending", "processing", "ready", "failed", name="document_status")
-FileTypeEnum = Enum("pdf", "docx", "md", "txt", name="file_type")
+FileTypeEnum = Enum("pdf", "docx", "md", "txt", "png", "jpg", "jpeg", "webp", "gif", name="file_type")
 
 
 class Document(BaseModel):

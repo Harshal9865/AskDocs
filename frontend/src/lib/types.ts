@@ -85,6 +85,9 @@ export interface DocumentItem {
   status: "pending" | "processing" | "ready" | "failed";
   error_msg: string | null;
   size_bytes: number;
+  uploader_id?: string;
+  created_at?: string;
+  workspace_id?: string;
 }
 
 export interface Conversation {

@@ -108,7 +108,7 @@ export default function RegisterPage() {
           disabled={busy}
           className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-indigo-600 disabled:opacity-50"
         >
-          {busy ? "Creatingâ€¦" : "Create account"}
+          {busy ? "Creating\u2026" : "Create account"}
         </button>
 
         <p className="mt-4 text-center text-sm text-slate-600">

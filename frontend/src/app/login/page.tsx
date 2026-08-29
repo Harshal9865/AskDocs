@@ -74,7 +74,7 @@ export default function LoginPage() {
           disabled={busy}
           className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-indigo-600 disabled:opacity-50"
         >
-          {busy ? "Signing inâ€¦" : "Sign in"}
+          {busy ? "Signing in\u2026" : "Sign in"}
         </button>
 
         <p className="mt-4 text-center text-sm text-slate-600">

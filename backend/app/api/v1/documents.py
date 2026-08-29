@@ -41,6 +41,9 @@ class DocumentOut(BaseModel):
     status: str
     error_msg: str | None = None
     size_bytes: int
+    uploader_id: uuid.UUID | None = None
+    created_at: object | None = None
+    workspace_id: uuid.UUID | None = None
 
 
 def _detect_file_type(filename: str, content_type: str | None) -> str | None:

@@ -9,6 +9,7 @@ import TopNavbar from "@/components/TopNavbar";
 import CommandPalette from "@/components/CommandPalette";
 import WelcomeModal from "@/components/WelcomeModal";
 import Loading from "@/components/Loading";
+import { Toaster } from "@/components/Toast";
 
 export default function ProtectedLayout({
   children,
@@ -53,6 +54,7 @@ export default function ProtectedLayout({
   return (
     <WorkspaceProvider>
       <TopNavbar onMenu={() => setDrawerOpen(true)} />
+      <Toaster />
 
       <div className="dark:bg-[#121212] flex min-h-[100dvh] pt-14 pl-[68px] transition-colors md:pl-0">
         <Sidebar
