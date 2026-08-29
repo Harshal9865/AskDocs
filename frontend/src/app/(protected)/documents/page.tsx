@@ -111,12 +111,16 @@ export default function DocumentsPage() {
         setTotalCount(mine.length);
       } else {
         if (!workspace) return;
-        const [docsResult, countResult] = await Promise.all([
-          api.listDocuments(workspace.id),
-          api.documentCount(workspace.id),
-        ]);
+        const docsResult = await api.listDocuments(workspace.id);
+        let count = docsResult.length;
+        try {
+          const c = await api.documentCount(workspace.id);
+          count = c.count;
+        } catch {
+          // fallback: use list length if count endpoint not yet deployed (old backend)
+        }
         setDocs(docsResult);
-        setTotalCount(countResult.count);
+        setTotalCount(count);
       }
       setError(null);
     } catch (err) {

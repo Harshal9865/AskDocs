@@ -131,6 +131,21 @@ async def list_documents(
     return list(result.scalars().all())
 
 
+@router.get("/workspaces/{workspace_id}/documents/count")
+async def document_count(
+    workspace_id: uuid.UUID,
+    db: DbSession,
+    membership: Membership,
+):
+    from sqlalchemy import func
+    result = await db.execute(
+        select(func.count(Document.id))
+        .where(Document.workspace_id == membership.workspace_id)
+        .where(Document.deleted_at.is_(None))
+    )
+    return {"count": result.scalar() or 0}
+
+
 @router.get("/documents/mine", response_model=list[DocumentOut])
 async def list_my_documents(db: DbSession, user: CurrentUser):
     """Return all non-deleted documents uploaded by the current user across all workspaces."""
@@ -221,21 +236,6 @@ async def retry_document(
     await db.refresh(document)
     background_tasks.add_task(_run_ingest, document.id)
     return document
-
-
-@router.get("/workspaces/{workspace_id}/documents/count")
-async def document_count(
-    workspace_id: uuid.UUID,
-    db: DbSession,
-    membership: Membership,
-):
-    from sqlalchemy import func
-    result = await db.execute(
-        select(func.count(Document.id))
-        .where(Document.workspace_id == membership.workspace_id)
-        .where(Document.deleted_at.is_(None))
-    )
-    return {"count": result.scalar() or 0}
 
 
 

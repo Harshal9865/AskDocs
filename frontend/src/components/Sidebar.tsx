@@ -130,7 +130,7 @@ export default function Sidebar({
     };
   }, [workspace, user]);
 
-  // fetch document count for badge (use count endpoint, not full list)
+  // fetch document count for badge (use count endpoint, fallback to list length if 422/old deploy)
   useEffect(() => {
     if (!workspace) {
       setDocCount(null);
@@ -142,7 +142,12 @@ export default function Sidebar({
         const { count } = await api.documentCount(workspace.id);
         if (!cancelled) setDocCount(count);
       } catch {
-        if (!cancelled) setDocCount(null);
+        try {
+          const docs = await api.listDocuments(workspace.id);
+          if (!cancelled) setDocCount(docs.length);
+        } catch {
+          if (!cancelled) setDocCount(null);
+        }
       }
     })();
     return () => {
