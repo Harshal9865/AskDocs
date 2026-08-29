@@ -66,7 +66,7 @@ function EmptyState({ icon: Icon, title, hint, action }: { icon: typeof UsersRou
 export default function FriendsPage() {
   const { workspace } = useWorkspace();
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>("suggested");
+  const [tab, setTab] = useState<Tab>("friends");
   const [friends, setFriends] = useState<Member[]>([]);
   const [requests, setRequests] = useState<Member[]>([]);
   const [suggested, setSuggested] = useState<Member[]>([]);
@@ -157,9 +157,9 @@ export default function FriendsPage() {
   };
 
   const tabs: { key: Tab; label: string; count?: number }[] = [
-    { key: "suggested", label: "Suggested", count: suggested.length },
-    { key: "requests", label: "Requests", count: requests.length },
     { key: "friends", label: "Friends", count: friends.length },
+    { key: "requests", label: "Requests", count: requests.length },
+    { key: "suggested", label: "Suggested", count: suggested.length },
     { key: "blocked", label: "Blocked", count: blocked.length },
   ];
 
@@ -320,7 +320,16 @@ export default function FriendsPage() {
             {loading ? (
               <div className="space-y-3"><SkeletonCard /><SkeletonCard /><SkeletonCard /></div>
             ) : filterByQuery(friends).length === 0 ? (
-              <EmptyState icon={HeartHandshake} title="No friends yet" hint="Add people from Suggested — they'll show up here with online status." />
+              <EmptyState
+                icon={HeartHandshake}
+                title="No friends yet"
+                hint="Your accepted friends appear here. Discover people in Suggested below."
+                action={
+                  <button onClick={() => setTab("suggested")} className="rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 dark:bg-[#1DB954] dark:text-black">
+                    Browse Suggested →
+                  </button>
+                }
+              />
             ) : (
               filterByQuery(friends).map((m) => {
                 const fid = (m as unknown as { id: string }).id || m.user_id;

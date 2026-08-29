@@ -208,8 +208,8 @@ export default function ProfilePage() {
           <div className="gemini-orb gemini-orb-2" />
         </div>
         <div className="relative px-6 pb-6">
-          <div className="-mt-12 flex items-end gap-4">
-            <button onClick={() => setLightbox(true)} aria-label="View photo" className="shrink-0">
+          <div className="flex items-end gap-4">
+            <button onClick={() => setLightbox(true)} aria-label="View photo" className="-mt-12 shrink-0 rounded-full ring-4 ring-white dark:ring-[#121212]">
               <Avatar
                 name={profile.name}
                 size={96}
@@ -219,17 +219,17 @@ export default function ProfilePage() {
                 online={profile.online ?? false}
               />
             </button>
-            <div className="min-w-0 flex-1 pb-1">
-              <div className="flex items-center gap-2">
-                <h1 className="truncate text-xl font-bold text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.7)]">
+            <div className="min-w-0 flex-1 pt-2 pb-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="truncate text-xl font-bold text-slate-900 dark:text-white">
                   {profile.name}{" "}
                   {profile.pronouns && (
-                    <span className="text-sm font-normal text-white/80">({profile.pronouns})</span>
+                    <span className="text-sm font-normal text-slate-500 dark:text-zinc-400">({profile.pronouns})</span>
                   )}
                 </h1>
                 {!isMe && (
                   <span
-                    className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full border-2 border-white/80 shadow-sm ${profile.online ? "bg-emerald-500" : "bg-slate-300"}`}
+                    className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full border-2 border-white shadow-sm dark:border-[#121212] ${profile.online ? "bg-emerald-500" : "bg-slate-300 dark:bg-zinc-600"}`}
                     title={profile.online ? "Online" : "Offline"}
                   />
                 )}
@@ -237,7 +237,7 @@ export default function ProfilePage() {
                   <EditProfileModal
                     trigger={
                       <button
-                        className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-white/30 bg-white/90 px-2.5 py-1 text-xs font-medium text-slate-700 shadow-sm backdrop-blur hover:bg-white dark:border-white/10 dark:bg-[#1a1a1a] dark:text-zinc-300 dark:hover:bg-white/10"
+                        className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-zinc-300 dark:hover:bg-white/10"
                       >
                         <Pencil className="h-3 w-3" /> Edit
                       </button>
@@ -245,8 +245,8 @@ export default function ProfilePage() {
                   />
                 )}
               </div>
-              <p className="truncate text-sm font-medium text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">{profile.email}</p>
-              {profile.status && <p className="mt-1 text-sm italic font-medium text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">&ldquo;{profile.status}&rdquo;</p>}
+              <p className="truncate text-sm font-medium text-slate-600 dark:text-zinc-300">{profile.email}</p>
+              {profile.status && <p className="mt-1 text-sm italic text-slate-700 dark:text-zinc-300">&ldquo;{profile.status}&rdquo;</p>}
             </div>
           </div>
 
