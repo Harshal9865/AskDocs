@@ -38,6 +38,11 @@ class DbStorage(StorageService):
                 raise FileNotFoundError(storage_key)
             return bytes(row)
 
+    async def delete(self, storage_key: str) -> None:
+        async with AsyncSessionLocal() as session:
+            await session.execute(delete(FileBlob).where(FileBlob.key == storage_key))
+            await session.commit()
+
 
 def get_storage():
     from app.core.config import get_settings

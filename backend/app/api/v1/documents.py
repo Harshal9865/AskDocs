@@ -114,13 +114,19 @@ async def upload_document(
 
 @router.get("/workspaces/{workspace_id}/documents", response_model=list[DocumentOut])
 async def list_documents(
-    workspace_id: uuid.UUID, db: DbSession, membership: Membership
+    workspace_id: uuid.UUID,
+    db: DbSession,
+    membership: Membership,
+    limit: int = 50,
+    offset: int = 0,
 ):
     result = await db.execute(
         select(Document)
         .where(Document.workspace_id == membership.workspace_id)
         .where(Document.deleted_at.is_(None))
         .order_by(Document.created_at.desc())
+        .limit(limit)
+        .offset(offset)
     )
     return list(result.scalars().all())
 
@@ -193,6 +199,43 @@ async def delete_document(
     document.deleted_at = utcnow()
     await log_activity(db, membership.workspace_id, membership.user_id, "document.trashed", document.title)
     await db.commit()
+
+
+@router.post("/workspaces/{workspace_id}/documents/{document_id}/retry", response_model=DocumentOut)
+async def retry_document(
+    workspace_id: uuid.UUID,
+    document_id: uuid.UUID,
+    background_tasks: BackgroundTasks,
+    db: DbSession,
+    membership: MemberMembership,
+):
+    """Re-run ingestion for a failed document."""
+    document = await db.get(Document, document_id)
+    if document is None or document.workspace_id != membership.workspace_id or document.deleted_at is not None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Document not found")
+    if document.status != "failed":
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Only failed documents can be retried")
+    document.status = "pending"
+    document.error_msg = None
+    await db.commit()
+    await db.refresh(document)
+    background_tasks.add_task(_run_ingest, document.id)
+    return document
+
+
+@router.get("/workspaces/{workspace_id}/documents/count")
+async def document_count(
+    workspace_id: uuid.UUID,
+    db: DbSession,
+    membership: Membership,
+):
+    from sqlalchemy import func
+    result = await db.execute(
+        select(func.count(Document.id))
+        .where(Document.workspace_id == membership.workspace_id)
+        .where(Document.deleted_at.is_(None))
+    )
+    return {"count": result.scalar() or 0}
 
 
 

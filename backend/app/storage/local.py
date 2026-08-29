@@ -13,6 +13,10 @@ class StorageService(ABC):
     async def open(self, storage_key: str) -> bytes:
         """Return raw file bytes for a key."""
 
+    async def delete(self, storage_key: str) -> None:
+        """Delete a stored file (best-effort)."""
+        pass
+
 
 class LocalStorage(StorageService):
     def __init__(self, base_dir: str | None = None):
@@ -38,6 +42,11 @@ class LocalStorage(StorageService):
 
     async def open(self, storage_key: str) -> bytes:
         return self._path(storage_key).read_bytes()
+
+    async def delete(self, storage_key: str) -> None:
+        path = self._path(storage_key)
+        if path.exists():
+            path.unlink()
 
 
 def get_storage() -> StorageService:

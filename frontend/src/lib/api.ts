@@ -467,6 +467,15 @@ export const api = {
     request<DocumentItem[]>("/documents/mine"),
   deleteDocument: (wsId: string, docId: string) =>
     request<void>(`/workspaces/${wsId}/documents/${docId}`, { method: "DELETE" }),
+  retryDocument: (wsId: string, docId: string) =>
+    request<DocumentItem>(`/workspaces/${wsId}/documents/${docId}/retry`, { method: "POST" }),
+  documentCount: (wsId: string) =>
+    request<{ count: number }>(`/workspaces/${wsId}/documents/count`),
+  bulkDeleteDocuments: async (wsId: string, docIds: string[]) => {
+    for (const id of docIds) {
+      await request<void>(`/workspaces/${wsId}/documents/${id}`, { method: "DELETE" });
+    }
+  },
 
   // ---- chat ----
   createConversation: (wsId: string) =>

@@ -17,20 +17,27 @@ settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
-    from app.services.slack_bot import start_slack_bot
-    await start_slack_bot()
+    # Startup — slack bot is optional; don't crash if token is missing
+    try:
+        from app.services.slack_bot import start_slack_bot
+        await start_slack_bot()
+    except Exception:
+        pass
     yield
-    # shutdown - cleanup if needed
 
 app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG, lifespan=lifespan)
 
 allow_all = "*" in settings.CORS_ORIGINS
 
-# Always allow Vercel previews + wildcard; `allow_credentials` must be False when using "*"
+# Build allowed origins list
+if allow_all:
+    _origins = ["*"]
+else:
+    _origins = list(settings.CORS_ORIGINS)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"] if allow_all else settings.CORS_ORIGINS + ["https://*.vercel.app"],
+    allow_origins=_origins,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],

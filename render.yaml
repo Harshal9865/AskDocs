@@ -17,7 +17,7 @@ services:
       - key: STORAGE_BACKEND
         value: db
       - key: CORS_ORIGINS
-        value: '["*"]'
+        value: '["https://frontend-mu-liard-92.vercel.app","http://localhost:3000"]'
       - key: DEBUG
         value: "false"
       # Slack bot (optional): leave blank to disable

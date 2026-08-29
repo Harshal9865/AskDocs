@@ -79,6 +79,15 @@ async def purge_document(
     doc = await _get_trashed_document_async(db, membership.workspace_id, document_id)
     from sqlalchemy import delete as sa_delete
 
+    # delete file blob from storage
+    try:
+        from app.models.file import FileBlob
+        from app.storage.db_storage import get_storage
+        storage = get_storage()
+        await storage.delete(doc.storage_key)
+    except Exception:
+        pass  # best-effort cleanup
+
     await db.execute(sa_delete(Chunk).where(Chunk.document_id == doc.id))
     await log_activity(db, membership.workspace_id, membership.user_id, "document.purged", doc.title)
     await db.delete(doc)
