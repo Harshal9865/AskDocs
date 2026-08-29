@@ -130,7 +130,7 @@ export default function Sidebar({
     };
   }, [workspace, user]);
 
-  // fetch document count for badge
+  // fetch document count for badge (use count endpoint, not full list)
   useEffect(() => {
     if (!workspace) {
       setDocCount(null);
@@ -139,8 +139,8 @@ export default function Sidebar({
     let cancelled = false;
     (async () => {
       try {
-        const docs = await api.listDocuments(workspace.id);
-        if (!cancelled) setDocCount(docs.length);
+        const { count } = await api.documentCount(workspace.id);
+        if (!cancelled) setDocCount(count);
       } catch {
         if (!cancelled) setDocCount(null);
       }
@@ -232,8 +232,8 @@ export default function Sidebar({
             </button>
           </div>
         )}
-        <div className="sb-hide dark:border-slate-700/50 shrink-0 border-b border-slate-100 p-4">
-          <div className="mt-3 flex items-center gap-1.5">
+        <div className="sb-hide dark:border-slate-700/50 shrink-0 border-b border-slate-100 px-3 py-3">
+          <div className="flex items-center gap-1.5">
           <select
             value={workspace?.id ?? ""}
             onChange={(e) => {

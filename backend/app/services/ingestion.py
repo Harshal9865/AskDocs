@@ -32,15 +32,23 @@ def _pdf_has_text(data: bytes) -> bool:
     return False
 
 
+MAX_OCR_PAGES = 30
+
+
 def _pdf_to_images(data: bytes, dpi: int = 150) -> list[bytes]:
-    """Convert PDF pages to PNG images using pymupdf."""
-    import fitz  # pymupdf
+    """Convert PDF pages to PNG images using pymupdf. Limited to MAX_OCR_PAGES."""
+    try:
+        import fitz  # pymupdf
+    except ImportError as e:
+        raise RuntimeError("pymupdf not installed — cannot OCR scanned PDFs") from e
 
     doc = fitz.open(stream=data, filetype="pdf")
-    images = []
+    images: list[bytes] = []
     zoom = dpi / 72
     mat = fitz.Matrix(zoom, zoom)
-    for page in doc:
+    for idx, page in enumerate(doc):
+        if idx >= MAX_OCR_PAGES:
+            break
         pix = page.get_pixmap(matrix=mat)
         images.append(pix.tobytes("png"))
     doc.close()
@@ -107,21 +115,40 @@ def chunk_text(text: str) -> list[str]:
 
 async def _ocr_with_gemini(data: bytes, file_type: str) -> str:
     """Use Gemini vision to extract text from images or scanned PDFs."""
+    import asyncio
+
     from app.services.llm.gemini_provider import get_llm
 
     llm = get_llm()
 
     if file_type in IMAGE_TYPES:
         mime = MIME_MAP.get(file_type, "image/png")
-        return await llm.ocr_image(data, mime)
+        try:
+            return await llm.ocr_image(data, mime)
+        except Exception:
+            return ""
 
     if file_type == "pdf":
-        images = _pdf_to_images(data)
-        parts = []
-        for i, img_bytes in enumerate(images):
-            text = await llm.ocr_image(img_bytes, "image/png")
-            parts.append(f"--- Page {i + 1} ---\n{text}")
-        return "\n\n".join(parts)
+        try:
+            images = _pdf_to_images(data)
+        except Exception as e:
+            raise RuntimeError(f"Failed to render PDF for OCR: {e}") from e
+        # parallel OCR with limited concurrency (2 at a time to avoid rate limits)
+        sem = asyncio.Semaphore(2)
+
+        async def ocr_one(idx: int, img: bytes) -> str:
+            async with sem:
+                try:
+                    text = await llm.ocr_image(img, "image/png")
+                    return f"--- Page {idx + 1} ---\n{text}" if text.strip() else ""
+                except Exception:
+                    return ""
+
+        results = await asyncio.gather(*(ocr_one(i, img) for i, img in enumerate(images)))
+        combined = "\n\n".join(r for r in results if r.strip())
+        if not combined.strip():
+            raise ValueError("Gemini OCR returned no text — try a clearer scan or a text-based PDF")
+        return combined
 
     return ""
 

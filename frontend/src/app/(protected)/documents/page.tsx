@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   FileText,
   FileImage,
@@ -77,6 +78,11 @@ const CONCURRENCY = 3;
 export default function DocumentsPage() {
   const { workspace } = useWorkspace();
   const { user } = useAuth();
+  const router = useRouter();
+  const getInitialView = () => {
+    if (typeof window === "undefined") return "workspace" as const;
+    return new URLSearchParams(window.location.search).get("view") === "mine" ? "mine" as const : "workspace" as const;
+  };
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -88,14 +94,14 @@ export default function DocumentsPage() {
   const [myRole, setMyRole] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
-  const [viewMode, setViewMode] = useState<"workspace" | "mine">("workspace");
+  const [viewMode, setViewMode] = useState<"workspace" | "mine">(getInitialView());
 
   // upload state
   const [uploadQueue, setUploadQueue] = useState<UploadItem[]>([]);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
-  let uploadId = useRef(0);
+  const uploadId = useRef(0);
 
   const load = useCallback(async () => {
     try {
@@ -119,6 +125,18 @@ export default function DocumentsPage() {
       setLoading(false);
     }
   }, [workspace, viewMode]);
+
+  // sync viewMode from URL (?view=mine) on popstate
+  useEffect(() => {
+    const onPop = () => {
+      const v = new URLSearchParams(window.location.search).get("view") === "mine" ? "mine" as const : "workspace" as const;
+      setViewMode((prev) => (prev !== v ? v : prev));
+      setPage(0);
+      setSelected(new Set());
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -273,6 +291,22 @@ export default function DocumentsPage() {
     }
   }
 
+  function switchView(v: "workspace" | "mine") {
+    setViewMode(v);
+    setPage(0);
+    setSelected(new Set());
+    const params = new URLSearchParams(window.location.search);
+    if (v === "mine") params.set("view", "mine");
+    else params.delete("view");
+    const qs = params.toString();
+    router.replace(qs ? `/documents?${qs}` : "/documents");
+  }
+
+  function docHref(d: DocumentItem) {
+    const wsId = d.workspace_id || workspace?.id;
+    return wsId ? `/documents/${wsId}/${d.id}` : "#";
+  }
+
   if (!workspace && viewMode === "workspace") {
     return (
       <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-sm text-zinc-500 shadow-sm">
@@ -294,7 +328,7 @@ export default function DocumentsPage() {
         </div>
         <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-0.5 dark:border-white/10 dark:bg-[#1a1a1a]">
           <button
-            onClick={() => { setViewMode("workspace"); setPage(0); setSelected(new Set()); }}
+            onClick={() => switchView("workspace")}
             className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
               viewMode === "workspace"
                 ? "bg-indigo-600 text-white"
@@ -304,7 +338,7 @@ export default function DocumentsPage() {
             Workspace
           </button>
           <button
-            onClick={() => { setViewMode("mine"); setPage(0); setSelected(new Set()); }}
+            onClick={() => switchView("mine")}
             className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
               viewMode === "mine"
                 ? "bg-indigo-600 text-white"
@@ -362,7 +396,10 @@ export default function DocumentsPage() {
               Drop files here or click to browse
             </p>
             <p className="mt-1 text-xs text-slate-400">
-              PDF (incl. scanned/handwritten), DOCX, MD, TXT, PNG, JPG, WEBP, GIF \u00b7 Max 20 MB
+              PDF (incl. scanned/handwritten), DOCX, MD, TXT, PNG, JPG, WEBP, GIF · Max 20 MB
+            </p>
+            <p className="mt-1 text-[11px] text-slate-400">
+              Scanned & handwritten PDFs are auto-transcribed with Gemini — may take 10-20s per page
             </p>
           </>
         )}
@@ -499,7 +536,7 @@ export default function DocumentsPage() {
                   <div className="shrink-0">{getFileIcon(d.file_type)}</div>
                   <div className="min-w-0 flex-1">
                     <Link
-                      href={workspace ? `/documents/${workspace.id}/${d.id}` : "#"}
+                      href={docHref(d)}
                       className="truncate text-sm font-medium text-slate-800 hover:text-indigo-600 dark:text-zinc-200 dark:hover:text-indigo-400"
                     >
                       {d.title}
