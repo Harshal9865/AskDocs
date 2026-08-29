@@ -114,17 +114,28 @@ async def list_friend_requests(db: DbSession, user: CurrentUser):
 
 @router.get("/friends")
 async def list_friends(db: DbSession, user: CurrentUser):
-    result = await db.execute(
+    # two separate queries — avoids UNION type issues with asyncpg + preserves ordering
+    sent = await db.execute(
         select(Friendship, User)
         .join(User, User.id == Friendship.addressee_id)
         .where(Friendship.requester_id == user.id, Friendship.status == "accepted")
-        .union(
-            select(Friendship, User)
-            .join(User, User.id == Friendship.requester_id)
-            .where(Friendship.addressee_id == user.id, Friendship.status == "accepted")
-        )
     )
-    return [_user_to_friend(u, f) for f, u in result.all()]
+    received = await db.execute(
+        select(Friendship, User)
+        .join(User, User.id == Friendship.requester_id)
+        .where(Friendship.addressee_id == user.id, Friendship.status == "accepted")
+    )
+    out = [_user_to_friend(u, f) for f, u in sent.all()]
+    out.extend(_user_to_friend(u, f) for f, u in received.all())
+    # dedup by friendship id (defensive if duplicate rows)
+    seen: set[str] = set()
+    uniq: list[FriendOut] = []
+    for fr in out:
+        sid = str(fr.id)
+        if sid not in seen:
+            seen.add(sid)
+            uniq.append(fr)
+    return uniq
 
 
 @router.post("/friends/{friend_id}/accept")
@@ -206,17 +217,26 @@ async def unblock_friend(friend_id: uuid.UUID, db: DbSession, user: CurrentUser)
 
 @router.get("/friends/blocked")
 async def list_blocked(db: DbSession, user: CurrentUser):
-    result = await db.execute(
+    sent = await db.execute(
         select(Friendship, User)
         .join(User, User.id == Friendship.addressee_id)
         .where(Friendship.requester_id == user.id, Friendship.status == "blocked")
-        .union(
-            select(Friendship, User)
-            .join(User, User.id == Friendship.requester_id)
-            .where(Friendship.addressee_id == user.id, Friendship.status == "blocked")
-        )
     )
-    return [_user_to_friend(u, f) for f, u in result.all()]
+    received = await db.execute(
+        select(Friendship, User)
+        .join(User, User.id == Friendship.requester_id)
+        .where(Friendship.addressee_id == user.id, Friendship.status == "blocked")
+    )
+    out = [_user_to_friend(u, f) for f, u in sent.all()]
+    out.extend(_user_to_friend(u, f) for f, u in received.all())
+    seen: set[str] = set()
+    uniq: list[FriendOut] = []
+    for fr in out:
+        sid = str(fr.id)
+        if sid not in seen:
+            seen.add(sid)
+            uniq.append(fr)
+    return uniq
 
 
 @router.delete("/friends/{friend_id}")
