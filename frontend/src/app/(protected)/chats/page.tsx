@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, API_BASE } from "@/lib/api";
@@ -387,7 +387,24 @@ export default function ChatsPage() {
   const onlineColleagues = filteredColleagues.filter((m) => m.online);
   const unreadTotal = chats.reduce((n, c) => n + (c.unread_count > 0 ? 1 : 0), 0);
 
-  const visibleChats = chats
+  const sortedChats = [...chats].sort(
+    (a, b) =>
+      new Date(b.last_message_at ?? b.created_at).getTime() -
+      new Date(a.last_message_at ?? a.created_at).getTime(),
+  );
+
+  const seenProfiles = new Set<string>();
+  const deduplicatedChats = sortedChats.filter((c) => {
+    if (c.type === "group") return true;
+    const other = otherParticipant(c, user?.email);
+    if (!other) return false;
+    const profileKey = other.user_id || other.email || other.id;
+    if (profileKey && seenProfiles.has(profileKey)) return false;
+    if (profileKey) seenProfiles.add(profileKey);
+    return true;
+  });
+
+  const visibleChats = deduplicatedChats
     .filter((c) =>
       filter === "all"
         ? true
@@ -401,15 +418,10 @@ export default function ChatsPage() {
       (c) =>
         matches(chatTitle(c, user?.email), null) ||
         c.participants.some((p) => matches(p.name, p.email)),
-    )
-    .sort(
-      (a, b) =>
-        new Date(b.last_message_at ?? b.created_at).getTime() -
-        new Date(a.last_message_at ?? a.created_at).getTime(),
     );
 
   const chips: { key: ChipFilter; label: string; count?: number }[] = [
-    { key: "all", label: "All", count: chats.length },
+    { key: "all", label: "All", count: deduplicatedChats.length },
     { key: "direct", label: "Personal" },
     { key: "group", label: "Groups" },
     { key: "unread", label: "Unread", count: unreadTotal },
@@ -624,7 +636,7 @@ export default function ChatsPage() {
 
       {/* ============ THREAD — WhatsApp full on mobile when chat active, aurora/green distinct ============ */}
       <div
-        className={`gemini-gradient-bg relative flex min-h-0 w-full flex-1 flex-col overflow-hidden border bg-white shadow-sm dark:border-white/10 dark:bg-[#181818] md:rounded-xl rounded-[20px] md:border
+        className={`gemini-gradient-bg flex min-h-0 w-full flex-1 flex-col overflow-hidden border bg-white shadow-sm dark:border-white/10 dark:bg-[#181818] md:rounded-xl rounded-[20px] md:border
           absolute inset-0 md:relative md:inset-auto md:w-auto
           transition-transform duration-300 ease-in-out will-change-transform
           ${activeChat ? "translate-x-0" : "translate-x-full md:translate-x-0"}`}
