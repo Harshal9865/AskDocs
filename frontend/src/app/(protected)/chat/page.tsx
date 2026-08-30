@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -338,7 +338,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="relative mx-auto flex h-[var(--chat-h)] max-w-5xl overflow-hidden rounded-[20px] md:rounded-xl md:flex-row md:gap-4">
+    <div className="relative mx-auto flex w-full h-[var(--chat-h)] max-w-5xl overflow-hidden rounded-[20px] md:rounded-xl md:flex-row md:gap-4">
       {/* ============ CONVERSATION LIST — WhatsApp on mobile (full when no conv) ============ */}
       <div
         className={`gemini-gradient-bg sb-scroll flex min-h-0 flex-col overflow-y-auto border bg-white shadow-sm dark:border-[rgba(129,140,248,0.16)] dark:bg-[#0d0d1f] md:rounded-xl md:border md:shadow-sm absolute inset-0 md:relative md:inset-auto w-full md:w-64 shrink-0 p-2 sm:p-3 rounded-[20px] md:rounded-xl transition-transform duration-300 ease-in-out will-change-transform ${
@@ -409,7 +409,7 @@ export default function ChatPage() {
 
       {/* thread — WhatsApp full on mobile when conv active */}
       <div
-        className={`gemini-gradient-bg relative flex min-h-0 w-full flex-1 flex-col overflow-hidden border bg-white shadow-sm dark:border-[rgba(129,140,248,0.16)] dark:bg-[#13132b] md:rounded-xl rounded-[20px] md:border absolute inset-0 md:relative md:inset-auto md:w-auto transition-transform duration-300 ease-in-out will-change-transform ${
+        className={`gemini-gradient-bg flex min-h-0 w-full flex-1 flex-col overflow-hidden border bg-white shadow-sm dark:border-[rgba(129,140,248,0.16)] dark:bg-[#13132b] md:rounded-xl rounded-[20px] md:border absolute inset-0 md:relative md:inset-auto md:w-auto transition-transform duration-300 ease-in-out will-change-transform ${
           activeConv ? "translate-x-0" : "translate-x-full md:translate-x-0"
         }`}
       >
