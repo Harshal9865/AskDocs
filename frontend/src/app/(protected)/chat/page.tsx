@@ -370,7 +370,7 @@ export default function ChatPage() {
           </button>
         )}
 
-        <div className="relative z-10 rounded-b-xl border-t border-indigo-100/60 bg-white px-3 pb-4 pt-3 pb-safe dark:border-indigo-500/10 dark:bg-[#13132b] sm:px-4 sm:pb-5 sm:pt-3">
+        <div className="relative z-10 rounded-b-xl border-t border-indigo-100/60 bg-white px-3 py-2 dark:border-indigo-500/10 dark:bg-[#13132b]">
           <ChatComposer
             inputId="chat-input"
             value={input}

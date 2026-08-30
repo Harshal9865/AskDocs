@@ -466,7 +466,7 @@ export default function ChatsPage() {
               </button>
             )}
 
-            <div className="relative z-10 border-t border-slate-100/60 px-2 pb-2 pt-2 pb-safe dark:border-white/5 sm:px-4 sm:pb-4 sm:pt-3">
+            <div className="relative z-10 border-t border-slate-100/60 px-3 py-2 dark:border-white/5">
               <ChatComposer
                 inputId="team-chat-input"
                 value={input}

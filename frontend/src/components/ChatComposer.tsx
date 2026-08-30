@@ -204,7 +204,7 @@ export default function ChatComposer({
       )}
 
       {/* input row */}
-      <div className="flex items-end gap-1.5 px-2 py-1.5">
+      <div className="flex items-center gap-1.5 px-2 py-1">
         {showAttach && (
           <div className="relative shrink-0" ref={menuRef}>
             <button
