@@ -56,7 +56,7 @@ export default function ProtectedLayout({
       <div className="flex min-h-dvh flex-col">
         <TopNavbar onMenu={() => setDrawerOpen(true)} />
         <Toaster />
-        <div className="dark:bg-[#121212] flex flex-1 min-h-0 transition-colors">
+        <div className="dark:bg-[#121212] flex flex-1 min-h-0 pl-[68px] transition-colors md:pl-0">
           <Sidebar
             mobileOpen={drawerOpen}
             onCloseMobile={() => setDrawerOpen(false)}
