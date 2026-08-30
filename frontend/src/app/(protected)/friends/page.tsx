@@ -20,7 +20,6 @@ function FriendCard({
   member: Member;
   action: React.ReactNode;
 }) {
-  const router = useRouter();
   const { src, stickerId } = useUserAvatar(member.user_id, member.avatar_kind, member.avatar_value);
   return (
     <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-[#121212] dark:hover:border-white/15">
