@@ -105,12 +105,33 @@ export default function ChatPage() {
 
   useEffect(() => { setActiveConv(null); setMessages([]); void loadConversations(); }, [workspace, loadConversations]);
 
+  const prevMsgCount = useRef(0);
+  
   function scrollToBottom(smooth = true) {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollTo({ top: el.scrollHeight, behavior: smooth ? "smooth" : "auto" });
+    requestAnimationFrame(() => {
+      const el = scrollRef.current;
+      if (!el) return;
+      el.scrollTo({ top: el.scrollHeight, behavior: smooth ? "smooth" : "auto" });
+    });
   }
-  useEffect(() => { scrollToBottom(); }, [messages]);
+
+  useEffect(() => {
+    const count = messages.length;
+    if (count > 0) {
+      const isInitial = prevMsgCount.current === 0;
+      const isNew = count > prevMsgCount.current;
+      
+      const el = scrollRef.current;
+      const isAtBottom = el ? (el.scrollHeight - el.scrollTop - el.clientHeight < 300) : true;
+
+      if (isInitial || isAtBottom) {
+        scrollToBottom(!isInitial);
+      } else if (isNew) {
+        setShowJump(true);
+      }
+    }
+    prevMsgCount.current = count;
+  }, [messages]);
 
   async function openConversation(conv: Conversation) {
     setActiveConv(conv);
@@ -262,7 +283,7 @@ export default function ChatPage() {
         <div
           ref={scrollRef}
           onScroll={(e) => { const el = e.currentTarget; setShowJump(el.scrollHeight - el.scrollTop - el.clientHeight > 300); }}
-          className="scroll-touch ai-thread relative z-10 flex-1 space-y-3 overflow-y-auto px-3 py-4 sm:px-6"
+          className="scroll-touch ai-thread relative z-10 flex-1 min-h-0 space-y-3 overflow-y-auto px-3 py-4 sm:px-6"
         >
           {!activeConv ? (
             <div className="flex h-full items-center justify-center text-center">
@@ -365,7 +386,7 @@ export default function ChatPage() {
         </div>
 
         {showJump && (
-          <button onClick={() => scrollToBottom()} aria-label="Jump to latest" className="absolute bottom-28 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-indigo-200/60 bg-white text-indigo-600 shadow-lg hover:scale-105 dark:border-indigo-500/30 dark:bg-[#23233d] dark:text-indigo-300 md:bottom-32">
+          <button onClick={() => scrollToBottom()} aria-label="Jump to latest" className="absolute bottom-20 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-indigo-200/60 bg-white text-indigo-600 shadow-lg hover:scale-105 dark:border-indigo-500/30 dark:bg-[#23233d] dark:text-indigo-300 md:bottom-24">
             <ArrowDownCircle className="h-5 w-5" />
           </button>
         )}
