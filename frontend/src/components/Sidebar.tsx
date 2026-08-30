@@ -72,10 +72,19 @@ export default function Sidebar({
   const asideRef = useRef<HTMLElement>(null);
   const [collapsed, setCollapsed] = useState(false);
   const planBadge = user?.plan === "pro" ? "bg-gradient-to-r from-amber-400 to-orange-500 text-white" : user?.plan === "enterprise" ? "bg-gradient-to-r from-violet-500 to-purple-600 text-white" : "bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-zinc-400";
+  // on mobile drawer open, always show labels regardless of desktop collapsed
+  const isCollapsed = collapsed && !mobileOpen;
 
   useEffect(() => {
     setCollapsed(localStorage.getItem("askdocs_sb_collapsed") === "1");
   }, []);
+
+  // close drawer when a chat is opened on mobile (WhatsApp slide)
+  useEffect(() => {
+    const onClose = () => onCloseMobile?.();
+    window.addEventListener("closeSidebar", onClose);
+    return () => window.removeEventListener("closeSidebar", onClose);
+  }, [onCloseMobile]);
 
   function toggleCollapsed() {
     setCollapsed((c) => {
@@ -224,8 +233,8 @@ export default function Sidebar({
       )}
       <aside
         ref={asideRef}
-        style={{ width: mobileOpen ? `min(${width}px, 85vw)` : collapsed ? 68 : `min(${width}px, 85vw)` }}
-        className={`dark:border-slate-700/50 dark:bg-[#1a1a2e] sb-aside fixed left-0 top-14 bottom-0 z-40 flex shrink-0 flex-col border-r border-slate-200 bg-white transition-colors md:sticky md:top-14 md:h-[calc(100dvh-3.5rem)] md:z-auto md:translate-x-0 md:overflow-visible ${mobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full md:translate-x-0"} ${collapsed && !mobileOpen ? "sb-collapsed shadow-xl" : ""}`}
+        style={{ width: isCollapsed ? 68 : `min(${width}px, 85vw)` }}
+        className={`dark:border-slate-700/50 dark:bg-[#1a1a2e] sb-aside fixed left-0 top-14 bottom-0 z-40 flex shrink-0 flex-col border-r border-slate-200 bg-white transition-colors md:sticky md:top-14 md:h-[calc(100dvh-3.5rem)] md:z-auto md:translate-x-0 md:overflow-visible ${mobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full md:translate-x-0"} ${isCollapsed ? "sb-collapsed shadow-xl" : ""}`}
       >
         {/* collapse arrow - only on desktop */}
         <button
@@ -339,8 +348,8 @@ export default function Sidebar({
           const active = pathname === item.href || (item.href === "/friends" && pathname.startsWith("/friends")) || (item.href === "/documents" && pathname.startsWith("/documents"));
           const Icon = item.icon;
           const count = item.href === "/documents" ? docCount : item.href === "/friends" ? (friendReqCount > 0 ? friendReqCount : null) : null;
-          const showCount = !collapsed && count !== null && count > 0;
-          const showBadge = collapsed && (item.href === "/friends" && friendReqCount > 0 || item.href === "/documents" && docCount !== null && docCount > 0);
+          const showCount = !isCollapsed && count !== null && count > 0;
+          const showBadge = isCollapsed && (item.href === "/friends" && friendReqCount > 0 || item.href === "/documents" && docCount !== null && docCount > 0);
           return (
             <Link
               key={item.href}
@@ -348,10 +357,10 @@ export default function Sidebar({
               onClick={onCloseMobile}
               title={item.label}
               aria-label={item.label}
-              className={`relative mb-0.5 flex h-8 items-center gap-2 rounded-md px-2 text-[13px] font-medium transition-colors ${collapsed ? "justify-center px-0" : ""} ${active ? "dark:bg-slate-800 dark:text-indigo-400 bg-white text-indigo-700 shadow-sm ring-1 ring-slate-900/5" : "dark:text-slate-400 dark:hover:bg-slate-800/50 text-slate-600 hover:bg-slate-900/5"}`}
+              className={`relative mb-0.5 flex h-8 items-center gap-2 rounded-md px-2 text-[13px] font-medium transition-colors ${isCollapsed ? "justify-center px-0" : ""} ${active ? "dark:bg-slate-800 dark:text-indigo-400 bg-white text-indigo-700 shadow-sm ring-1 ring-slate-900/5" : "dark:text-slate-400 dark:hover:bg-slate-800/50 text-slate-600 hover:bg-slate-900/5"}`}
             >
               <Icon aria-hidden className={`h-4 w-4 shrink-0 ${active ? "text-indigo-600" : "text-slate-500"}`} />
-              {!collapsed && (
+              {!isCollapsed && (
                 <>
                   <span className="truncate">{item.label}</span>
                   {showCount && (
@@ -361,7 +370,7 @@ export default function Sidebar({
                   )}
                 </>
               )}
-              {collapsed && showBadge && (
+              {isCollapsed && showBadge && (
                 <>
                   {item.href === "/friends" && friendReqCount > 0 && (
                     <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-black" />
@@ -388,10 +397,10 @@ export default function Sidebar({
               onClick={onCloseMobile}
               title={item.label}
               aria-label={item.label}
-              className={`mb-0.5 flex h-7 items-center gap-2 rounded-md px-2 text-[13px] transition-colors ${collapsed ? "justify-center px-0" : ""} ${active ? "dark:bg-slate-800 dark:text-indigo-400 bg-white text-indigo-700 shadow-sm ring-1 ring-slate-900/5" : "dark:text-slate-400 dark:hover:bg-slate-800/50 text-slate-600 hover:bg-slate-900/5"}`}
+              className={`mb-0.5 flex h-7 items-center gap-2 rounded-md px-2 text-[13px] transition-colors ${isCollapsed ? "justify-center px-0" : ""} ${active ? "dark:bg-slate-800 dark:text-indigo-400 bg-white text-indigo-700 shadow-sm ring-1 ring-slate-900/5" : "dark:text-slate-400 dark:hover:bg-slate-800/50 text-slate-600 hover:bg-slate-900/5"}`}
             >
               <Icon aria-hidden className={`h-4 w-4 shrink-0 ${active ? "text-indigo-600" : "text-slate-500"}`} />
-              {!collapsed && <span className="truncate">{item.label}</span>}
+              {!isCollapsed && <span className="truncate">{item.label}</span>}
             </Link>
           );
         })}

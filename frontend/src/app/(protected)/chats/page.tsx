@@ -273,6 +273,7 @@ export default function ChatsPage() {
       const chat = await api.createDirectChat(workspace.id, member.user_id);
       setActiveChat(chat);
       setMessages([]);
+      if (typeof window !== "undefined" && window.innerWidth < 768) window.dispatchEvent(new CustomEvent("closeSidebar"));
       await loadChats();
     } catch (err) {
       alert((err as Error).message);
@@ -288,6 +289,7 @@ export default function ChatsPage() {
       setSelectedIds([]);
       setActiveChat(chat);
       setMessages([]);
+      if (typeof window !== "undefined" && window.innerWidth < 768) window.dispatchEvent(new CustomEvent("closeSidebar"));
       await loadChats();
     } catch (err) {
       alert((err as Error).message);
@@ -418,7 +420,7 @@ export default function ChatsPage() {
       {/* ============ CHAT LIST — WhatsApp on mobile (full when no chat), sidebar rail 68px always ============ */}
       <div
         className={`gemini-gradient-bg sb-scroll flex flex-col overflow-y-auto border bg-white shadow-sm dark:border-white/10 dark:bg-[#0b0f14] md:rounded-xl md:border md:shadow-sm
-          absolute inset-0 md:relative md:inset-auto w-full md:w-72 shrink-0 p-2 sm:p-3 rounded-[16px] md:rounded-xl
+          absolute inset-0 md:relative md:inset-auto w-full md:w-72 shrink-0 p-2 sm:p-3 rounded-[20px] md:rounded-xl
           transition-transform duration-300 ease-in-out will-change-transform
           ${activeChat ? "-translate-x-full md:translate-x-0" : "translate-x-0"}`}
         style={{ WebkitOverflowScrolling: "touch" }}
@@ -564,6 +566,7 @@ export default function ChatsPage() {
                         onClick={() => {
                           setActiveChat(chat);
                           setMessages([]);
+                          if (typeof window !== "undefined" && window.innerWidth < 768) window.dispatchEvent(new CustomEvent("closeSidebar"));
                         }}
                         className={`wa-row flex min-w-0 flex-1 items-center gap-3 rounded-lg px-2 py-2.5 text-left ${
                           isActive ? "wa-row-active" : ""
@@ -621,7 +624,7 @@ export default function ChatsPage() {
 
       {/* ============ THREAD — WhatsApp full on mobile when chat active, aurora/green distinct ============ */}
       <div
-        className={`gemini-gradient-bg relative flex min-h-0 w-full flex-1 flex-col overflow-hidden border bg-white shadow-sm dark:border-white/10 dark:bg-[#181818] md:rounded-xl rounded-[16px] md:border
+        className={`gemini-gradient-bg relative flex min-h-0 w-full flex-1 flex-col overflow-hidden border bg-white shadow-sm dark:border-white/10 dark:bg-[#181818] md:rounded-xl rounded-[20px] md:border
           absolute inset-0 md:relative md:inset-auto md:w-auto
           transition-transform duration-300 ease-in-out will-change-transform
           ${activeChat ? "translate-x-0" : "translate-x-full md:translate-x-0"}`}
