@@ -245,16 +245,16 @@ export default function ProfilePage() {
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#121212]">
         {/* Cover with aurora */}
-        <div className="gemini-gradient-bg relative h-32 bg-slate-900 dark:bg-[#0a0a0a]">
+        <div className="gemini-gradient-bg relative h-24 sm:h-32 bg-slate-900 dark:bg-[#0a0a0a]">
           <div className="gemini-orb gemini-orb-1" />
           <div className="gemini-orb gemini-orb-2" />
         </div>
-        <div className="relative px-6 pb-6">
+        <div className="relative px-4 sm:px-6 pb-4 sm:pb-6">
           <div className="flex items-end gap-4">
-            <button onClick={() => setLightbox(true)} aria-label="View photo" className="-mt-12 shrink-0 rounded-full ring-4 ring-white dark:ring-[#121212]">
+            <button onClick={() => setLightbox(true)} aria-label="View photo" className="-mt-10 shrink-0 rounded-full ring-4 ring-white dark:ring-[#121212]">
               <Avatar
                 name={profile.name}
-                size={96}
+                size={80}
                 src={src}
                 stickerId={stickerId}
                 showPresence={!isMe}
@@ -263,7 +263,7 @@ export default function ProfilePage() {
             </button>
             <div className="min-w-0 flex-1 pt-2 pb-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="truncate text-xl font-bold text-slate-900 dark:text-white">
+                <h1 className="truncate text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
                   {profile.name}{" "}
                   {profile.pronouns && (
                     <span className="text-sm font-normal text-slate-500 dark:text-zinc-400">({profile.pronouns})</span>

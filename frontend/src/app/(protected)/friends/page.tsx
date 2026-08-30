@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
 import Avatar from "@/components/Avatar";
@@ -19,21 +20,33 @@ function FriendCard({
   member: Member;
   action: React.ReactNode;
 }) {
+  const router = useRouter();
   const { src, stickerId } = useUserAvatar(member.user_id, member.avatar_kind, member.avatar_value);
   return (
     <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-[#121212] dark:hover:border-white/15">
-      <Avatar name={member.name || member.email} size={52} src={src} stickerId={stickerId} showPresence online={member.online} />
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5 truncate text-sm font-semibold dark:text-white">
-          <span className="truncate">{member.name || member.email}</span>
-          {member.pronouns && <span className="shrink-0 text-xs font-normal text-slate-500">({member.pronouns})</span>}
-          {member.online && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />}
+      <Link
+        href={`/profile/${member.user_id}`}
+        className="flex items-center gap-3 min-w-0 flex-1"
+        onClick={(e) => {
+          // Prevent the action buttons from triggering navigation
+          if ((e.target as HTMLElement).closest('button')) {
+            e.preventDefault();
+          }
+        }}
+      >
+        <Avatar name={member.name || member.email} size={52} src={src} stickerId={stickerId} showPresence online={member.online} />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5 truncate text-sm font-semibold dark:text-white">
+            <span className="truncate">{member.name || member.email}</span>
+            {member.pronouns && <span className="shrink-0 text-xs font-normal text-slate-500">({member.pronouns})</span>}
+            {member.online && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />}
+          </div>
+          <div className="truncate text-xs text-slate-500 dark:text-zinc-400">
+            {member.status || member.bio?.slice(0, 44) || member.email}
+            {member.online ? <span className="ml-1.5 text-emerald-600 font-medium">· Online</span> : null}
+          </div>
         </div>
-        <div className="truncate text-xs text-slate-500 dark:text-zinc-400">
-          {member.status || member.bio?.slice(0, 44) || member.email}
-          {member.online ? <span className="ml-1.5 text-emerald-600 font-medium">· Online</span> : null}
-        </div>
-      </div>
+      </Link>
       <div className="shrink-0">{action}</div>
     </div>
   );

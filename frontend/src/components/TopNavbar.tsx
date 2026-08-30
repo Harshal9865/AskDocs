@@ -62,14 +62,21 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
   return (
     <>
     <header className="dark:border-slate-700/50 dark:bg-[#181818] sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-3 transition-colors sm:px-5">
-      {/* mobile hamburger */}
+{/* mobile hamburger */}
       {onMenu && (
         <button
           onClick={onMenu}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onMenu();
+            }
+          }}
           aria-label="Open menu"
-          className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 md:hidden"
+          aria-expanded={false}
+          className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 md:hidden focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200">
             <line x1="3" y1="6" x2="21" y2="6" />
             <line x1="3" y1="12" x2="21" y2="12" />
             <line x1="3" y1="18" x2="21" y2="18" />

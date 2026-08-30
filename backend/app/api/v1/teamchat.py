@@ -1,3 +1,4 @@
+import hashlib
 import uuid
 
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
@@ -18,6 +19,14 @@ from app.models.file import FileBlob
 from app.models.user import User
 from app.models.workspace import Role, WorkspaceMember
 from app.storage.db_storage import DbStorage
+
+def _generate_direct_chat_key(user_id_1: uuid.UUID, user_id_2: uuid.UUID) -> str:
+    """Generate a deterministic key for a direct chat between two users.
+    Sorts the UUIDs to ensure the same key regardless of order."""
+    ids = sorted([str(user_id_1), str(user_id_2)])
+    combined = f"{ids[0]}:{ids[1]}"
+    return hashlib.sha256(combined.encode()).hexdigest()[:64]
+
 
 router = APIRouter()
 
@@ -280,6 +289,69 @@ async def create_direct_chat(
         if blocked.scalar_one_or_none():
             raise HTTPException(status.HTTP_403_FORBIDDEN, "Cannot message a blocked user")
 
+    # Use a transaction with retry logic to handle race conditions
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            # Lock the relevant rows to prevent race conditions
+            existing = await db.execute(
+                select(Conversation.id)
+                .join(
+                    ConversationParticipant,
+                    ConversationParticipant.conversation_id == Conversation.id,
+                )
+                .where(
+                    Conversation.type == "direct",
+                    Conversation.workspace_id == workspace_id,
+                    Conversation.deleted_at.is_(None),
+                    ConversationParticipant.user_id.in_([user.id, payload.user_id]),
+                )
+                .group_by(Conversation.id)
+                .having(func.count(ConversationParticipant.user_id) == 2)
+                .with_for_update(nowait=True)
+            )
+            conv_existing_id = existing.scalar_one_or_none()
+
+            if conv_existing_id is not None:
+                conv_existing = await db.get(Conversation, conv_existing_id)
+                # unhide only for current user
+                await db.execute(
+                    delete(ConversationHidden).where(
+                        ConversationHidden.conversation_id == conv_existing.id,
+                        ConversationHidden.user_id == user.id,
+                    )
+                )
+                await db.commit()
+                return await _build_conv_out(db, conv_existing, user.id)
+
+            # Create new direct conversation
+            direct_chat_key = _generate_direct_chat_key(user.id, payload.user_id)
+            conv = Conversation(
+                workspace_id=workspace_id,
+                user_id=user.id,
+                type="direct",
+                title="Direct message",
+                direct_chat_key=direct_chat_key,
+            )
+            db.add(conv)
+            await db.flush()
+
+            db.add(ConversationParticipant(conversation_id=conv.id, user_id=user.id))
+            db.add(ConversationParticipant(conversation_id=conv.id, user_id=payload.user_id))
+
+            await db.commit()
+            return await _build_conv_out(db, conv, user.id)
+
+        except Exception as e:
+            await db.rollback()
+            # Check if it's a unique constraint violation (race condition)
+            error_str = str(e).lower()
+            if "unique" in error_str or "duplicate" in error_str or "integrity" in error_str:
+                if attempt < max_retries - 1:
+                    continue  # retry
+            raise
+
+    # Fallback: try to find existing conversation after retries
     existing = await db.execute(
         select(Conversation.id)
         .join(
@@ -289,6 +361,7 @@ async def create_direct_chat(
         .where(
             Conversation.type == "direct",
             Conversation.workspace_id == workspace_id,
+            Conversation.deleted_at.is_(None),
             ConversationParticipant.user_id.in_([user.id, payload.user_id]),
         )
         .group_by(Conversation.id)
@@ -297,29 +370,16 @@ async def create_direct_chat(
     conv_existing_id = existing.scalar_one_or_none()
     if conv_existing_id is not None:
         conv_existing = await db.get(Conversation, conv_existing_id)
-        # unhide for both users
         await db.execute(
             delete(ConversationHidden).where(
                 ConversationHidden.conversation_id == conv_existing.id,
+                ConversationHidden.user_id == user.id,
             )
         )
         await db.commit()
-        out = await _build_conv_out(db, conv_existing, user.id)
-        from fastapi.responses import JSONResponse
-        return JSONResponse(status_code=200, content=out.model_dump(mode="json"))
+        return await _build_conv_out(db, conv_existing, user.id)
 
-    conv = Conversation(
-        workspace_id=workspace_id,
-        user_id=user.id,
-        type="direct",
-        title="Direct message",
-    )
-    db.add(conv)
-    await db.flush()
-    db.add(ConversationParticipant(conversation_id=conv.id, user_id=user.id))
-    db.add(ConversationParticipant(conversation_id=conv.id, user_id=payload.user_id))
-    await db.commit()
-    return await _build_conv_out(db, conv, user.id)
+    raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Failed to create direct chat after retries")
 
 
 @router.post("/workspaces/{workspace_id}/team-chats/group", response_model=TeamConversationOut, status_code=201)

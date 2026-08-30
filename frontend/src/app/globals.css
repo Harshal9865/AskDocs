@@ -962,3 +962,33 @@ button.bg-indigo-600:hover {
     transition: none !important;
   }
 }
+
+/* Mobile rounded corners - 20px on mobile, 16px on desktop */
+@media (max-width: 767px) {
+  .rounded-xl {
+    border-radius: calc(var(--radius) * 2) !important; /* 20px on mobile */
+  }
+  .rounded-2xl {
+    border-radius: calc(var(--radius) * 2.5) !important; /* 25px on mobile */
+  }
+  .rounded-3xl {
+    border-radius: calc(var(--radius) * 3) !important; /* 30px on mobile */
+  }
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+/* Prevent horizontal scroll on mobile */
+@media (max-width: 767px) {
+  html, body {
+    overflow-x: hidden;
+  }
+}

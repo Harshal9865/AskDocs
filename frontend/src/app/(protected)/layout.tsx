@@ -51,18 +51,22 @@ export default function ProtectedLayout({
   }
   if (!user) return null;
 
-  return (
+return (
     <WorkspaceProvider>
-      <div className="flex min-h-dvh flex-col">
+      <TopNavbar onMenu={() => setDrawerOpen(true)} />
+      <Toaster />
+
+      <div className="dark:bg-[#121212] flex min-h-dvh flex-col">
         <TopNavbar onMenu={() => setDrawerOpen(true)} />
         <Toaster />
+
         <div className="dark:bg-[#121212] flex flex-1 min-h-0 pl-[68px] transition-colors md:pl-0">
-        <Sidebar
-          mobileOpen={drawerOpen}
-          onCloseMobile={() => setDrawerOpen(false)}
-          width={width}
-          setWidth={setWidth}
-        />
+          <Sidebar
+            mobileOpen={drawerOpen}
+            onCloseMobile={() => setDrawerOpen(false)}
+            width={width}
+            setWidth={setWidth}
+          />
           <main className="dark:bg-[#121212] min-w-0 flex-1 overflow-y-auto overflow-x-clip p-4 transition-colors md:p-6">
             <WelcomeModal />
             <CommandPalette />
