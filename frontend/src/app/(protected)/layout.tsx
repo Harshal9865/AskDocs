@@ -51,10 +51,10 @@ export default function ProtectedLayout({
 
   return (
     <WorkspaceProvider>
-      <div className="flex min-h-full flex-col">
+      <div className="flex h-[100dvh] flex-col overflow-hidden">
         <TopNavbar onMenu={() => setDrawerOpen(true)} />
         <Toaster />
-        <div className={`dark:bg-[#121212] flex flex-1 transition-colors ${isChatPage ? "overflow-hidden" : ""}`}>
+        <div className={`dark:bg-[#121212] flex flex-1 min-h-0 transition-colors ${isChatPage ? "overflow-hidden" : ""}`}>
           <Sidebar
             mobileOpen={drawerOpen}
             onCloseMobile={() => setDrawerOpen(false)}
@@ -62,7 +62,7 @@ export default function ProtectedLayout({
             setWidth={setWidth}
           />
           <main
-            className={`dark:bg-[#121212] min-w-0 flex-1 transition-colors ${
+            className={`dark:bg-[#121212] min-w-0 flex-1 min-h-0 transition-colors ${
               isChatPage
                 ? "flex flex-col overflow-hidden p-4 md:p-6"
                 : "overflow-y-auto p-4 md:p-6"

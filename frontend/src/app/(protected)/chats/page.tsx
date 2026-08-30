@@ -274,7 +274,7 @@ export default function ChatsPage() {
       {/* ===== CHAT LIST PANEL ===== */}
       <div
         className={`gemini-gradient-bg sb-scroll flex-col overflow-y-auto border bg-white shadow-sm dark:border-white/10 dark:bg-[#0b0f14] rounded-xl shrink-0 p-2 sm:p-3
-          ${activeChat ? "hidden md:flex md:w-72" : "flex w-full md:w-72"}`}
+          ${activeChat ? "hidden md:flex md:w-72 min-h-0" : "flex w-full md:w-72 min-h-0"}`}
         style={{ WebkitOverflowScrolling: "touch" }}
       >
         <div className="gemini-orb gemini-orb-1" />
@@ -389,7 +389,7 @@ export default function ChatsPage() {
       </div>
 
       {/* ===== THREAD / MESSAGE PANEL ===== */}
-      <div className={`gemini-gradient-bg relative flex-col overflow-hidden border bg-white shadow-sm dark:border-white/10 dark:bg-[#181818] rounded-xl ${activeChat ? "flex flex-1 min-w-0" : "hidden md:flex md:flex-1 md:min-w-0"}`}>
+      <div className={`gemini-gradient-bg relative flex-col overflow-hidden border bg-white shadow-sm dark:border-white/10 dark:bg-[#181818] rounded-xl ${activeChat ? "flex flex-1 min-w-0 min-h-0" : "hidden md:flex md:flex-1 md:min-w-0 md:min-h-0"}`}>
         <div className="gemini-orb gemini-orb-1" />
         <div className="gemini-orb gemini-orb-2" />
         <div className="gemini-orb gemini-orb-3" />

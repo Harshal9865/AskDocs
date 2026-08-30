@@ -209,7 +209,7 @@ export default function ChatPage() {
       {/* ===== CONVERSATION LIST PANEL ===== */}
       <div
         className={`gemini-gradient-bg sb-scroll flex-col overflow-y-auto border bg-white shadow-sm dark:border-[rgba(129,140,248,0.16)] dark:bg-[#0d0d1f] rounded-xl shrink-0 p-2 sm:p-3
-          ${activeConv ? "hidden md:flex md:w-64" : "flex w-full md:w-64"}`}
+          ${activeConv ? "hidden md:flex md:w-64 min-h-0" : "flex w-full md:w-64 min-h-0"}`}
       >
         <div className="gemini-orb gemini-orb-1" />
         <div className="gemini-orb gemini-orb-2" />
@@ -256,7 +256,7 @@ export default function ChatPage() {
       </div>
 
       {/* ===== AI THREAD PANEL ===== */}
-      <div className={`gemini-gradient-bg relative flex-col overflow-hidden border bg-white shadow-sm dark:border-[rgba(129,140,248,0.16)] dark:bg-[#13132b] rounded-xl ${activeConv ? "flex flex-1 min-w-0" : "hidden md:flex md:flex-1 md:min-w-0"}`}>
+      <div className={`gemini-gradient-bg relative flex-col overflow-hidden border bg-white shadow-sm dark:border-[rgba(129,140,248,0.16)] dark:bg-[#13132b] rounded-xl ${activeConv ? "flex flex-1 min-w-0 min-h-0" : "hidden md:flex md:flex-1 md:min-w-0 md:min-h-0"}`}>
         <div className="gemini-orb gemini-orb-1" />
         <div className="gemini-orb gemini-orb-2" />
         <div className="gemini-orb gemini-orb-3" />
