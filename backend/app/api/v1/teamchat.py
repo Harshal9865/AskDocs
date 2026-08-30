@@ -298,20 +298,25 @@ async def create_direct_chat(
                 )
                 .group_by(Conversation.id)
                 .having(func.count(ConversationParticipant.user_id) == 2)
+                .limit(1)
             )
-            conv_existing_id = existing.scalar_one_or_none()
+            conv_existing_id = existing.scalars().first()
 
             if conv_existing_id is not None:
                 conv_existing = await db.get(Conversation, conv_existing_id)
-                # unhide only for current user
-                await db.execute(
-                    delete(ConversationHidden).where(
-                        ConversationHidden.conversation_id == conv_existing.id,
-                        ConversationHidden.user_id == user.id,
+                if conv_existing is None:
+                    # stale id, continue to creation
+                    pass
+                else:
+                    # unhide only for current user
+                    await db.execute(
+                        delete(ConversationHidden).where(
+                            ConversationHidden.conversation_id == conv_existing.id,
+                            ConversationHidden.user_id == user.id,
+                        )
                     )
-                )
-                await db.commit()
-                return await _build_conv_out(db, conv_existing, user.id)
+                    await db.commit()
+                    return await _build_conv_out(db, conv_existing, user.id)
 
             # Create new direct conversation (direct_chat_key migration is optional; retry handles race)
             conv = Conversation(
@@ -362,18 +367,20 @@ async def create_direct_chat(
         )
         .group_by(Conversation.id)
         .having(func.count(ConversationParticipant.user_id) == 2)
+        .limit(1)
     )
-    conv_existing_id = existing.scalar_one_or_none()
+    conv_existing_id = existing.scalars().first()
     if conv_existing_id is not None:
         conv_existing = await db.get(Conversation, conv_existing_id)
-        await db.execute(
-            delete(ConversationHidden).where(
-                ConversationHidden.conversation_id == conv_existing.id,
-                ConversationHidden.user_id == user.id,
+        if conv_existing is not None:
+            await db.execute(
+                delete(ConversationHidden).where(
+                    ConversationHidden.conversation_id == conv_existing.id,
+                    ConversationHidden.user_id == user.id,
+                )
             )
-        )
-        await db.commit()
-        return await _build_conv_out(db, conv_existing, user.id)
+            await db.commit()
+            return await _build_conv_out(db, conv_existing, user.id)
 
     raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Failed to create direct chat after retries")
 
