@@ -419,7 +419,7 @@ export default function ChatsPage() {
     <div className="relative mx-auto flex h-[var(--chat-h)] max-w-5xl overflow-hidden rounded-[20px] md:rounded-xl md:flex-row md:gap-4">
       {/* ============ CHAT LIST — WhatsApp on mobile (full when no chat), sidebar rail 68px always ============ */}
       <div
-        className={`gemini-gradient-bg sb-scroll flex flex-col overflow-y-auto border bg-white shadow-sm dark:border-white/10 dark:bg-[#0b0f14] md:rounded-xl md:border md:shadow-sm
+        className={`gemini-gradient-bg sb-scroll flex min-h-0 flex-col overflow-y-auto border bg-white shadow-sm dark:border-white/10 dark:bg-[#0b0f14] md:rounded-xl md:border md:shadow-sm
           absolute inset-0 md:relative md:inset-auto w-full md:w-72 shrink-0 p-2 sm:p-3 rounded-[20px] md:rounded-xl
           transition-transform duration-300 ease-in-out will-change-transform
           ${activeChat ? "-translate-x-full md:translate-x-0" : "translate-x-0"}`}
