@@ -280,11 +280,10 @@ async def create_direct_chat(
         if blocked.scalar_one_or_none():
             raise HTTPException(status.HTTP_403_FORBIDDEN, "Cannot message a blocked user")
 
-    # Use a transaction with retry logic to handle race conditions
+    # Use retry logic to handle race conditions — no DB lock needed (works without direct_chat_key column)
     max_retries = 3
     for attempt in range(max_retries):
         try:
-            # Lock the relevant rows to prevent race conditions
             existing = await db.execute(
                 select(Conversation.id)
                 .join(
@@ -299,7 +298,6 @@ async def create_direct_chat(
                 )
                 .group_by(Conversation.id)
                 .having(func.count(ConversationParticipant.user_id) == 2)
-                .with_for_update(nowait=True)
             )
             conv_existing_id = existing.scalar_one_or_none()
 
@@ -333,12 +331,21 @@ async def create_direct_chat(
 
         except Exception as e:
             await db.rollback()
-            # Check if it's a unique constraint violation (race condition)
+            # Log for Render logs to debug 500
+            import logging
+
+            logging.getLogger(__name__).exception("create_direct_chat failed attempt %s", attempt, exc_info=e)
             error_str = str(e).lower()
-            if "unique" in error_str or "duplicate" in error_str or "integrity" in error_str:
+            if "unique" in error_str or "duplicate" in error_str or "integrity" in error_str or "could not obtain lock" in error_str:
                 if attempt < max_retries - 1:
                     continue  # retry
-            raise
+            # Re-raise as HTTPException with detail for frontend to show (not just 500)
+            # Preserve original HTTPExceptions
+            from fastapi import HTTPException as _HTTP
+
+            if isinstance(e, _HTTP):
+                raise
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Direct chat failed: {e}")
 
     # Fallback: try to find existing conversation after retries
     existing = await db.execute(
