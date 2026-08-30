@@ -210,10 +210,11 @@ body {
 }
 /* ---------- Light refinements (no layout changes) ---------- */
 
-/* Never allow sideways scrolling off-screen */
+/* Never allow sideways scrolling off-screen; give html/body full height so flex children work */
 html,
 body {
   overflow-x: clip;
+  height: 100%;
 }
 
 /* Slim, unobtrusive scrollbars */

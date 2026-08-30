@@ -24,7 +24,6 @@ export default function ProtectedLayout({
     if (!loading && !user) router.replace("/login");
   }, [loading, user, router]);
 
-  // Onboarding guard: mandatory = bio, status, pronouns, job_title, job_role
   useEffect(() => {
     if (loading || !user) return;
     const onboarded = typeof window !== "undefined" ? localStorage.getItem("askdocs_onboarded") : "1";
@@ -40,33 +39,35 @@ export default function ProtectedLayout({
     }
   }, [loading, user, pathname, router]);
 
-  // restore saved sidebar width
   useEffect(() => {
     const saved = Number(localStorage.getItem("askdocs_sidebar_width"));
     if (saved >= 220 && saved <= 420) setWidth(saved);
   }, []);
 
-  if (loading) {
-    return <Loading />;
-  }
+  if (loading) return <Loading />;
   if (!user) return null;
+
+  const isChatPage = pathname === "/chat" || pathname === "/chats";
 
   return (
     <WorkspaceProvider>
-      {/* Full-viewport column: navbar on top, then content row below */}
-      <div className="flex h-dvh flex-col overflow-hidden">
+      <div className="flex min-h-full flex-col">
         <TopNavbar onMenu={() => setDrawerOpen(true)} />
         <Toaster />
-        {/* Content row: sidebar + main. min-h-0 is critical so flex children can shrink below content size */}
-        <div className="dark:bg-[#121212] flex flex-1 min-h-0 overflow-hidden transition-colors">
+        <div className={`dark:bg-[#121212] flex flex-1 transition-colors ${isChatPage ? "overflow-hidden" : ""}`}>
           <Sidebar
             mobileOpen={drawerOpen}
             onCloseMobile={() => setDrawerOpen(false)}
             width={width}
             setWidth={setWidth}
           />
-          {/* main: flex-col so children (chat pages) can fill height; overflow-hidden so MAIN does not scroll */}
-          <main className="dark:bg-[#121212] flex min-w-0 flex-1 flex-col overflow-hidden p-4 transition-colors md:p-6">
+          <main
+            className={`dark:bg-[#121212] min-w-0 flex-1 transition-colors ${
+              isChatPage
+                ? "flex flex-col overflow-hidden p-4 md:p-6"
+                : "overflow-y-auto p-4 md:p-6"
+            }`}
+          >
             <WelcomeModal />
             <CommandPalette />
             {children}
