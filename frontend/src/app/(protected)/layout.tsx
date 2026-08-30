@@ -53,17 +53,20 @@ export default function ProtectedLayout({
 
   return (
     <WorkspaceProvider>
-      <div className="flex min-h-dvh flex-col">
+      {/* Full-viewport column: navbar on top, then content row below */}
+      <div className="flex h-dvh flex-col overflow-hidden">
         <TopNavbar onMenu={() => setDrawerOpen(true)} />
         <Toaster />
-        <div className="dark:bg-[#121212] flex flex-1 min-h-0 transition-colors">
+        {/* Content row: sidebar + main. min-h-0 is critical so flex children can shrink below content size */}
+        <div className="dark:bg-[#121212] flex flex-1 min-h-0 overflow-hidden transition-colors">
           <Sidebar
             mobileOpen={drawerOpen}
             onCloseMobile={() => setDrawerOpen(false)}
             width={width}
             setWidth={setWidth}
           />
-          <main className="dark:bg-[#121212] min-w-0 flex-1 overflow-y-auto overflow-x-clip p-4 transition-colors md:p-6">
+          {/* main: flex-col so children (chat pages) can fill height; overflow-hidden so MAIN does not scroll */}
+          <main className="dark:bg-[#121212] flex min-w-0 flex-1 flex-col overflow-hidden p-4 transition-colors md:p-6">
             <WelcomeModal />
             <CommandPalette />
             {children}
