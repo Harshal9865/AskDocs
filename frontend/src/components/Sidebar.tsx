@@ -224,8 +224,8 @@ export default function Sidebar({
       )}
       <aside
         ref={asideRef}
-        style={{ width: collapsed ? 68 : `min(${width}px, 85vw)` }}
-        className={`dark:border-slate-700/50 dark:bg-[#1a1a2e] sb-aside fixed left-0 top-14 bottom-0 z-40 flex shrink-0 flex-col border-r border-slate-200 bg-white transition-colors md:sticky md:top-14 md:h-[calc(100dvh-3.5rem)] md:z-auto md:translate-x-0 md:overflow-visible ${mobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"} ${collapsed ? "sb-collapsed shadow-xl" : ""}`}
+        style={{ width: mobileOpen ? `min(${width}px, 85vw)` : collapsed ? 68 : `min(${width}px, 85vw)` }}
+        className={`dark:border-slate-700/50 dark:bg-[#1a1a2e] sb-aside fixed left-0 top-14 bottom-0 z-40 flex shrink-0 flex-col border-r border-slate-200 bg-white transition-colors md:sticky md:top-14 md:h-[calc(100dvh-3.5rem)] md:z-auto md:translate-x-0 md:overflow-visible ${mobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full md:translate-x-0"} ${collapsed && !mobileOpen ? "sb-collapsed shadow-xl" : ""}`}
       >
         {/* collapse arrow - only on desktop */}
         <button

@@ -324,14 +324,12 @@ async def create_direct_chat(
                 await db.commit()
                 return await _build_conv_out(db, conv_existing, user.id)
 
-            # Create new direct conversation
-            direct_chat_key = _generate_direct_chat_key(user.id, payload.user_id)
+            # Create new direct conversation (direct_chat_key migration is optional; retry handles race)
             conv = Conversation(
                 workspace_id=workspace_id,
                 user_id=user.id,
                 type="direct",
                 title="Direct message",
-                direct_chat_key=direct_chat_key,
             )
             db.add(conv)
             await db.flush()
