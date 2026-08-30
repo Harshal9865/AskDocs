@@ -20,6 +20,18 @@ import {
 } from "lucide-react";
 import type { Member, TeamChat, TeamMessage, ChatAttachment } from "@/lib/types";
 
+// Mobile detection hook to avoid hydration mismatch
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+  return isMobile;
+}
+
 type ChipFilter = "all" | "direct" | "group" | "unread";
 
 function chatTitle(chat: TeamChat, myEmail?: string): string {
@@ -162,6 +174,7 @@ function dayLabel(d: Date): string {
 }
 
 export default function ChatsPage() {
+  const isMobile = useIsMobile();
   const { workspace } = useWorkspace();
   const { user } = useAuth();
   const [chats, setChats] = useState<TeamChat[]>([]);
@@ -384,7 +397,7 @@ export default function ChatsPage() {
     (email ?? "").toLowerCase().includes(needle);
 
   const filteredColleagues = colleagues.filter((m) => matches(m.name, m.email));
-  const onlineColleagues = filteredColleagues.filter((m) => m.online);
+const onlineColleagues = filteredColleagues.filter((m) => m.online);
   const unreadTotal = chats.reduce((n, c) => n + (c.unread_count > 0 ? 1 : 0), 0);
 
   const sortedChats = [...chats].sort(
@@ -393,27 +406,48 @@ export default function ChatsPage() {
       new Date(a.last_message_at ?? a.created_at).getTime(),
   );
 
+  // Deduplicate recent chats by participant (show only the most recent chat per person)
   const seenProfiles = new Set<string>();
   const deduplicatedChats = sortedChats.filter((c) => {
     if (c.type === "group") return true;
     const other = otherParticipant(c, user?.email);
     if (!other) return false;
-    const profileKey = other.user_id || other.email || other.id;
+    const profileKey = other.user_id || other.email || c.id;
     if (profileKey && seenProfiles.has(profileKey)) return false;
     if (profileKey) seenProfiles.add(profileKey);
     return true;
   });
 
-  const visibleChats = deduplicatedChats
-    .filter((c) =>
-      filter === "all"
-        ? true
-        : filter === "direct"
-          ? c.type === "direct"
-          : filter === "group"
-            ? c.type === "group"
-            : c.unread_count > 0,
-    )
+  // Deduplicate recent chats for the "all" and "direct" filters
+  const getFilteredChats = () => {
+    let chatsToFilter = [...chats];
+    if (filter === "direct") {
+      chatsToFilter = chats.filter((c) => c.type === "direct");
+    } else if (filter === "group") {
+      chatsToFilter = chats.filter((c) => c.type === "group");
+    } else if (filter === "unread") {
+      chatsToFilter = chats.filter((c) => c.unread_count > 0);
+    } else {
+      chatsToFilter = [...chats];
+    }
+    
+    // Deduplicate by participant for direct chats
+    if (filter === "all" || filter === "direct") {
+      const seenProfiles = new Set<string>();
+      return chatsToFilter.filter((c) => {
+        if (c.type === "group") return true;
+        const other = otherParticipant(c, user?.email);
+        if (!other) return false;
+        const profileKey = other.user_id || other.email || c.id;
+        if (profileKey && seenProfiles.has(profileKey)) return false;
+        if (profileKey) seenProfiles.add(profileKey);
+        return true;
+      });
+    }
+    return chatsToFilter;
+  };
+
+  const visibleChats = getFilteredChats()
     .filter(
       (c) =>
         matches(chatTitle(c, user?.email), null) ||
@@ -421,7 +455,7 @@ export default function ChatsPage() {
     );
 
   const chips: { key: ChipFilter; label: string; count?: number }[] = [
-    { key: "all", label: "All", count: deduplicatedChats.length },
+    { key: "all", label: "All", count: visibleChats.length },
     { key: "direct", label: "Personal" },
     { key: "group", label: "Groups" },
     { key: "unread", label: "Unread", count: unreadTotal },
@@ -639,7 +673,7 @@ export default function ChatsPage() {
         className={`gemini-gradient-bg flex min-h-0 w-full flex-1 flex-col overflow-hidden border bg-white shadow-sm dark:border-white/10 dark:bg-[#181818] md:rounded-xl rounded-[20px] md:border
           absolute inset-0 md:relative md:inset-auto md:w-auto
           transition-transform duration-300 ease-in-out will-change-transform
-          ${activeChat ? "translate-x-0" : "translate-x-full md:translate-x-0"}`}
+          ${isMobile ? (activeChat ? "translate-x-0" : "translate-x-full") : "translate-x-0"}`}
       >
 
         <div className="gemini-orb gemini-orb-1" />
