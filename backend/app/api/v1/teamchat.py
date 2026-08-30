@@ -1,4 +1,3 @@
-import hashlib
 import uuid
 
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
@@ -19,14 +18,6 @@ from app.models.file import FileBlob
 from app.models.user import User
 from app.models.workspace import Role, WorkspaceMember
 from app.storage.db_storage import DbStorage
-
-def _generate_direct_chat_key(user_id_1: uuid.UUID, user_id_2: uuid.UUID) -> str:
-    """Generate a deterministic key for a direct chat between two users.
-    Sorts the UUIDs to ensure the same key regardless of order."""
-    ids = sorted([str(user_id_1), str(user_id_2)])
-    combined = f"{ids[0]}:{ids[1]}"
-    return hashlib.sha256(combined.encode()).hexdigest()[:64]
-
 
 router = APIRouter()
 
