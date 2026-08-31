@@ -63,70 +63,87 @@ class GoogleLoginRequest(BaseModel):
     access_token: str | None = None
     token: str | None = None
 
+
 @router.post("/google", response_model=TokenPair)
 async def google_login(payload: GoogleLoginRequest, db: DbSession):
     import aiohttp
     import logging
-    from google.oauth2 import id_token
-    from google.auth.transport import requests as google_requests
-    
+
     logger = logging.getLogger(__name__)
-    raw_token = payload.token or payload.id_token or payload.access_token
+    raw_token = (payload.token or payload.id_token or payload.access_token or "").strip()
     if not raw_token:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Google token is missing")
 
     email: str | None = None
     name: str | None = None
 
-    # 1. If it looks like a JWT ID token (3 parts separated by dots), try official verify
-    if raw_token.count(".") == 2:
-        try:
-            idinfo = id_token.verify_oauth2_token(
-                raw_token,
-                google_requests.Request(),
-                audience=None,
-            )
-            email = idinfo.get("email")
-            name = idinfo.get("name")
-        except Exception as e:
-            logger.warning(f"ID token verification failed, trying userinfo endpoint: {e}")
-
-    # 2. If not an ID token or ID token verify failed, fetch user profile via Google userinfo API
-    if not email:
-        try:
-            async with aiohttp.ClientSession() as session:
+    try:
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10)) as session:
+            # 1. Try Google Userinfo endpoint (works for OAuth access tokens)
+            try:
                 async with session.get(
                     "https://www.googleapis.com/oauth2/v3/userinfo",
                     headers={"Authorization": f"Bearer {raw_token}"},
-                    timeout=aiohttp.ClientTimeout(total=10),
                 ) as res:
                     if res.status == 200:
                         data = await res.json()
                         email = data.get("email")
                         name = data.get("name")
-                    else:
-                        err_text = await res.text()
-                        logger.warning(f"Google userinfo returned status {res.status}: {err_text}")
-        except Exception as e:
-            logger.error(f"Google userinfo request error: {e}")
+            except Exception as e:
+                logger.warning(f"Userinfo check failed: {e}")
+
+            # 2. If not verified, try Google tokeninfo with id_token
+            if not email:
+                try:
+                    async with session.get(
+                        f"https://oauth2.googleapis.com/tokeninfo?id_token={raw_token}"
+                    ) as res:
+                        if res.status == 200:
+                            data = await res.json()
+                            email = data.get("email")
+                            name = data.get("name")
+                except Exception as e:
+                    logger.warning(f"Tokeninfo id_token check failed: {e}")
+
+            # 3. If still not verified, try Google tokeninfo with access_token
+            if not email:
+                try:
+                    async with session.get(
+                        f"https://oauth2.googleapis.com/tokeninfo?access_token={raw_token}"
+                    ) as res:
+                        if res.status == 200:
+                            data = await res.json()
+                            email = data.get("email")
+                            name = data.get("name")
+                except Exception as e:
+                    logger.warning(f"Tokeninfo access_token check failed: {e}")
+
+    except Exception as e:
+        logger.error(f"Google authentication network error: {e}")
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, f"Failed to reach Google auth servers: {e}")
 
     if not email:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired Google account token")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired Google token")
 
     name = name or email.split("@")[0]
 
-    result = await db.execute(select(User).where(User.email == email))
-    user = result.scalar_one_or_none()
-    if not user:
-        user = User(
-            email=email,
-            password_hash="[GOOGLE_AUTH]",
-            name=name,
-        )
-        db.add(user)
-        await db.commit()
-        await db.refresh(user)
-    return _token_pair(user)
+    try:
+        result = await db.execute(select(User).where(User.email == email))
+        user = result.scalar_one_or_none()
+        if not user:
+            user = User(
+                email=email,
+                password_hash="[GOOGLE_AUTH]",
+                name=name,
+            )
+            db.add(user)
+            await db.commit()
+            await db.refresh(user)
+        return _token_pair(user)
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Failed to load or create user for Google login: {e}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Database error: {e}")
 
 
 @router.post("/refresh", response_model=TokenPair)
