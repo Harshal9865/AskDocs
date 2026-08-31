@@ -27,7 +27,9 @@ export default function RegisterPage() {
       setBusy(true);
       setError(null);
       try {
-        await googleLogin(tokenResponse.access_token);
+        // Use ID token (JWT) for backend verification, not access token
+        // @ts-expect-error - id_token is present but not in type defs
+        await googleLogin(tokenResponse.id_token);
         const me = await import("@/lib/api").then(m => m.api.me());
         router.replace(`/profile/${me.id}?edit=true`);
       } catch (err) {

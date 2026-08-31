@@ -25,7 +25,9 @@ export default function LoginPage() {
       setBusy(true);
       setError(null);
       try {
-        await googleLogin(tokenResponse.access_token);
+        // Use ID token (JWT) for backend verification, not access token
+        // @ts-expect-error - id_token is present but not in type defs
+        await googleLogin(tokenResponse.id_token);
         router.replace("/dashboard");
       } catch (err) {
         setError((err as Error).message || "Google sign-in failed");
