@@ -136,7 +136,6 @@ export default function ChatsPage() {
   const [filter, setFilter] = useState<ChipFilter>("all");
   const [query, setQuery] = useState("");
   const [showJump, setShowJump] = useState(false);
-  const [heart, setHeart] = useState<{ id: string; k: number } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const threadEnd = useRef<HTMLDivElement>(null);
 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/lib/auth-context";
 import { useGoogleLogin } from "@react-oauth/google";
 import { Mail, Lock, ChevronRight } from "lucide-react";
@@ -171,15 +172,21 @@ export default function LoginPage() {
         <div className="w-full h-36 sm:h-48 lg:h-auto lg:w-[45%] order-first lg:order-last shrink-0 p-3 sm:p-4">
           <div className="relative h-full w-full overflow-hidden rounded-2xl sm:rounded-[2rem]">
              <div className="absolute inset-0 z-10 bg-gradient-to-t lg:bg-gradient-to-tr from-[#121214]/60 lg:from-[#121214]/40 via-transparent to-transparent" />
-             <img 
+             <Image 
                src="/login-day.jpg" 
                alt="Scenery" 
-               className="h-full w-full object-cover dark:hidden"
+               fill
+               priority
+               sizes="(max-width: 768px) 100vw, 45vw"
+               className="object-cover dark:hidden"
              />
-             <img 
+             <Image 
                src="/login-night.jpg" 
                alt="Scenery" 
-               className="hidden h-full w-full object-cover dark:block"
+               fill
+               priority
+               sizes="(max-width: 768px) 100vw, 45vw"
+               className="hidden object-cover dark:block"
              />
           </div>
         </div>

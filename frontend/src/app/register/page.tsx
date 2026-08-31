@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/lib/auth-context";
 import { useGoogleLogin } from "@react-oauth/google";
 import { Mail, Lock, User, ChevronRight } from "lucide-react";
@@ -212,15 +213,21 @@ export default function RegisterPage() {
              <div className="absolute inset-0 z-10 bg-gradient-to-t lg:bg-gradient-to-tr from-[#121214]/60 lg:from-[#121214]/40 via-transparent to-transparent" />
              
              {/* Dynamic terraces image based on theme */}
-             <img 
+             <Image 
                src="/login-day.jpg" 
                alt="Scenery" 
-               className="h-full w-full object-cover dark:hidden"
+               fill
+               priority
+               sizes="(max-width: 768px) 100vw, 45vw"
+               className="object-cover dark:hidden"
              />
-             <img 
+             <Image 
                src="/login-night.jpg" 
                alt="Scenery" 
-               className="hidden h-full w-full object-cover dark:block"
+               fill
+               priority
+               sizes="(max-width: 768px) 100vw, 45vw"
+               className="hidden object-cover dark:block"
              />
           </div>
         </div>

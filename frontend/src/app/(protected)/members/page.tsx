@@ -25,6 +25,8 @@ import { showToast } from "@/components/Toast";
 import type { Invitation, JoinRequest, Member, Role } from "@/lib/types";
 
 const ROLES: Role[] = ["viewer", "member", "admin"];
+type MemberSort = "name_asc" | "name_desc" | "role_admin" | "status_online";
+type MemberFilter = "all" | Role | "online";
 
 function MemberAvatar({ member, size }: { member: Member; size: number }) {
   const { src, stickerId } = useUserAvatar(
@@ -53,7 +55,7 @@ export default function MembersPage() {
   const [pendingInvites, setPendingInvites] = useState<Invitation[]>([]);
   const [joinRequests, setJoinRequests] = useState<JoinRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // Invite state
   const [inviteEmail, setInviteEmail] = useState("");
@@ -62,8 +64,8 @@ export default function MembersPage() {
 
   // Filters and pagination state
   const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState<"all" | Role | "online">("all");
-  const [sortBy, setSortBy] = useState<"name_asc" | "name_desc" | "role_admin" | "status_online">("name_asc");
+  const [roleFilter, setRoleFilter] = useState<MemberFilter>("all");
+  const [sortBy, setSortBy] = useState<MemberSort>("name_asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
 
@@ -86,9 +88,9 @@ export default function MembersPage() {
         setPendingInvites(invites);
         setJoinRequests(reqs.filter((r) => r.status === "pending"));
       }
-      setError(null);
+      setErrorMsg(null);
     } catch (err) {
-      setError((err as Error).message);
+      setErrorMsg((err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -429,7 +431,7 @@ export default function MembersPage() {
               <ArrowUpDown className="h-4 w-4 text-slate-400" />
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as MemberSort)}
                 className="rounded-xl border border-slate-200 bg-white py-2 px-3 text-xs font-semibold text-slate-700 dark:border-white/10 dark:bg-[#181818] dark:text-zinc-300 outline-none"
               >
                 <option value="name_asc">Name (A → Z)</option>
@@ -454,15 +456,15 @@ export default function MembersPage() {
           {/* Filter Pills */}
           <div className="flex flex-wrap gap-1.5 pt-1">
             {[
-              { id: "all", label: "All Members", count: members.length },
-              { id: "online", label: "Online", count: onlineCount },
-              { id: "admin", label: "Admins", count: adminCount },
-              { id: "member", label: "Members", count: members.filter((m) => m.role === "member").length },
-              { id: "viewer", label: "Viewers", count: members.filter((m) => m.role === "viewer").length },
+              { id: "all" as const, label: "All Members", count: members.length },
+              { id: "online" as const, label: "Online", count: onlineCount },
+              { id: "admin" as const, label: "Admins", count: adminCount },
+              { id: "member" as const, label: "Members", count: members.filter((m) => m.role === "member").length },
+              { id: "viewer" as const, label: "Viewers", count: members.filter((m) => m.role === "viewer").length },
             ].map((f) => (
               <button
                 key={f.id}
-                onClick={() => setRoleFilter(f.id as any)}
+                onClick={() => setRoleFilter(f.id)}
                 className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
                   roleFilter === f.id
                     ? "bg-purple-600 text-white shadow-sm"
