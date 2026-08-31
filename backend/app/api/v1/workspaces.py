@@ -67,7 +67,7 @@ async def list_public_workspaces(
     limit: int = 20,
     offset: int = 0,
 ):
-    """Discoverable public workspaces (excludes already joined)."""
+    """Discoverable public workspaces."""
     from sqlalchemy import func
 
     query = select(Workspace).where(Workspace.is_public == True)  # noqa: E712
@@ -79,17 +79,19 @@ async def list_public_workspaces(
     query = query.order_by(Workspace.created_at.desc()).limit(min(limit, 50)).offset(offset)
     result = await db.execute(query)
     all_public = list(result.scalars().all())
-    # exclude already member
-    member_ids = await db.execute(select(WorkspaceMember.workspace_id).where(WorkspaceMember.user_id == user.id))
-    joined = {wid for (wid,) in member_ids.all()}
-    filtered = [w for w in all_public if w.id not in joined]
+    
+    # get membership roles for this user
+    memberships = await db.execute(select(WorkspaceMember).where(WorkspaceMember.user_id == user.id))
+    roles_map = {m.workspace_id: m.role.value for m in memberships.scalars().all()}
+
     # add member counts
     out: list[WorkspaceOut] = []
-    for w in filtered:
+    for w in all_public:
         cnt = await db.execute(select(func.count(WorkspaceMember.user_id)).where(WorkspaceMember.workspace_id == w.id))
         wc = cnt.scalar() or 0
         wo = WorkspaceOut.model_validate(w)
         wo.member_count = wc
+        wo.role = roles_map.get(w.id)  # set role if already joined
         out.append(wo)
     return out
 

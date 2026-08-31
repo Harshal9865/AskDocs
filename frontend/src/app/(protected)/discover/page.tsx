@@ -188,7 +188,11 @@ export default function DiscoverPage() {
                       )}
                     </div>
                     <div className="flex shrink-0 flex-col items-end gap-1.5">
-                      {!isPending ? (
+                      {ws.role ? (
+                        <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+                          Joined ({ws.role})
+                        </span>
+                      ) : !isPending ? (
                         <>
                           <button
                             onClick={() => (isOpen ? void apply(ws.id) : setShowMsgFor(ws.id))}

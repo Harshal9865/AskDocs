@@ -75,7 +75,7 @@ export default function LoginPage() {
       <div className="relative z-10 flex w-full max-w-4xl flex-col overflow-hidden rounded-[2.5rem] bg-white shadow-2xl dark:bg-[#121214] lg:flex-row">
         
         {/* Left Panel: Form */}
-        <div className="flex flex-col justify-center p-10 sm:p-12 lg:w-[55%] lg:p-14">
+        <div className="flex flex-col justify-center p-8 sm:p-12 lg:w-[55%] lg:p-14">
           <h1 className="mb-10 text-center text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">
             Welcome back <span className="inline-block animate-wave origin-bottom-right">👋</span>
           </h1>
@@ -155,11 +155,11 @@ export default function LoginPage() {
           </form>
         </div>
 
-        {/* Right Panel: Graphic */}
-        <div className="hidden p-4 lg:block lg:w-[45%]">
+        {/* Right Panel: Graphic (Visible at the top on mobile, right on desktop) */}
+        <div className="w-full h-48 p-4 sm:h-64 lg:h-auto lg:w-[45%] order-first lg:order-last shrink-0">
           <div className="relative h-full w-full overflow-hidden rounded-[2rem]">
              {/* Subtle dark gradient overlay on bottom left */}
-             <div className="absolute inset-0 z-10 bg-gradient-to-tr from-[#121214]/40 via-transparent to-transparent" />
+             <div className="absolute inset-0 z-10 bg-gradient-to-t lg:bg-gradient-to-tr from-[#121214]/60 lg:from-[#121214]/40 via-transparent to-transparent" />
              
              {/* Dynamic terraces image based on theme */}
              <img 
