@@ -199,15 +199,19 @@ export default function RegisterPage() {
         {/* Right Panel: Graphic */}
         <div className="hidden p-4 lg:block lg:w-[45%]">
           <div className="relative h-full w-full overflow-hidden rounded-[2rem]">
-             {/* Vibrant purple gradient overlay to make any image look like the space suit / purply aesthetic */}
-             <div className="absolute inset-0 z-10 bg-[#7b39ed]/30 mix-blend-color" />
-             <div className="absolute inset-0 z-10 bg-gradient-to-tr from-[#121214]/80 via-transparent to-transparent" />
+             {/* Subtle dark gradient overlay on bottom left */}
+             <div className="absolute inset-0 z-10 bg-gradient-to-tr from-[#121214]/40 via-transparent to-transparent" />
              
-             {/* Beautiful nature/terraces image from Unsplash */}
+             {/* Dynamic terraces image based on theme */}
              <img 
-               src="https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?q=80&w=1500&auto=format&fit=crop" 
+               src="/login-day.jpg" 
                alt="Scenery" 
-               className="h-full w-full object-cover"
+               className="h-full w-full object-cover dark:hidden"
+             />
+             <img 
+               src="/login-night.jpg" 
+               alt="Scenery" 
+               className="hidden h-full w-full object-cover dark:block"
              />
           </div>
         </div>
