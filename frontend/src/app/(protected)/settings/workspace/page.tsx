@@ -14,6 +14,17 @@ export default function WorkspaceSettingsPage() {
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  const [isAdmin, setIsAdmin] = useState(false);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!workspace || !user) return;
+    api.listMembers(workspace.id).then((members) => {
+      const me = members.find((m) => m.user_id === user.id);
+      setIsAdmin(me?.role === "admin");
+    }).catch(() => {});
+  }, [workspace, user]);
+
   useEffect(() => {
     setName(workspace?.name ?? "");
     setIsPublic(workspace?.is_public ?? false);
@@ -28,17 +39,6 @@ export default function WorkspaceSettingsPage() {
   }
 
   const wsId = workspace?.id;
-
-  const [isAdmin, setIsAdmin] = useState(false);
-  const { user } = useAuth();
-
-  useEffect(() => {
-    if (!workspace || !user) return;
-    api.listMembers(workspace.id).then((members) => {
-      const me = members.find((m) => m.user_id === user.id);
-      setIsAdmin(me?.role === "admin");
-    }).catch(() => {});
-  }, [workspace, user]);
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
