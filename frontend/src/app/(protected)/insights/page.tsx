@@ -38,49 +38,6 @@ export default function InsightsPage() {
   }, [load]);
 
   if (!workspace) {
-    return <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500 shadow-sm">Select a workspace first.</div>;
-  }
-
-  if (loading) return <p className="text-sm text-slate-500">Crunching insights…</p>;
-  if (error || !data) {
-    return <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm font-medium text-red-700">{error ?? "Failed to load."}</div>;
-  }
-import { BookOpen, Target } from "lucide-react";
-import { api } from "@/lib/api";
-import { useWorkspace } from "@/lib/workspace-context";
-
-interface Insights {
-  total_documents: number;
-  ready_documents: number;
-  total_questions: number;
-  unanswered_count: number;
-  unanswered_questions: { question: string; asked_at: string }[];
-  top_cited_documents: { title: string; citations: number }[];
-}
-
-export default function InsightsPage() {
-  const { workspace } = useWorkspace();
-  const [data, setData] = useState<Insights | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    if (!workspace) return;
-    try {
-      setData(await api.insights(workspace.id));
-      setError(null);
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  }, [workspace]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  if (!workspace) {
     return <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500 shadow-sm dark:border-white/10 dark:bg-[#121212] dark:text-zinc-400">Select a workspace first.</div>;
   }
 
