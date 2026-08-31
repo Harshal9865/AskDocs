@@ -186,6 +186,22 @@ export default function Sidebar({
     };
   }, [user]);
 
+  // unread office chats badge — polling 10s
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
+  useEffect(() => {
+    if (!workspace) { setUnreadChatCount(0); return; }
+    let cancelled = false;
+    const fetchUnread = async () => {
+      try {
+        const chats = await api.listTeamChats(workspace.id);
+        if (!cancelled) setUnreadChatCount(chats.reduce((n, c) => n + (c.unread_count > 0 ? 1 : 0), 0));
+      } catch { /* ignore */ }
+    };
+    void fetchUnread();
+    const t = setInterval(() => void fetchUnread(), 10000);
+    return () => { cancelled = true; clearInterval(t); };
+  }, [workspace]);
+
   async function createWorkspace(e: React.FormEvent) {
     e.preventDefault();
     if (!newName.trim()) return;
@@ -347,9 +363,16 @@ export default function Sidebar({
         {NAV.map((item) => {
           const active = pathname === item.href || (item.href === "/friends" && pathname.startsWith("/friends")) || (item.href === "/documents" && pathname.startsWith("/documents"));
           const Icon = item.icon;
-          const count = item.href === "/documents" ? docCount : item.href === "/friends" ? (friendReqCount > 0 ? friendReqCount : null) : null;
+          const count = item.href === "/documents" ? docCount
+            : item.href === "/friends" ? (friendReqCount > 0 ? friendReqCount : null)
+            : item.href === "/chats" ? (unreadChatCount > 0 ? unreadChatCount : null)
+            : null;
           const showCount = !isCollapsed && count !== null && count > 0;
-          const showBadge = isCollapsed && (item.href === "/friends" && friendReqCount > 0 || item.href === "/documents" && docCount !== null && docCount > 0);
+          const showBadge = isCollapsed && (
+            (item.href === "/friends" && friendReqCount > 0) ||
+            (item.href === "/documents" && docCount !== null && docCount > 0) ||
+            (item.href === "/chats" && unreadChatCount > 0)
+          );
           return (
             <Link
               key={item.href}
@@ -364,7 +387,7 @@ export default function Sidebar({
                 <>
                   <span className="truncate">{item.label}</span>
                   {showCount && (
-                    <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-bold ${item.href === "/friends" ? "bg-red-500 text-white" : "bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-zinc-400"}`}>
+                    <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-bold ${item.href === "/friends" ? "bg-red-500 text-white" : item.href === "/chats" ? "bg-[#1DB954] text-black" : "bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-zinc-400"}`}>
                       {count}
                     </span>
                   )}
@@ -377,6 +400,9 @@ export default function Sidebar({
                   )}
                   {item.href === "/documents" && docCount !== null && docCount > 0 && (
                     <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-indigo-500 ring-2 ring-white dark:ring-black" />
+                  )}
+                  {item.href === "/chats" && unreadChatCount > 0 && (
+                    <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[#1DB954] ring-2 ring-white dark:ring-black" />
                   )}
                 </>
               )}

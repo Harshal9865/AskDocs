@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
@@ -172,25 +172,30 @@ export default function DocumentsPage() {
     return () => { cancelled = true; };
   }, [workspace, user, viewMode]);
 
-  // parallel upload
-  async function runUploadQueue(queue: UploadItem[]) {
-    if (!workspace) return;
+  // parallel upload — returns { done, failed } counts tracked live
+  async function runUploadQueue(queue: UploadItem[]): Promise<{ done: number; failed: number }> {
+    if (!workspace) return { done: 0, failed: queue.length };
     const wsId = workspace.id;
     let idx = 0;
+    let done = 0;
+    let failed = 0;
     async function next() {
       while (idx < queue.length) {
         const item = queue[idx++];
         setUploadQueue((q) => q.map((x) => x.id === item.id ? { ...x, status: "uploading" } : x));
         try {
           await api.uploadDocument(wsId, item.file);
+          done++;
           setUploadQueue((q) => q.map((x) => x.id === item.id ? { ...x, status: "done" } : x));
         } catch (err) {
+          failed++;
           setUploadQueue((q) => q.map((x) => x.id === item.id ? { ...x, status: "failed", error: (err as Error).message } : x));
         }
       }
     }
     await Promise.all(Array.from({ length: Math.min(CONCURRENCY, queue.length) }, () => next()));
     await load();
+    return { done, failed };
   }
 
   function handleFiles(fileList: FileList | null) {
@@ -202,9 +207,7 @@ export default function DocumentsPage() {
     }));
     setUploadQueue(items);
     setUploading(true);
-    void runUploadQueue(items).then(() => {
-      const done = items.filter((i) => i.status === "done").length;
-      const failed = items.filter((i) => i.status === "failed").length;
+    void runUploadQueue(items).then(({ done, failed }) => {
       if (failed === 0) {
         showToast("success", `${done} file${done > 1 ? "s" : ""} uploaded`);
       } else {

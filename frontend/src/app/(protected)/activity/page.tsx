@@ -23,7 +23,10 @@ export default function ActivityPage() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!workspace) return;
+    if (!workspace) {
+      setLoading(false);
+      return;
+    }
     try {
       setItems(await api.getActivity(workspace.id));
       setError(null);

@@ -515,16 +515,31 @@ async def approve_join_request(
     )
     req = result.scalar_one_or_none()
     if req is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Request not found")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Request not found or already processed")
     req.status = "approved"
     req.reviewed_by = membership.user_id
     from app.models.base import utcnow
 
     req.reviewed_at = utcnow()
-    # create membership as viewer by default
-    db.add(WorkspaceMember(workspace_id=membership.workspace_id, user_id=req.user_id, role=Role.member))
-    await log_activity(db, membership.workspace_id, membership.user_id, "member.joined", str(req.user_id))
-    await db.commit()
+
+    # Only add member if not already a member (guard against double-approve / race condition)
+    existing_member = await db.execute(
+        select(WorkspaceMember).where(
+            WorkspaceMember.workspace_id == membership.workspace_id,
+            WorkspaceMember.user_id == req.user_id,
+        )
+    )
+    if existing_member.scalar_one_or_none() is None:
+        db.add(WorkspaceMember(workspace_id=membership.workspace_id, user_id=req.user_id, role=Role.member))
+
+    try:
+        await db.flush()  # catch constraint errors before committing
+        await log_activity(db, membership.workspace_id, membership.user_id, "member.joined", str(req.user_id))
+        await db.commit()
+    except Exception:
+        await db.rollback()
+        raise HTTPException(status.HTTP_409_CONFLICT, "User is already a member of this workspace")
+
     await db.refresh(req)
     user = await db.get(User, req.user_id)
     return JoinRequestOut(

@@ -140,7 +140,8 @@ export default function ChatsPage() {
   useEffect(() => {
     setActiveChat(null); setMessages([]);
     void loadChats(); void loadColleagues();
-    const t = setInterval(() => void loadColleagues(), 30000);
+    // poll both chat list (for unread counts) and colleague presence
+    const t = setInterval(() => { void loadChats(); void loadColleagues(); }, 15000);
     return () => clearInterval(t);
   }, [loadChats, loadColleagues]);
 
@@ -560,9 +561,16 @@ export default function ChatsPage() {
                 ))}
               </ul>
             )}
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setShowNewGroup(false)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:text-zinc-300 dark:hover:bg-white/5">Cancel</button>
-              <button onClick={() => void createGroup()} disabled={!groupTitle.trim() || selectedIds.length < 2} className="rounded-lg bg-[#1DB954] px-4 py-2 text-sm font-semibold text-black hover:bg-[#1ed760] disabled:opacity-40">Create group</button>
+            <div className="flex flex-col gap-2">
+              {selectedIds.length < 2 && (
+                <p className="text-xs text-slate-400 dark:text-zinc-500 text-right">
+                  Select at least 2 members to create a group
+                </p>
+              )}
+              <div className="flex justify-end gap-2">
+                <button onClick={() => setShowNewGroup(false)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:text-zinc-300 dark:hover:bg-white/5">Cancel</button>
+                <button onClick={() => void createGroup()} disabled={!groupTitle.trim() || selectedIds.length < 2} className="rounded-lg bg-[#1DB954] px-4 py-2 text-sm font-semibold text-black hover:bg-[#1ed760] disabled:opacity-40">Create group</button>
+              </div>
             </div>
           </div>
         </div>
