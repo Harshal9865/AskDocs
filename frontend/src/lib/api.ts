@@ -381,6 +381,21 @@ export const api = {
       method: "POST",
       ...json({ current_password: currentPassword, new_password: newPassword }),
     }),
+  requestPasswordReset: (email: string) =>
+    request<void>("/auth/forgot-password", {
+      method: "POST",
+      ...json({ email }),
+    }),
+  verifyResetCode: (email: string, code: string) =>
+    request<void>("/auth/verify-reset-code", {
+      method: "POST",
+      ...json({ email, code }),
+    }),
+  resetPassword: (email: string, code: string, newPassword: string) =>
+    request<void>("/auth/reset-password", {
+      method: "POST",
+      ...json({ email, code, new_password: newPassword }),
+    }),
   deleteMe: () =>
     request<void>("/auth/me", { method: "DELETE" }),
   renameWorkspace: (wsId: string, name: string) =>

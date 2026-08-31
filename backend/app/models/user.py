@@ -35,3 +35,9 @@ class User(BaseModel):
     plan_reset_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True, default=None
     )
+
+    # Password reset
+    reset_code: Mapped[str | None] = mapped_column(String(6), nullable=True)
+    reset_code_expires: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, default=None
+    )

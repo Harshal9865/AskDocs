@@ -1,11 +1,12 @@
 from typing import Annotated
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
+import secrets
 
 from fastapi import APIRouter, Depends, File, HTTPException, status
 from fastapi import UploadFile
 from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from sqlalchemy import select
 
 from app.core.deps import CurrentUser, DbSession
@@ -394,6 +395,83 @@ async def change_password(payload: PasswordChange, db: DbSession, user: CurrentU
     if len(payload.new_password) < 8:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "New password must be at least 8 characters")
     user.password_hash = hash_password(payload.new_password)
+    await db.commit()
+
+
+# ---------- Password Reset ----------
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class VerifyResetCodeRequest(BaseModel):
+    email: EmailStr
+    code: str
+
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    code: str
+    new_password: str
+
+
+@router.post("/forgot-password", status_code=204)
+async def forgot_password(payload: ForgotPasswordRequest, db: DbSession):
+    """Send a password reset code to the user's email."""
+    result = await db.execute(select(User).where(User.email == payload.email))
+    user = result.scalar_one_or_none()
+    # Always return 204 to prevent email enumeration
+    if not user:
+        return
+
+    # Generate 6-digit code
+    code = f"{secrets.randbelow(1_000_000):06d}"
+    user.reset_code = code
+    user.reset_code_expires = datetime.utcnow() + timedelta(minutes=15)
+    await db.commit()
+
+    # TODO: Send email with code
+    # For now, log it (in production, use email service)
+    print(f"Password reset code for {payload.email}: {code}")
+
+
+@router.post("/verify-reset-code", status_code=204)
+async def verify_reset_code(payload: VerifyResetCodeRequest, db: DbSession):
+    """Verify the password reset code."""
+    result = await db.execute(select(User).where(User.email == payload.email))
+    user = result.scalar_one_or_none()
+    if not user or not user.reset_code or not user.reset_code_expires:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid or expired code")
+
+    if user.reset_code != payload.code:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid code")
+
+    if datetime.utcnow() > user.reset_code_expires:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Code has expired")
+
+    return
+
+
+@router.post("/reset-password", status_code=204)
+async def reset_password(payload: ResetPasswordRequest, db: DbSession):
+    """Reset the user's password using a valid code."""
+    result = await db.execute(select(User).where(User.email == payload.email))
+    user = result.scalar_one_or_none()
+    if not user or not user.reset_code or not user.reset_code_expires:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid or expired code")
+
+    if user.reset_code != payload.code:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid code")
+
+    if datetime.utcnow() > user.reset_code_expires:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Code has expired")
+
+    if len(payload.new_password) < 8:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "New password must be at least 8 characters")
+
+    user.password_hash = hash_password(payload.new_password)
+    user.reset_code = None
+    user.reset_code_expires = None
     await db.commit()
 
 
