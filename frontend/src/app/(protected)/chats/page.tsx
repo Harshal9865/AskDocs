@@ -125,7 +125,6 @@ export default function ChatsPage() {
   const [colleagues, setColleagues] = useState<Member[]>([]);
   const [activeChat, setActiveChat] = useState<TeamChat | null>(null);
   const [messages, setMessages] = useState<TeamMessage[]>([]);
-  const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [showNewGroup, setShowNewGroup] = useState(false);
   const [showNewChat, setShowNewChat] = useState(false);
@@ -272,7 +271,7 @@ export default function ChatsPage() {
   }
 
   function senderName(senderId: string) {
-    const p = activeChat?.participants.find((u) => (u.id || u.user_id) === senderId);
+    const p = activeChat?.participants.find((u) => u.user_id === senderId);
     return p?.name || p?.email || "Team member";
   }
 
