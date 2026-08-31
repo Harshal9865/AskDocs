@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, Compass, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, UsersRound, Pencil } from "lucide-react";
+import { ChevronDown, Compass, Home, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, UsersRound, Pencil } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -231,6 +231,14 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
 
       {/* right side */}
       <div className="flex items-center gap-1 sm:gap-2">
+        <Link
+          href="/"
+          title="Go to Homepage"
+          aria-label="Go to Homepage"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 transition-colors"
+        >
+          <Home className="h-5 w-5" />
+        </Link>
         <ThemeToggle dark={dark} onToggle={toggle} />
         <NotificationBell />
 

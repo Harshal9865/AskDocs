@@ -34,7 +34,8 @@ import {
   Settings,
   LogOut,
   Pencil,
-  ChevronDown
+  ChevronDown,
+  LayoutDashboard
 } from "lucide-react";
 
 function AuroraHeroMock() {
@@ -379,6 +380,15 @@ export default function Home() {
           </a>
         </nav>
         <div className="flex items-center gap-2">
+          {/* Dashboard quick button for smaller screens */}
+          <Link
+            href="/dashboard"
+            title="Go to Dashboard"
+            aria-label="Go to Dashboard"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 sm:hidden transition-colors"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+          </Link>
           <ThemeToggle dark={dark} onToggle={toggle} />
           {user ? (
             <Link

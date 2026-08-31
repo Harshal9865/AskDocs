@@ -14,11 +14,57 @@ import {
   CheckCheck,
   EyeOff,
   MessagesSquare,
+  Palette,
   Search,
   Trash2,
   UsersRound,
 } from "lucide-react";
 import type { Member, TeamChat, TeamMessage, ChatAttachment } from "@/lib/types";
+
+const WALLPAPERS = [
+  {
+    id: "whatsapp-doodle",
+    name: "WhatsApp Classic",
+    icon: "💬",
+    style: {
+      backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%236366f1' fill-opacity='0.05' fill-rule='evenodd'%3E%3Cpath d='M11 14.01V7a1 1 0 0 1 2 0v7.01A3.001 3.001 0 0 1 15 17a3 3 0 1 1-6 0c0-1.4.96-2.57 2.27-2.93L11 14zM4.41 23.9a2 2 0 1 1 2.83 2.83l-4.24 4.24a2 2 0 0 1-2.83-2.83l4.24-4.24zm34.25-3.32a2 2 0 1 1 2.83 2.83l-4.24 4.24a2 2 0 0 1-2.83-2.83l4.24-4.24zM51 14.01V7a1 1 0 0 1 2 0v7.01A3.001 3.001 0 0 1 55 17a3 3 0 1 1-6 0c0-1.4.96-2.57 2.27-2.93L51 14zM64.41 23.9a2 2 0 1 1 2.83 2.83l-4.24 4.24a2 2 0 0 1-2.83-2.83l4.24-4.24zM30 40a10 10 0 1 1-20 0 10 10 0 0 1 20 0zm40 0a10 10 0 1 1-20 0 10 10 0 0 1 20 0zM17 65a4 4 0 1 1-8 0 4 4 0 0 1 8 0zm40 0a4 4 0 1 1-8 0 4 4 0 0 1 8 0z'/%3E%3C/g%3E%3C/svg%3E")`,
+      backgroundSize: '160px 160px',
+    },
+  },
+  {
+    id: "instagram-aurora",
+    name: "Instagram Aurora",
+    icon: "🔮",
+    style: {
+      backgroundImage: `radial-gradient(at 15% 15%, rgba(168, 85, 247, 0.12) 0px, transparent 50%), radial-gradient(at 85% 85%, rgba(236, 72, 153, 0.12) 0px, transparent 50%), radial-gradient(at 50% 50%, rgba(99, 102, 241, 0.08) 0px, transparent 50%)`,
+      backgroundSize: '100% 100%',
+    },
+  },
+  {
+    id: "midnight-velvet",
+    name: "Midnight Velvet",
+    icon: "🌌",
+    style: {
+      backgroundImage: `radial-gradient(circle, rgba(99, 102, 241, 0.1) 1px, transparent 1px)`,
+      backgroundSize: '24px 24px',
+    },
+  },
+  {
+    id: "whatsapp-emerald",
+    name: "Emerald Glow",
+    icon: "🌿",
+    style: {
+      backgroundImage: `radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.1) 0px, transparent 40%), radial-gradient(at 100% 100%, rgba(5, 150, 105, 0.1) 0px, transparent 40%)`,
+      backgroundSize: '100% 100%',
+    },
+  },
+  {
+    id: "clean-minimal",
+    name: "Clean Minimal",
+    icon: "⚪",
+    style: {},
+  },
+];
 
 type ChipFilter = "all" | "direct" | "group" | "unread";
 
@@ -120,6 +166,19 @@ export default function ChatsPage() {
 
   const [displayCount, setDisplayCount] = useState(40);
   const [loadingOlder, setLoadingOlder] = useState(false);
+  const [wallpaper, setWallpaper] = useState<string>("whatsapp-doodle");
+  const [showWallpaperMenu, setShowWallpaperMenu] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("askdocs_chat_wallpaper");
+    if (saved) setWallpaper(saved);
+  }, []);
+
+  const selectWallpaper = (wpId: string) => {
+    setWallpaper(wpId);
+    localStorage.setItem("askdocs_chat_wallpaper", wpId);
+    setShowWallpaperMenu(false);
+  };
 
   const loadChats = useCallback(async () => {
     try { 
@@ -505,16 +564,56 @@ export default function ChatsPage() {
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-1">
+                {/* Wallpaper Customizer */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowWallpaperMenu((v) => !v)}
+                    title="Change chat wallpaper"
+                    aria-label="Change chat wallpaper"
+                    className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-purple-600 dark:hover:bg-white/10 dark:hover:text-purple-400 transition-colors"
+                  >
+                    <Palette className="h-4 w-4" />
+                  </button>
+                  {showWallpaperMenu && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setShowWallpaperMenu(false)} />
+                      <div className="absolute right-0 top-full z-50 mt-1.5 w-48 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-white/10 dark:bg-[#202020]">
+                        <div className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+                          Chat Wallpaper
+                        </div>
+                        {WALLPAPERS.map((wp) => (
+                          <button
+                            key={wp.id}
+                            onClick={() => selectWallpaper(wp.id)}
+                            className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                              wallpaper === wp.id
+                                ? "bg-purple-50 font-bold text-purple-700 dark:bg-purple-950/60 dark:text-purple-300"
+                                : "text-slate-700 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/5"
+                            }`}
+                          >
+                            <span className="flex items-center gap-2">
+                              <span>{wp.icon}</span>
+                              <span>{wp.name}</span>
+                            </span>
+                            {wallpaper === wp.id && <Check className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+
                 <button onClick={() => void hideChat(activeChat.id)} title="Hide chat" className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-white/10 transition-colors"><EyeOff className="h-4 w-4" /></button>
                 <button onClick={() => void deleteChat(activeChat.id)} title="Delete for you" className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 transition-colors"><Trash2 className="h-4 w-4" /></button>
               </div>
             </div>
 
-            {/* Messages with upward infinite scroll */}
+            {/* Messages with upward infinite scroll & custom wallpaper */}
             <div
               ref={scrollRef}
               onScroll={handleScroll}
-              className="scroll-touch wa-thread relative z-10 flex-1 min-h-0 space-y-2 overflow-y-auto px-3 py-4 sm:px-6"
+              style={WALLPAPERS.find((w) => w.id === wallpaper)?.style}
+              className="scroll-touch wa-thread relative z-10 flex-1 min-h-0 space-y-2 overflow-y-auto px-3 py-4 sm:px-6 transition-all duration-300"
             >
               {hasMoreMessages && (
                 <div className="flex justify-center py-2">
