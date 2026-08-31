@@ -44,9 +44,10 @@ export default function RegisterPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError("Invalid email format");
+    const emailClean = email.trim().toLowerCase();
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(emailClean)) {
+      setError("Please enter a valid, real email address (e.g. name@domain.com)");
       return;
     }
     const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -75,7 +76,7 @@ export default function RegisterPage() {
   if (loading || user) return null;
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-4 py-12 dark:bg-[#0B0B0F] sm:px-6 lg:px-8">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-3 py-6 sm:px-6 lg:px-8 dark:bg-[#0B0B0F]">
       {/* Background Wavy Patterns */}
       <div 
         className="pointer-events-none absolute inset-0 opacity-40 mix-blend-multiply dark:opacity-10 dark:mix-blend-screen"
@@ -95,26 +96,26 @@ export default function RegisterPage() {
       />
 
       {/* Main Card */}
-      <div className="relative z-10 flex w-full max-w-4xl flex-col overflow-hidden rounded-[2.5rem] bg-white shadow-2xl dark:bg-[#121214] lg:flex-row">
+      <div className="relative z-10 flex w-full max-w-sm sm:max-w-md lg:max-w-4xl flex-col overflow-hidden rounded-3xl sm:rounded-[2.5rem] bg-white/95 shadow-2xl border border-slate-200/80 dark:border-white/10 dark:bg-[#121214]/95 backdrop-blur-xl lg:flex-row">
         
         {/* Left Panel: Form */}
-        <div className="flex flex-col justify-center p-8 sm:p-12 lg:w-[55%] lg:p-14">
-          <h1 className="mb-8 text-center text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">
+        <div className="flex flex-col justify-center p-6 sm:p-10 lg:w-[55%] lg:p-12">
+          <h1 className="mb-6 sm:mb-8 text-center text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
             Create Account <span className="inline-block animate-wave origin-bottom-right">✨</span>
           </h1>
           
-          <form onSubmit={onSubmit} className="mx-auto w-full max-w-sm space-y-4">
+          <form onSubmit={onSubmit} className="mx-auto w-full max-w-sm space-y-3.5 sm:space-y-4">
             
             {/* Name Input */}
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                <User className="h-5 w-5 text-slate-400 dark:text-zinc-500" />
+                <User className="h-4.5 w-4.5 text-slate-400 dark:text-zinc-500" />
               </div>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="block w-full rounded-full border border-slate-300 bg-transparent py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-800 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                className="block w-full rounded-full border border-slate-300 bg-transparent py-2.5 sm:py-3 pl-11 pr-4 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-800 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:ring-purple-500 transition-all"
                 placeholder="Full Name"
                 required
               />
@@ -123,14 +124,14 @@ export default function RegisterPage() {
             {/* Email Input */}
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                <Mail className="h-5 w-5 text-slate-400 dark:text-zinc-500" />
+                <Mail className="h-4.5 w-4.5 text-slate-400 dark:text-zinc-500" />
               </div>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="block w-full rounded-full border border-slate-300 bg-transparent py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-800 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:ring-purple-500"
-                placeholder="Email"
+                className="block w-full rounded-full border border-slate-300 bg-transparent py-2.5 sm:py-3 pl-11 pr-4 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-800 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:ring-purple-500 transition-all"
+                placeholder="Email address"
                 required
               />
             </div>
@@ -138,13 +139,13 @@ export default function RegisterPage() {
             {/* Password Input */}
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                <Lock className="h-5 w-5 text-slate-400 dark:text-zinc-500" />
+                <Lock className="h-4.5 w-4.5 text-slate-400 dark:text-zinc-500" />
               </div>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="block w-full rounded-full border border-slate-300 bg-transparent py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-800 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                className="block w-full rounded-full border border-slate-300 bg-transparent py-2.5 sm:py-3 pl-11 pr-4 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-800 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:ring-purple-500 transition-all"
                 placeholder="Password"
                 required
               />
@@ -153,20 +154,20 @@ export default function RegisterPage() {
             {/* Confirm Password Input */}
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                <Lock className="h-5 w-5 text-slate-400 dark:text-zinc-500" />
+                <Lock className="h-4.5 w-4.5 text-slate-400 dark:text-zinc-500" />
               </div>
               <input
                 type="password"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
-                className="block w-full rounded-full border border-slate-300 bg-transparent py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-800 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                className="block w-full rounded-full border border-slate-300 bg-transparent py-2.5 sm:py-3 pl-11 pr-4 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-800 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:ring-purple-500 transition-all"
                 placeholder="Confirm Password"
                 required
               />
             </div>
 
             {error && (
-              <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-xs font-medium text-red-600 dark:border-red-900/30 dark:bg-red-900/20 dark:text-red-400">
+              <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-2.5 text-center text-xs font-medium text-red-600 dark:border-red-900/30 dark:bg-red-900/20 dark:text-red-400">
                 {error}
               </p>
             )}
@@ -174,19 +175,19 @@ export default function RegisterPage() {
             <button 
               type="submit" 
               disabled={busy} 
-              className="mt-4 flex w-full items-center justify-center rounded-full bg-purple-600 py-4 text-sm font-bold tracking-wide text-white transition-colors hover:bg-purple-700 disabled:opacity-70 dark:bg-[#7b39ed] dark:hover:bg-[#6d32d3]"
+              className="mt-2 sm:mt-3 flex w-full items-center justify-center rounded-full bg-purple-600 py-3 sm:py-3.5 text-sm font-bold tracking-wide text-white transition-all hover:bg-purple-700 active:scale-[0.99] disabled:opacity-70 dark:bg-[#7b39ed] dark:hover:bg-[#6d32d3] shadow-md shadow-purple-600/20"
             >
               {busy ? "Creating Account..." : "Sign Up"}
-              {!busy && <ChevronRight className="ml-2 h-4 w-4" />}
+              {!busy && <ChevronRight className="ml-1.5 h-4 w-4" />}
             </button>
 
             <button 
               type="button" 
               onClick={() => googleLoginAction()} 
               disabled={busy}
-              className="flex w-full items-center justify-center rounded-full border border-slate-300 bg-transparent py-3 text-sm font-bold tracking-wide text-slate-700 transition-colors hover:bg-slate-50 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-white/5"
+              className="flex w-full items-center justify-center rounded-full border border-slate-300 dark:border-zinc-800 bg-white/50 dark:bg-white/[0.02] py-2.5 sm:py-3 text-sm font-bold tracking-wide text-slate-700 dark:text-zinc-200 transition-all hover:bg-slate-50 dark:hover:bg-white/5 active:scale-[0.99]"
             >
-              <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
+              <svg className="mr-2.5 h-4.5 w-4.5" viewBox="0 0 24 24">
                 <path d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.81002 8.87028 4.75 12.0003 4.75Z" fill="#EA4335"/>
                 <path d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z" fill="#4285F4"/>
                 <path d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z" fill="#FBBC05"/>
@@ -195,9 +196,9 @@ export default function RegisterPage() {
               Sign up with Google
             </button>
 
-            <p className="mt-8 text-center text-xs text-slate-500 dark:text-zinc-500">
+            <p className="mt-6 text-center text-xs text-slate-500 dark:text-zinc-500">
               Already registered?{" "}
-              <Link href="/login" className="font-semibold text-slate-900 hover:text-purple-600 dark:text-white dark:hover:text-purple-400">
+              <Link href="/login" className="font-semibold text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300">
                 Log In
               </Link>
             </p>
@@ -205,8 +206,8 @@ export default function RegisterPage() {
         </div>
 
         {/* Right Panel: Graphic (Visible at the top on mobile, right on desktop) */}
-        <div className="w-full h-48 p-4 sm:h-64 lg:h-auto lg:w-[45%] order-first lg:order-last shrink-0">
-          <div className="relative h-full w-full overflow-hidden rounded-[2rem]">
+        <div className="w-full h-36 sm:h-48 lg:h-auto lg:w-[45%] order-first lg:order-last shrink-0 p-3 sm:p-4">
+          <div className="relative h-full w-full overflow-hidden rounded-2xl sm:rounded-[2rem]">
              {/* Subtle dark gradient overlay on bottom left */}
              <div className="absolute inset-0 z-10 bg-gradient-to-t lg:bg-gradient-to-tr from-[#121214]/60 lg:from-[#121214]/40 via-transparent to-transparent" />
              

@@ -70,6 +70,7 @@ export default function EditProfileModal({
   const open = controlledOpen ?? internalOpen;
   const setOpen = controlledOnChange ?? setInternalOpen;
 
+  const [name, setName] = useState("");
   const [bio, setBio] = useState("");
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState("");
@@ -82,6 +83,7 @@ export default function EditProfileModal({
 
   useEffect(() => {
     if (open && user) {
+      setName(user.name || "");
       setBio(user.bio || "");
       setPhone(user.phone || "");
       setStatus(user.status || "");
@@ -94,13 +96,17 @@ export default function EditProfileModal({
   }, [open, user]);
 
   async function handleSave() {
-    // Validation
-    if (phone && !/^\+?[0-9\s\-()]{7,20}$/.test(phone)) {
+    if (!name.trim()) {
+      setMsg("Full name is required.");
+      return;
+    }
+    // Phone validation
+    if (phone.trim() && !/^\+?[0-9\s\-()]{7,20}$/.test(phone.trim())) {
       setMsg("Invalid input: Phone number contains invalid characters.");
       return;
     }
-    // simple heuristic to block keyboard mashing with special characters in job titles
-    if (jobTitle && /[^a-zA-Z0-9\s\-,.&/]/.test(jobTitle)) {
+    // Job title validation
+    if (jobTitle.trim() && /[^a-zA-Z0-9\s\-,.&/]/.test(jobTitle.trim())) {
       setMsg("Invalid input: Job title contains invalid special characters.");
       return;
     }
@@ -109,16 +115,17 @@ export default function EditProfileModal({
     setMsg(null);
     try {
       await api.updateMe({
-        bio: bio || null,
-        phone: phone || null,
-        status: status || null,
-        location: location || null,
-        pronouns: pronouns || null,
-        job_title: jobTitle || null,
-        job_role: jobRole || null,
+        name: name.trim(),
+        bio: bio.trim() || null,
+        phone: phone.trim() || null,
+        status: status.trim() || null,
+        location: location.trim() || null,
+        pronouns: pronouns.trim() || null,
+        job_title: jobTitle.trim() || null,
+        job_role: jobRole.trim() || null,
       });
       await refreshUser();
-      setMsg("Profile updated!");
+      setMsg("Profile updated successfully!");
       setTimeout(() => setOpen(false), 800);
     } catch (err) {
       setMsg((err as Error).message);
@@ -142,54 +149,70 @@ export default function EditProfileModal({
       )}
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Edit profile</DialogTitle>
+          <DialogTitle>Edit Profile</DialogTitle>
           <DialogDescription>
-            Update your profile details visible to your team.
+            Update your profile details visible to your team. Only your name is required.
           </DialogDescription>
         </DialogHeader>
 
-        <form id="profile-form" onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="max-h-[60vh] space-y-4 overflow-y-auto px-1 py-1 -mx-1">
+        <form id="profile-form" onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="max-h-[62vh] space-y-4 overflow-y-auto px-1 py-1 -mx-1">
+          {/* Name */}
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">
-              Status
+            <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-zinc-300">
+              Full Name <span className="text-purple-600">*</span>
+            </label>
+            <input
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your Name"
+              maxLength={80}
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all"
+            />
+          </div>
+
+          {/* Status */}
+          <div>
+            <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-zinc-400">
+              Status <span className="text-[10px] text-slate-400 dark:text-zinc-500">(optional)</span>
             </label>
             <input
               value={status}
               onChange={(e) => setStatus(e.target.value)}
               placeholder="Hey there! I'm on AskDocs"
               maxLength={120}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#181818] dark:text-white dark:focus:border-[#1DB954] dark:focus:ring-[#1DB954]/20"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all"
             />
           </div>
 
+          {/* Bio */}
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">
-              Bio <span className="text-red-500">*</span>
+            <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-zinc-400">
+              Bio <span className="text-[10px] text-slate-400 dark:text-zinc-500">(optional)</span>
             </label>
             <textarea
-              required
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              placeholder="Tell your team about yourself"
+              placeholder="Tell your team a little about yourself"
               maxLength={500}
               rows={3}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#181818] dark:text-white dark:focus:border-[#1DB954] dark:focus:ring-[#1DB954]/20"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all"
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {/* Job Title & Role */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">
-                Job Title <span className="text-red-500">*</span>
+              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-zinc-400">
+                Job Title <span className="text-[10px] text-slate-400 dark:text-zinc-500">(optional)</span>
               </label>
               <input
-                required
                 list="edit-job-titles"
                 value={jobTitle}
                 onChange={(e) => setJobTitle(e.target.value)}
                 placeholder="e.g. Senior Engineer"
                 maxLength={120}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#181818] dark:text-white dark:focus:border-[#1DB954] dark:focus:ring-[#1DB954]/20"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all"
               />
               <datalist id="edit-job-titles">
                 {JOB_TITLES.map((t) => (
@@ -198,8 +221,8 @@ export default function EditProfileModal({
               </datalist>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">
-                Job Role / Domain
+              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-zinc-400">
+                Department / Role <span className="text-[10px] text-slate-400 dark:text-zinc-500">(optional)</span>
               </label>
               <input
                 list="edit-job-roles"
@@ -207,7 +230,7 @@ export default function EditProfileModal({
                 onChange={(e) => setJobRole(e.target.value)}
                 placeholder="e.g. Engineering"
                 maxLength={120}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#181818] dark:text-white dark:focus:border-[#1DB954] dark:focus:ring-[#1DB954]/20"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all"
               />
               <datalist id="edit-job-roles">
                 {JOB_ROLES.map((r) => (
@@ -217,22 +240,23 @@ export default function EditProfileModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {/* Phone & Pronouns */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">
-                Phone
+              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-zinc-400">
+                Phone <span className="text-[10px] text-slate-400 dark:text-zinc-500">(optional)</span>
               </label>
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+1 555 123 4567"
                 maxLength={32}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#181818] dark:text-white dark:focus:border-[#1DB954] dark:focus:ring-[#1DB954]/20"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">
-                Pronouns
+              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-zinc-400">
+                Pronouns <span className="text-[10px] text-slate-400 dark:text-zinc-500">(optional)</span>
               </label>
               <input
                 list="edit-pronouns"
@@ -240,7 +264,7 @@ export default function EditProfileModal({
                 onChange={(e) => setPronouns(e.target.value)}
                 placeholder="he/him, she/her, they/them"
                 maxLength={50}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#181818] dark:text-white dark:focus:border-[#1DB954] dark:focus:ring-[#1DB954]/20"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all"
               />
               <datalist id="edit-pronouns">
                 {PRONOUNS.map((p) => (
@@ -250,18 +274,18 @@ export default function EditProfileModal({
             </div>
           </div>
 
+          {/* Location */}
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">
-              Location
+            <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-zinc-400">
+              Location <span className="text-[10px] text-slate-400 dark:text-zinc-500">(optional)</span>
             </label>
             <input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="San Francisco, CA"
               maxLength={120}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#181818] dark:text-white dark:focus:border-[#1DB954] dark:focus:ring-[#1DB954]/20"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all"
             />
-          </div>
         </form>
 
         {msg && (

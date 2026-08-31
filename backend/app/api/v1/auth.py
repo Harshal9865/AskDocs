@@ -33,13 +33,20 @@ def _token_pair(user: User) -> TokenPair:
 
 @router.post("/register", response_model=UserOut, status_code=201)
 async def register(payload: UserCreate, db: DbSession):
-    existing = await db.execute(select(User).where(User.email == payload.email))
+    clean_email = payload.email.strip().lower()
+    clean_name = payload.name.strip()
+    if not clean_name:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Full name is required")
+    if len(payload.password) < 8:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Password must be at least 8 characters")
+
+    existing = await db.execute(select(User).where(User.email == clean_email))
     if existing.scalar_one_or_none():
         raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
     user = User(
-        email=payload.email,
+        email=clean_email,
         password_hash=hash_password(payload.password),
-        name=payload.name,
+        name=clean_name,
     )
     db.add(user)
     await db.commit()
@@ -333,10 +340,9 @@ async def update_me(payload: SchemaProfileUpdate, db: DbSession, user: CurrentUs
     if payload.bio is not None:
         user.bio = payload.bio.strip()[:500] or None
     if payload.phone is not None:
-        # basic phone validation: allow +, digits, spaces, dashes, parentheses
         phone = payload.phone.strip()[:32]
         if phone and not phone.replace(" ", "").replace("-", "").replace("(", "").replace(")", "").replace("+", "").isdigit():
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Invalid phone number")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Invalid phone number format")
         user.phone = phone or None
     if payload.status is not None:
         user.status = payload.status.strip()[:120] or None
@@ -345,15 +351,9 @@ async def update_me(payload: SchemaProfileUpdate, db: DbSession, user: CurrentUs
     if payload.pronouns is not None:
         user.pronouns = payload.pronouns.strip()[:50] or None
     if payload.job_title is not None:
-        jt = payload.job_title.strip()[:120]
-        if jt and jt.lower() in ("", "none", "null"):
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Job title cannot be empty — use “Prefer not to say”")
-        user.job_title = jt or None
+        user.job_title = payload.job_title.strip()[:120] or None
     if payload.job_role is not None:
-        jr = payload.job_role.strip()[:120]
-        if jr and jr.lower() in ("", "none", "null"):
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Job role cannot be empty — use “Prefer not to say”")
-        user.job_role = jr or None
+        user.job_role = payload.job_role.strip()[:120] or None
     await db.commit()
     await db.refresh(user)
     return user

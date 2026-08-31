@@ -2,16 +2,17 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
+import { X, UserPlus, Building, Bell } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
 import { useAuth } from "@/lib/auth-context";
-import type { Invitation, JoinRequest } from "@/lib/types";
+import type { Invitation, JoinRequest, Member } from "@/lib/types";
 
 export default function NotificationBell() {
   const { workspace, refresh } = useWorkspace();
   const [invites, setInvites] = useState<Invitation[]>([]);
   const [joinReqs, setJoinReqs] = useState<JoinRequest[]>([]);
+  const [friendReqs, setFriendReqs] = useState<Member[]>([]);
   const [open, setOpen] = useState(false);
   const [previews, setPreviews] = useState<Record<string, { workspace_name: string; inviter_email: string; role: string }>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -35,12 +36,15 @@ export default function NotificationBell() {
 
   const load = useCallback(async () => {
     try {
-      const [list, reqs] = await Promise.all([
+      const [list, reqs, fReqs] = await Promise.all([
         api.myInvitations().catch(() => []),
         isAdmin && workspace ? api.listJoinRequests(workspace.id).catch(() => []) : Promise.resolve([]),
+        api.listFriendRequests().catch(() => []),
       ]);
       setInvites(list);
       setJoinReqs(reqs.filter((r: JoinRequest) => r.status === "pending"));
+      setFriendReqs(fReqs || []);
+
       for (const inv of list) {
         if (!previewsRef.current[inv.id]) {
           try {
@@ -58,13 +62,13 @@ export default function NotificationBell() {
 
   useEffect(() => {
     void load();
-    pollRef.current = setInterval(() => void load(), 10000);
+    pollRef.current = setInterval(() => void load(), 8000);
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
   }, [load]);
 
-  async function respond(inv: Invitation, accept: boolean) {
+  async function respondInvite(inv: Invitation, accept: boolean) {
     setBusyId(inv.id);
     try {
       if (accept) {
@@ -83,21 +87,35 @@ export default function NotificationBell() {
     }
   }
 
-  const totalNotifs = invites.length + joinReqs.length;
+  async function respondFriend(f: Member, accept: boolean) {
+    setBusyId(f.id);
+    try {
+      if (accept) {
+        await api.acceptFriend(f.id);
+      } else {
+        await api.declineFriend(f.id);
+      }
+      setFriendReqs((prev) => prev.filter((item) => item.id !== f.id));
+    } catch (err) {
+      alert((err as Error).message);
+      await load();
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  const totalNotifs = invites.length + joinReqs.length + friendReqs.length;
 
   return (
     <div className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label={`Notifications${totalNotifs ? `, ${totalNotifs} pending notifications` : ""}`}
-        className="relative rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+        className="relative rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white transition-colors"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-        </svg>
+        <Bell className="h-5 w-5" />
         {totalNotifs > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+          <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-[#0B0B0F]">
             {totalNotifs > 9 ? "9+" : totalNotifs}
           </span>
         )}
@@ -108,82 +126,145 @@ export default function NotificationBell() {
           {/* backdrop */}
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} aria-hidden />
 
-          {/* dropdown — mobile/tablet: fixed sheet below navbar, always in viewport.
-              desktop (sm+): normal anchored dropdown at the bell, 320px. */}
+          {/* dropdown */}
           <div
             role="dialog"
-            aria-label="Invitations"
+            aria-label="Notifications"
             className="
               fixed inset-x-2 top-[4.25rem] z-50
-              rounded-xl border border-slate-200 bg-white shadow-2xl
-              sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-80 sm:shadow-xl
+              rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#121214]
+              sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-88 sm:shadow-2xl
+              overflow-hidden
             "
           >
-            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-              <span className="text-sm font-semibold text-slate-900">Invitations</span>
+            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02]">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-slate-900 dark:text-white">Notifications</span>
+                {totalNotifs > 0 && (
+                  <span className="rounded-full bg-purple-100 dark:bg-purple-950/60 px-2 py-0.5 text-[10px] font-bold text-purple-600 dark:text-purple-400">
+                    {totalNotifs}
+                  </span>
+                )}
+              </div>
               <button
                 onClick={() => setOpen(false)}
                 aria-label="Close"
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 sm:hidden"
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-zinc-200 sm:hidden"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
             {totalNotifs === 0 ? (
-              <p className="px-4 py-6 text-center text-sm text-slate-400">
-                No pending notifications.
-              </p>
+              <div className="flex flex-col items-center justify-center px-4 py-8 text-center">
+                <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-zinc-500">
+                  <Bell className="h-5 w-5" />
+                </div>
+                <p className="text-sm font-medium text-slate-600 dark:text-zinc-400">All caught up!</p>
+                <p className="text-xs text-slate-400 dark:text-zinc-500">No pending notifications right now.</p>
+              </div>
             ) : (
-              <ul className="max-h-[60vh] overflow-y-auto p-2 sm:max-h-80">
+              <ul className="max-h-[65vh] overflow-y-auto p-2 space-y-1.5 sm:max-h-84 divide-y divide-slate-100/50 dark:divide-white/[0.04]">
+                {/* Friend Requests */}
+                {friendReqs.map((f) => (
+                  <li key={f.id} className="rounded-xl p-3 transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.04] bg-transparent">
+                    <div className="flex items-start gap-2.5">
+                      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-pink-100 dark:bg-pink-950/50 text-pink-600 dark:text-pink-400">
+                        <UserPlus className="h-3.5 w-3.5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">
+                          {f.name || f.email}
+                        </p>
+                        <p className="mb-2.5 text-[11px] text-slate-500 dark:text-zinc-400 truncate">
+                          Sent you a friend request
+                        </p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => void respondFriend(f, true)}
+                            disabled={busyId === f.id}
+                            className="rounded-lg bg-purple-600 px-3 py-1 text-xs font-semibold text-white hover:bg-purple-700 disabled:opacity-50 transition-colors shadow-sm"
+                          >
+                            Accept
+                          </button>
+                          <button
+                            onClick={() => void respondFriend(f, false)}
+                            disabled={busyId === f.id}
+                            className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-1 text-xs font-medium text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-white/10 disabled:opacity-50 transition-colors"
+                          >
+                            Decline
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+
+                {/* Workspace Invitations */}
                 {invites.map((inv) => {
                   const p = previews[inv.id];
                   return (
-                    <li key={inv.id} className="rounded-lg p-3 hover:bg-slate-50">
-                      <p className="text-sm font-medium text-slate-900">
-                        {p?.workspace_name ?? "Workspace"}
-                      </p>
-                      <p className="mb-2 text-xs text-slate-500">
-                        {p ? `${p.inviter_email} invited you as ${p.role}` : "Loading…"}
-                      </p>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => void respond(inv, true)}
-                          disabled={busyId === inv.id}
-                          className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
-                        >
-                          Accept
-                        </button>
-                        <button
-                          onClick={() => void respond(inv, false)}
-                          disabled={busyId === inv.id}
-                          className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 disabled:opacity-50"
-                        >
-                          Decline
-                        </button>
+                    <li key={inv.id} className="rounded-xl p-3 transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.04] bg-transparent">
+                      <div className="flex items-start gap-2.5">
+                        <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400">
+                          <Building className="h-3.5 w-3.5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">
+                            {p?.workspace_name ?? "Workspace Invitation"}
+                          </p>
+                          <p className="mb-2.5 text-[11px] text-slate-500 dark:text-zinc-400">
+                            {p ? `${p.inviter_email} invited you as ${p.role}` : "Loading invite details…"}
+                          </p>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => void respondInvite(inv, true)}
+                              disabled={busyId === inv.id}
+                              className="rounded-lg bg-purple-600 px-3 py-1 text-xs font-semibold text-white hover:bg-purple-700 disabled:opacity-50 transition-colors shadow-sm"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              onClick={() => void respondInvite(inv, false)}
+                              disabled={busyId === inv.id}
+                              className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-1 text-xs font-medium text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-white/10 disabled:opacity-50 transition-colors"
+                            >
+                              Decline
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </li>
                   );
                 })}
+
+                {/* Workspace Join Requests */}
                 {joinReqs.map((req) => (
-                  <li key={req.id} className="rounded-lg p-3 hover:bg-slate-50">
-                    <p className="text-sm font-medium text-slate-900">
-                      {req.user_name || req.user_email} wants to join
-                    </p>
-                    <p className="mb-2 text-xs text-slate-500">
-                      {req.user_email}
-                      {req.message && ` — "${req.message}"`}
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setOpen(false);
-                          router.push("/members");
-                        }}
-                        className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
-                      >
-                        Review in Members
-                      </button>
+                  <li key={req.id} className="rounded-xl p-3 transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.04] bg-transparent">
+                    <div className="flex items-start gap-2.5">
+                      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400">
+                        <UserPlus className="h-3.5 w-3.5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">
+                          {req.user_name || req.user_email} wants to join
+                        </p>
+                        <p className="mb-2.5 text-[11px] text-slate-500 dark:text-zinc-400 truncate">
+                          {req.user_email}
+                          {req.message && ` — "${req.message}"`}
+                        </p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              setOpen(false);
+                              router.push("/members");
+                            }}
+                            className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-1 text-xs font-medium text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+                          >
+                            Review in Members
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </li>
                 ))}
