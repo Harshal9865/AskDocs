@@ -59,7 +59,7 @@ async def login(
 
 
 class GoogleLoginRequest(BaseModel):
-    access_token: str
+    id_token: str
 
 @router.post("/google", response_model=TokenPair)
 async def google_login(payload: GoogleLoginRequest, db: DbSession):
@@ -73,7 +73,7 @@ async def google_login(payload: GoogleLoginRequest, db: DbSession):
         # Use Google's official library to verify the ID token
         # This is more reliable than making HTTP calls ourselves
         idinfo = id_token.verify_oauth2_token(
-            payload.access_token,
+            payload.id_token,
             google_requests.Request(),
             audience=None  # We accept any audience
         )

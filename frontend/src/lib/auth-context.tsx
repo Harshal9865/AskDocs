@@ -19,7 +19,7 @@ interface AuthState {
   /** object URL of the uploaded profile photo (when avatar_kind === "upload") */
   avatarSrc: string | null;
   login: (email: string, password: string) => Promise<void>;
-  googleLogin: (accessToken: string) => Promise<void>;
+  googleLogin: (idToken: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
   /** update local user + re-resolve avatar after changes */
@@ -90,8 +90,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const googleLogin = useCallback(
-    async (accessToken: string) => {
-      await api.googleLogin(accessToken);
+    async (idToken: string) => {
+      await api.googleLogin(idToken);
       await applyUser(await api.me());
     },
     [applyUser],
