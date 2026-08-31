@@ -65,34 +65,34 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f0ebf8] px-4 py-12 dark:bg-[#1a0f2e] sm:px-6 lg:px-8">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-4 py-12 dark:bg-[#0B0B0F] sm:px-6 lg:px-8">
       {/* Background Wavy Patterns */}
       <div 
-        className="pointer-events-none absolute inset-0 opacity-40 mix-blend-multiply dark:opacity-20 dark:mix-blend-screen"
+        className="pointer-events-none absolute inset-0 opacity-40 mix-blend-multiply dark:opacity-10 dark:mix-blend-screen"
         style={{ 
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%239333ea' fill-opacity='1' d='M0,192L48,202.7C96,213,192,235,288,218.7C384,203,480,149,576,144C672,139,768,181,864,192C960,203,1056,181,1152,149.3C1248,117,1344,75,1392,53.3L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E")`, 
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%236366f1' fill-opacity='1' d='M0,192L48,202.7C96,213,192,235,288,218.7C384,203,480,149,576,144C672,139,768,181,864,192C960,203,1056,181,1152,149.3C1248,117,1344,75,1392,53.3L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E")`, 
           backgroundSize: 'cover',
           backgroundPosition: 'bottom'
         }}
       />
       <div 
-        className="pointer-events-none absolute inset-0 opacity-30 mix-blend-multiply dark:opacity-10 dark:mix-blend-screen"
+        className="pointer-events-none absolute inset-0 opacity-30 mix-blend-multiply dark:opacity-5 dark:mix-blend-screen"
         style={{ 
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%237e22ce' fill-opacity='1' d='M0,256L48,229.3C96,203,192,149,288,154.7C384,160,480,224,576,218.7C672,213,768,139,864,128C960,117,1056,171,1152,197.3C1248,224,1344,224,1392,224L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E")`, 
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%238b5cf6' fill-opacity='1' d='M0,256L48,229.3C96,203,192,149,288,154.7C384,160,480,224,576,218.7C672,213,768,139,864,128C960,117,1056,171,1152,197.3C1248,224,1344,224,1392,224L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E")`, 
           backgroundSize: 'cover',
           backgroundPosition: 'bottom'
         }}
       />
 
       {/* Main Card */}
-      <div className="relative z-10 flex w-full max-w-5xl flex-col overflow-hidden rounded-[2.5rem] bg-white shadow-2xl dark:bg-[#161618] lg:flex-row">
+      <div className="relative z-10 flex w-full max-w-4xl flex-col overflow-hidden rounded-[2.5rem] bg-white shadow-2xl dark:bg-[#121214] lg:flex-row">
         
         {/* Left Panel: Form */}
-        <div className="flex flex-col justify-center p-10 sm:p-14 lg:w-1/2 lg:p-16">
+        <div className="flex flex-col justify-center p-10 sm:p-12 lg:w-[55%] lg:p-14">
           <h1 className="mb-2 text-center text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">
             Create account
           </h1>
-          <p className="mb-8 text-center text-sm font-medium text-slate-500 dark:text-zinc-400">
+          <p className="mb-8 text-center text-sm font-medium text-slate-500 dark:text-zinc-500">
             Start your team knowledge base
           </p>
           
@@ -107,7 +107,7 @@ export default function RegisterPage() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="block w-full rounded-full border border-slate-300 bg-transparent py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-700 dark:text-white dark:placeholder-zinc-500 dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                className="block w-full rounded-full border border-slate-300 bg-transparent py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-800 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:ring-purple-500"
                 placeholder="Full Name"
                 required
               />
@@ -122,7 +122,7 @@ export default function RegisterPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="block w-full rounded-full border border-slate-300 bg-transparent py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-700 dark:text-white dark:placeholder-zinc-500 dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                className="block w-full rounded-full border border-slate-300 bg-transparent py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-800 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:ring-purple-500"
                 placeholder="Email Address"
                 required
               />
@@ -137,7 +137,7 @@ export default function RegisterPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="block w-full rounded-full border border-slate-300 bg-transparent py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-700 dark:text-white dark:placeholder-zinc-500 dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                className="block w-full rounded-full border border-slate-300 bg-transparent py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-800 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:ring-purple-500"
                 placeholder="Password"
                 required
               />
@@ -152,7 +152,7 @@ export default function RegisterPage() {
                 type="password"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
-                className="block w-full rounded-full border border-slate-300 bg-transparent py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-700 dark:text-white dark:placeholder-zinc-500 dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                className="block w-full rounded-full border border-slate-300 bg-transparent py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-800 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:ring-purple-500"
                 placeholder="Confirm Password"
                 required
               />
@@ -167,7 +167,7 @@ export default function RegisterPage() {
             <button 
               type="submit" 
               disabled={busy} 
-              className="mt-4 flex w-full items-center justify-center rounded-full bg-purple-600 py-4 text-sm font-bold tracking-wide text-white transition-colors hover:bg-purple-700 disabled:opacity-70 dark:bg-purple-600 dark:hover:bg-purple-500"
+              className="mt-4 flex w-full items-center justify-center rounded-full bg-purple-600 py-4 text-sm font-bold tracking-wide text-white transition-colors hover:bg-purple-700 disabled:opacity-70 dark:bg-[#7b39ed] dark:hover:bg-[#6d32d3]"
             >
               {busy ? "Creating Account..." : "Sign Up"}
               {!busy && <ChevronRight className="ml-2 h-4 w-4" />}
@@ -176,7 +176,7 @@ export default function RegisterPage() {
             <button 
               type="button" 
               onClick={() => googleLoginAction()} 
-              className="flex w-full items-center justify-center rounded-full border border-slate-300 bg-transparent py-3 text-sm font-bold tracking-wide text-slate-700 transition-colors hover:bg-slate-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-white/5"
+              className="flex w-full items-center justify-center rounded-full border border-slate-300 bg-transparent py-3 text-sm font-bold tracking-wide text-slate-700 transition-colors hover:bg-slate-50 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-white/5"
             >
               <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
                 <path d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.81002 8.87028 4.75 12.0003 4.75Z" fill="#EA4335"/>
@@ -197,15 +197,15 @@ export default function RegisterPage() {
         </div>
 
         {/* Right Panel: Graphic */}
-        <div className="hidden p-4 lg:block lg:w-1/2">
+        <div className="hidden p-4 lg:block lg:w-[45%]">
           <div className="relative h-full w-full overflow-hidden rounded-[2rem]">
-             {/* Vibrant purple gradient overlay to make any image look like the purple terraces */}
-             <div className="absolute inset-0 z-10 bg-purple-900/40 mix-blend-color" />
-             <div className="absolute inset-0 z-10 bg-gradient-to-tr from-indigo-900/60 via-purple-800/40 to-transparent mix-blend-multiply" />
+             {/* Vibrant purple gradient overlay to make any image look like the space suit / purply aesthetic */}
+             <div className="absolute inset-0 z-10 bg-[#7b39ed]/30 mix-blend-color" />
+             <div className="absolute inset-0 z-10 bg-gradient-to-tr from-[#121214]/80 via-transparent to-transparent" />
              
              {/* Beautiful nature/terraces image from Unsplash */}
              <img 
-               src="https://images.unsplash.com/photo-1536697246787-1f7ae568d89a?q=80&w=2564&auto=format&fit=crop" 
+               src="https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?q=80&w=1500&auto=format&fit=crop" 
                alt="Scenery" 
                className="h-full w-full object-cover"
              />

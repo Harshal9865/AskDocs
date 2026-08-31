@@ -1,50 +1,36 @@
-export function AIAvatarIcon({ className }: { className?: string }) {
+export function AIAvatarIcon({ className, streaming = false }: { className?: string, streaming?: boolean }) {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <defs>
-        <linearGradient id="aiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#4F46E5" />
-          <stop offset="100%" stopColor="#9333EA" />
-        </linearGradient>
-      </defs>
-      <rect width="24" height="24" rx="12" fill="url(#aiGrad)" />
-      <path
-        d="M8.5 10C8.5 9.17157 9.17157 8.5 10 8.5H14C14.8284 8.5 15.5 9.17157 15.5 10V14C15.5 14.8284 14.8284 15.5 14 15.5H10C9.17157 15.5 8.5 14.8284 8.5 14V10Z"
-        fill="white"
-        fillOpacity="0.2"
-      />
-      <circle cx="10" cy="11.5" r="1" fill="white" />
-      <circle cx="14" cy="11.5" r="1" fill="white" />
-      <path
-        d="M10.5 14C10.5 14 11 14.5 12 14.5C13 14.5 13.5 14 13.5 14"
-        stroke="white"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M12 5V8.5"
-        stroke="white"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <circle cx="12" cy="4" r="1" fill="white" />
-      <path
-        d="M6 12H8.5"
-        stroke="white"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M18 12H15.5"
-        stroke="white"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
+    <div className={`relative flex items-center justify-center rounded-full bg-gradient-to-tr from-indigo-500 via-purple-500 to-emerald-400 p-0.5 ${className}`}>
+      <div className="flex h-full w-full items-center justify-center rounded-full bg-[#121214]">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className={`h-[60%] w-[60%] text-white ${streaming ? 'animate-spin' : ''}`}
+        >
+          <path
+            d="M12 2L13.1 8.9L20 10L13.1 11.1L12 18L10.9 11.1L4 10L10.9 8.9L12 2Z"
+            fill="url(#aiSparkGrad)"
+          />
+          <path
+            d="M19 18L19.5 20.5L22 21L19.5 21.5L19 24L18.5 21.5L16 21L18.5 20.5L19 18Z"
+            fill="url(#aiSparkGrad)"
+          />
+          <path
+            d="M6 18L6.3 19.5L7.8 19.8L6.3 20.1L6 21.6L5.7 20.1L4.2 19.8L5.7 19.5L6 18Z"
+            fill="url(#aiSparkGrad)"
+          />
+          <defs>
+            <linearGradient id="aiSparkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#A855F7" />
+              <stop offset="100%" stopColor="#34D399" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      {streaming && (
+        <span className="absolute -inset-1 animate-pulse rounded-full border border-purple-500/50" />
+      )}
+    </div>
   );
 }

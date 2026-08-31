@@ -3,6 +3,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import ThemeToggle, { useTheme } from "@/components/ThemeToggle";
 import Avatar from "@/components/Avatar";
@@ -30,6 +31,10 @@ import {
   FileKey,
   Plug2,
   ArrowUp,
+  Settings,
+  LogOut,
+  Pencil,
+  ChevronDown
 } from "lucide-react";
 
 function AuroraHeroMock() {
@@ -309,9 +314,12 @@ function Reveal({ children, dir = "up", delay = 0, className = "" }: { children:
 }
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { dark, toggle } = useTheme();
   const [scrolled, setScrolled] = React.useState(false);
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -319,6 +327,17 @@ export default function Home() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  React.useEffect(() => {
+    if (!menuOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    window.addEventListener("mousedown", onClick);
+    return () => window.removeEventListener("mousedown", onClick);
+  }, [menuOpen]);
 
   return (
     <div className="min-h-screen bg-white text-slate-900 dark:bg-[#070b0e] dark:text-white">
@@ -365,15 +384,85 @@ export default function Home() {
             Workspace
           </Link>
           {user ? (
-            <Link href={`/profile/${user.id}`} className="flex items-center gap-2 rounded-full border border-slate-200 bg-white p-0.5 pr-2.5 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10" title="Your profile">
-              <Avatar
-                name={user.name}
-                size={28}
-                src={user.avatar_kind === "upload" ? undefined : undefined}
-                stickerId={user.avatar_kind === "sticker" ? user.avatar_value ?? null : null}
-              />
-              <span className="hidden max-w-[80px] truncate text-xs font-medium sm:inline">{user.name.split(" ")[0]}</span>
-            </Link>
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={() => setMenuOpen((o) => !o)}
+                aria-label="Open profile menu"
+                aria-expanded={menuOpen}
+                className="flex items-center gap-1 rounded-full p-0.5 transition-colors hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 pr-2.5 bg-white dark:bg-white/5"
+              >
+                <Avatar
+                  name={user?.name ?? "?"}
+                  size={28}
+                  src={user.avatar_kind === "upload" ? undefined : undefined}
+                  stickerId={
+                    user?.avatar_kind === "sticker" ? user.avatar_value ?? null : null
+                  }
+                />
+                <span className="hidden max-w-[80px] truncate text-xs font-medium sm:inline">{user.name.split(" ")[0]}</span>
+                <ChevronDown
+                  className={`ml-1 hidden h-3.5 w-3.5 text-slate-400 transition-transform sm:block ${menuOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {menuOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+                  <div className="dark:border-slate-700/50 dark:bg-[#242424] absolute right-0 z-50 mt-2 w-56 rounded-xl border border-slate-200 bg-white p-1 shadow-xl">
+                    <div className="dark:border-slate-700/50 border-b border-slate-100 px-3 py-2.5">
+                      <div className="dark:text-white truncate text-sm font-semibold text-slate-900">
+                        {user?.name}
+                      </div>
+                      <div className="dark:text-slate-400 truncate text-xs text-slate-500">{user?.email}</div>
+                    </div>
+                    <div className="p-1">
+                      <button
+                        onClick={() => {
+                          setMenuOpen(false);
+                          router.push(`/profile/${user.id}`);
+                        }}
+                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors dark:text-slate-300 dark:hover:bg-slate-700/50 text-slate-700 hover:bg-slate-100"
+                      >
+                        <Pencil className="h-4 w-4" />
+                        Edit profile
+                      </button>
+                      <button
+                        onClick={() => {
+                          setMenuOpen(false);
+                          router.push("/settings");
+                        }}
+                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors dark:text-slate-300 dark:hover:bg-slate-700/50 text-slate-700 hover:bg-slate-100"
+                      >
+                        <Settings className="h-4 w-4" />
+                        Account settings
+                      </button>
+                      <button
+                        onClick={() => {
+                          setMenuOpen(false);
+                          router.push("/settings/workspace");
+                        }}
+                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors dark:text-slate-300 dark:hover:bg-slate-700/50 text-slate-700 hover:bg-slate-100"
+                      >
+                        <Settings className="h-4 w-4" />
+                        Workspace settings
+                      </button>
+                    </div>
+                    <div className="border-t border-slate-100 dark:border-slate-700/50 p-1">
+                      <button
+                        onClick={() => {
+                          logout();
+                          router.replace("/login");
+                        }}
+                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Sign out
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           ) : (
             <>
               <Link

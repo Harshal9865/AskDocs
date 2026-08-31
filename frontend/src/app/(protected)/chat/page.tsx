@@ -303,7 +303,7 @@ export default function ChatPage() {
             messages.map((m, i) => (
               <div key={i} className={`flex items-end gap-1.5 ${m.role === "user" ? "justify-end" : ""}`}>
                 {m.role === "assistant" && (
-                  <AIAvatarIcon className="h-7 w-7 shrink-0" />
+                  <AIAvatarIcon className="h-7 w-7 shrink-0" streaming={m.streaming} />
                 )}
                 <div className="min-w-0 max-w-[85%]">
                   <div className={`relative z-10 inline-block max-w-full whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-sm ${m.role === "user" ? "ai-bubble-mine ml-auto block rounded-br-md" : "ai-bubble-theirs block rounded-bl-md"}`}>
@@ -325,7 +325,7 @@ export default function ChatPage() {
                       </span>
                     )}
                     {m.content}
-                    {m.streaming && <span className="ml-1 inline-block animate-pulse">▋</span>}
+                    {m.streaming && <span className="ml-1.5 inline-block h-2 w-2 animate-bounce rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]" />}
                   </div>
                   {m.role === "assistant" && m.citations && m.citations.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">
