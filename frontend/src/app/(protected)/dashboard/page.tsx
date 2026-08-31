@@ -67,11 +67,11 @@ function StatCard({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="glow-card glow-indigo group relative rounded-xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-[#181818] sm:p-5">
+    <div className="card-hover-lift glass-card group relative rounded-2xl border border-slate-200/80 bg-white/90 p-4 dark:border-white/10 dark:bg-[#151518]/90 sm:p-5 shadow-sm">
       <div className="flex items-start justify-between">
         <div>
           <div
-            className={`text-2xl font-bold ${
+            className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
               accent
                 ? "text-rose-600 dark:text-rose-400"
                 : "text-slate-900 dark:text-white"
@@ -79,14 +79,14 @@ function StatCard({
           >
             {value}
           </div>
-          <div className="mt-1 text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-zinc-500">
+          <div className="mt-1 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
             {label}
           </div>
         </div>
         <div
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${color} text-white`}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${color} text-white shadow-md transition-transform group-hover:scale-105 duration-300`}
         >
-          <Icon className="h-4.5 w-4.5" />
+          <Icon className="h-5 w-5" />
         </div>
       </div>
       {children}
@@ -404,16 +404,16 @@ export default function DashboardPage() {
       {/* Two-column grid: Documents + Activity OR Documents + Chats */}
       <div className="grid gap-5 md:grid-cols-2">
         {/* Recent Documents */}
-        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#121212] sm:p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-700 dark:text-zinc-200">
-              Recent documents
+        <section className="glass-card card-hover-lift rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-sm dark:border-white/10 dark:bg-[#151518]/90 sm:p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-zinc-100">
+              Recent Documents
             </h2>
             <Link
               href="/documents"
-              className="text-xs font-medium text-indigo-600 hover:underline dark:text-[#1DB954]"
+              className="text-xs font-semibold text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 transition-colors"
             >
-              View all
+              View all →
             </Link>
           </div>
           {docs.length === 0 ? (
@@ -467,36 +467,36 @@ export default function DashboardPage() {
           )}
         </section>
 
-        {/* Activity Feed (admin-only) or Team Members */}
-        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#121212] sm:p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-700 dark:text-zinc-200">
-              {recentActivity.length > 0 ? "Recent activity" : "Team members"}
+        <section className="glass-card card-hover-lift rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-sm dark:border-white/10 dark:bg-[#151518]/90 sm:p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-zinc-100">
+              Team Members
             </h2>
             <Link
-              href={recentActivity.length > 0 ? "/activity" : "/members"}
-              className="text-xs font-medium text-indigo-600 hover:underline dark:text-[#1DB954]"
+              href="/members"
+              className="text-xs font-semibold text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 transition-colors"
             >
-              {recentActivity.length > 0 ? "View all" : "Manage"}
+              Manage →
             </Link>
           </div>
-          {recentActivity.length > 0 ? (
-            <ul className="divide-y divide-slate-100 dark:divide-white/5">
-              {recentActivity.map((item) => (
-                <ActivityItem key={item.id} item={item} />
-              ))}
-            </ul>
-          ) : members.length > 0 ? (
+          {members.length > 0 ? (
             <ul className="space-y-1.5">
-              {members.slice(0, 7).map((m) => (
-                <li key={m.user_id} className="flex items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-slate-50 dark:hover:bg-white/5">
+              {members.slice(0, 5).map((m) => (
+                <li
+                  key={m.id}
+                  className="group flex items-center gap-3 rounded-xl px-2 py-2 transition hover:bg-slate-50 dark:hover:bg-white/5"
+                >
                   <div className="relative">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-xs font-bold text-white">
-                      {m.name?.slice(0, 2)?.toUpperCase() ?? "?"}
-                    </div>
-                    {m.online && (
-                      <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500 dark:border-[#121212]" />
-                    )}
+                    <Avatar
+                      name={m.name ?? m.email}
+                      size={32}
+                      src={m.avatar_value ? `${API_BASE}${m.avatar_value}` : undefined}
+                    />
+                    <span
+                      className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white dark:border-[#181818] ${
+                        m.online ? "bg-emerald-500" : "bg-slate-300 dark:bg-zinc-600"
+                      }`}
+                    />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-medium text-slate-700 dark:text-zinc-200">{m.name}</div>
@@ -515,16 +515,16 @@ export default function DashboardPage() {
       </div>
 
       {/* Chats Row */}
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#121212] sm:p-5">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-700 dark:text-zinc-200">
-            Office chats
+      <section className="glass-card card-hover-lift rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-sm dark:border-white/10 dark:bg-[#151518]/90 sm:p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-zinc-100">
+            Office Chats
           </h2>
           <Link
             href="/chats"
-            className="text-xs font-medium text-indigo-600 hover:underline dark:text-[#1DB954]"
+            className="text-xs font-semibold text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 transition-colors"
           >
-            Open chats
+            Open chats →
           </Link>
         </div>
         {chats.length === 0 ? (

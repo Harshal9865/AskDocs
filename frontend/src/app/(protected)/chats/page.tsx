@@ -545,7 +545,7 @@ export default function ChatsPage() {
         ) : (
           <>
             {/* Thread header */}
-            <div className="relative z-10 flex items-center gap-2 border-b border-slate-100 px-3 py-2.5 dark:border-white/5 sm:px-4 bg-white/60 dark:bg-black/20 backdrop-blur">
+            <div className="relative z-30 flex items-center gap-2 border-b border-slate-100 px-3 py-2.5 dark:border-white/5 sm:px-4 bg-white/70 dark:bg-black/40 backdrop-blur-md">
               <button onClick={() => { setActiveChat(null); setMessages([]); }} aria-label="Back" className="rounded-full p-2 text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 md:hidden">
                 <ArrowLeft className="h-5 w-5" />
               </button>
@@ -564,38 +564,39 @@ export default function ChatsPage() {
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-1">
-                {/* Wallpaper Customizer */}
+                {/* Wallpaper Customizer - Uppermost Layer */}
                 <div className="relative">
                   <button
                     onClick={() => setShowWallpaperMenu((v) => !v)}
-                    title="Change chat wallpaper"
-                    aria-label="Change chat wallpaper"
+                    title="Change chat wallpaper / theme"
+                    aria-label="Change chat wallpaper / theme"
+                    aria-expanded={showWallpaperMenu}
                     className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-purple-600 dark:hover:bg-white/10 dark:hover:text-purple-400 transition-colors"
                   >
                     <Palette className="h-4 w-4" />
                   </button>
                   {showWallpaperMenu && (
                     <>
-                      <div className="fixed inset-0 z-40" onClick={() => setShowWallpaperMenu(false)} />
-                      <div className="absolute right-0 top-full z-50 mt-1.5 w-48 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-white/10 dark:bg-[#202020]">
+                      <div className="fixed inset-0 z-[999]" onClick={() => setShowWallpaperMenu(false)} />
+                      <div className="absolute right-0 top-full z-[1000] mt-2 w-52 rounded-2xl border border-slate-200 bg-white/95 p-1.5 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#1c1c20]/95 ring-1 ring-black/5 dark:ring-white/10">
                         <div className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
-                          Chat Wallpaper
+                          Chat Background Theme
                         </div>
                         {WALLPAPERS.map((wp) => (
                           <button
                             key={wp.id}
                             onClick={() => selectWallpaper(wp.id)}
-                            className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                            className={`flex w-full items-center justify-between rounded-xl px-2.5 py-2 text-xs font-medium transition-colors ${
                               wallpaper === wp.id
-                                ? "bg-purple-50 font-bold text-purple-700 dark:bg-purple-950/60 dark:text-purple-300"
+                                ? "bg-purple-50 font-bold text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 shadow-sm"
                                 : "text-slate-700 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/5"
                             }`}
                           >
-                            <span className="flex items-center gap-2">
-                              <span>{wp.icon}</span>
+                            <span className="flex items-center gap-2.5">
+                              <span className="text-sm">{wp.icon}</span>
                               <span>{wp.name}</span>
                             </span>
-                            {wallpaper === wp.id && <Check className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />}
+                            {wallpaper === wp.id && <Check className="h-4 w-4 text-purple-600 dark:text-purple-400" />}
                           </button>
                         ))}
                       </div>
