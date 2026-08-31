@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
+import { useAuth } from "@/lib/auth-context";
 
 export default function WorkspaceSettingsPage() {
   const { workspace, refresh } = useWorkspace();
