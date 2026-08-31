@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api, API_BASE } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
-import ChatComposer from "@/components/ChatComposer";
+import ChatComposer, { type AttachedFile } from "@/components/ChatComposer";
 import { useUserAvatar } from "@/lib/use-user-avatar";
 import Avatar from "@/components/Avatar";
 import {
@@ -19,18 +19,6 @@ import {
   UsersRound,
 } from "lucide-react";
 import type { Member, TeamChat, TeamMessage, ChatAttachment } from "@/lib/types";
-
-// Mobile detection hook to avoid hydration mismatch
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
-  return isMobile;
-}
 
 type ChipFilter = "all" | "direct" | "group" | "unread";
 
@@ -109,22 +97,14 @@ function fmtTime(iso: string | null): string {
   return d.toLocaleDateString([], { day: "2-digit", month: "short" });
 }
 
-function dayLabel(d: Date): string {
-  const today = new Date();
-  const yesterday = new Date(Date.now() - 86400000);
-  if (d.toDateString() === today.toDateString()) return "TODAY";
-  if (d.toDateString() === yesterday.toDateString()) return "YESTERDAY";
-  return d.toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" });
-}
-
 export default function ChatsPage() {
-  const isMobile = useIsMobile();
   const { workspace } = useWorkspace();
   const { user } = useAuth();
   const [chats, setChats] = useState<TeamChat[]>([]);
   const [colleagues, setColleagues] = useState<Member[]>([]);
   const [activeChat, setActiveChat] = useState<TeamChat | null>(null);
   const [messages, setMessages] = useState<TeamMessage[]>([]);
+  const [composerText, setComposerText] = useState("");
   const [sending, setSending] = useState(false);
   const [showNewGroup, setShowNewGroup] = useState(false);
   const [showNewChat, setShowNewChat] = useState(false);
@@ -276,13 +256,14 @@ export default function ChatsPage() {
     return p?.name || p?.email || "Team member";
   }
 
-  async function handleSend(text: string, attachments: { file: File; previewUrl?: string }[]) {
+  async function handleSend(text: string, attachments: AttachedFile[]) {
     if (!activeChat || sending) return;
     setSending(true);
     try {
       const ids: string[] = []; const failed: string[] = [];
       for (const a of attachments) { try { ids.push((await api.uploadChatAttachment(a.file)).id); } catch { failed.push(a.file.name); } }
       await api.sendTeamMessage(activeChat.id, text, ids);
+      setComposerText("");
       if (failed.length > 0) alert(`Couldn't upload: ${failed.join(", ")}`);
       setMessages(await api.listTeamMessages(activeChat.id)); await loadChats();
     } catch (err) { alert((err as Error).message); } finally { setSending(false); }
@@ -574,7 +555,14 @@ export default function ChatsPage() {
 
             {/* Composer */}
             <div className="relative z-10 border-t border-slate-100 bg-white/80 p-2 dark:border-white/5 dark:bg-[#181818]/80 backdrop-blur sm:p-3">
-              <ChatComposer onSend={handleSend} disabled={sending} placeholder={`Message ${chatTitle(activeChat, user?.email)}…`} />
+              <ChatComposer
+                value={composerText}
+                onChange={setComposerText}
+                onSend={handleSend}
+                disabled={sending}
+                showAttach
+                placeholder={`Message ${chatTitle(activeChat, user?.email)}…`}
+              />
             </div>
           </>
         )}
