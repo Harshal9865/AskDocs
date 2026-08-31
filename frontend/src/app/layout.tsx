@@ -1,7 +1,8 @@
-﻿import type { Metadata, Viewport } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
+import GoogleProvider from "@/components/GoogleProvider";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -42,7 +43,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>{children}</AuthProvider>
+        <GoogleProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </GoogleProvider>
       </body>
     </html>
   );

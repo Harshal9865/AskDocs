@@ -1,4 +1,4 @@
-﻿import type {
+import type {
   Citation,
   ConflictWarning,
   FreshnessWarning,
@@ -61,6 +61,20 @@ async function refreshTokens(): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+async function googleLogin(accessToken: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/auth/google`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ access_token: accessToken }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err || "Google sign-in failed");
+  }
+  const pair: TokenPair = await res.json();
+  setTokens({ access: pair.access_token, refresh: pair.refresh_token });
 }
 
 async function request<T>(
@@ -152,6 +166,7 @@ export const api = {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
     });
   },
+  googleLogin,
   me: () => request<User>("/auth/me"),
 
   // ---- plan ----

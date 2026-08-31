@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { Camera, Check, ImagePlus, RotateCcw, Pencil, Trash2 } from "lucide-react";
@@ -13,6 +13,7 @@ const STICKER_IDS = [
   "male-1", "male-2", "male-3", "male-4",
   "female-1", "female-2", "female-3", "female-4",
   "cute-1", "cute-2", "cute-3", "cute-4",
+  "ai-1", "ai-2",
 ];
 
 function Section({
@@ -410,7 +411,7 @@ export default function SettingsPage() {
                 <ImagePlus className="h-3.5 w-3.5" /> Upload logo
               </button>
               <div className="flex flex-wrap gap-1.5">
-                {["male-1", "female-1", "cute-1"].map((id) => (
+                {["male-1", "female-1", "cute-1", "ai-1"].map((id) => (
                   <button
                     key={id}
                     onClick={() => void applyBrand("sticker", id)}

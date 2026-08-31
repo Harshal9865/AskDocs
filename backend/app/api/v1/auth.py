@@ -52,8 +52,43 @@ async def login(
 ):
     result = await db.execute(select(User).where(User.email == form.username))
     user = result.scalar_one_or_none()
-    if user is None or not verify_password(form.password, user.password_hash):
+    if user is None or user.password_hash == "[GOOGLE_AUTH]" or not verify_password(form.password, user.password_hash):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid credentials")
+    return _token_pair(user)
+
+
+class GoogleLoginRequest(BaseModel):
+    access_token: str
+
+@router.post("/google", response_model=TokenPair)
+async def google_login(payload: GoogleLoginRequest, db: DbSession):
+    import aiohttp
+    
+    async with aiohttp.ClientSession() as session:
+        async with session.get(
+            "https://www.googleapis.com/oauth2/v3/userinfo",
+            headers={"Authorization": f"Bearer {payload.access_token}"}
+        ) as resp:
+            if resp.status != 200:
+                raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid Google token")
+            idinfo = await resp.json()
+            
+    email = idinfo.get("email")
+    if not email:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Google account has no email")
+    name = idinfo.get("name", email.split("@")[0])
+
+    result = await db.execute(select(User).where(User.email == email))
+    user = result.scalar_one_or_none()
+    if not user:
+        user = User(
+            email=email,
+            password_hash="[GOOGLE_AUTH]",
+            name=name,
+        )
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
     return _token_pair(user)
 
 

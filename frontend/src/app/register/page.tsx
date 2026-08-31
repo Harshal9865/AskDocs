@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -18,6 +18,16 @@ export default function RegisterPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Invalid email format");
+      return;
+    }
+    const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!pwdRegex.test(password)) {
+      setError("Password must have at least 8 characters, an uppercase letter, a lowercase letter, a number, and a special character (@$!%*?&)");
+      return;
+    }
     if (password !== confirm) {
       setError("Passwords do not match");
       return;
@@ -26,7 +36,8 @@ export default function RegisterPage() {
     setError(null);
     try {
       await register(email.trim().toLowerCase(), password, name.trim());
-      router.replace("/dashboard");
+      const me = await import("@/lib/api").then(m => m.api.me());
+      router.replace(`/profile/${me.id}?edit=true`);
     } catch (err) {
       setError((err as Error).message || "Registration failed");
     } finally {

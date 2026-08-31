@@ -19,6 +19,7 @@ interface AuthState {
   /** object URL of the uploaded profile photo (when avatar_kind === "upload") */
   avatarSrc: string | null;
   login: (email: string, password: string) => Promise<void>;
+  googleLogin: (accessToken: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
   /** update local user + re-resolve avatar after changes */
@@ -30,6 +31,7 @@ const AuthContext = createContext<AuthState>({
   loading: true,
   avatarSrc: null,
   login: async () => {},
+  googleLogin: async () => {},
   register: async () => {},
   logout: () => {},
   refreshUser: async () => {},
@@ -87,6 +89,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [applyUser],
   );
 
+  const googleLogin = useCallback(
+    async (accessToken: string) => {
+      await api.googleLogin(accessToken);
+      await applyUser(await api.me());
+    },
+    [applyUser],
+  );
+
   const register = useCallback(
     async (email: string, password: string, name: string) => {
       await api.register(email, password, name);
@@ -112,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, avatarSrc, login, register, logout, refreshUser }}
+      value={{ user, avatarSrc, loading, login, googleLogin, register, logout, refreshUser }}
     >
       {children}
     </AuthContext.Provider>

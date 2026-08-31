@@ -94,6 +94,17 @@ export default function EditProfileModal({
   }, [open, user]);
 
   async function handleSave() {
+    // Validation
+    if (phone && !/^\+?[0-9\s\-()]{7,20}$/.test(phone)) {
+      setMsg("Invalid input: Phone number contains invalid characters.");
+      return;
+    }
+    // simple heuristic to block keyboard mashing with special characters in job titles
+    if (jobTitle && /[^a-zA-Z0-9\s\-,.&/]/.test(jobTitle)) {
+      setMsg("Invalid input: Job title contains invalid special characters.");
+      return;
+    }
+
     setBusy(true);
     setMsg(null);
     try {
@@ -137,7 +148,7 @@ export default function EditProfileModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="max-h-[60vh] space-y-4 overflow-y-auto px-1 py-1 -mx-1">
+        <form id="profile-form" onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="max-h-[60vh] space-y-4 overflow-y-auto px-1 py-1 -mx-1">
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">
               Status
@@ -153,9 +164,10 @@ export default function EditProfileModal({
 
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">
-              Bio
+              Bio <span className="text-red-500">*</span>
             </label>
             <textarea
+              required
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               placeholder="Tell your team about yourself"
@@ -168,9 +180,10 @@ export default function EditProfileModal({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-zinc-300">
-                Job Title
+                Job Title <span className="text-red-500">*</span>
               </label>
               <input
+                required
                 list="edit-job-titles"
                 value={jobTitle}
                 onChange={(e) => setJobTitle(e.target.value)}
@@ -249,7 +262,7 @@ export default function EditProfileModal({
               className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-white/10 dark:bg-[#181818] dark:text-white dark:focus:border-[#1DB954] dark:focus:ring-[#1DB954]/20"
             />
           </div>
-        </div>
+        </form>
 
         {msg && (
           <p
@@ -268,10 +281,11 @@ export default function EditProfileModal({
             variant="outline"
             onClick={() => setOpen(false)}
             disabled={busy}
+            type="button"
           >
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={busy}>
+          <Button type="submit" form="profile-form" disabled={busy}>
             {busy ? "Saving…" : "Save changes"}
           </Button>
         </DialogFooter>

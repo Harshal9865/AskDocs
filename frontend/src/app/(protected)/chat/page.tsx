@@ -6,6 +6,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
 import ChatComposer from "@/components/ChatComposer";
+import { AIAvatarIcon } from "@/components/AIAvatarIcon";
 import type { Citation, Conversation, Message } from "@/lib/types";
 import {
   ArrowDownCircle,
@@ -270,9 +271,7 @@ export default function ChatPage() {
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
-            <Sparkles className="h-4 w-4" />
-          </span>
+          <AIAvatarIcon className="h-9 w-9 shrink-0" />
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-semibold text-slate-900 dark:text-white">{activeConv ? activeConv.title : "AI Assistant"}</div>
             <div className="truncate text-[11px] text-[#1DB954]">AI · answers from your documents</div>
@@ -288,9 +287,7 @@ export default function ChatPage() {
           {!activeConv ? (
             <div className="flex h-full items-center justify-center text-center">
               <div>
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20">
-                  <MessagesSquare className="h-8 w-8 text-indigo-500 dark:text-indigo-400" />
-                </div>
+                <AIAvatarIcon className="mx-auto mb-4 h-16 w-16" />
                 <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Start a new conversation</p>
                 <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Ask about your documents and get AI-powered answers</p>
               </div>
@@ -298,9 +295,7 @@ export default function ChatPage() {
           ) : messages.length === 0 ? (
             <div className="flex h-full items-center justify-center text-center">
               <div>
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20">
-                  <Sparkles className="h-8 w-8 text-indigo-500 dark:text-indigo-400" />
-                </div>
+                <AIAvatarIcon className="mx-auto mb-4 h-16 w-16" />
                 <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Ask anything</p>
                 <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Get answers from your documents, powered by AI</p>
               </div>
@@ -309,9 +304,7 @@ export default function ChatPage() {
             messages.map((m, i) => (
               <div key={i} className={`flex items-end gap-1.5 ${m.role === "user" ? "justify-end" : ""}`}>
                 {m.role === "assistant" && (
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
-                    <Sparkles className="h-3.5 w-3.5" />
-                  </span>
+                  <AIAvatarIcon className="h-7 w-7 shrink-0" />
                 )}
                 <div className="min-w-0 max-w-[85%]">
                   <div className={`relative z-10 inline-block max-w-full whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-sm ${m.role === "user" ? "ai-bubble-mine ml-auto block rounded-br-md" : "ai-bubble-theirs block rounded-bl-md"}`}>

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -571,14 +571,14 @@ export default function DashboardPage() {
 
       {/* Knowledge Gaps (if any) */}
       {insights && insights.unanswered_questions.length > 0 && (
-        <section className="rounded-xl border border-amber-200 bg-amber-50/50 p-4 dark:border-amber-500/20 dark:bg-amber-500/5 sm:p-5">
+        <section className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-500/30 dark:bg-amber-950/40 sm:p-5">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+            <h2 className="text-sm font-semibold text-amber-800 dark:text-amber-100">
               Knowledge gaps — {insights.unanswered_questions.length} unanswered
             </h2>
             <Link
               href="/insights"
-              className="text-xs font-medium text-amber-700 hover:underline dark:text-amber-400"
+              className="text-xs font-medium text-amber-700 hover:underline dark:text-amber-300"
             >
               View all
             </Link>
@@ -586,7 +586,7 @@ export default function DashboardPage() {
           <ul className="space-y-2">
             {insights.unanswered_questions.slice(0, 3).map((q, i) => (
               <li key={i} className="flex items-start gap-2 text-sm text-amber-900 dark:text-amber-200">
-                <Target className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
+                <Target className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500 dark:text-amber-400" />
                 <span className="truncate">{q.question}</span>
               </li>
             ))}

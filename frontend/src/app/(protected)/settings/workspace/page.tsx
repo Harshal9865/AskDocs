@@ -29,9 +29,11 @@ export default function WorkspaceSettingsPage() {
 
   const wsId = workspace?.id;
 
+  const isAdmin = workspace?.role === "admin";
+
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    if (!wsId || !name.trim()) return;
+    if (!wsId || !name.trim() || !isAdmin) return;
     setBusy(true);
     setMsg(null);
     try {
@@ -46,7 +48,7 @@ export default function WorkspaceSettingsPage() {
   }
 
   async function togglePublic() {
-    if (!wsId) return;
+    if (!wsId || !isAdmin) return;
     const next = !isPublic;
     setVisMsg(null);
     try {
@@ -60,7 +62,7 @@ export default function WorkspaceSettingsPage() {
   }
 
   async function deleteWs() {
-    if (!workspace || !wsId) return;
+    if (!workspace || !wsId || !isAdmin) return;
     if (!confirm(`Delete "${workspace.name}" and ALL its documents/chats? This cannot be undone.`)) return;
     setBusy(true);
     try {
@@ -79,6 +81,12 @@ export default function WorkspaceSettingsPage() {
       <h1 className="mb-1 text-xl font-bold">Workspace settings</h1>
       <p className="mb-6 text-sm text-slate-500">Configuration for “{workspace.name}”.</p>
 
+      {!isAdmin && (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+          You are a {workspace.role} in this workspace. Only admins can change these settings.
+        </div>
+      )}
+
       <section className="mb-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <form onSubmit={save} className="space-y-3">
           <label className="block text-sm font-medium" htmlFor="ws-name">Workspace name</label>
@@ -87,12 +95,13 @@ export default function WorkspaceSettingsPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={100}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+            disabled={!isAdmin}
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:opacity-50"
           />
           {msg && <p className="text-xs font-medium text-indigo-700">{msg}</p>}
           <button
             type="submit"
-            disabled={busy || !name.trim()}
+            disabled={busy || !name.trim() || !isAdmin}
             className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
           >
             {busy ? "Saving…" : "Save"}
@@ -108,7 +117,8 @@ export default function WorkspaceSettingsPage() {
           </div>
           <button
             onClick={() => void togglePublic()}
-            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors ${
+            disabled={!isAdmin}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors disabled:opacity-50 ${
               isPublic ? "bg-indigo-600" : "bg-slate-300"
             }`}
             aria-pressed={isPublic}
@@ -127,7 +137,7 @@ export default function WorkspaceSettingsPage() {
         </p>
         <button
           onClick={() => void deleteWs()}
-          disabled={busy}
+          disabled={busy || !isAdmin}
           className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
         >
           Delete this workspace

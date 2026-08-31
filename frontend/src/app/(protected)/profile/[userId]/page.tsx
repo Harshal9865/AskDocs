@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import Avatar from "@/components/Avatar";
@@ -14,6 +14,8 @@ import type { User } from "@/lib/types";
 export default function ProfilePage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [editOpen, setEditOpen] = useState(searchParams.get("edit") === "true");
   const { user: me } = useAuth();
   const userId = params.userId as string;
   const [profile, setProfile] = useState<User | null>(null);
@@ -161,8 +163,8 @@ export default function ProfilePage() {
       );
     }
 
-    if (fs === "pending" && profile.friendship_id) {
-      if (!profile.friendship_by_me) {
+    if (fs === "pending") {
+      if (!profile.friendship_by_me && profile.friendship_id) {
         return (
           <div className="flex items-center gap-2">
             <button
@@ -277,6 +279,8 @@ export default function ProfilePage() {
                 )}
                 {isMe && (
                   <EditProfileModal
+                    open={editOpen}
+                    onOpenChange={setEditOpen}
                     trigger={
                       <button
                         className="flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-white/10 dark:bg-[#1a1a1a] dark:text-zinc-300 dark:hover:bg-white/10"

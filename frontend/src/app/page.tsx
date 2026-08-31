@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 /* eslint-disable react/no-unescaped-entities */
 import React from "react";
@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import ThemeToggle, { useTheme } from "@/components/ThemeToggle";
 import Avatar from "@/components/Avatar";
+import { AccordionItem } from "@/components/Accordion";
 import {
   Sparkles,
   MessagesSquare,
@@ -733,19 +734,7 @@ export default function Home() {
           <div className="mt-10 space-y-3">
             {FAQS.map((f, i) => (
               <Reveal key={f.q} dir={i % 2 === 0 ? "left" : "right"} delay={i * 60}>
-                <details className="group glow-card glow-indigo rounded-2xl dark:bg-[#121212]">
-                  <div className="rounded-2xl border border-slate-200/60 bg-white transition-all duration-300 group-open:border-indigo-200/50 group-open:shadow-xl dark:border-white/10 dark:bg-[#121212] dark:group-open:border-indigo-500/20">
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-5 text-sm font-semibold [&::-webkit-details-marker]:hidden">
-                      {f.q}
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-white transition-all duration-300 group-open:rotate-45">
-                        +
-                      </span>
-                    </summary>
-                    <div className="px-5 pb-5">
-                      <p className="text-sm leading-relaxed text-slate-600 dark:text-zinc-300">{f.a}</p>
-                    </div>
-                  </div>
-                </details>
+                <AccordionItem question={f.q} answer={f.a} />
               </Reveal>
             ))}
           </div>
@@ -846,10 +835,10 @@ export default function Home() {
               <Globe className="h-4 w-4" /> View source
             </a>
             <Link
-              href="/register"
+              href={user ? "/dashboard" : "/register"}
               className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-black dark:bg-white dark:text-black"
             >
-              Start free <ArrowRight className="h-4 w-4" />
+              {user ? "Open Dashboard" : "Start free"} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </Reveal>
@@ -913,34 +902,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Newsletter / Early Access */}
-      <section className="border-t border-slate-100 bg-white py-12 dark:border-white/5 dark:bg-[#0a0a0f] sm:py-16">
-        <div className="mx-auto max-w-xl px-4 text-center sm:px-6">
-          <Reveal dir="up">
-            <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white">
-              <Zap className="h-5 w-5" />
-            </div>
-            <h2 className="text-xl font-bold sm:text-2xl">Stay in the loop</h2>
-            <p className="mx-auto mt-2 max-w-md text-sm text-slate-500 dark:text-zinc-400">
-              Get product updates, tips for getting the most out of AskDocs, and early access to new features. No spam.
-            </p>
-          </Reveal>
-          <Reveal dir="up" delay={150} className="mt-6">
-            <form onSubmit={(e) => { e.preventDefault(); alert("Thanks for subscribing!"); }} className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <input
-                type="email"
-                required
-                placeholder="you@company.com"
-                className="glow-input w-full rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none dark:border-white/10 dark:bg-[#121212] dark:text-white sm:w-72"
-              />
-              <button type="submit" className="rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-500 dark:bg-[#1DB954] dark:text-black dark:hover:bg-[#1ed760] transition-all">
-                Get early access
-              </button>
-            </form>
-            <p className="mt-3 text-xs text-slate-400 dark:text-zinc-500">Join 2,400+ early subscribers. Unsubscribe anytime.</p>
-          </Reveal>
-        </div>
-      </section>
+
 
 {/* CTA — rich gradient with floating orbs + Talk to Us */}
       <section className="relative overflow-hidden py-16 sm:py-24">

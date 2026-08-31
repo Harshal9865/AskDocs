@@ -2,13 +2,15 @@ import uuid
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, delete
+from datetime import timedelta
 
 from app.core.deps import CurrentUser, DbSession, MemberMembership
 from app.models.activity import log_activity
 from app.models.friend import Friendship
 from app.models.user import User
 from app.models.workspace import WorkspaceMember
+from app.models.base import utcnow
 
 router = APIRouter()
 
@@ -49,6 +51,22 @@ def _user_to_friend(u: User, friendship: Friendship | None, status: str | None =
     )
 
 
+async def _cleanup_expired_requests(db: DbSession, user_id: uuid.UUID):
+    # delete pending requests older than 2 days
+    cutoff = utcnow() - timedelta(days=2)
+    await db.execute(
+        delete(Friendship).where(
+            Friendship.status == "pending",
+            Friendship.created_at < cutoff,
+            or_(
+                Friendship.requester_id == user_id,
+                Friendship.addressee_id == user_id,
+            )
+        )
+    )
+    await db.commit()
+
+
 async def _require_ws_member(db, workspace_id, user):
     result = await db.execute(
         select(WorkspaceMember).where(
@@ -79,6 +97,8 @@ async def send_friend_request(
     target = result.scalar_one_or_none()
     if target is None:
         raise HTTPException(404, "User not found")
+
+    await _cleanup_expired_requests(db, user.id)
 
     # check inverse already exists
     existing = await db.execute(
@@ -114,6 +134,7 @@ async def send_friend_request(
 
 @router.get("/friends/requests")
 async def list_friend_requests(db: DbSession, user: CurrentUser):
+    await _cleanup_expired_requests(db, user.id)
     result = await db.execute(
         select(Friendship, User)
         .join(User, User.id == Friendship.requester_id)
@@ -124,6 +145,7 @@ async def list_friend_requests(db: DbSession, user: CurrentUser):
 
 @router.get("/friends")
 async def list_friends(db: DbSession, user: CurrentUser):
+    await _cleanup_expired_requests(db, user.id)
     # two separate queries — avoids UNION type issues with asyncpg + preserves ordering
     sent = await db.execute(
         select(Friendship, User)
@@ -309,6 +331,7 @@ async def friend_suggestions(
     user: CurrentUser,
 ):
     await _require_ws_member(db, workspace_id, user)
+    await _cleanup_expired_requests(db, user.id)
 
     # all workspace members
     member_ids_q = select(WorkspaceMember.user_id).where(
@@ -340,6 +363,7 @@ async def search_users(q: str, db: DbSession, user: CurrentUser):
     """Global user search for friends — any workspace. Hides blocked users."""
     if not q or len(q.strip()) < 2:
         return []
+    await _cleanup_expired_requests(db, user.id)
     like = f"%{q.strip()}%"
     # blocked ids to exclude
     blocked_rows = await db.execute(

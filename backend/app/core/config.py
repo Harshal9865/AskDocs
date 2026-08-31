@@ -44,6 +44,8 @@ class Settings(BaseSettings):
             return [origin.strip() for origin in v.split(",") if origin.strip()]
         return v
 
+    GOOGLE_CLIENT_ID: str | None = None
+
     GEMINI_API_KEY: str | None = None
     GEMINI_CHAT_MODEL: str = "gemini-3.6-flash"
     GEMINI_EMBED_MODEL: str = "gemini-embedding-001"

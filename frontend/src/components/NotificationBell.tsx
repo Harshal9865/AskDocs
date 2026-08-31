@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -8,18 +8,25 @@ import { useWorkspace } from "@/lib/workspace-context";
 import type { Invitation } from "@/lib/types";
 
 export default function NotificationBell() {
+  const { workspace, refresh } = useWorkspace();
   const [invites, setInvites] = useState<Invitation[]>([]);
+  const [joinReqs, setJoinReqs] = useState<any[]>([]); // Using any to avoid type import issues for JoinRequest if it's not exported here, though we have it.
   const [open, setOpen] = useState(false);
   const [previews, setPreviews] = useState<Record<string, { workspace_name: string; inviter_email: string; role: string }>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
   const router = useRouter();
-  const { refresh } = useWorkspace();
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const isAdmin = workspace?.role === "admin";
 
   const load = useCallback(async () => {
     try {
-      const list = await api.myInvitations();
+      const [list, reqs] = await Promise.all([
+        api.myInvitations().catch(() => []),
+        isAdmin && workspace ? api.listJoinRequests(workspace.id).catch(() => []) : Promise.resolve([]),
+      ]);
       setInvites(list);
+      setJoinReqs(reqs.filter((r: any) => r.status === "pending"));
       for (const inv of list) {
         if (!previews[inv.id]) {
           try {
@@ -63,20 +70,22 @@ export default function NotificationBell() {
     }
   }
 
+  const totalNotifs = invites.length + joinReqs.length;
+
   return (
     <div className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        aria-label={`Notifications${invites.length ? `, ${invites.length} pending invitations` : ""}`}
+        aria-label={`Notifications${totalNotifs ? `, ${totalNotifs} pending notifications` : ""}`}
         className="relative rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
           <path d="M13.73 21a2 2 0 0 1-3.46 0" />
         </svg>
-        {invites.length > 0 && (
+        {totalNotifs > 0 && (
           <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-            {invites.length > 9 ? "9+" : invites.length}
+            {totalNotifs > 9 ? "9+" : totalNotifs}
           </span>
         )}
       </button>
@@ -108,9 +117,9 @@ export default function NotificationBell() {
               </button>
             </div>
 
-            {invites.length === 0 ? (
+            {totalNotifs === 0 ? (
               <p className="px-4 py-6 text-center text-sm text-slate-400">
-                No pending invitations.
+                No pending notifications.
               </p>
             ) : (
               <ul className="max-h-[60vh] overflow-y-auto p-2 sm:max-h-80">
@@ -143,6 +152,28 @@ export default function NotificationBell() {
                     </li>
                   );
                 })}
+                {joinReqs.map((req) => (
+                  <li key={req.id} className="rounded-lg p-3 hover:bg-slate-50">
+                    <p className="text-sm font-medium text-slate-900">
+                      {req.user_name || req.user_email} wants to join
+                    </p>
+                    <p className="mb-2 text-xs text-slate-500">
+                      {req.user_email}
+                      {req.message && ` — "${req.message}"`}
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setOpen(false);
+                          router.push("/members");
+                        }}
+                        className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                      >
+                        Review in Members
+                      </button>
+                    </div>
+                  </li>
+                ))}
               </ul>
             )}
           </div>

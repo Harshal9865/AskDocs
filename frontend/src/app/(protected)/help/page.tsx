@@ -1,5 +1,7 @@
 "use client";
 
+import { AccordionItem } from "@/components/Accordion";
+
 export default function HelpPage() {
   const faqs: { q: string; a: React.ReactNode }[] = [
     {
@@ -50,22 +52,7 @@ export default function HelpPage() {
       <p className="mb-6 text-sm text-slate-500 dark:text-zinc-400">Everything you need to know about AskDocs.</p>
       <div className="space-y-3">
         {faqs.map((f) => (
-          <details
-            key={f.q}
-            className="group glow-card glow-indigo rounded-2xl dark:bg-[#121212]"
-          >
-            <div className="rounded-2xl border border-slate-200/60 bg-white transition-all duration-300 group-open:border-indigo-200/50 group-open:shadow-xl dark:border-white/10 dark:bg-[#121212] dark:group-open:border-indigo-500/20">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-5 text-sm font-semibold text-slate-900 dark:text-white [&::-webkit-details-marker]:hidden">
-                <span>{f.q}</span>
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-white transition-all duration-300 group-open:rotate-45">
-                  +
-                </span>
-              </summary>
-              <div className="px-5 pb-5">
-                <p className="text-sm leading-relaxed text-slate-600 dark:text-zinc-300">{f.a}</p>
-              </div>
-            </div>
-          </details>
+          <AccordionItem key={f.q} question={f.q} answer={f.a} />
         ))}
       </div>
     </div>
