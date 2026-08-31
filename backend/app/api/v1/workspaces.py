@@ -10,7 +10,6 @@ from app.models.chat import Conversation, Message
 from app.models.document import Chunk, Document
 from app.models.invitation import Invitation
 from app.models.join_request import WorkspaceJoinRequest
-from app.models.activity import ActivityLog, log_activity
 from app.models.user import User
 from app.models.workspace import Role, Workspace, WorkspaceMember
 from app.schemas.workspace import (
@@ -28,7 +27,6 @@ router = APIRouter()
 
 VALID_ROLES = {r.value for r in Role}
 
-
 def _slugify(name: str) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
     return slug or "workspace"
@@ -41,6 +39,38 @@ async def create_workspace(payload: WorkspaceCreate, db: DbSession, user: Curren
     existing = await db.execute(select(Workspace).where(Workspace.slug == slug))
     if existing.scalar_one_or_none():
         raise HTTPException(status.HTTP_409_CONFLICT, "Workspace name already taken")
+    ws = Workspace(name=payload.name, slug=slug, created_by=user.id)
+    db.add(ws)
+    await db.flush()
+    await log_activity(db, ws.id, user.id, 'workspace.created', ws.name)
+    db.add(WorkspaceMember(workspace_id=ws.id, user_id=user.id, role=Role.admin))
+    await db.commit()
+    await db.refresh(ws)
+    return ws
+
+
+@router.get("", response_model=list[WorkspaceOut])
+async def list_workspaces(db: DbSession, user: CurrentUser):
+    result = await db.execute(
+        select(Workspace)
+        .join(WorkspaceMember, WorkspaceMember.workspace_id == Workspace.id)
+        .where(WorkspaceMember.user_id == user.id)
+    )
+    return list(result.scalars().all())
+
+
+@router.get("/public", response_model=list[WorkspaceOut])
+async def list_public_workspaces(
+    db: DbSession,
+    user: CurrentUser,
+    q: str | None = None,
+    limit: int = 20,
+    offset: int = 0,
+):
+    """Discoverable public workspaces (excludes already joined)."""
+    from sqlalchemy import func
+
+    query = select(Workspace).where(Workspace.is_public == True)  # noqa: E712
     if q:
         # escape %_ for ilike
         safe = q.strip().replace("%", r"\%").replace("_", r"\_")
@@ -92,8 +122,6 @@ async def my_join_requests(db: DbSession, user: CurrentUser):
             )
         )
     return out
-
-
 
 
 @router.delete("/join-requests/{request_id}", status_code=204)
