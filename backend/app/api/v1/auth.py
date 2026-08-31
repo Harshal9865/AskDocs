@@ -63,16 +63,29 @@ class GoogleLoginRequest(BaseModel):
 @router.post("/google", response_model=TokenPair)
 async def google_login(payload: GoogleLoginRequest, db: DbSession):
     import aiohttp
+    import logging
     
-    async with aiohttp.ClientSession() as session:
-        async with session.get(
-            "https://www.googleapis.com/oauth2/v3/userinfo",
-            headers={"Authorization": f"Bearer {payload.access_token}"}
-        ) as resp:
-            if resp.status != 200:
-                raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid Google token")
-            idinfo = await resp.json()
-            
+    logger = logging.getLogger(__name__)
+    
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                "https://www.googleapis.com/oauth2/v3/userinfo",
+                headers={"Authorization": f"Bearer {payload.access_token}"}
+            ) as resp:
+                if resp.status != 200:
+                    error_text = await resp.text()
+                    logger.error(f"Google API error: {resp.status} - {error_text}")
+                    raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid Google token")
+                idinfo = await resp.json()
+                
+    except aiohttp.ClientError as e:
+        logger.error(f"Network error calling Google API: {e}")
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "Unable to verify Google token (network error)")
+    except Exception as e:
+        logger.error(f"Unexpected error in google_login: {e}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Authentication service error")
+    
     email = idinfo.get("email")
     if not email:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Google account has no email")

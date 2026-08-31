@@ -316,18 +316,10 @@ function Reveal({ children, dir = "up", delay = 0, className = "" }: { children:
 export default function Home() {
   const { user, logout, avatarSrc, loading } = useAuth();
   const { dark, toggle } = useTheme();
+  const router = useRouter();
   const [scrolled, setScrolled] = React.useState(false);
   const [menuOpen, setMenuOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
-  const router = useRouter();
-
-  // Redirect logged-in users straight to the dashboard
-  React.useEffect(() => {
-    if (!loading && user) router.replace("/dashboard");
-  }, [loading, user, router]);
-
-  // Use a local variable to avoid TypeScript control flow issues with the redirect effect
-  const currentUser = user;
 
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -347,8 +339,8 @@ export default function Home() {
     return () => window.removeEventListener("mousedown", onClick);
   }, [menuOpen]);
 
-  // Show nothing while auth is loading or redirect is in progress
-  if (loading || user) return null;
+  // Show nothing while auth is loading
+  if (loading) return null;
 
   return (
     <div className="min-h-screen bg-white text-slate-900 dark:bg-[#070b0e] dark:text-white">
@@ -388,13 +380,22 @@ export default function Home() {
         </nav>
         <div className="flex items-center gap-2">
           <ThemeToggle dark={dark} onToggle={toggle} />
-          <Link
-            href="/dashboard"
-            className="hidden rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-white sm:inline"
-          >
-            Workspace
-          </Link>
-          {currentUser ? (
+          {user ? (
+            <Link
+              href="/dashboard"
+              className="hidden rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-white sm:inline"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              href="/dashboard"
+              className="hidden rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-white sm:inline"
+            >
+              Workspace
+            </Link>
+          )}
+          {user ? (
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setMenuOpen((o) => !o)}
@@ -403,14 +404,14 @@ export default function Home() {
                 className="flex items-center gap-1 rounded-full p-0.5 transition-colors hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 pr-2.5 bg-white dark:bg-white/5"
               >
                 <Avatar
-                  name={currentUser.name ?? "?"}
+                  name={user!.name ?? "?"}
                   size={28}
                   src={avatarSrc}
                   stickerId={
-                    currentUser.avatar_kind === "sticker" ? currentUser.avatar_value ?? null : null
+                    user!.avatar_kind === "sticker" ? user.avatar_value ?? null : null
                   }
                 />
-                <span className="hidden max-w-[80px] truncate text-xs font-medium sm:inline">{currentUser.name.split(" ")[0]}</span>
+                <span className="hidden max-w-[80px] truncate text-xs font-medium sm:inline">{user.name.split(" ")[0]}</span>
                 <ChevronDown
                   className={`ml-1 hidden h-3.5 w-3.5 text-slate-400 transition-transform sm:block ${menuOpen ? "rotate-180" : ""}`}
                 />
@@ -422,15 +423,15 @@ export default function Home() {
                   <div className="dark:border-slate-700/50 dark:bg-[#242424] absolute right-0 z-50 mt-2 w-56 rounded-xl border border-slate-200 bg-white p-1 shadow-xl">
                     <div className="dark:border-slate-700/50 border-b border-slate-100 px-3 py-2.5">
                       <div className="dark:text-white truncate text-sm font-semibold text-slate-900">
-                        {currentUser.name}
+                        {user.name}
                       </div>
-                      <div className="dark:text-slate-400 truncate text-xs text-slate-500">{currentUser.email}</div>
+                      <div className="dark:text-slate-400 truncate text-xs text-slate-500">{user.email}</div>
                     </div>
                     <div className="p-1">
                       <button
                         onClick={() => {
                           setMenuOpen(false);
-                          router.push(`/profile/${currentUser.id}`);
+                          router.push(`/profile/${user.id}`);
                         }}
                         className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors dark:text-slate-300 dark:hover:bg-slate-700/50 text-slate-700 hover:bg-slate-100"
                       >
