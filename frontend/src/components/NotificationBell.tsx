@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
-import type { Invitation } from "@/lib/types";
+import type { Invitation, JoinRequest } from "@/lib/types";
 
 export default function NotificationBell() {
   const { workspace, refresh } = useWorkspace();
   const [invites, setInvites] = useState<Invitation[]>([]);
-  const [joinReqs, setJoinReqs] = useState<any[]>([]); // Using any to avoid type import issues for JoinRequest if it's not exported here, though we have it.
+  const [joinReqs, setJoinReqs] = useState<JoinRequest[]>([]);
   const [open, setOpen] = useState(false);
   const [previews, setPreviews] = useState<Record<string, { workspace_name: string; inviter_email: string; role: string }>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -26,7 +26,7 @@ export default function NotificationBell() {
         isAdmin && workspace ? api.listJoinRequests(workspace.id).catch(() => []) : Promise.resolve([]),
       ]);
       setInvites(list);
-      setJoinReqs(reqs.filter((r: any) => r.status === "pending"));
+      setJoinReqs(reqs.filter((r: JoinRequest) => r.status === "pending"));
       for (const inv of list) {
         if (!previews[inv.id]) {
           try {

@@ -65,7 +65,7 @@ export default function LoginPage() {
             </h1>
             <h2 className="mt-8 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Sign in to your account</h2>
             <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link href="/register" className="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-[#1DB954] dark:hover:text-[#1ed760]">
                 Register
               </Link>
@@ -168,7 +168,7 @@ export default function LoginPage() {
                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
                </span>
              </div>
-             <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Unleash your team's collective brain.</h2>
+             <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Unleash your team&apos;s collective brain.</h2>
              <p className="mt-6 text-lg leading-8 text-indigo-200">
                Search instantly across all your company documents, wikis, and chats. Ask questions and get intelligent, cited answers in seconds.
              </p>
