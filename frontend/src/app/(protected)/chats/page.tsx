@@ -20,6 +20,18 @@ import {
 } from "lucide-react";
 import type { Member, TeamChat, TeamMessage, ChatAttachment } from "@/lib/types";
 
+// Mobile detection hook to avoid hydration mismatch
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+  return isMobile;
+}
+
 type ChipFilter = "all" | "direct" | "group" | "unread";
 
 function chatTitle(chat: TeamChat, myEmail?: string): string {
@@ -106,6 +118,7 @@ function dayLabel(d: Date): string {
 }
 
 export default function ChatsPage() {
+  const isMobile = useIsMobile();
   const { workspace } = useWorkspace();
   const { user } = useAuth();
   const [chats, setChats] = useState<TeamChat[]>([]);

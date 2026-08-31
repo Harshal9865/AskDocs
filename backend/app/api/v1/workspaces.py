@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy import delete, select
 
 from app.core.deps import AdminMembership, CurrentUser, DbSession, Membership
+from app.models.activity import log_activity
 from app.models.chat import Conversation, Message
 from app.models.document import Chunk, Document
 from app.models.invitation import Invitation
@@ -98,8 +99,6 @@ async def list_public_workspaces(
 
 @router.get("/join-requests/me", response_model=list[JoinRequestOut])
 async def my_join_requests(db: DbSession, user: CurrentUser):
-    from app.models.join_request import WorkspaceJoinRequest
-
     result = await db.execute(
         select(WorkspaceJoinRequest)
         .where(WorkspaceJoinRequest.user_id == user.id)
@@ -128,8 +127,6 @@ async def my_join_requests(db: DbSession, user: CurrentUser):
 
 @router.delete("/join-requests/{request_id}", status_code=204)
 async def withdraw_join_request(request_id: uuid.UUID, db: DbSession, user: CurrentUser):
-    from app.models.join_request import WorkspaceJoinRequest
-
     result = await db.execute(
         select(WorkspaceJoinRequest).where(
             WorkspaceJoinRequest.id == request_id,
@@ -167,9 +164,6 @@ async def get_brand(workspace_id: uuid.UUID, db: DbSession, membership: Membersh
 class BrandSetRequest(BaseModel):
     kind: str  # default | sticker
     value: str | None = None
-
-
-from pydantic import BaseModel as BaseModel_  # noqa: E402
 
 
 @router.post("/{workspace_id}/brand")
@@ -294,8 +288,6 @@ async def delete_workspace(workspace_id: uuid.UUID, db: DbSession, membership: A
     from app.models.activity import ActivityLog
 
     await db.execute(delete(Invitation).where(Invitation.workspace_id == ws_id))
-    from app.models.join_request import WorkspaceJoinRequest
-
     await db.execute(delete(WorkspaceJoinRequest).where(WorkspaceJoinRequest.workspace_id == ws_id))
     await db.execute(delete(ActivityLog).where(ActivityLog.workspace_id == ws_id))
     await db.execute(delete(Workspace).where(Workspace.id == ws_id))
@@ -426,8 +418,6 @@ async def create_join_request(
     db: DbSession,
     user: CurrentUser,
 ):
-    from app.models.join_request import WorkspaceJoinRequest
-
     ws = await db.get(Workspace, workspace_id)
     if ws is None or not ws.is_public:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Workspace not found or not public")
@@ -471,8 +461,6 @@ async def create_join_request(
 async def list_join_requests(
     workspace_id: uuid.UUID, db: DbSession, membership: AdminMembership
 ):
-    from app.models.join_request import WorkspaceJoinRequest
-
     result = await db.execute(
         select(WorkspaceJoinRequest, User)
         .join(User, User.id == WorkspaceJoinRequest.user_id)
@@ -504,8 +492,6 @@ async def approve_join_request(
     db: DbSession,
     membership: AdminMembership,
 ):
-    from app.models.join_request import WorkspaceJoinRequest
-
     result = await db.execute(
         select(WorkspaceJoinRequest).where(
             WorkspaceJoinRequest.id == request_id,
@@ -561,8 +547,6 @@ async def reject_join_request(
     db: DbSession,
     membership: AdminMembership,
 ):
-    from app.models.join_request import WorkspaceJoinRequest
-
     result = await db.execute(
         select(WorkspaceJoinRequest).where(
             WorkspaceJoinRequest.id == request_id,

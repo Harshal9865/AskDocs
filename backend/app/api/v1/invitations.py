@@ -78,33 +78,44 @@ async def accept_invitation(
     invite = result.scalar_one_or_none()
     if invite is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Invitation not found")
-    if invite.expires_at is not None:
-        from app.models.base import utcnow
 
-        if invite.expires_at <= utcnow():
-            raise HTTPException(status.HTTP_410_GONE, "Invitation expired")
+    # Check if invitation is expired
+    from app.models.base import utcnow
+    if invite.expires_at and invite.expires_at <= utcnow():
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invitation has expired")
 
-    already = await db.execute(
+    # Check if user already exists in workspace
+    existing = await db.execute(
         select(WorkspaceMember).where(
             WorkspaceMember.workspace_id == invite.workspace_id,
             WorkspaceMember.user_id == user.id,
         )
     )
-    if already.scalar_one_or_none():
-        invite.status = "accepted"
-        await db.commit()
-        raise HTTPException(status.HTTP_409_CONFLICT, "Already a member of this workspace")
+    if existing.scalar_one_or_none():
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Already a member of this workspace")
 
+    # Add user to workspace
     member = WorkspaceMember(
         workspace_id=invite.workspace_id,
         user_id=user.id,
-        role=Role(invite.role.value) if hasattr(invite.role, "value") else Role(invite.role),
+        role=invite.role,
     )
     db.add(member)
-    await log_activity(db, invite.workspace_id, user.id, 'member.joined', user.email)
+
+    # Update invitation status
     invite.status = "accepted"
     await db.commit()
     await db.refresh(invite)
+
+    # Log activity
+    await log_activity(
+        db=db,
+        workspace_id=invite.workspace_id,
+        user_id=user.id,
+        action="accept_invitation",
+        metadata={"invitation_id": str(invitation_id), "role": str(invite.role)},
+    )
+
     return invite
 
 
@@ -122,7 +133,8 @@ async def decline_invitation(
     invite = result.scalar_one_or_none()
     if invite is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Invitation not found")
+
     invite.status = "declined"
     await db.commit()
+    await db.refresh(invite)
     return invite
-

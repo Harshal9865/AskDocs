@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
@@ -8,12 +8,17 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { Mail, Lock, ChevronRight } from "lucide-react";
 
 export default function LoginPage() {
-  const { login, googleLogin } = useAuth();
+  const { login, googleLogin, user, loading } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // If already logged in, go straight to dashboard
+  useEffect(() => {
+    if (!loading && user) router.replace("/dashboard");
+  }, [loading, user, router]);
 
   const googleLoginAction = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -50,6 +55,9 @@ export default function LoginPage() {
       setBusy(false);
     }
   }
+
+  // Don't flash the login form while checking session or during redirect
+  if (loading || user) return null;
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-4 py-12 dark:bg-[#0B0B0F] sm:px-6 lg:px-8">

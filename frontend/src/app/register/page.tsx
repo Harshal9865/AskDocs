@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
@@ -8,7 +8,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { Mail, Lock, User, ChevronRight } from "lucide-react";
 
 export default function RegisterPage() {
-  const { register, googleLogin } = useAuth();
+  const { register, googleLogin, user, loading } = useAuth();
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -16,6 +16,11 @@ export default function RegisterPage() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // If already logged in, skip registration
+  useEffect(() => {
+    if (!loading && user) router.replace("/dashboard");
+  }, [loading, user, router]);
 
   const googleLoginAction = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -63,6 +68,9 @@ export default function RegisterPage() {
       setBusy(false);
     }
   }
+
+  // Don't flash the form while checking session or redirecting
+  if (loading || user) return null;
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-4 py-12 dark:bg-[#0B0B0F] sm:px-6 lg:px-8">
