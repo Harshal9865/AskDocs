@@ -4,10 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
-import PasswordInput from "@/components/PasswordInput";
+import { useGoogleLogin } from "@react-oauth/google";
+import { Mail, Lock, User, ChevronRight } from "lucide-react";
 
 export default function RegisterPage() {
-  const { register } = useAuth();
+  const { register, googleLogin } = useAuth();
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -15,6 +16,24 @@ export default function RegisterPage() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  const googleLoginAction = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setBusy(true);
+      setError(null);
+      try {
+        await googleLogin(tokenResponse.access_token);
+        const me = await import("@/lib/api").then(m => m.api.me());
+        router.replace(`/profile/${me.id}?edit=true`);
+      } catch (err) {
+        setError((err as Error).message || "Google sign-in failed");
+        setBusy(false);
+      }
+    },
+    onError: () => {
+      setError("Google sign-in failed or was cancelled.");
+    },
+  });
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -25,7 +44,7 @@ export default function RegisterPage() {
     }
     const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if (!pwdRegex.test(password)) {
-      setError("Password must have at least 8 characters, an uppercase letter, a lowercase letter, a number, and a special character (@$!%*?&)");
+      setError("Password must have at least 8 chars, uppercase, lowercase, number, and special char (@$!%*?&)");
       return;
     }
     if (password !== confirm) {
@@ -46,90 +65,154 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
-      <form
-        onSubmit={onSubmit}
-        className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-8 shadow-sm"
-      >
-        <h1 className="mb-1 text-2xl font-bold">Create account</h1>
-        <p className="mb-6 text-sm text-slate-600">
-          Start your team knowledge base
-        </p>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f0ebf8] px-4 py-12 dark:bg-[#1a0f2e] sm:px-6 lg:px-8">
+      {/* Background Wavy Patterns */}
+      <div 
+        className="pointer-events-none absolute inset-0 opacity-40 mix-blend-multiply dark:opacity-20 dark:mix-blend-screen"
+        style={{ 
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%239333ea' fill-opacity='1' d='M0,192L48,202.7C96,213,192,235,288,218.7C384,203,480,149,576,144C672,139,768,181,864,192C960,203,1056,181,1152,149.3C1248,117,1344,75,1392,53.3L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E")`, 
+          backgroundSize: 'cover',
+          backgroundPosition: 'bottom'
+        }}
+      />
+      <div 
+        className="pointer-events-none absolute inset-0 opacity-30 mix-blend-multiply dark:opacity-10 dark:mix-blend-screen"
+        style={{ 
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%237e22ce' fill-opacity='1' d='M0,256L48,229.3C96,203,192,149,288,154.7C384,160,480,224,576,218.7C672,213,768,139,864,128C960,117,1056,171,1152,197.3C1248,224,1344,224,1392,224L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E")`, 
+          backgroundSize: 'cover',
+          backgroundPosition: 'bottom'
+        }}
+      />
 
-        <label className="mb-1 block text-sm font-medium" htmlFor="name">
-          Name
-        </label>
-        <input
-          id="name"
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="mb-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-          placeholder="Ada Lovelace"
-        />
-
-        <label className="mb-1 block text-sm font-medium" htmlFor="email">
-          Email
-        </label>
-        <input
-          id="email"
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mb-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-          placeholder="you@team.com"
-        />
-
-        <label className="mb-1 block text-sm font-medium" htmlFor="password">
-          Password
-        </label>
-        <div className="mb-1">
-          <PasswordInput
-            id="password"
-            value={password}
-            onChange={setPassword}
-            minLength={8}
-            autoComplete="new-password"
-          />
-        </div>
-        <p className="mb-3 text-xs text-slate-500">Minimum 8 characters.</p>
-
-        <label className="mb-1 block text-sm font-medium" htmlFor="confirm">
-          Confirm password
-        </label>
-        <div className="mb-4">
-          <PasswordInput
-            id="confirm"
-            value={confirm}
-            onChange={setConfirm}
-            autoComplete="new-password"
-            ariaLabel="Password confirmation"
-          />
-        </div>
-
-        {error && (
-          <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
-            {error}
+      {/* Main Card */}
+      <div className="relative z-10 flex w-full max-w-5xl flex-col overflow-hidden rounded-[2.5rem] bg-white shadow-2xl dark:bg-[#161618] lg:flex-row">
+        
+        {/* Left Panel: Form */}
+        <div className="flex flex-col justify-center p-10 sm:p-14 lg:w-1/2 lg:p-16">
+          <h1 className="mb-2 text-center text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">
+            Create account
+          </h1>
+          <p className="mb-8 text-center text-sm font-medium text-slate-500 dark:text-zinc-400">
+            Start your team knowledge base
           </p>
-        )}
+          
+          <form onSubmit={onSubmit} className="mx-auto w-full max-w-sm space-y-4">
+            
+            {/* Name Input */}
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                <User className="h-5 w-5 text-slate-400 dark:text-zinc-500" />
+              </div>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="block w-full rounded-full border border-slate-300 bg-transparent py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-700 dark:text-white dark:placeholder-zinc-500 dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                placeholder="Full Name"
+                required
+              />
+            </div>
 
-        <button
-          type="submit"
-          disabled={busy}
-          className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-indigo-600 disabled:opacity-50"
-        >
-          {busy ? "Creating\u2026" : "Create account"}
-        </button>
+            {/* Email Input */}
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                <Mail className="h-5 w-5 text-slate-400 dark:text-zinc-500" />
+              </div>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="block w-full rounded-full border border-slate-300 bg-transparent py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-700 dark:text-white dark:placeholder-zinc-500 dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                placeholder="Email Address"
+                required
+              />
+            </div>
 
-        <p className="mt-4 text-center text-sm text-slate-600">
-          Already registered?{" "}
-          <Link href="/login" className="font-semibold text-indigo-700 underline hover:text-indigo-800">
-            Sign in
-          </Link>
-        </p>
-      </form>
+            {/* Password Input */}
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                <Lock className="h-5 w-5 text-slate-400 dark:text-zinc-500" />
+              </div>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="block w-full rounded-full border border-slate-300 bg-transparent py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-700 dark:text-white dark:placeholder-zinc-500 dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                placeholder="Password"
+                required
+              />
+            </div>
+
+            {/* Confirm Password Input */}
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                <Lock className="h-5 w-5 text-slate-400 dark:text-zinc-500" />
+              </div>
+              <input
+                type="password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                className="block w-full rounded-full border border-slate-300 bg-transparent py-3 pl-12 pr-4 text-slate-900 placeholder-slate-400 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 dark:border-zinc-700 dark:text-white dark:placeholder-zinc-500 dark:focus:border-purple-500 dark:focus:ring-purple-500"
+                placeholder="Confirm Password"
+                required
+              />
+            </div>
+
+            {error && (
+              <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-xs font-medium text-red-600 dark:border-red-900/30 dark:bg-red-900/20 dark:text-red-400">
+                {error}
+              </p>
+            )}
+
+            <button 
+              type="submit" 
+              disabled={busy} 
+              className="mt-4 flex w-full items-center justify-center rounded-full bg-purple-600 py-4 text-sm font-bold tracking-wide text-white transition-colors hover:bg-purple-700 disabled:opacity-70 dark:bg-purple-600 dark:hover:bg-purple-500"
+            >
+              {busy ? "Creating Account..." : "Sign Up"}
+              {!busy && <ChevronRight className="ml-2 h-4 w-4" />}
+            </button>
+
+            <button 
+              type="button" 
+              onClick={() => googleLoginAction()} 
+              className="flex w-full items-center justify-center rounded-full border border-slate-300 bg-transparent py-3 text-sm font-bold tracking-wide text-slate-700 transition-colors hover:bg-slate-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-white/5"
+            >
+              <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
+                <path d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.81002 8.87028 4.75 12.0003 4.75Z" fill="#EA4335"/>
+                <path d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z" fill="#4285F4"/>
+                <path d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z" fill="#FBBC05"/>
+                <path d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.82 13.6204 19.245 12.0004 19.245C8.8704 19.245 6.21537 17.185 5.26538 14.29L1.27539 17.385C3.25539 21.31 7.3104 24.0001 12.0004 24.0001Z" fill="#34A853"/>
+              </svg>
+              Sign up with Google
+            </button>
+
+            <p className="mt-8 text-center text-xs text-slate-500 dark:text-zinc-500">
+              Already registered?{" "}
+              <Link href="/login" className="font-semibold text-slate-900 hover:text-purple-600 dark:text-white dark:hover:text-purple-400">
+                Log In
+              </Link>
+            </p>
+          </form>
+        </div>
+
+        {/* Right Panel: Graphic */}
+        <div className="hidden p-4 lg:block lg:w-1/2">
+          <div className="relative h-full w-full overflow-hidden rounded-[2rem]">
+             {/* Vibrant purple gradient overlay to make any image look like the purple terraces */}
+             <div className="absolute inset-0 z-10 bg-purple-900/40 mix-blend-color" />
+             <div className="absolute inset-0 z-10 bg-gradient-to-tr from-indigo-900/60 via-purple-800/40 to-transparent mix-blend-multiply" />
+             
+             {/* Beautiful nature/terraces image from Unsplash */}
+             <img 
+               src="https://images.unsplash.com/photo-1536697246787-1f7ae568d89a?q=80&w=2564&auto=format&fit=crop" 
+               alt="Scenery" 
+               className="h-full w-full object-cover"
+             />
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }
-
