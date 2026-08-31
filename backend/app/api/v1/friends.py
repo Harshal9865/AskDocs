@@ -174,7 +174,10 @@ async def list_friends(db: DbSession, user: CurrentUser):
 async def accept_friend(friend_id: uuid.UUID, db: DbSession, user: CurrentUser):
     result = await db.execute(
         select(Friendship).where(
-            Friendship.id == friend_id,
+            or_(
+                Friendship.id == friend_id,
+                (Friendship.requester_id == friend_id) & (Friendship.addressee_id == user.id),
+            ),
             Friendship.addressee_id == user.id,
             Friendship.status == "pending",
         )
@@ -202,7 +205,11 @@ async def accept_friend(friend_id: uuid.UUID, db: DbSession, user: CurrentUser):
 async def decline_friend(friend_id: uuid.UUID, db: DbSession, user: CurrentUser):
     result = await db.execute(
         select(Friendship).where(
-            Friendship.id == friend_id,
+            or_(
+                Friendship.id == friend_id,
+                (Friendship.requester_id == friend_id) & (Friendship.addressee_id == user.id),
+                (Friendship.addressee_id == friend_id) & (Friendship.requester_id == user.id),
+            ),
             or_(
                 Friendship.addressee_id == user.id,
                 Friendship.requester_id == user.id,
@@ -221,7 +228,11 @@ async def decline_friend(friend_id: uuid.UUID, db: DbSession, user: CurrentUser)
 async def block_friend(friend_id: uuid.UUID, db: DbSession, user: CurrentUser):
     result = await db.execute(
         select(Friendship).where(
-            Friendship.id == friend_id,
+            or_(
+                Friendship.id == friend_id,
+                (Friendship.requester_id == friend_id) & (Friendship.addressee_id == user.id),
+                (Friendship.addressee_id == friend_id) & (Friendship.requester_id == user.id),
+            ),
             or_(
                 Friendship.addressee_id == user.id,
                 Friendship.requester_id == user.id,
@@ -230,7 +241,7 @@ async def block_friend(friend_id: uuid.UUID, db: DbSession, user: CurrentUser):
     )
     f = result.scalar_one_or_none()
     if f is None:
-        raise HTTPException(404, "Friend request not found")
+        raise HTTPException(404, "Friend record not found")
     f.status = "blocked"
     await db.commit()
     try:
@@ -250,7 +261,11 @@ async def block_friend(friend_id: uuid.UUID, db: DbSession, user: CurrentUser):
 async def unblock_friend(friend_id: uuid.UUID, db: DbSession, user: CurrentUser):
     result = await db.execute(
         select(Friendship).where(
-            Friendship.id == friend_id,
+            or_(
+                Friendship.id == friend_id,
+                (Friendship.requester_id == friend_id) & (Friendship.addressee_id == user.id),
+                (Friendship.addressee_id == friend_id) & (Friendship.requester_id == user.id),
+            ),
             Friendship.status == "blocked",
             or_(
                 Friendship.addressee_id == user.id,
@@ -294,7 +309,11 @@ async def list_blocked(db: DbSession, user: CurrentUser):
 async def unfriend(friend_id: uuid.UUID, db: DbSession, user: CurrentUser):
     result = await db.execute(
         select(Friendship).where(
-            Friendship.id == friend_id,
+            or_(
+                Friendship.id == friend_id,
+                (Friendship.requester_id == friend_id) & (Friendship.addressee_id == user.id),
+                (Friendship.addressee_id == friend_id) & (Friendship.requester_id == user.id),
+            ),
             or_(
                 Friendship.addressee_id == user.id,
                 Friendship.requester_id == user.id,

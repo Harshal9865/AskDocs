@@ -25,21 +25,6 @@ export default function ProtectedLayout({
   }, [loading, user, router]);
 
   useEffect(() => {
-    if (loading || !user) return;
-    const onboarded = typeof window !== "undefined" ? localStorage.getItem("askdocs_onboarded") : "1";
-    const hasProfile = !!(
-      user.bio &&
-      user.status &&
-      user.pronouns &&
-      (user as unknown as { job_title?: string | null }).job_title &&
-      (user as unknown as { job_role?: string | null }).job_role
-    );
-    if (!onboarded && !hasProfile && pathname !== "/onboarding") {
-      router.replace("/onboarding");
-    }
-  }, [loading, user, pathname, router]);
-
-  useEffect(() => {
     const saved = Number(localStorage.getItem("askdocs_sidebar_width"));
     if (saved >= 220 && saved <= 420) setWidth(saved);
   }, []);

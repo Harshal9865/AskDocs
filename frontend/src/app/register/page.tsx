@@ -18,10 +18,10 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // If already logged in, skip registration
+  // If already logged in on initial visit, skip registration
   useEffect(() => {
-    if (!loading && user) router.replace("/dashboard");
-  }, [loading, user, router]);
+    if (!loading && user && !busy) router.replace("/dashboard");
+  }, [loading, user, busy, router]);
 
   const googleLoginAction = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -30,8 +30,7 @@ export default function RegisterPage() {
       try {
         const token = tokenResponse.access_token;
         if (!token) throw new Error("No token received from Google");
-        await googleLogin(token);
-        const me = await import("@/lib/api").then(m => m.api.me());
+        const me = await googleLogin(token);
         router.replace(`/profile/${me.id}?edit=true`);
       } catch (err) {
         setError((err as Error).message || "Google sign-in failed");
@@ -63,18 +62,16 @@ export default function RegisterPage() {
     setBusy(true);
     setError(null);
     try {
-      await register(email.trim().toLowerCase(), password, name.trim());
-      const me = await import("@/lib/api").then(m => m.api.me());
+      const me = await register(emailClean, password, name.trim());
       router.replace(`/profile/${me.id}?edit=true`);
     } catch (err) {
       setError((err as Error).message || "Registration failed");
-    } finally {
       setBusy(false);
     }
   }
 
   // Don't flash the form while checking session or redirecting
-  if (loading || user) return null;
+  if (loading || (user && !busy)) return null;
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-3 py-6 sm:px-6 lg:px-8 dark:bg-[#0B0B0F]">

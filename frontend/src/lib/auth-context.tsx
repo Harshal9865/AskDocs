@@ -18,9 +18,9 @@ interface AuthState {
   loading: boolean;
   /** object URL of the uploaded profile photo (when avatar_kind === "upload") */
   avatarSrc: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  googleLogin: (idToken: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  googleLogin: (idToken: string) => Promise<User>;
+  register: (email: string, password: string, name: string) => Promise<User>;
   logout: () => void;
   /** update local user + re-resolve avatar after changes */
   refreshUser: () => Promise<void>;
@@ -30,9 +30,9 @@ const AuthContext = createContext<AuthState>({
   user: null,
   loading: true,
   avatarSrc: null,
-  login: async () => {},
-  googleLogin: async () => {},
-  register: async () => {},
+  login: async () => ({} as User),
+  googleLogin: async () => ({} as User),
+  register: async () => ({} as User),
   logout: () => {},
   refreshUser: async () => {},
 });
@@ -84,7 +84,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (email: string, password: string) => {
       const pair = await api.login(email, password);
       setTokens({ access: pair.access_token, refresh: pair.refresh_token });
-      await applyUser(await api.me());
+      const me = await api.me();
+      await applyUser(me);
+      return me;
     },
     [applyUser],
   );
@@ -92,7 +94,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const googleLogin = useCallback(
     async (idToken: string) => {
       await api.googleLogin(idToken);
-      await applyUser(await api.me());
+      const me = await api.me();
+      await applyUser(me);
+      return me;
     },
     [applyUser],
   );
@@ -100,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(
     async (email: string, password: string, name: string) => {
       await api.register(email, password, name);
-      await login(email.trim().toLowerCase(), password);
+      return await login(email.trim().toLowerCase(), password);
     },
     [login],
   );
