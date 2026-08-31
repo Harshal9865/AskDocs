@@ -46,39 +46,39 @@ function AuroraHeroMock() {
         <span className="ask-aurora-blob ask-aurora-blob--2" />
         <span className="ask-aurora-blob ask-aurora-blob--3" />
       </div>
-      <div className="glass-card card-hover-lift relative z-10 overflow-hidden rounded-3xl border border-white/40 dark:border-white/10 shadow-2xl backdrop-blur-2xl">
-        <div className="flex items-center gap-2 border-b border-slate-100/80 px-4 py-3 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]">
-          <span className="h-2.5 w-2.5 rounded-full bg-red-400/90 shadow-sm" />
-          <span className="h-2.5 w-2.5 rounded-full bg-amber-400/90 shadow-sm" />
-          <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/90 shadow-sm" />
-          <span className="ml-2 text-xs font-semibold text-slate-500 dark:text-zinc-400">AskDocs — AI Chat</span>
+      <div className="relative z-10 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#0d0d1a]">
+        <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3 dark:border-white/5">
+          <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
+          <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+          <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+          <span className="ml-2 text-xs text-slate-400 dark:text-zinc-500">AskDocs — AI Chat</span>
         </div>
-        <div className="space-y-3.5 p-5">
-          <div className="flex gap-2.5">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300 shadow-sm">
-              <FileText className="h-4 w-4" />
+        <div className="space-y-3 p-4">
+          <div className="flex gap-2">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300">
+              <FileText className="h-3.5 w-3.5" />
             </span>
-            <div className="rounded-2xl rounded-bl-md bg-slate-100/90 px-3.5 py-2.5 text-sm font-medium text-slate-800 dark:bg-white/10 dark:text-zinc-200 shadow-sm">
+            <div className="rounded-2xl rounded-bl-md bg-slate-100 px-3 py-2 text-sm dark:bg-white/5 dark:text-zinc-200">
               What does our leave policy say?
             </div>
           </div>
-          <div className="flex gap-2.5 justify-end">
-            <div className="max-w-[80%] rounded-2xl rounded-br-md bg-gradient-to-r from-purple-600 to-indigo-600 px-3.5 py-2.5 text-sm text-white shadow-md shadow-indigo-500/20">
-              Based on HR Handbook p.12: 24 days annual leave, carry over 5. <span className="rounded bg-white/20 px-1 py-0.5 text-xs text-indigo-100">[Source 1]</span>
+          <div className="flex gap-2 justify-end">
+            <div className="max-w-[80%] rounded-2xl rounded-br-md bg-indigo-600 px-3 py-2 text-sm text-white">
+              Based on HR Handbook p.12: 24 days annual leave, carry over 5. <span className="text-indigo-200">[Source 1]</span>
             </div>
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-sm">
-              <Sparkles className="h-4 w-4" />
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+              <Sparkles className="h-3.5 w-3.5" />
             </span>
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-emerald-200/80 bg-emerald-50/90 px-3.5 py-1.5 text-xs font-semibold text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300 shadow-sm">
-            <Check className="h-3.5 w-3.5" /> Answer cited from 2 verified workspace documents
+          <div className="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
+            <Check className="h-3 w-3" /> Answer cited from 2 documents
           </div>
         </div>
-        <div className="border-t border-slate-100/80 px-4 py-3 dark:border-white/5 bg-slate-50/30 dark:bg-white/[0.01]">
-          <div className="flex items-center gap-2 rounded-2xl border border-slate-200/80 bg-white/80 px-3.5 py-2.5 text-sm text-slate-400 dark:border-white/10 dark:bg-white/5 shadow-inner">
+        <div className="border-t border-slate-100 px-3 py-3 dark:border-white/5">
+          <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-400 dark:border-white/10 dark:bg-white/5">
             <Search className="h-4 w-4" />
-            Ask anything about your team's docs...
-            <span className="ml-auto flex h-6 w-6 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm hover:scale-105 transition-transform">
+            Ask a question...
+            <span className="ml-auto flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-white">
               <ArrowRight className="h-3 w-3" />
             </span>
           </div>
