@@ -122,14 +122,18 @@ export default function ChatsPage() {
   const [loadingOlder, setLoadingOlder] = useState(false);
 
   const loadChats = useCallback(async () => {
-    if (!workspace) return;
     try { 
-      const chatList = await api.listTeamChats(workspace.id);
+      const chatList = await api.listTeamChats(workspace?.id);
       // Strict recency sort: newest message or newest created conversation first
       chatList.sort((a, b) => new Date(b.last_message_at ?? b.created_at).getTime() - new Date(a.last_message_at ?? a.created_at).getTime());
-      setChats(chatList); 
+      setChats(chatList);
+      setActiveChat((curr) => {
+        if (!curr) return null;
+        const updated = chatList.find((c) => c.id === curr.id);
+        return updated || curr;
+      });
     } catch { /* ignore */ }
-  }, [workspace]);
+  }, [workspace?.id]);
 
   const loadColleagues = useCallback(async () => {
     if (!workspace) return;
@@ -137,26 +141,30 @@ export default function ChatsPage() {
   }, [workspace, user]);
 
   useEffect(() => {
-    setActiveChat(null); setMessages([]); setDisplayCount(40);
-    void loadChats(); void loadColleagues();
-    const t = setInterval(() => { void loadChats(); void loadColleagues(); }, 10000);
+    void loadChats();
+    void loadColleagues();
+    const t = setInterval(() => { void loadChats(); void loadColleagues(); }, 5000);
     return () => clearInterval(t);
   }, [loadChats, loadColleagues]);
 
   useEffect(() => {
     if (!activeChat) return;
-    setDisplayCount(40);
     let cancelled = false;
     const poll = async () => { 
       try { 
         const msgs = await api.listTeamMessages(activeChat.id); 
-        if (!cancelled) setMessages(msgs); 
+        if (!cancelled) {
+          setMessages(msgs);
+          if (msgs.length > prevMsgCount.current) {
+            void loadChats();
+          }
+        }
       } catch { /* ignore */ } 
     };
     void poll();
-    const t = setInterval(poll, 4000);
+    const t = setInterval(poll, 3000);
     return () => { cancelled = true; clearInterval(t); };
-  }, [activeChat]);
+  }, [activeChat?.id, loadChats]);
 
   const prevMsgCount = useRef(0);
   
@@ -258,18 +266,33 @@ export default function ChatsPage() {
 
   async function handleSend(text: string, attachments: AttachedFile[]) {
     if (!activeChat || sending) return;
+    const currentChatId = activeChat.id;
     setSending(true);
     try {
       const ids: string[] = []; const failed: string[] = [];
       for (const a of attachments) { try { ids.push((await api.uploadChatAttachment(a.file)).id); } catch { failed.push(a.file.name); } }
-      await api.sendTeamMessage(activeChat.id, text, ids);
+      const newMsg = await api.sendTeamMessage(currentChatId, text, ids);
       setComposerText("");
       if (failed.length > 0) alert(`Couldn't upload: ${failed.join(", ")}`);
-      setMessages(await api.listTeamMessages(activeChat.id)); await loadChats();
+      
+      // Optimistically push message and bubble this chat to index #0 at the top
+      setMessages((prev) => [...prev, newMsg]);
+      const nowIso = new Date().toISOString();
+      setChats((prev) => {
+        const target = prev.find((c) => c.id === currentChatId);
+        if (!target) return prev;
+        const updatedTarget = { ...target, last_message_at: nowIso, last_message_preview: text };
+        const others = prev.filter((c) => c.id !== currentChatId);
+        return [updatedTarget, ...others];
+      });
+
+      const msgs = await api.listTeamMessages(currentChatId);
+      setMessages(msgs);
+      await loadChats();
     } catch (err) { alert((err as Error).message); } finally { setSending(false); }
   }
 
-  if (!workspace) {
+  if (!workspace && chats.length === 0) {
     return <div className="dark:border-white/10 dark:bg-[#121212] rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">Create or select a workspace first.</div>;
   }
 

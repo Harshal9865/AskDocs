@@ -255,8 +255,10 @@ export const api = {
   presencePing: () => request<void>("/presence/ping", { method: "POST" }),
 
   // ---- team chats (DMs + groups) ----
-  listTeamChats: (wsId: string) =>
-    request<TeamChat[]>(`/workspaces/${wsId}/team-chats`),
+  listTeamChats: (wsId?: string) =>
+    wsId
+      ? request<TeamChat[]>(`/workspaces/${wsId}/team-chats`)
+      : request<TeamChat[]>("/team-chats"),
   createDirectChat: (wsId: string, userId: string) =>
     request<TeamChat>(`/workspaces/${wsId}/team-chats/direct`, {
       method: "POST",

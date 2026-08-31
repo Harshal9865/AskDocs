@@ -419,9 +419,13 @@ async def create_group_chat(
     return await _build_conv_out(db, conv, user.id)
 
 
+@router.get("/team-chats", response_model=list[TeamConversationOut])
 @router.get("/workspaces/{workspace_id}/team-chats", response_model=list[TeamConversationOut])
-async def list_team_chats(workspace_id: uuid.UUID, db: DbSession, user: CurrentUser):
-    await _require_ws_member(db, workspace_id, user)
+async def list_team_chats(
+    db: DbSession,
+    user: CurrentUser,
+    workspace_id: uuid.UUID | None = None,
+):
     my_convs = select(ConversationParticipant.conversation_id).where(
         ConversationParticipant.user_id == user.id
     )
@@ -431,14 +435,19 @@ async def list_team_chats(workspace_id: uuid.UUID, db: DbSession, user: CurrentU
     result = await db.execute(
         select(Conversation)
         .where(
-            Conversation.workspace_id == workspace_id,
             Conversation.type != "docs_qa",
             Conversation.id.in_(my_convs),
             Conversation.id.notin_(hidden_convs),
         )
         .order_by(Conversation.created_at.desc())
     )
-    return [await _build_conv_out(db, c, user.id) for c in result.scalars().all()]
+    convs = list(result.scalars().all())
+    built = [await _build_conv_out(db, c, user.id) for c in convs]
+    built.sort(
+        key=lambda c: str(c.last_message_at or c.created_at),
+        reverse=True,
+    )
+    return built
 
 
 @router.get("/team-chats/{conversation_id}", response_model=TeamConversationOut)
