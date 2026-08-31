@@ -223,7 +223,7 @@ export default function ChatsPage() {
     void poll();
     const t = setInterval(poll, 3000);
     return () => { cancelled = true; clearInterval(t); };
-  }, [activeChat?.id, loadChats]);
+  }, [activeChat, loadChats]);
 
   const prevMsgCount = useRef(0);
   

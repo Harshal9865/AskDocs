@@ -467,36 +467,36 @@ export default function DashboardPage() {
           )}
         </section>
 
+        {/* Activity Feed (admin-only) or Team Members */}
         <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#121212] sm:p-5">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-700 dark:text-zinc-200">
-              Team members
+              {recentActivity.length > 0 ? "Recent activity" : "Team members"}
             </h2>
             <Link
-              href="/members"
+              href={recentActivity.length > 0 ? "/activity" : "/members"}
               className="text-xs font-medium text-indigo-600 hover:underline dark:text-[#1DB954]"
             >
-              Manage
+              {recentActivity.length > 0 ? "View all" : "Manage"}
             </Link>
           </div>
-          {members.length > 0 ? (
+          {recentActivity.length > 0 ? (
+            <ul className="divide-y divide-slate-100 dark:divide-white/5">
+              {recentActivity.map((item) => (
+                <ActivityItem key={item.id} item={item} />
+              ))}
+            </ul>
+          ) : members.length > 0 ? (
             <ul className="space-y-1.5">
-              {members.slice(0, 5).map((m) => (
-                <li
-                  key={m.id}
-                  className="group flex items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-slate-50 dark:hover:bg-white/5"
-                >
+              {members.slice(0, 7).map((m) => (
+                <li key={m.user_id} className="flex items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-slate-50 dark:hover:bg-white/5">
                   <div className="relative">
-                    <Avatar
-                      name={m.name ?? m.email}
-                      size={32}
-                      src={m.avatar_value ? `${API_BASE}${m.avatar_value}` : undefined}
-                    />
-                    <span
-                      className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white dark:border-[#181818] ${
-                        m.online ? "bg-emerald-500" : "bg-slate-300 dark:bg-zinc-600"
-                      }`}
-                    />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-xs font-bold text-white">
+                      {m.name?.slice(0, 2)?.toUpperCase() ?? "?"}
+                    </div>
+                    {m.online && (
+                      <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500 dark:border-[#121212]" />
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-medium text-slate-700 dark:text-zinc-200">{m.name}</div>
