@@ -61,8 +61,8 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
 
   return (
     <>
-    <header className="dark:border-slate-700/50 dark:bg-[#181818] sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-3 transition-colors sm:px-5">
-{/* mobile hamburger */}
+    <header className="dark:border-slate-700/50 dark:bg-[#181818] sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b border-slate-200 bg-white px-3 transition-colors sm:gap-3 sm:px-5">
+      {/* mobile hamburger */}
       {onMenu && (
         <button
           onClick={onMenu}
@@ -83,6 +83,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           </svg>
         </button>
       )}
+
       {/* brand */}
       <button
         onClick={() => router.push("/")}
@@ -109,6 +110,16 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           AskDocs
         </span>
       </button>
+
+      {/* Home icon for small screens on top left side after logo */}
+      <Link
+        href="/"
+        title="Go to Homepage"
+        aria-label="Go to Homepage"
+        className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 sm:hidden transition-colors"
+      >
+        <Home className="h-4.5 w-4.5" />
+      </Link>
 
       {/* desktop nav — fills the empty middle (collapses to More sheet <lg) */}
       <nav className="hidden items-center gap-1 lg:flex">
@@ -235,7 +246,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           href="/"
           title="Go to Homepage"
           aria-label="Go to Homepage"
-          className="flex h-9 w-9 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 transition-colors"
+          className="hidden sm:flex h-9 w-9 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 transition-colors"
         >
           <Home className="h-5 w-5" />
         </Link>
