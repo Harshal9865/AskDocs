@@ -314,7 +314,7 @@ function Reveal({ children, dir = "up", delay = 0, className = "" }: { children:
 }
 
 export default function Home() {
-  const { user, logout } = useAuth();
+  const { user, logout, avatarSrc } = useAuth();
   const { dark, toggle } = useTheme();
   const [scrolled, setScrolled] = React.useState(false);
   const [menuOpen, setMenuOpen] = React.useState(false);
@@ -394,7 +394,7 @@ export default function Home() {
                 <Avatar
                   name={user?.name ?? "?"}
                   size={28}
-                  src={user.avatar_kind === "upload" ? undefined : undefined}
+                  src={avatarSrc}
                   stickerId={
                     user?.avatar_kind === "sticker" ? user.avatar_value ?? null : null
                   }
