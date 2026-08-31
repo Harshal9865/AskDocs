@@ -278,59 +278,73 @@ export default function MembersPage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#121214]">
+        <div className="group rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-purple-300 dark:border-white/10 dark:bg-[#13111c] dark:hover:border-purple-500/30">
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-zinc-400">
-            <Users className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400">
+              <Users className="h-3.5 w-3.5" />
+            </span>
             Total Members
           </div>
-          <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{members.length}</p>
+          <p className="mt-2 text-2xl font-black tracking-tight text-slate-900 dark:text-white">{members.length}</p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#121214]">
+
+        <div className="group rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-emerald-300 dark:border-white/10 dark:bg-[#13111c] dark:hover:border-emerald-500/30">
           <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-            <Activity className="h-4 w-4" />
+            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
+              <Activity className="h-3.5 w-3.5" />
+            </span>
             Online Now
           </div>
-          <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{onlineCount}</p>
+          <p className="mt-2 text-2xl font-black tracking-tight text-slate-900 dark:text-white">{onlineCount}</p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#121214]">
+
+        <div className="group rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-indigo-300 dark:border-white/10 dark:bg-[#13111c] dark:hover:border-indigo-500/30">
           <div className="flex items-center gap-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-            <Shield className="h-4 w-4" />
+            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
+              <Shield className="h-3.5 w-3.5" />
+            </span>
             Administrators
           </div>
-          <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{adminCount}</p>
+          <p className="mt-2 text-2xl font-black tracking-tight text-slate-900 dark:text-white">{adminCount}</p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#121214]">
+
+        <div className="group rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-amber-300 dark:border-white/10 dark:bg-[#13111c] dark:hover:border-amber-500/30">
           <div className="flex items-center gap-2 text-xs font-semibold text-amber-600 dark:text-amber-400">
-            <Clock className="h-4 w-4" />
+            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
+              <Clock className="h-3.5 w-3.5" />
+            </span>
             Pending / Reqs
           </div>
-          <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{pendingInvites.length + joinRequests.length}</p>
+          <p className="mt-2 text-2xl font-black tracking-tight text-slate-900 dark:text-white">{pendingInvites.length + joinRequests.length}</p>
         </div>
       </div>
 
       {/* Invite Member Section (Admin Only) */}
       {isAdmin && (
-        <div className="rounded-2xl border border-purple-200/70 bg-gradient-to-r from-purple-50/50 via-white to-indigo-50/30 p-5 shadow-sm dark:border-purple-900/30 dark:bg-[#15121e]">
-          <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-3">
-            <UserPlus className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+        <div className="relative overflow-hidden rounded-2xl border border-purple-200/80 bg-gradient-to-br from-purple-50/80 via-white to-indigo-50/60 p-5 shadow-sm dark:border-purple-500/20 dark:from-[#161224] dark:via-[#13111e] dark:to-[#181427]">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-purple-500/10 blur-2xl dark:bg-purple-500/15" />
+          <h2 className="relative mb-3 flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-purple-600 text-white shadow-sm">
+              <UserPlus className="h-3.5 w-3.5" />
+            </span>
             Invite New Member
           </h2>
-          <form onSubmit={invite} className="flex flex-col gap-2.5 sm:flex-row">
+          <form onSubmit={invite} className="relative flex flex-col gap-2.5 sm:flex-row">
             <div className="relative flex-1">
-              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
               <input
                 type="email"
                 required
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
                 placeholder="colleague@company.com"
-                className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-9 pr-4 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#121214] dark:text-white transition-all"
+                className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm outline-none placeholder:text-slate-400 focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#0e0c16] dark:text-white dark:placeholder:text-zinc-500 transition-all"
               />
             </div>
             <select
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value as Role)}
-              className="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 outline-none focus:border-purple-600 dark:border-white/10 dark:bg-[#121214] dark:text-zinc-200"
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 outline-none focus:border-purple-600 dark:border-white/10 dark:bg-[#0e0c16] dark:text-zinc-200 transition-colors"
               aria-label="Role for new member"
             >
               {ROLES.map((r) => (
@@ -342,7 +356,7 @@ export default function MembersPage() {
             <button
               type="submit"
               disabled={inviteBusy}
-              className="rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-purple-700 active:scale-[0.99] disabled:opacity-50 transition-all shadow-sm"
+              className="rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-purple-600/20 hover:from-purple-500 hover:to-indigo-500 active:scale-[0.99] disabled:opacity-50 transition-all"
             >
               {inviteBusy ? "Inviting…" : "Send Invite"}
             </button>
@@ -355,22 +369,23 @@ export default function MembersPage() {
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {/* Pending Invitations */}
           {pendingInvites.length > 0 && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#121214]">
-              <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#13111c]">
+              <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+                <Clock className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
                 Pending Invitations ({pendingInvites.length})
               </h3>
-              <ul className="space-y-2 max-h-48 overflow-y-auto">
+              <ul className="space-y-2 max-h-48 overflow-y-auto pr-1">
                 {pendingInvites.map((inv) => (
-                  <li key={inv.id} className="flex items-center justify-between rounded-xl bg-slate-50 p-2.5 text-sm dark:bg-white/5">
+                  <li key={inv.id} className="flex items-center justify-between rounded-xl bg-slate-50 p-2.5 text-sm dark:bg-[#1a1726] border border-transparent dark:border-white/5">
                     <span className="truncate min-w-0 pr-2">
                       <span className="font-medium text-slate-800 dark:text-zinc-200">{inv.email}</span>
-                      <span className="ml-2 rounded-md bg-purple-100 px-1.5 py-0.5 text-[10px] font-bold text-purple-700 dark:bg-purple-950 dark:text-purple-300">
+                      <span className="ml-2 rounded-md bg-purple-100 px-1.5 py-0.5 text-[10px] font-bold text-purple-700 dark:bg-purple-950/80 dark:text-purple-300">
                         {inv.role}
                       </span>
                     </span>
                     <button
                       onClick={() => void cancelInvite(inv)}
-                      className="shrink-0 text-xs font-medium text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                      className="shrink-0 text-xs font-semibold text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
                     >
                       Cancel
                     </button>
@@ -382,13 +397,14 @@ export default function MembersPage() {
 
           {/* Join Requests */}
           {joinRequests.length > 0 && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#121214]">
-              <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#13111c]">
+              <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+                <Users className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                 Join Requests ({joinRequests.length})
               </h3>
-              <ul className="space-y-2 max-h-48 overflow-y-auto">
+              <ul className="space-y-2 max-h-48 overflow-y-auto pr-1">
                 {joinRequests.map((req) => (
-                  <li key={req.id} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-2.5 text-sm dark:bg-white/5">
+                  <li key={req.id} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-2.5 text-sm dark:bg-[#1a1726] border border-transparent dark:border-white/5">
                     <div className="min-w-0 flex-1 truncate">
                       <p className="font-semibold text-slate-800 dark:text-zinc-100">{req.user_name || req.user_email}</p>
                       <p className="text-xs text-slate-400 truncate">{req.user_email}</p>
@@ -396,13 +412,13 @@ export default function MembersPage() {
                     <div className="flex shrink-0 gap-1.5">
                       <button
                         onClick={() => void handleJoinRequest(req.id, "approve")}
-                        className="rounded-lg bg-emerald-600 px-2.5 py-1 text-xs font-bold text-white hover:bg-emerald-700 shadow-sm"
+                        className="rounded-lg bg-emerald-600 px-3 py-1 text-xs font-bold text-white hover:bg-emerald-700 shadow-sm transition-colors"
                       >
                         Approve
                       </button>
                       <button
                         onClick={() => void handleJoinRequest(req.id, "reject")}
-                        className="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300"
+                        className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10 transition-colors"
                       >
                         Reject
                       </button>
@@ -416,19 +432,19 @@ export default function MembersPage() {
       )}
 
       {/* Main Members Management Section */}
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#121214] overflow-hidden">
+      <div className="rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-white/10 dark:bg-[#13111c] overflow-hidden">
         
         {/* Toolbar: Search, Filters & Sorters */}
-        <div className="border-b border-slate-100 p-4 dark:border-white/10 space-y-3">
+        <div className="border-b border-slate-100 p-4 dark:border-white/10 space-y-3 bg-slate-50/50 dark:bg-white/[0.01]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             {/* Search Input */}
             <div className="relative flex-1 max-w-md">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search member by name, email, or role…"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none placeholder:text-slate-400 focus:border-purple-600 focus:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-zinc-500 transition-all"
+                className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm outline-none placeholder:text-slate-400 focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#0e0c16] dark:text-white dark:placeholder:text-zinc-500 transition-all"
               />
             </div>
 
@@ -438,7 +454,7 @@ export default function MembersPage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as MemberSort)}
-                className="rounded-xl border border-slate-200 bg-white py-2 px-3 text-xs font-semibold text-slate-700 dark:border-white/10 dark:bg-[#181818] dark:text-zinc-300 outline-none"
+                className="rounded-xl border border-slate-200 bg-white py-2 px-3 text-xs font-semibold text-slate-700 dark:border-white/10 dark:bg-[#0e0c16] dark:text-zinc-300 outline-none focus:border-purple-600"
               >
                 <option value="name_asc">Name (A → Z)</option>
                 <option value="name_desc">Name (Z → A)</option>
@@ -449,7 +465,7 @@ export default function MembersPage() {
               <select
                 value={pageSize}
                 onChange={(e) => setPageSize(Number(e.target.value))}
-                className="rounded-xl border border-slate-200 bg-white py-2 px-2 text-xs font-semibold text-slate-700 dark:border-white/10 dark:bg-[#181818] dark:text-zinc-300 outline-none"
+                className="rounded-xl border border-slate-200 bg-white py-2 px-2 text-xs font-semibold text-slate-700 dark:border-white/10 dark:bg-[#0e0c16] dark:text-zinc-300 outline-none focus:border-purple-600"
               >
                 <option value={10}>10 / page</option>
                 <option value={20}>20 / page</option>
@@ -471,10 +487,10 @@ export default function MembersPage() {
               <button
                 key={f.id}
                 onClick={() => setRoleFilter(f.id)}
-                className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
+                className={`rounded-full px-3.5 py-1 text-xs font-semibold transition-all duration-150 ${
                   roleFilter === f.id
-                    ? "bg-purple-600 text-white shadow-sm"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/5 dark:text-zinc-400 dark:hover:bg-white/10"
+                    ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm shadow-purple-600/20"
+                    : "bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-100 dark:bg-white/5 dark:border-transparent dark:text-zinc-400 dark:hover:bg-white/10"
                 }`}
               >
                 {f.label} <span className={`ml-1 text-[10px] ${roleFilter === f.id ? "text-purple-100" : "text-slate-400 dark:text-zinc-500"}`}>({f.count})</span>
@@ -501,7 +517,7 @@ export default function MembersPage() {
               return (
                 <div
                   key={m.user_id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 hover:bg-slate-50/70 dark:hover:bg-white/[0.02] transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 hover:bg-purple-50/40 dark:hover:bg-purple-950/15 transition-colors"
                 >
                   {/* Member Info */}
                   <div
@@ -515,12 +531,13 @@ export default function MembersPage() {
                           {m.name || m.email}
                         </span>
                         {isMe && (
-                          <span className="rounded-full bg-purple-100 dark:bg-purple-950/60 px-2 py-0.5 text-[10px] font-bold text-purple-700 dark:text-purple-400">
+                          <span className="rounded-full bg-purple-100 dark:bg-purple-950/70 px-2 py-0.5 text-[10px] font-bold text-purple-700 dark:text-purple-300 border border-purple-200/50 dark:border-purple-800/40">
                             You
                           </span>
                         )}
-                        <span className={`text-[11px] font-medium ${m.online ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-zinc-500"}`}>
-                          · {m.online ? "Online" : "Offline"}
+                        <span className={`text-[11px] font-medium flex items-center gap-1 ${m.online ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-zinc-500"}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${m.online ? "bg-emerald-500" : "bg-slate-300 dark:bg-zinc-600"}`} />
+                          {m.online ? "Online" : "Offline"}
                         </span>
                       </div>
                       <p className="truncate text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
@@ -535,7 +552,7 @@ export default function MembersPage() {
                       <button
                         onClick={() => void startDM(m)}
                         title="Send direct message"
-                        className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 p-2 text-slate-600 hover:text-purple-600 dark:text-zinc-300 dark:hover:text-purple-400 hover:bg-slate-50 dark:hover:bg-white/10 transition-colors"
+                        className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 p-2 text-slate-600 hover:text-purple-600 dark:text-zinc-300 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/30 transition-all active:scale-95"
                       >
                         <MessageSquare className="h-4 w-4" />
                       </button>
@@ -547,7 +564,7 @@ export default function MembersPage() {
                           disabled={isActionBusy}
                           value={m.role}
                           onChange={(e) => void changeRole(m, e.target.value as Role)}
-                          className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#181818] px-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:text-zinc-200 outline-none focus:border-purple-600 disabled:opacity-50"
+                          className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0e0c16] px-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:text-zinc-200 outline-none focus:border-purple-600 disabled:opacity-50"
                           aria-label={`Change role for ${m.email}`}
                         >
                           {ROLES.map((r) => (
@@ -560,7 +577,7 @@ export default function MembersPage() {
                           disabled={isActionBusy}
                           onClick={() => void remove(m)}
                           title="Remove from workspace"
-                          className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 dark:hover:text-red-400 transition-colors disabled:opacity-50"
+                          className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:text-red-400 transition-all active:scale-95 disabled:opacity-50"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -568,10 +585,10 @@ export default function MembersPage() {
                     ) : (
                       <span className={`rounded-lg px-2.5 py-1 text-xs font-bold uppercase tracking-wider ${
                         m.role === "admin"
-                          ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300"
+                          ? "bg-purple-100 text-purple-700 dark:bg-purple-950/80 dark:text-purple-300 border border-purple-200/50 dark:border-purple-800/40"
                           : m.role === "member"
-                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300"
-                          : "bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-zinc-300"
+                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/40"
+                          : "bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-zinc-300 border border-slate-200/50 dark:border-white/5"
                       }`}>
                         {m.role}
                       </span>
