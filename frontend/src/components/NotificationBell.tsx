@@ -28,6 +28,11 @@ export default function NotificationBell() {
     }).catch(() => {});
   }, [workspace, user]);
 
+  const previewsRef = useRef(previews);
+  useEffect(() => {
+    previewsRef.current = previews;
+  }, [previews]);
+
   const load = useCallback(async () => {
     try {
       const [list, reqs] = await Promise.all([
@@ -37,7 +42,7 @@ export default function NotificationBell() {
       setInvites(list);
       setJoinReqs(reqs.filter((r: JoinRequest) => r.status === "pending"));
       for (const inv of list) {
-        if (!previews[inv.id]) {
+        if (!previewsRef.current[inv.id]) {
           try {
             const p = await api.invitationPreview(inv.id);
             setPreviews((prev) => ({ ...prev, [inv.id]: p }));
@@ -49,12 +54,11 @@ export default function NotificationBell() {
     } catch {
       /* not signed in yet */
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isAdmin, workspace]);
 
   useEffect(() => {
     void load();
-    pollRef.current = setInterval(() => void load(), 30000);
+    pollRef.current = setInterval(() => void load(), 10000);
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
