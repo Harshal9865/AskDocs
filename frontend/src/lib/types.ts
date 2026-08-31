@@ -38,6 +38,7 @@ export interface Workspace {
   brand_value?: string | null;
   is_public?: boolean;
   member_count?: number | null;
+  role?: string;
 }
 
 export interface JoinRequest {

@@ -29,7 +29,16 @@ export default function WorkspaceSettingsPage() {
 
   const wsId = workspace?.id;
 
-  const isAdmin = workspace?.role === "admin";
+  const [isAdmin, setIsAdmin] = useState(false);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!workspace || !user) return;
+    api.listMembers(workspace.id).then((members) => {
+      const me = members.find((m) => m.user_id === user.id);
+      setIsAdmin(me?.role === "admin");
+    }).catch(() => {});
+  }, [workspace, user]);
 
   async function save(e: React.FormEvent) {
     e.preventDefault();

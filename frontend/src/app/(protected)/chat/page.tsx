@@ -13,7 +13,6 @@ import {
   ArrowLeft,
   FileText,
   MessagesSquare,
-  Sparkles,
   Trash2,
   TriangleAlert,
   UsersRound,

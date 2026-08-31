@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
+import { useAuth } from "@/lib/auth-context";
 import type { Invitation, JoinRequest } from "@/lib/types";
 
 export default function NotificationBell() {
@@ -16,8 +17,16 @@ export default function NotificationBell() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const router = useRouter();
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { user } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  const isAdmin = workspace?.role === "admin";
+  useEffect(() => {
+    if (!workspace || !user) return;
+    api.listMembers(workspace.id).then((members) => {
+      const me = members.find((m) => m.user_id === user.id);
+      setIsAdmin(me?.role === "admin");
+    }).catch(() => {});
+  }, [workspace, user]);
 
   const load = useCallback(async () => {
     try {

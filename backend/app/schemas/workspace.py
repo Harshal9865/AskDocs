@@ -19,6 +19,7 @@ class WorkspaceOut(BaseModel):
     brand_value: str | None = None
     is_public: bool = False
     member_count: int | None = None
+    role: str | None = None
 
 
 class JoinRequestOut(BaseModel):

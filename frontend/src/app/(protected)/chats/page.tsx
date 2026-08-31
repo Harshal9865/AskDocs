@@ -54,7 +54,7 @@ function ChatAvatar({
   return <Avatar name={user.name ?? user.email ?? "User"} size={size} showPresence online={user.online} src={src} stickerId={stickerId} />;
 }
 
-function GroupAvatar({ chat: _chat, size = 40 }: { chat: TeamChat; size?: number }) {
+function GroupAvatar({ size = 40 }: { chat: TeamChat; size?: number }) {
   return (
     <span className="flex shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400/30 to-emerald-700/40 text-emerald-600 ring-1 ring-emerald-500/20 dark:from-emerald-500/20 dark:to-emerald-900/50 dark:text-emerald-400 dark:ring-emerald-400/20" style={{ width: size, height: size }}>
       <UsersRound style={{ width: size * 0.5, height: size * 0.5 }} />
