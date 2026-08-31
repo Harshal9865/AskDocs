@@ -88,14 +88,14 @@ export default function NotificationBell() {
   }
 
   async function respondFriend(f: Member, accept: boolean) {
-    setBusyId(f.id);
+    setBusyId(f.user_id);
     try {
       if (accept) {
-        await api.acceptFriend(f.id);
+        await api.acceptFriend(f.user_id);
       } else {
-        await api.declineFriend(f.id);
+        await api.declineFriend(f.user_id);
       }
-      setFriendReqs((prev) => prev.filter((item) => item.id !== f.id));
+      setFriendReqs((prev) => prev.filter((item) => item.user_id !== f.user_id));
     } catch (err) {
       alert((err as Error).message);
       await load();
@@ -167,7 +167,7 @@ export default function NotificationBell() {
               <ul className="max-h-[65vh] overflow-y-auto p-2 space-y-1.5 sm:max-h-84 divide-y divide-slate-100/50 dark:divide-white/[0.04]">
                 {/* Friend Requests */}
                 {friendReqs.map((f) => (
-                  <li key={f.id} className="rounded-xl p-3 transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.04] bg-transparent">
+                  <li key={f.user_id} className="rounded-xl p-3 transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.04] bg-transparent">
                     <div className="flex items-start gap-2.5">
                       <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-pink-100 dark:bg-pink-950/50 text-pink-600 dark:text-pink-400">
                         <UserPlus className="h-3.5 w-3.5" />
@@ -182,14 +182,14 @@ export default function NotificationBell() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => void respondFriend(f, true)}
-                            disabled={busyId === f.id}
+                            disabled={busyId === f.user_id}
                             className="rounded-lg bg-purple-600 px-3 py-1 text-xs font-semibold text-white hover:bg-purple-700 disabled:opacity-50 transition-colors shadow-sm"
                           >
                             Accept
                           </button>
                           <button
                             onClick={() => void respondFriend(f, false)}
-                            disabled={busyId === f.id}
+                            disabled={busyId === f.user_id}
                             className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-1 text-xs font-medium text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-white/10 disabled:opacity-50 transition-colors"
                           >
                             Decline

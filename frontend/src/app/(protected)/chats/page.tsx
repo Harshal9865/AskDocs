@@ -270,7 +270,8 @@ export default function ChatsPage() {
     catch (err) { alert((err as Error).message); }
   }
 
-  function senderName(senderId: string) {
+  function senderName(senderId?: string | null) {
+    if (!senderId) return "Team member";
     const p = activeChat?.participants.find((u) => u.user_id === senderId);
     return p?.name || p?.email || "Team member";
   }
