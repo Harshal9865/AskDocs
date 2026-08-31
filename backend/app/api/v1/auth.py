@@ -65,7 +65,7 @@ class GoogleLoginRequest(BaseModel):
 
 @router.post("/google", response_model=TokenPair)
 async def google_login(payload: GoogleLoginRequest, db: DbSession):
-    import httpx
+    import aiohttp
     import logging
     from google.oauth2 import id_token
     from google.auth.transport import requests as google_requests
@@ -89,25 +89,29 @@ async def google_login(payload: GoogleLoginRequest, db: DbSession):
             email = idinfo.get("email")
             name = idinfo.get("name")
         except Exception as e:
-            logger.warning(f"ID token verification failed, will fallback to userinfo: {e}")
+            logger.warning(f"ID token verification failed, trying userinfo endpoint: {e}")
 
-    # 2. If verification failed or it's an OAuth access token, fetch from Google userinfo API
+    # 2. If not an ID token or ID token verify failed, fetch user profile via Google userinfo API
     if not email:
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                res = await client.get(
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
                     "https://www.googleapis.com/oauth2/v3/userinfo",
                     headers={"Authorization": f"Bearer {raw_token}"},
-                )
-                if res.is_success:
-                    data = res.json()
-                    email = data.get("email")
-                    name = data.get("name")
+                    timeout=aiohttp.ClientTimeout(total=10),
+                ) as res:
+                    if res.status == 200:
+                        data = await res.json()
+                        email = data.get("email")
+                        name = data.get("name")
+                    else:
+                        err_text = await res.text()
+                        logger.warning(f"Google userinfo returned status {res.status}: {err_text}")
         except Exception as e:
-            logger.error(f"Google userinfo request failed: {e}")
+            logger.error(f"Google userinfo request error: {e}")
 
     if not email:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired Google token")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired Google account token")
 
     name = name or email.split("@")[0]
 
