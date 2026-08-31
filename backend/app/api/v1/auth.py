@@ -63,26 +63,24 @@ class GoogleLoginRequest(BaseModel):
 
 @router.post("/google", response_model=TokenPair)
 async def google_login(payload: GoogleLoginRequest, db: DbSession):
-    import aiohttp
     import logging
+    from google.oauth2 import id_token
+    from google.auth.transport import requests as google_requests
     
     logger = logging.getLogger(__name__)
     
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                "https://www.googleapis.com/oauth2/v3/userinfo",
-                headers={"Authorization": f"Bearer {payload.access_token}"}
-            ) as resp:
-                if resp.status != 200:
-                    error_text = await resp.text()
-                    logger.error(f"Google API error: {resp.status} - {error_text}")
-                    raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid Google token")
-                idinfo = await resp.json()
-                
-    except aiohttp.ClientError as e:
-        logger.error(f"Network error calling Google API: {e}")
-        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "Unable to verify Google token (network error)")
+        # Use Google's official library to verify the ID token
+        # This is more reliable than making HTTP calls ourselves
+        idinfo = id_token.verify_oauth2_token(
+            payload.access_token,
+            google_requests.Request(),
+            audience=None  # We accept any audience
+        )
+        
+    except ValueError as e:
+        logger.error(f"Invalid Google token: {e}")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid Google token")
     except Exception as e:
         logger.error(f"Unexpected error in google_login: {e}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Authentication service error")
