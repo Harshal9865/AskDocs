@@ -286,6 +286,7 @@ export default function EditProfileModal({
               maxLength={120}
               className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all"
             />
+          </div>
         </form>
 
         {msg && (
