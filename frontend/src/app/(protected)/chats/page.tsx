@@ -271,6 +271,11 @@ export default function ChatsPage() {
     catch (err) { alert((err as Error).message); }
   }
 
+  function senderName(senderId: string) {
+    const p = activeChat?.participants.find((u) => (u.id || u.user_id) === senderId);
+    return p?.name || p?.email || "Team member";
+  }
+
   async function handleSend(text: string, attachments: { file: File; previewUrl?: string }[]) {
     if (!activeChat || sending) return;
     setSending(true);
