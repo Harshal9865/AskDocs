@@ -1,4 +1,4 @@
-﻿import uuid
+import uuid
 
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
@@ -104,17 +104,9 @@ async def accept_invitation(
 
     # Update invitation status
     invite.status = "accepted"
+    await log_activity(db, invite.workspace_id, user.id, "member.joined", str(user.email))
     await db.commit()
     await db.refresh(invite)
-
-    # Log activity
-    await log_activity(
-        db=db,
-        workspace_id=invite.workspace_id,
-        user_id=user.id,
-        action="accept_invitation",
-        metadata={"invitation_id": str(invitation_id), "role": str(invite.role)},
-    )
 
     return invite
 

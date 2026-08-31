@@ -63,15 +63,22 @@ async function refreshTokens(): Promise<boolean> {
   }
 }
 
-async function googleLogin(idToken: string): Promise<void> {
+async function googleLogin(token: string): Promise<void> {
   const res = await fetch(`${API_BASE}/auth/google`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id_token: idToken }),
+    body: JSON.stringify({ token, id_token: token, access_token: token }),
   });
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(err || "Google sign-in failed");
+    let msg = "Google sign-in failed";
+    try {
+      const parsed = JSON.parse(err);
+      msg = parsed.detail || msg;
+    } catch {
+      msg = err || msg;
+    }
+    throw new Error(msg);
   }
   const pair: TokenPair = await res.json();
   setTokens({ access: pair.access_token, refresh: pair.refresh_token });

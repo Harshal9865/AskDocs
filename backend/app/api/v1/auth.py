@@ -59,36 +59,57 @@ async def login(
 
 
 class GoogleLoginRequest(BaseModel):
-    id_token: str
+    id_token: str | None = None
+    access_token: str | None = None
+    token: str | None = None
 
 @router.post("/google", response_model=TokenPair)
 async def google_login(payload: GoogleLoginRequest, db: DbSession):
+    import httpx
     import logging
     from google.oauth2 import id_token
     from google.auth.transport import requests as google_requests
     
     logger = logging.getLogger(__name__)
-    
-    try:
-        # Use Google's official library to verify the ID token
-        # This is more reliable than making HTTP calls ourselves
-        idinfo = id_token.verify_oauth2_token(
-            payload.id_token,
-            google_requests.Request(),
-            audience=None  # We accept any audience
-        )
-        
-    except ValueError as e:
-        logger.error(f"Invalid Google token: {e}")
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid Google token")
-    except Exception as e:
-        logger.error(f"Unexpected error in google_login: {e}")
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Authentication service error")
-    
-    email = idinfo.get("email")
+    raw_token = payload.token or payload.id_token or payload.access_token
+    if not raw_token:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Google token is missing")
+
+    email: str | None = None
+    name: str | None = None
+
+    # 1. If it looks like a JWT ID token (3 parts separated by dots), try official verify
+    if raw_token.count(".") == 2:
+        try:
+            idinfo = id_token.verify_oauth2_token(
+                raw_token,
+                google_requests.Request(),
+                audience=None,
+            )
+            email = idinfo.get("email")
+            name = idinfo.get("name")
+        except Exception as e:
+            logger.warning(f"ID token verification failed, will fallback to userinfo: {e}")
+
+    # 2. If verification failed or it's an OAuth access token, fetch from Google userinfo API
     if not email:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Google account has no email")
-    name = idinfo.get("name", email.split("@")[0])
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                res = await client.get(
+                    "https://www.googleapis.com/oauth2/v3/userinfo",
+                    headers={"Authorization": f"Bearer {raw_token}"},
+                )
+                if res.is_success:
+                    data = res.json()
+                    email = data.get("email")
+                    name = data.get("name")
+        except Exception as e:
+            logger.error(f"Google userinfo request failed: {e}")
+
+    if not email:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired Google token")
+
+    name = name or email.split("@")[0]
 
     result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()

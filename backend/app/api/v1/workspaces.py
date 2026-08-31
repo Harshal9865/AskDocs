@@ -53,11 +53,16 @@ async def create_workspace(payload: WorkspaceCreate, db: DbSession, user: Curren
 @router.get("", response_model=list[WorkspaceOut])
 async def list_workspaces(db: DbSession, user: CurrentUser):
     result = await db.execute(
-        select(Workspace)
+        select(Workspace, WorkspaceMember.role)
         .join(WorkspaceMember, WorkspaceMember.workspace_id == Workspace.id)
         .where(WorkspaceMember.user_id == user.id)
     )
-    return list(result.scalars().all())
+    out: list[WorkspaceOut] = []
+    for ws, role in result.all():
+        wo = WorkspaceOut.model_validate(ws)
+        wo.role = role.value if isinstance(role, Role) else str(role)
+        out.append(wo)
+    return out
 
 
 @router.get("/public", response_model=list[WorkspaceOut])
@@ -144,7 +149,11 @@ async def withdraw_join_request(request_id: uuid.UUID, db: DbSession, user: Curr
 @router.get("/{workspace_id}", response_model=WorkspaceOut)
 async def get_workspace(workspace_id: uuid.UUID, db: DbSession, membership: Membership):
     ws = await db.get(Workspace, membership.workspace_id)
-    return ws
+    if ws is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Workspace not found")
+    wo = WorkspaceOut.model_validate(ws)
+    wo.role = membership.role.value if isinstance(membership.role, Role) else str(membership.role)
+    return wo
 
 
 # ---------- Workspace brand logo ----------
