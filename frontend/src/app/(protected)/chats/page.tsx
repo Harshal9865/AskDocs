@@ -574,6 +574,8 @@ export default function ChatsPage() {
             </div>
           </>
         )}
+      </div>
+
       {/* New chat modal */}
       {showNewChat && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" onClick={() => { setShowNewChat(false); setNewChatQuery(""); setNewChatResults([]); }}>
