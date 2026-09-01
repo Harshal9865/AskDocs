@@ -43,6 +43,7 @@ function SearchInner() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
   const [recent, setRecent] = useState<string[]>([]);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const r = JSON.parse(localStorage.getItem("askdocs_recent_search") || "[]");
@@ -60,18 +61,32 @@ function SearchInner() {
   async function run(term?: string) {
     const query = (term ?? q).trim();
     if (!workspace || query.length < 2) return;
+
+    // Abort previous in-flight search request to prevent race conditions
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setBusy(true);
     setError(null);
     try {
       const res = await api.search(workspace.id, query);
-      setResults(res);
-      setSearched(true);
-      pushRecent(query);
-      router.replace(`/search?q=${encodeURIComponent(query)}`);
+      if (!controller.signal.aborted) {
+        setResults(res);
+        setSearched(true);
+        pushRecent(query);
+        router.replace(`/search?q=${encodeURIComponent(query)}`);
+      }
     } catch (err) {
-      setError((err as Error).message);
+      if (!controller.signal.aborted) {
+        setError((err as Error).message);
+      }
     } finally {
-      setBusy(false);
+      if (!controller.signal.aborted) {
+        setBusy(false);
+      }
     }
   }
 
@@ -81,10 +96,13 @@ function SearchInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspace]);
 
-  // debounced live search
+  // debounced live search (250ms)
   useEffect(() => {
-    if (q.trim().length < 2) return;
-    const t = setTimeout(() => void run(), 450);
+    if (q.trim().length < 2) {
+      if (q.trim().length === 0) setResults(null);
+      return;
+    }
+    const t = setTimeout(() => void run(), 250);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q]);

@@ -2,19 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Camera, Check, ImagePlus, RotateCcw, Building2, Sparkles } from "lucide-react";
+import { Camera, ImagePlus, RotateCcw, Building2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
 import { useAuth } from "@/lib/auth-context";
 import Avatar from "@/components/Avatar";
-
-const AVATARS = [
-  { id: "male-1", name: "Ginger Curls", tag: "Yellow BG", color: "from-amber-400 to-yellow-500" },
-  { id: "male-2", name: "Classic Cool", tag: "Yellow BG", color: "from-yellow-500 to-amber-600" },
-  { id: "female-1", name: "Lavender Bob", tag: "Day Theme", color: "from-indigo-400 to-purple-500" },
-  { id: "female-2", name: "Modern Teal", tag: "Day Theme", color: "from-sky-400 to-teal-500" },
-  { id: "ai-1", name: "Violet Night", tag: "Dark Theme", color: "from-violet-600 to-indigo-900" },
-];
 
 export default function WorkspaceSettingsPage() {
   const { workspace, refresh } = useWorkspace();
@@ -30,7 +22,6 @@ export default function WorkspaceSettingsPage() {
   const [brandBusy, setBrandBusy] = useState(false);
   const [brandMsg, setBrandMsg] = useState<string | null>(null);
   const [brandSrcLocal, setBrandSrcLocal] = useState<string | null>(null);
-  const [brandStickerLocal, setBrandStickerLocal] = useState<string | null>(null);
 
   const [isAdmin, setIsAdmin] = useState(false);
   const { user } = useAuth();
@@ -51,16 +42,11 @@ export default function WorkspaceSettingsPage() {
     if (workspace?.brand_kind === "upload") {
       api.getBrandLogoUrl(workspace.id).then((url) => {
         setBrandSrcLocal(url);
-        setBrandStickerLocal(null);
       }).catch(() => {
         setBrandSrcLocal(null);
       });
-    } else if (workspace?.brand_kind === "sticker" && workspace.brand_value) {
-      setBrandStickerLocal(workspace.brand_value);
-      setBrandSrcLocal(null);
     } else {
       setBrandSrcLocal(null);
-      setBrandStickerLocal(null);
     }
   }, [workspace]);
 
@@ -104,22 +90,15 @@ export default function WorkspaceSettingsPage() {
     }
   }
 
-  async function applyBrand(kind: "default" | "sticker", value?: string) {
+  async function resetBrandToDefault() {
     if (!wsId || !isAdmin) return;
     setBrandBusy(true);
     setBrandMsg(null);
     try {
-      await api.setBrand(wsId, kind, value);
+      await api.setBrand(wsId, "default");
       await refresh();
-      if (kind === "default") {
-        setBrandSrcLocal(null);
-        setBrandStickerLocal(null);
-        setBrandMsg("Reset to workspace initials.");
-      } else {
-        setBrandSrcLocal(null);
-        setBrandStickerLocal(value ?? null);
-        setBrandMsg("Workspace avatar updated.");
-      }
+      setBrandSrcLocal(null);
+      setBrandMsg("Reset to default workspace initials.");
     } catch (err) {
       setBrandMsg((err as Error).message);
     } finally {
@@ -136,7 +115,6 @@ export default function WorkspaceSettingsPage() {
       await api.uploadBrandPhoto(wsId, file);
       const url = await api.getBrandLogoUrl(wsId);
       setBrandSrcLocal(url);
-      setBrandStickerLocal(null);
       await refresh();
       setBrandMsg("Brand logo uploaded successfully.");
     } catch (err) {
@@ -180,16 +158,16 @@ export default function WorkspaceSettingsPage() {
         </div>
       )}
 
-      {/* Workspace Brand Logo & Icon Customization Card */}
+      {/* Workspace Brand Logo Card */}
       <section className="rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-[#13111f]/90 sm:p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Building2 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-              Workspace Brand Logo & Avatar
+              Workspace Brand Logo
             </h2>
             <p className="mt-0.5 text-xs text-slate-500 dark:text-zinc-400">
-              Customize the logo or 3D icon displayed across your workspace.
+              Upload a custom logo or emblem for &ldquo;{workspace.name}&rdquo;.
             </p>
           </div>
         </div>
@@ -201,7 +179,6 @@ export default function WorkspaceSettingsPage() {
               name={workspace.name}
               size={64}
               src={brandSrcLocal}
-              stickerId={brandStickerLocal}
             />
             {isAdmin && (
               <button
@@ -222,10 +199,8 @@ export default function WorkspaceSettingsPage() {
             </h3>
             <p className="text-xs text-slate-400 dark:text-zinc-500">
               {brandSrcLocal
-                ? "Custom logo uploaded"
-                : brandStickerLocal
-                ? `Active avatar: ${brandStickerLocal}`
-                : "Using workspace initial badge"}
+                ? "Custom logo uploaded and active"
+                : "Using default workspace initials"}
             </p>
           </div>
 
@@ -246,10 +221,10 @@ export default function WorkspaceSettingsPage() {
               >
                 <ImagePlus className="h-3.5 w-3.5" /> Upload Logo
               </button>
-              {(brandSrcLocal || brandStickerLocal) && (
+              {brandSrcLocal && (
                 <button
                   type="button"
-                  onClick={() => void applyBrand("default")}
+                  onClick={() => void resetBrandToDefault()}
                   disabled={brandBusy}
                   className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-red-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400 dark:hover:text-red-400 transition-all disabled:opacity-50"
                   title="Reset to workspace initials"
@@ -260,43 +235,6 @@ export default function WorkspaceSettingsPage() {
             </div>
           )}
         </div>
-
-        {/* 3D Avatars / Sticker Picker for Workspace */}
-        {isAdmin && (
-          <div>
-            <span className="block mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
-              Or Choose 3D Character Avatar
-            </span>
-            <div className="grid grid-cols-5 gap-2">
-              {AVATARS.map((a) => {
-                const selected = brandStickerLocal === a.id && !brandSrcLocal;
-                return (
-                  <button
-                    key={a.id}
-                    type="button"
-                    onClick={() => void applyBrand("sticker", a.id)}
-                    disabled={brandBusy}
-                    className={`group relative flex flex-col items-center gap-1.5 rounded-2xl border p-2.5 transition-all ${
-                      selected
-                        ? "border-purple-600 bg-purple-50/80 shadow-md shadow-purple-500/10 ring-2 ring-purple-600 dark:border-purple-400 dark:bg-purple-950/40"
-                        : "border-slate-200/80 bg-slate-50/60 hover:-translate-y-0.5 hover:border-purple-300 dark:border-white/10 dark:bg-[#181628]/60 dark:hover:border-purple-500/30"
-                    }`}
-                  >
-                    <Avatar name={a.name} size={40} stickerId={a.id} />
-                    <span className="truncate text-[10px] font-bold text-slate-700 dark:text-zinc-300 max-w-full">
-                      {a.name}
-                    </span>
-                    {selected && (
-                      <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-purple-600 text-white shadow-xs">
-                        <Check className="h-2.5 w-2.5 stroke-[3]" />
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {brandMsg && (
           <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">

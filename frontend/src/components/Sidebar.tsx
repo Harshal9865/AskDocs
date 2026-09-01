@@ -186,7 +186,7 @@ export default function Sidebar({
     };
   }, [user]);
 
-  // unread office chats badge — polling 10s
+  // unread office chats badge — polling 10s + instant event listener
   const [unreadChatCount, setUnreadChatCount] = useState(0);
   useEffect(() => {
     if (!workspace) { setUnreadChatCount(0); return; }
@@ -199,7 +199,18 @@ export default function Sidebar({
     };
     void fetchUnread();
     const t = setInterval(() => void fetchUnread(), 10000);
-    return () => { cancelled = true; clearInterval(t); };
+
+    const onChatRead = () => {
+      setUnreadChatCount((prev) => Math.max(0, prev - 1));
+      void fetchUnread();
+    };
+    window.addEventListener("askdocs_chat_read", onChatRead);
+
+    return () => {
+      cancelled = true;
+      clearInterval(t);
+      window.removeEventListener("askdocs_chat_read", onChatRead);
+    };
   }, [workspace]);
 
   async function createWorkspace(e: React.FormEvent) {

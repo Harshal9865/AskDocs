@@ -101,33 +101,13 @@ class GeminiProvider(LLMProvider):
         image_parts: list | None = None,
     ):
         contents = self._build_contents(question, contexts, history, image_parts)
-        loop = asyncio.get_running_loop()
-        queue: asyncio.Queue = asyncio.Queue()
-
-        def _run():
-            stream = self.client.models.generate_content_stream(
-                model=self.settings.GEMINI_CHAT_MODEL,
-                contents=contents,
-            )
-            return [chunk.text for chunk in stream if chunk.text]
-
-        async def _produce():
-            try:
-                chunks = await asyncio.to_thread(_run)
-                for text in chunks:
-                    await queue.put(text)
-            finally:
-                await queue.put(None)
-
-        task = asyncio.create_task(_produce())
-        try:
-            while True:
-                item = await queue.get()
-                if item is None:
-                    break
-                yield item
-        finally:
-            task.cancel()
+        response_stream = await self.client.aio.models.generate_content_stream(
+            model=self.settings.GEMINI_CHAT_MODEL,
+            contents=contents,
+        )
+        async for chunk in response_stream:
+            if chunk.text:
+                yield chunk.text
 
 
     async def detect_conflict(self, contexts: list[RetrievedChunk]) -> dict | None:

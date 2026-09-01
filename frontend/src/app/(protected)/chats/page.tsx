@@ -227,6 +227,16 @@ export default function ChatsPage() {
   }, [activeChat, loadChats]);
 
   const prevMsgCount = useRef(0);
+
+  const openChat = (chat: TeamChat) => {
+    setActiveChat(chat);
+    setMessages([]);
+    // Optimistically clear unread badge for this chat
+    setChats((prev) =>
+      prev.map((c) => (c.id === chat.id ? { ...c, unread_count: 0 } : c))
+    );
+    window.dispatchEvent(new CustomEvent("askdocs_chat_read", { detail: { chatId: chat.id } }));
+  };
   
   function scrollToBottom(smooth = true) {
     requestAnimationFrame(() => {
@@ -502,7 +512,7 @@ export default function ChatsPage() {
                   return (
                     <li key={chat.id} className="group relative flex items-center">
                       <button
-                        onClick={() => { setActiveChat(chat); setMessages([]); }}
+                        onClick={() => openChat(chat)}
                         className={`relative flex min-w-0 flex-1 items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-all duration-200 ${
                           isActive
                             ? "bg-gradient-to-r from-purple-500/15 via-indigo-500/10 to-blue-500/10 border border-purple-300/80 shadow-xs ring-1 ring-purple-500/20 dark:border-purple-500/30 dark:bg-purple-950/40"

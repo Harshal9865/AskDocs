@@ -46,7 +46,7 @@ function fmtSize(bytes: number) {
 export default function DocumentDetailPage() {
   const params = useParams<{ wsId: string; docId: string }>();
   const router = useRouter();
-  const { workspace } = useWorkspace();
+  const { workspace, workspaces, select } = useWorkspace();
   const { user } = useAuth();
   const [doc, setDoc] = useState<DocumentItem | null>(null);
   const [chunks, setChunks] = useState<ChunkItem[]>([]);
@@ -54,18 +54,31 @@ export default function DocumentDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [myRole, setMyRole] = useState<string | null>(null);
 
+  const targetWsId = params.wsId || workspace?.id;
+
+  // Auto-sync active workspace if URL param points to another workspace the user belongs to
+  useEffect(() => {
+    if (params.wsId && workspaces.length > 0 && workspace?.id !== params.wsId) {
+      const match = workspaces.find((w) => w.id === params.wsId);
+      if (match) {
+        select(match);
+      }
+    }
+  }, [params.wsId, workspaces, workspace?.id, select]);
+
   const load = useCallback(async () => {
-    if (!workspace) return;
+    if (!targetWsId || !params.docId) return;
     try {
-      const d = await api.getDocument(workspace.id, params.docId);
+      const d = await api.getDocument(targetWsId, params.docId);
       setDoc(d);
-      setChunks(await api.getDocumentChunks(workspace.id, d.id));
+      setChunks(await api.getDocumentChunks(targetWsId, d.id));
+      setError(null);
     } catch (err) {
       setError((err as Error).message);
     } finally {
       setLoading(false);
     }
-  }, [workspace, params.docId]);
+  }, [targetWsId, params.docId]);
 
   useEffect(() => {
     void load();
@@ -80,11 +93,11 @@ export default function DocumentDetailPage() {
 
   // resolve role
   useEffect(() => {
-    if (!workspace || !user) return;
+    if (!targetWsId || !user) return;
     let cancelled = false;
     (async () => {
       try {
-        const members = await api.listMembers(workspace.id);
+        const members = await api.listMembers(targetWsId);
         if (!cancelled) {
           setMyRole(members.find((m) => m.email === user.email)?.role ?? null);
         }
@@ -95,12 +108,12 @@ export default function DocumentDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [workspace, user]);
+  }, [targetWsId, user]);
 
   async function handleDelete() {
-    if (!workspace || !doc) return;
+    if (!targetWsId || !doc) return;
     try {
-      await api.deleteDocument(workspace.id, doc.id);
+      await api.deleteDocument(targetWsId, doc.id);
       showToast("success", `"${doc.title}" moved to trash`);
       router.push("/documents");
     } catch (err) {
