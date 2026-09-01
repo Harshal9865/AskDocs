@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Check, Sparkles, Crown, Zap, Shield, ArrowRight } from "lucide-react";
+import { X, Check, Sparkles, Crown, Zap, ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import FakeCheckoutModal from "./FakeCheckoutModal";
 
@@ -14,7 +14,7 @@ interface PricingModalProps {
 export default function PricingModal({
   isOpen,
   onClose,
-  initialPlan = "premium",
+  initialPlan: _initialPlan = "premium",
 }: PricingModalProps) {
   const { user } = useAuth();
   const [interval, setInterval] = useState<"monthly" | "annual">("monthly");

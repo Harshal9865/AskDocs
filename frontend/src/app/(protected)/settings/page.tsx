@@ -9,6 +9,7 @@ import PasswordInput from "@/components/PasswordInput";
 import Avatar from "@/components/Avatar";
 import PlanBadge from "@/components/PlanBadge";
 import PricingModal from "@/components/PricingModal";
+import type { SubscriptionInfo, InvoiceRecord } from "@/lib/types";
 
 const AVATARS = [
   { id: "male-1", name: "Ginger Curls", tag: "Yellow BG", color: "from-amber-400 to-yellow-500" },
@@ -360,16 +361,14 @@ export default function SettingsPage() {
 
 function SubscriptionSection() {
   const { user, refreshUser } = useAuth();
-  const [sub, setSub] = useState<any>(null);
-  const [invoices, setInvoices] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [sub, setSub] = useState<SubscriptionInfo | null>(null);
+  const [invoices, setInvoices] = useState<InvoiceRecord[]>([]);
   const [pricingOpen, setPricingOpen] = useState(false);
   const [cancelBusy, setCancelBusy] = useState(false);
   const [cancelMsg, setCancelMsg] = useState<string | null>(null);
 
   async function loadData() {
     try {
-      setLoading(true);
       const [subData, invData] = await Promise.all([
         api.getSubscription().catch(() => null),
         api.listInvoices().catch(() => []),
@@ -378,13 +377,11 @@ function SubscriptionSection() {
       setInvoices(invData);
     } catch {
       // ignore
-    } finally {
-      setLoading(false);
     }
   }
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, [user]);
 
   async function handleCancel() {
@@ -396,8 +393,8 @@ function SubscriptionSection() {
       await refreshUser();
       await loadData();
       setCancelMsg("Subscription canceled. You have been downgraded to Free.");
-    } catch (err: any) {
-      setCancelMsg(err?.message || "Failed to cancel subscription.");
+    } catch (err: unknown) {
+      setCancelMsg((err as Error)?.message || "Failed to cancel subscription.");
     } finally {
       setCancelBusy(false);
     }

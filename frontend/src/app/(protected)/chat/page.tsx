@@ -200,6 +200,27 @@ export default function ChatPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [showCitations]);
 
+  const openConversation = useCallback(async (conv: Conversation) => {
+    setActiveConv(conv);
+    if (workspace) {
+      try {
+        localStorage.setItem(`askdocs_last_ai_conv_${workspace.id}`, conv.id);
+      } catch {}
+    }
+    prevMsgCount.current = 0;
+    try {
+      const history = await api.listMessages(conv.id);
+      setMessages(history.map((m: Message) => ({
+        id: m.id, role: m.role, content: m.content, citations: m.citations,
+        conflict: m.conflict ?? null, freshness: m.freshness ?? null,
+        suggested: m.suggested_colleagues && (!m.citations || m.citations.length === 0) ? m.suggested_colleagues : [],
+      })));
+      scrollToBottom(false);
+    } catch {
+      setMessages([]);
+    }
+  }, [workspace]);
+
   const loadConversations = useCallback(async () => {
     if (!workspace) return;
     try {
@@ -221,7 +242,7 @@ export default function ChatPage() {
         });
       }
     } catch {}
-  }, [workspace]);
+  }, [workspace, openConversation]);
 
   useEffect(() => {
     void loadConversations();
@@ -254,27 +275,6 @@ export default function ChatPage() {
     }
     prevMsgCount.current = count;
   }, [messages, busy]);
-
-  async function openConversation(conv: Conversation) {
-    setActiveConv(conv);
-    if (workspace) {
-      try {
-        localStorage.setItem(`askdocs_last_ai_conv_${workspace.id}`, conv.id);
-      } catch {}
-    }
-    prevMsgCount.current = 0;
-    try {
-      const history = await api.listMessages(conv.id);
-      setMessages(history.map((m: Message) => ({
-        id: m.id, role: m.role, content: m.content, citations: m.citations,
-        conflict: m.conflict ?? null, freshness: m.freshness ?? null,
-        suggested: m.suggested_colleagues && (!m.citations || m.citations.length === 0) ? m.suggested_colleagues : [],
-      })));
-      scrollToBottom(false);
-    } catch {
-      setMessages([]);
-    }
-  }
 
   async function askColleague(colleague: SuggestedColleague, question: string, idx: number) {
     if (!workspace) return;

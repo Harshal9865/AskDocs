@@ -21,7 +21,6 @@ import {
   Building2,
   UserCheck,
   PlusCircle,
-  Zap,
 } from "lucide-react";
 
 const NAV_ITEMS = [

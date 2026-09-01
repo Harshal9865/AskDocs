@@ -73,7 +73,6 @@ export default function Sidebar({
   const [friendReqCount, setFriendReqCount] = useState<number>(0);
   const asideRef = useRef<HTMLElement>(null);
   const [collapsed, setCollapsed] = useState(false);
-  const planBadge = user?.plan === "pro" ? "bg-gradient-to-r from-amber-400 to-orange-500 text-white" : user?.plan === "enterprise" ? "bg-gradient-to-r from-violet-500 to-purple-600 text-white" : "bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-zinc-400";
   // on mobile drawer open, always show labels regardless of desktop collapsed
   const isCollapsed = collapsed && !mobileOpen;
 

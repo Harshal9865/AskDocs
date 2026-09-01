@@ -109,8 +109,8 @@ export default function FakeCheckoutModal({
       await refreshUser();
       setSuccessData({ planName: res.plan_name || planName, invoiceNo: `INV-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}` });
       onSuccess?.();
-    } catch (err: any) {
-      setError(err?.message || "Payment processing failed. Please try a different card.");
+    } catch (err: unknown) {
+      setError((err as Error)?.message || "Payment processing failed. Please try a different card.");
     } finally {
       setBusy(false);
     }
