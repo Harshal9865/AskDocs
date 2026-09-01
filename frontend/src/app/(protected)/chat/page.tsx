@@ -250,21 +250,14 @@ export default function ChatPage() {
 
   const prevMsgCount = useRef(0);
   
-  function scrollToBottom(smooth = true) {
-    const run = () => {
-      const el = scrollRef.current;
-      if (el) {
-        el.scrollTop = el.scrollHeight + 9999;
-      }
-      if (threadEnd.current) {
-        threadEnd.current.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "end" });
-      }
-    };
-    run();
-    requestAnimationFrame(run);
-    setTimeout(run, 40);
-    setTimeout(run, 120);
-    setTimeout(run, 300);
+  function scrollToBottom(smooth = false) {
+    const el = scrollRef.current;
+    if (!el) return;
+    if (smooth) {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    } else {
+      el.scrollTop = el.scrollHeight;
+    }
   }
 
   useEffect(() => {

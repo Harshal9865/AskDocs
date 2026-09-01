@@ -220,7 +220,16 @@ export default function ChatsPage() {
       setActiveChat((curr) => {
         if (!curr) return null;
         const updated = chatList.find((c) => c.id === curr.id);
-        return updated || curr;
+        if (!updated) return curr;
+        if (
+          curr.id === updated.id &&
+          curr.last_message_at === updated.last_message_at &&
+          curr.unread_count === updated.unread_count &&
+          curr.participants.length === updated.participants.length
+        ) {
+          return curr;
+        }
+        return updated;
       });
     } catch { /* ignore */ }
   }, [workspace?.id]);
@@ -233,46 +242,53 @@ export default function ChatsPage() {
   useEffect(() => {
     void loadChats();
     void loadColleagues();
-    const t = setInterval(() => { void loadChats(); void loadColleagues(); }, 5000);
+    const t = setInterval(() => { void loadChats(); void loadColleagues(); }, 6000);
     return () => clearInterval(t);
   }, [loadChats, loadColleagues]);
 
   useEffect(() => {
     if (!activeChat) return;
+    const currentChatId = activeChat.id;
     let cancelled = false;
+
     const poll = async () => { 
       try { 
-        const msgs = await api.listTeamMessages(activeChat.id); 
+        const msgs = await api.listTeamMessages(currentChatId); 
         if (!cancelled) {
-          if (msgs.length > prevMsgCount.current && prevMsgCount.current > 0) {
-            const newMsgs = msgs.slice(prevMsgCount.current);
-            const incoming = newMsgs.filter((m) => m.sender_id !== user?.id);
-            if (incoming.length > 0) {
-              if (soundEnabled) {
-                playMessageChime();
-              }
-              if (typeof document !== "undefined" && document.hidden) {
-                const latest = incoming[incoming.length - 1];
-                const sender = activeChat.participants.find((p) => p.user_id === latest.sender_id);
-                const senderTitle = sender?.name || sender?.email || chatTitle(activeChat, user?.email);
-                showDesktopPush(
-                  senderTitle,
-                  latest.content || "Sent an attachment"
-                );
+          setMessages((prev) => {
+            // If message list is structurally identical, return exact reference to prevent re-render & scroll jitter
+            if (prev.length === msgs.length) {
+              const isDifferent = msgs.some((m, i) => m.id !== prev[i]?.id || (m.read_by?.length !== prev[i]?.read_by?.length));
+              if (!isDifferent) return prev;
+            }
+            if (msgs.length > prevMsgCount.current && prevMsgCount.current > 0) {
+              const newMsgs = msgs.slice(prevMsgCount.current);
+              const incoming = newMsgs.filter((m) => m.sender_id !== user?.id);
+              if (incoming.length > 0) {
+                if (soundEnabled) {
+                  playMessageChime();
+                }
+                if (typeof document !== "undefined" && document.hidden) {
+                  const latest = incoming[incoming.length - 1];
+                  const sender = activeChat.participants.find((p) => p.user_id === latest.sender_id);
+                  const senderTitle = sender?.name || sender?.email || chatTitle(activeChat, user?.email);
+                  showDesktopPush(
+                    senderTitle,
+                    latest.content || "Sent an attachment"
+                  );
+                }
               }
             }
-          }
-          setMessages(msgs);
-          if (msgs.length > prevMsgCount.current) {
-            void loadChats();
-          }
+            return msgs;
+          });
         }
       } catch { /* ignore */ } 
     };
+
     void poll();
     const t = setInterval(poll, 3000);
     return () => { cancelled = true; clearInterval(t); };
-  }, [activeChat, loadChats, soundEnabled, user?.id, user?.email]);
+  }, [activeChat?.id, soundEnabled, user?.id, user?.email]);
 
   const prevMsgCount = useRef(0);
 
@@ -308,31 +324,32 @@ export default function ChatsPage() {
     } catch { /* ignore */ }
   };
   
-  function scrollToBottom(smooth = true) {
-    const run = () => {
-      const el = scrollRef.current;
-      if (el) {
-        el.scrollTop = el.scrollHeight + 9999;
-      }
-      if (threadEnd.current) {
-        threadEnd.current.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "end" });
-      }
-    };
-    run();
-    requestAnimationFrame(run);
-    setTimeout(run, 40);
-    setTimeout(run, 120);
-    setTimeout(run, 300);
+  function scrollToBottom(smooth = false) {
+    const el = scrollRef.current;
+    if (!el) return;
+    if (smooth) {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    } else {
+      el.scrollTop = el.scrollHeight;
+    }
   }
   
   useEffect(() => {
     const count = messages.length;
     if (count > 0) {
+      const el = scrollRef.current;
       const isInitial = prevMsgCount.current === 0;
-      scrollToBottom(!isInitial);
+      const isNearBottom = el ? el.scrollHeight - el.scrollTop - el.clientHeight < 200 : true;
+      const lastMsgIsMine = messages[count - 1]?.sender_id === user?.id;
+
+      if (isInitial) {
+        scrollToBottom(false);
+      } else if (count > prevMsgCount.current && (isNearBottom || lastMsgIsMine)) {
+        scrollToBottom(true);
+      }
     }
     prevMsgCount.current = count;
-  }, [messages]);
+  }, [messages, user?.id]);
 
   // Handle upward infinite scroll in messages
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -785,7 +802,7 @@ export default function ChatsPage() {
               }}
               onDrop={(e) => void handleThreadDrop(e)}
               style={WALLPAPERS.find((w) => w.id === wallpaper)?.style}
-              className="scroll-touch wa-thread no-scrollbar relative z-10 flex-1 min-h-0 space-y-2 overflow-y-auto px-3 py-4 sm:px-6 transition-all duration-300"
+              className="scroll-touch wa-thread no-scrollbar relative z-10 flex-1 min-h-0 space-y-2 overflow-y-auto px-3 py-4 sm:px-6"
             >
               {/* Drag Over Overlay */}
               {dragOverThread && (
