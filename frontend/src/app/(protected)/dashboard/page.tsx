@@ -13,6 +13,7 @@ import {
   MessagesSquare,
   Plus,
   Shield,
+  Crown,
   Sparkles,
   Target,
   Upload,
@@ -61,18 +62,18 @@ function StatCard({
   children,
 }: {
   label: string;
-  value: string | number;
+  value: React.ReactNode;
   icon: React.ComponentType<{ className?: string }>;
   color: string;
   accent?: boolean;
   children?: React.ReactNode;
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-300/60 hover:shadow-lg hover:shadow-purple-500/5 dark:border-white/10 dark:bg-[#141422]/90 dark:hover:border-purple-500/30 sm:p-5">
-      <div className="flex items-start justify-between">
-        <div>
+    <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 sm:p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-300/60 hover:shadow-lg hover:shadow-purple-500/5 dark:border-white/10 dark:bg-[#141422]/90 dark:hover:border-purple-500/30">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
           <div
-            className={`text-2xl font-extrabold tracking-tight ${
+            className={`text-lg sm:text-xl md:text-2xl font-extrabold tracking-tight truncate leading-tight py-0.5 ${
               accent
                 ? "bg-gradient-to-r from-rose-500 to-red-500 bg-clip-text text-transparent"
                 : "text-slate-900 dark:text-white"
@@ -80,14 +81,14 @@ function StatCard({
           >
             {value}
           </div>
-          <div className="mt-1 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+          <div className="mt-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 truncate leading-snug">
             {label}
           </div>
         </div>
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${color} text-white shadow-md shadow-indigo-500/20 transition-transform duration-300 group-hover:scale-110`}
+          className={`flex h-8.5 w-8.5 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${color} text-white shadow-md shadow-indigo-500/20 transition-transform duration-300 group-hover:scale-110`}
         >
-          <Icon className="h-5 w-5" />
+          <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
         </div>
       </div>
       {children}
@@ -294,12 +295,16 @@ export default function DashboardPage() {
       <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 via-purple-50/30 to-indigo-50/20 p-5 shadow-xs backdrop-blur-xl dark:border-white/10 dark:from-[#13111f]/95 dark:via-[#19152e]/50 dark:to-[#0f0e1c]/80 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-purple-200/60 bg-purple-50/80 px-3 py-1 text-xs font-semibold text-purple-700 backdrop-blur-sm dark:border-purple-500/20 dark:bg-purple-950/40 dark:text-purple-300">
+            <div className="mb-2.5 inline-flex items-center gap-2 rounded-full border border-purple-200/60 bg-purple-50/80 px-3.5 py-1 text-xs font-semibold text-purple-700 backdrop-blur-sm dark:border-purple-500/20 dark:bg-purple-950/40 dark:text-purple-300">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Workspace: {workspace.name}</span>
             </div>
-            <h1 className="mt-2.5 text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
-              {greeting}, <span className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent">{firstName}</span> 👋
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-3xl leading-normal py-1">
+              {greeting},{" "}
+              <span className="inline-block bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent pb-1">
+                {firstName}
+              </span>{" "}
+              <span className="inline-block">👋</span>
             </h1>
             <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
               Your AI-powered knowledge hub and team collaboration center.
@@ -340,7 +345,7 @@ export default function DashboardPage() {
       )}
 
       {/* Stats Row — 6 cards with gradient accents */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
         <StatCard
           label="Documents"
           value={loading ? "…" : docCount}
@@ -410,32 +415,46 @@ export default function DashboardPage() {
           accent={unansweredCount > 0}
         />
 
-        <StatCard
-          label="Plan"
-          value={plan?.plan?.toUpperCase() ?? "FREE"}
-          icon={Shield}
-          color="from-rose-500 to-red-500"
-        >
-          {plan && (
-            <div className="mt-2">
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-rose-500 to-red-500 transition-all"
-                  style={{
-                    width: `${
-                      plan.documents_limit === -1
-                        ? 10
-                        : Math.min((plan.documents_used / plan.documents_limit) * 100, 100)
-                    }%`,
-                  }}
-                />
+        <Link href="/pricing" className="block transition-transform hover:scale-[1.02] active:scale-[0.98]">
+          <StatCard
+            label="Plan Tier"
+            value={
+              plan?.plan === "ultra_premium"
+                ? "Ultra 👑"
+                : plan?.plan === "premium"
+                  ? "Premium ⭐"
+                  : "Free"
+            }
+            icon={plan?.plan === "ultra_premium" ? Crown : plan?.plan === "premium" ? Sparkles : Shield}
+            color={
+              plan?.plan === "ultra_premium"
+                ? "from-amber-500 via-orange-500 to-yellow-500"
+                : plan?.plan === "premium"
+                  ? "from-purple-600 to-indigo-600"
+                  : "from-slate-600 to-slate-800"
+            }
+          >
+            {plan && (
+              <div className="mt-2">
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all"
+                    style={{
+                      width: `${
+                        plan.documents_limit === -1
+                          ? 100
+                          : Math.min((plan.documents_used / plan.documents_limit) * 100, 100)
+                      }%`,
+                    }}
+                  />
+                </div>
+                <p className="mt-1 text-[10px] text-slate-400 dark:text-zinc-500 truncate">
+                  {plan.documents_limit === -1 ? `${plan.documents_used} docs (∞)` : `${plan.documents_used}/${plan.documents_limit} docs`}
+                </p>
               </div>
-              <p className="mt-1 text-[10px] text-slate-400 dark:text-zinc-500">
-                {plan.documents_used}/{plan.documents_limit === -1 ? "∞" : plan.documents_limit} docs
-              </p>
-            </div>
-          )}
-        </StatCard>
+            )}
+          </StatCard>
+        </Link>
       </div>
 
       {/* Two-column grid: Documents + Activity / Team */}

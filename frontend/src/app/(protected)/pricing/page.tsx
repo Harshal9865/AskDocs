@@ -20,7 +20,7 @@ export default function PricingPage() {
           <Sparkles className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
           <span>Plans & Pricing</span>
         </div>
-        <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-purple-900 to-indigo-900 bg-clip-text text-transparent dark:from-white dark:via-purple-200 dark:to-indigo-200">
+        <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-purple-900 to-indigo-900 bg-clip-text text-transparent dark:from-white dark:via-purple-200 dark:to-indigo-200 py-1.5 pb-2.5 leading-snug sm:leading-normal">
           Supercharge your Team Intelligence
         </h1>
         <p className="text-sm sm:text-base text-slate-500 dark:text-zinc-400 max-w-xl mx-auto">

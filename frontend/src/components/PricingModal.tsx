@@ -46,7 +46,7 @@ export default function PricingModal({
               <Sparkles className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
               <span>Simple, Transparent Plans</span>
             </div>
-            <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+            <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white py-1 leading-normal">
               Unlock the Full Power of AskDocs AI
             </h2>
             <p className="mt-2 text-xs sm:text-sm text-slate-500 dark:text-zinc-400 max-w-xl mx-auto">
