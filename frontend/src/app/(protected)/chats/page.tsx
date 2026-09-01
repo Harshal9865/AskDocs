@@ -294,10 +294,7 @@ export default function ChatsPage() {
     for (const file of files) {
       try {
         const att = await api.uploadChatAttachment(file);
-        await api.sendTeamMessage(activeChat.id, {
-          content: file.name,
-          attachment_ids: [att.id],
-        });
+        await api.sendTeamMessage(activeChat.id, file.name, [att.id]);
       } catch (err) {
         showToast("error", (err as Error).message);
       }
