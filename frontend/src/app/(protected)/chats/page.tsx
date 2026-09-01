@@ -565,7 +565,7 @@ export default function ChatsPage() {
                   const other = otherParticipant(activeChat, user?.email)!;
                   return (
                     <Link
-                      href={`/profile/${other.user_id || other.id}`}
+                      href={`/profile/${other.user_id}`}
                       className="flex items-center gap-2.5 min-w-0 flex-1 hover:opacity-85 transition-opacity"
                       title={`View profile of ${other.name || other.email}`}
                     >
