@@ -17,10 +17,12 @@ import {
 import { Button } from "@/components/ui/button";
 
 const STICKER_IDS = [
-  "male-1", "male-2", "male-3", "male-4",
-  "female-1", "female-2", "female-3", "female-4",
-  "cute-1", "cute-2", "cute-3", "cute-4",
-  "ai-1", "ai-2",
+  "male-1", // 3D Ginger Curls (Yellow)
+  "male-2", // 3D Cool Classic (Yellow)
+  "female-1", // 3D Lavender Bob (Day Theme)
+  "female-2", // 3D Modern Cyan/Teal (Day Theme)
+  "ai-1", // 3D Violet Night (Dark Theme)
+  "ai-2", // 3D Emerald Lead (Dark Theme)
 ];
 
 const JOB_TITLES = [
@@ -315,31 +317,31 @@ export default function EditProfileModal({
               </div>
             </div>
 
-            {/* Sticker Picker */}
+            {/* 3D Avatar Picker */}
             {showStickers && (
               <div className="mt-3 border-t border-slate-200/60 pt-3 dark:border-white/10">
                 <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
-                  Select an avatar sticker
+                  Select 3D Character Avatar (6 Styles: 2 Yellow, 2 Day, 2 Dark)
                 </p>
-                <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                   {STICKER_IDS.map((id) => (
                     <button
                       key={id}
                       type="button"
                       onClick={() => void pickSticker(id)}
                       disabled={avatarBusy}
-                      aria-label={`Choose ${id} sticker`}
-                      className={`flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl border p-1 transition-transform hover:scale-105 ${
+                      aria-label={`Choose ${id} avatar`}
+                      className={`flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-2xl border p-1 transition-all hover:scale-110 ${
                         user?.avatar_kind === "sticker" && user?.avatar_value === id
-                          ? "border-purple-600 bg-purple-50 ring-2 ring-purple-600/30 dark:border-purple-400 dark:bg-purple-950/30"
-                          : "border-slate-200 bg-white hover:border-slate-300 dark:border-white/10 dark:bg-[#202020]"
+                          ? "border-purple-600 bg-purple-50 ring-2 ring-purple-600/30 dark:border-purple-400 dark:bg-purple-950/30 shadow-xs"
+                          : "border-slate-200 bg-white hover:border-purple-300 dark:border-white/10 dark:bg-[#202020] dark:hover:border-purple-500/30"
                       }`}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={`/stickers/${id}.svg`}
                         alt={id}
-                        className="h-full w-full object-contain"
+                        className="h-full w-full rounded-full object-cover"
                       />
                     </button>
                   ))}

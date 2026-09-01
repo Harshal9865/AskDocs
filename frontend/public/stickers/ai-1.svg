@@ -1,14 +1,60 @@
-<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%">
   <defs>
-    <linearGradient id="aiStickerGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stopColor="#818CF8" />
-      <stop offset="100%" stopColor="#C084FC" />
+    <radialGradient id="bgGrad5" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#4338CA"/>
+      <stop offset="60%" stop-color="#1E1B4B"/>
+      <stop offset="100%" stop-color="#0F0E1C"/>
+    </radialGradient>
+    <linearGradient id="skinGrad5" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FED7AA"/>
+      <stop offset="100%" stop-color="#FDBA74"/>
+    </linearGradient>
+    <linearGradient id="hairGrad5" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="30%" stop-color="#1E1B4B"/>
+      <stop offset="100%" stop-color="#09090B"/>
+    </linearGradient>
+    <linearGradient id="clothGrad5" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#312E81"/>
+      <stop offset="100%" stop-color="#1E1B4B"/>
     </linearGradient>
   </defs>
-  <rect x="20" y="25" width="60" height="50" rx="15" fill="url(#aiStickerGrad)" />
-  <circle cx="35" cy="45" r="5" fill="white" />
-  <circle cx="65" cy="45" r="5" fill="white" />
-  <path d="M40 60 Q50 65 60 60" stroke="white" strokeWidth="4" fill="none" strokeLinecap="round" />
-  <rect x="45" y="15" width="10" height="10" fill="#C084FC" />
-  <circle cx="50" cy="10" r="5" fill="#818CF8" />
+
+  <!-- Background Circle (Dark Theme Deep Violet) -->
+  <circle cx="80" cy="80" r="80" fill="url(#bgGrad5)"/>
+
+  <!-- High Ponytail -->
+  <path d="M96 44 C120 30 134 50 128 78 C124 94 116 100 112 100 C114 84 112 60 96 44 Z" fill="url(#hairGrad5)"/>
+  <circle cx="98" cy="46" r="6" fill="#A855F7"/>
+
+  <!-- Body / Dark Hoodie -->
+  <path d="M34 160 C34 125 54 118 80 118 C106 118 126 125 126 160 Z" fill="url(#clothGrad5)"/>
+  <!-- Neon Violet Zipper Line -->
+  <path d="M80 122 L80 160" stroke="#A855F7" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Neck -->
+  <rect x="70" y="96" width="20" height="24" rx="8" fill="url(#skinGrad5)"/>
+
+  <!-- Head Base -->
+  <ellipse cx="80" cy="76" rx="32" ry="36" fill="url(#skinGrad5)"/>
+
+  <!-- Cheeks Blush -->
+  <circle cx="58" cy="86" r="7.5" fill="#FB7185" opacity="0.35"/>
+  <circle cx="102" cy="86" r="7.5" fill="#FB7185" opacity="0.35"/>
+
+  <!-- Eyes -->
+  <ellipse cx="64" cy="72" rx="5.5" ry="6.5" fill="#1E1B4B"/>
+  <ellipse cx="96" cy="72" rx="5.5" ry="6.5" fill="#1E1B4B"/>
+  <circle cx="62" cy="70" r="2.2" fill="#FFFFFF"/>
+  <circle cx="94" cy="70" r="2.2" fill="#FFFFFF"/>
+
+  <!-- Eyelashes -->
+  <path d="M58 66 Q64 62 70 66" stroke="#1E1B4B" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <path d="M90 66 Q96 62 102 66" stroke="#1E1B4B" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+
+  <!-- Smile -->
+  <path d="M70 94 Q80 102 90 94" stroke="#BE123C" stroke-width="2.5" stroke-linecap="round" fill="#FDA4AF"/>
+
+  <!-- Sleek Hair with Violet Highlight -->
+  <path d="M46 64 C42 36 56 26 80 26 C102 26 114 36 112 60 C108 38 96 32 80 32 C64 32 50 38 46 64 Z" fill="url(#hairGrad5)"/>
 </svg>

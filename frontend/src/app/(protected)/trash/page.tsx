@@ -5,6 +5,15 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
 
+import {
+  FileText,
+  MessageSquare,
+  RotateCcw,
+  Trash2,
+  AlertTriangle,
+  Loader2,
+} from "lucide-react";
+
 interface TrashedDoc {
   id: string;
   title: string;
@@ -70,62 +79,89 @@ export default function TrashPage() {
   }
 
   if (!workspace) {
-    return <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500 shadow-sm">Select a workspace first.</div>;
+    return (
+      <div className="rounded-3xl border border-slate-200/80 bg-white/90 p-8 text-center text-sm font-medium text-slate-500 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-[#13111f]/90 dark:text-zinc-400">
+        Select a workspace first.
+      </div>
+    );
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <h1 className="mb-1 text-xl font-bold">Trash</h1>
-      <p className="mb-6 text-sm text-slate-500">
-        Deleted items live here. Admins can restore documents or delete them forever.
-      </p>
+    <div className="relative mx-auto max-w-3xl space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-xl font-extrabold bg-gradient-to-r from-slate-900 via-purple-900 to-indigo-900 bg-clip-text text-transparent dark:from-white dark:via-purple-200 dark:to-indigo-200">
+          Trash & Archive
+        </h1>
+        <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
+          Recover deleted items or delete them permanently. Only workspace admins can restore or purge files.
+        </p>
+      </div>
 
-      <div className="mb-4 flex gap-2">
+      {/* Capsule Tabs */}
+      <div className="flex gap-2">
         {(["documents", "conversations"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`rounded-lg px-4 py-2 text-sm font-medium capitalize ${
-              tab === t ? "bg-indigo-600 text-white" : "border border-slate-300 text-slate-600 hover:bg-slate-50"
+            className={`rounded-full px-4 py-1.5 text-xs font-bold capitalize transition-all ${
+              tab === t
+                ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-xs"
+                : "border border-slate-200/80 bg-white/80 text-slate-600 hover:text-slate-900 dark:border-white/10 dark:bg-[#13111f]/90 dark:text-zinc-400 dark:hover:text-white"
             }`}
           >
-            {t}
+            {t === "documents" ? `Documents (${docs.length})` : `AI Chats (${convs.length})`}
           </button>
         ))}
       </div>
 
       {error && (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">{error}</p>
+        <p className="rounded-2xl border border-red-200 bg-red-50/80 px-4 py-2.5 text-xs font-bold text-red-700 dark:border-red-900/30 dark:bg-red-950/30 dark:text-red-300">{error}</p>
       )}
 
       {loading ? (
-        <p className="text-sm text-slate-500">Loading trash…</p>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-6 w-6 animate-spin text-purple-600 dark:text-purple-400" />
+        </div>
       ) : tab === "documents" ? (
         docs.length === 0 ? (
-          <p className="rounded-xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-400 shadow-sm">
-            Trash is empty.
-          </p>
+          <div className="rounded-3xl border border-dashed border-slate-200/80 bg-white/50 p-10 text-center dark:border-white/10 dark:bg-[#13111f]/50">
+            <Trash2 className="mx-auto mb-3 h-8 w-8 text-slate-300 dark:text-zinc-600" />
+            <p className="text-sm font-bold text-slate-700 dark:text-zinc-300">Trash is empty</p>
+            <p className="mt-1 text-xs text-slate-400 dark:text-zinc-500">Deleted documents will appear here for 30 days before automatic cleanup.</p>
+          </div>
         ) : (
-          <ul className="space-y-2">
+          <ul className="space-y-2.5">
             {docs.map((d) => (
               <li
                 key={d.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
+                className="group flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-2xs backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-300/80 hover:shadow-md hover:shadow-purple-500/5 dark:border-white/10 dark:bg-[#13111f]/90 dark:hover:border-purple-500/30"
               >
-                <div>
-                  <div className="text-sm font-medium">📄 {d.title}</div>
-                  <div className="text-xs text-slate-400">
-                    deleted {new Date(d.deleted_at).toLocaleString()}
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/50 dark:text-purple-400">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="truncate text-xs sm:text-sm font-bold text-slate-900 dark:text-white">{d.title}</div>
+                    <div className="text-[11px] text-slate-400 dark:text-zinc-500">
+                      Deleted {new Date(d.deleted_at).toLocaleString()}
+                    </div>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                   {isAdmin && (
                     <>
-                      <button onClick={() => void restore(d.id)} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50">
-                        Restore
+                      <button
+                        onClick={() => void restore(d.id)}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/80 px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10 transition-all"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5 text-emerald-500" /> Restore
                       </button>
-                      <button onClick={() => void purge(d.id, d.title)} className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700">
-                        Delete forever
+                      <button
+                        onClick={() => void purge(d.id, d.title)}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-red-700 transition-all"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" /> Delete forever
                       </button>
                     </>
                   )}
@@ -135,15 +171,25 @@ export default function TrashPage() {
           </ul>
         )
       ) : convs.length === 0 ? (
-        <p className="rounded-xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-400 shadow-sm">
-          No trashed conversations. (Deleted AI chats appear here.)
-        </p>
+        <div className="rounded-3xl border border-dashed border-slate-200/80 bg-white/50 p-10 text-center dark:border-white/10 dark:bg-[#13111f]/50">
+          <MessageSquare className="mx-auto mb-3 h-8 w-8 text-slate-300 dark:text-zinc-600" />
+          <p className="text-sm font-bold text-slate-700 dark:text-zinc-300">No trashed AI conversations</p>
+          <p className="mt-1 text-xs text-slate-400 dark:text-zinc-500">Deleted AI chat threads appear here.</p>
+        </div>
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-2.5">
           {convs.map((c) => (
-            <li key={c.id} className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-              <div className="text-sm font-medium">💬 {c.title}</div>
-              <div className="text-xs text-slate-400">deleted {new Date(c.deleted_at).toLocaleString()}</div>
+            <li
+              key={c.id}
+              className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-2xs backdrop-blur-md dark:border-white/10 dark:bg-[#13111f]/90"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
+                <MessageSquare className="h-5 w-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-xs sm:text-sm font-bold text-slate-900 dark:text-white">{c.title}</div>
+                <div className="text-[11px] text-slate-400 dark:text-zinc-500">Deleted {new Date(c.deleted_at).toLocaleString()}</div>
+              </div>
             </li>
           ))}
         </ul>

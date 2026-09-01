@@ -1,10 +1,59 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" rx="50" fill="#EEF2FF"/>
-  <circle cx="50" cy="46" r="30" fill="#EAB08C"/>
-  <path d="M16 60 Q14 18 50 16 Q86 18 84 60 Q84 40 74 34 Q60 24 40 30 Q26 36 16 60 Z" fill="#6B3FA0"/><circle cx="30" cy="62" r="9" fill="#6B3FA0"/><circle cx="70" cy="62" r="9" fill="#6B3FA0"/>
-  <circle cx="40" cy="48" r="3.4" fill="#2B2B2B"/>
-  <circle cx="60" cy="48" r="3.4" fill="#2B2B2B"/>
-  
-  <path d="M41 66 Q50 73 59 66" stroke="#7C4A21" stroke-width="3" fill="none" stroke-linecap="round"/>
-  <path d="M30 92 Q50 72 70 92 Z" fill="#6366F1"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%">
+  <defs>
+    <radialGradient id="bgGrad3" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#C7D2FE"/>
+      <stop offset="70%" stop-color="#818CF8"/>
+      <stop offset="100%" stop-color="#6366F1"/>
+    </radialGradient>
+    <linearGradient id="skinGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FED7AA"/>
+      <stop offset="100%" stop-color="#FDBA74"/>
+    </linearGradient>
+    <linearGradient id="hairGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="60%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+    <linearGradient id="clothGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#A855F7"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background Circle (Day Theme Light Purple / Lavender) -->
+  <circle cx="80" cy="80" r="80" fill="url(#bgGrad3)"/>
+
+  <!-- Back Hair -->
+  <path d="M40 70 C36 108 50 114 80 114 C110 114 124 108 120 70 Z" fill="url(#hairGrad3)"/>
+
+  <!-- Body / Purple Sweater -->
+  <path d="M34 160 C34 125 54 118 80 118 C106 118 126 125 126 160 Z" fill="url(#clothGrad3)"/>
+  <!-- Turtleneck -->
+  <rect x="66" y="108" width="28" height="14" rx="6" fill="#6D28D9"/>
+
+  <!-- Neck -->
+  <rect x="70" y="96" width="20" height="20" rx="8" fill="url(#skinGrad3)"/>
+
+  <!-- Head Base -->
+  <ellipse cx="80" cy="76" rx="32" ry="36" fill="url(#skinGrad3)"/>
+
+  <!-- Cheeks Blush -->
+  <circle cx="58" cy="86" r="8" fill="#F43F5E" opacity="0.35"/>
+  <circle cx="102" cy="86" r="8" fill="#F43F5E" opacity="0.35"/>
+
+  <!-- Eyes -->
+  <ellipse cx="64" cy="72" rx="5.5" ry="6.5" fill="#312E81"/>
+  <ellipse cx="96" cy="72" rx="5.5" ry="6.5" fill="#312E81"/>
+  <circle cx="62" cy="70" r="2.2" fill="#FFFFFF"/>
+  <circle cx="94" cy="70" r="2.2" fill="#FFFFFF"/>
+
+  <!-- Eyelashes -->
+  <path d="M58 66 Q64 63 70 66" stroke="#0F172A" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <path d="M90 66 Q96 63 102 66" stroke="#0F172A" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+
+  <!-- Smile -->
+  <path d="M70 94 Q80 102 90 94" stroke="#BE123C" stroke-width="2.5" stroke-linecap="round" fill="#FDA4AF"/>
+
+  <!-- Sleek Bob Hair -->
+  <path d="M42 66 C40 38 56 28 80 28 C104 28 120 38 118 66 C116 80 110 92 108 92 C104 70 100 44 80 44 C60 44 56 70 52 92 C50 92 44 80 42 66 Z" fill="url(#hairGrad3)"/>
 </svg>

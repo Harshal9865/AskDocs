@@ -1,10 +1,87 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" rx="50" fill="#EEF2FF"/>
-  <circle cx="50" cy="46" r="30" fill="#F5C99B"/>
-  <path d="M20 26 Q50 6 80 26 L80 38 Q50 22 20 38 Z" fill="#3B2A1A"/>
-  <circle cx="40" cy="48" r="3.4" fill="#2B2B2B"/>
-  <circle cx="60" cy="48" r="3.4" fill="#2B2B2B"/>
-  
-  <path d="M41 66 Q50 73 59 66" stroke="#7C4A21" stroke-width="3" fill="none" stroke-linecap="round"/>
-  <path d="M30 92 Q50 72 70 92 Z" fill="#6366F1"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%">
+  <defs>
+    <radialGradient id="bgGrad1" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#FDE047"/>
+      <stop offset="70%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </radialGradient>
+    <linearGradient id="skinGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FED7AA"/>
+      <stop offset="100%" stop-color="#FDBA74"/>
+    </linearGradient>
+    <linearGradient id="hairGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FB923C"/>
+      <stop offset="50%" stop-color="#EA580C"/>
+      <stop offset="100%" stop-color="#C2410C"/>
+    </linearGradient>
+    <linearGradient id="sweaterGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#22C55E"/>
+      <stop offset="100%" stop-color="#15803D"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background Circle (Yellow) -->
+  <circle cx="80" cy="80" r="80" fill="url(#bgGrad1)"/>
+
+  <!-- Back Curls -->
+  <g fill="url(#hairGrad1)">
+    <circle cx="35" cy="65" r="22"/>
+    <circle cx="30" cy="85" r="20"/>
+    <circle cx="38" cy="105" r="18"/>
+    <circle cx="125" cy="65" r="22"/>
+    <circle cx="130" cy="85" r="20"/>
+    <circle cx="122" cy="105" r="18"/>
+    <circle cx="50" cy="40" r="24"/>
+    <circle cx="110" cy="40" r="24"/>
+    <circle cx="80" cy="35" r="26"/>
+  </g>
+
+  <!-- Body / Sweater -->
+  <path d="M36 160 C36 125 56 118 80 118 C104 118 124 125 124 160 Z" fill="url(#sweaterGrad1)"/>
+  <!-- Collar -->
+  <path d="M62 118 C62 128 98 128 98 118 Z" fill="#166534"/>
+
+  <!-- Neck -->
+  <rect x="70" y="98" width="20" height="24" rx="10" fill="url(#skinGrad1)"/>
+
+  <!-- Head Base -->
+  <ellipse cx="80" cy="78" rx="34" ry="38" fill="url(#skinGrad1)"/>
+
+  <!-- Cheeks Blush -->
+  <circle cx="58" cy="88" r="8" fill="#FB7185" opacity="0.35"/>
+  <circle cx="102" cy="88" r="8" fill="#FB7185" opacity="0.35"/>
+
+  <!-- Nose -->
+  <path d="M78 80 Q80 84 82 80" stroke="#EA580C" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.6"/>
+
+  <!-- Eyes -->
+  <ellipse cx="62" cy="72" rx="6" ry="7" fill="#451A03"/>
+  <ellipse cx="98" cy="72" rx="6" ry="7" fill="#451A03"/>
+  <!-- Highlights -->
+  <circle cx="60" cy="70" r="2.5" fill="#FFFFFF"/>
+  <circle cx="64" cy="74" r="1" fill="#FFFFFF"/>
+  <circle cx="96" cy="70" r="2.5" fill="#FFFFFF"/>
+  <circle cx="100" cy="74" r="1" fill="#FFFFFF"/>
+
+  <!-- Smile -->
+  <path d="M68 94 Q80 104 92 94" stroke="#BE123C" stroke-width="3" stroke-linecap="round" fill="#FDA4AF"/>
+
+  <!-- Eyeglasses (Gold Round) -->
+  <circle cx="62" cy="72" r="15" stroke="#FDE047" stroke-width="3" fill="none"/>
+  <circle cx="62" cy="72" r="15" stroke="#B45309" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <circle cx="98" cy="72" r="15" stroke="#FDE047" stroke-width="3" fill="none"/>
+  <circle cx="98" cy="72" r="15" stroke="#B45309" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <path d="M77 72 L83 72" stroke="#FDE047" stroke-width="3"/>
+
+  <!-- Front Voluminous Curls / Bangs -->
+  <g fill="url(#hairGrad1)">
+    <circle cx="48" cy="46" r="16"/>
+    <circle cx="68" cy="40" r="16"/>
+    <circle cx="92" cy="40" r="16"/>
+    <circle cx="112" cy="46" r="16"/>
+    <circle cx="40" cy="58" r="14"/>
+    <circle cx="120" cy="58" r="14"/>
+    <circle cx="36" cy="74" r="13"/>
+    <circle cx="124" cy="74" r="13"/>
+  </g>
 </svg>
