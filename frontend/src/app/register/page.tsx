@@ -318,57 +318,26 @@ export default function RegisterPage() {
           </form>
         </div>
 
-        {/* Right Panel: Scenery Image with Floating Glassmorphic Badges (Desktop Only) */}
+        {/* Right Panel: Clean Showcase Scenery Image (Desktop Only, 100% Pure Image) */}
         <div className="hidden lg:block lg:w-[46%] shrink-0 p-3 relative">
-          <div className="relative h-full w-full overflow-hidden rounded-[1.75rem] border border-slate-200/60 dark:border-white/10 shadow-inner flex flex-col justify-between p-5">
-             {/* Background Scenery Image */}
-             <div className="absolute inset-0 -z-10 overflow-hidden">
-               <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/75 via-black/30 to-black/30 backdrop-blur-[0.5px]" />
-               <Image 
-                 src="/login-day.jpg" 
-                 alt="AskDocs Workspace Day" 
-                 fill
-                 priority
-                 sizes="45vw"
-                 className="object-cover dark:hidden transition-transform duration-700 hover:scale-105"
-               />
-               <Image 
-                 src="/login-night.jpg" 
-                 alt="AskDocs Workspace Night" 
-                 fill
-                 priority
-                 sizes="45vw"
-                 className="hidden object-cover dark:block transition-transform duration-700 hover:scale-105"
-               />
-             </div>
-
-             {/* Top Floating Glass Badge */}
-             <div className="relative z-20 flex items-start">
-               <div className="inline-flex items-center gap-2 rounded-2xl border border-white/30 bg-black/30 px-3.5 py-1.5 shadow-lg backdrop-blur-md">
-                 <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-                 <span className="text-xs font-semibold text-white tracking-wide">AI Knowledge Mesh Active</span>
-               </div>
-             </div>
-
-             {/* Bottom Floating Glass Feature Card & Social Proof */}
-             <div className="relative z-20 space-y-3">
-               <div className="rounded-2xl border border-white/30 bg-black/40 p-4 shadow-xl backdrop-blur-md">
-                 <div className="text-xs font-bold text-white tracking-wide">Start Collaborating Today</div>
-                 <p className="mt-1 text-[11px] text-white/80 leading-relaxed font-normal">
-                   Connect your workspace team, upload documents, and get fast cited intelligence.
-                 </p>
-               </div>
-
-               <div className="flex items-center gap-2.5 px-1">
-                 <div className="flex -space-x-1.5 overflow-hidden">
-                   <div className="inline-flex h-6 w-6 rounded-full ring-2 ring-white/50 bg-gradient-to-br from-purple-500 to-indigo-500 text-[9px] font-bold text-white items-center justify-center shadow-xs">AI</div>
-                   <div className="inline-flex h-6 w-6 rounded-full ring-2 ring-white/50 bg-gradient-to-br from-blue-500 to-cyan-500 text-[9px] font-bold text-white items-center justify-center shadow-xs">KB</div>
-                   <div className="inline-flex h-6 w-6 rounded-full ring-2 ring-white/50 bg-gradient-to-br from-emerald-500 to-teal-500 text-[9px] font-bold text-white items-center justify-center shadow-xs">✦</div>
-                 </div>
-                 <span className="text-[11px] font-medium text-white/90 drop-shadow-xs">Join thousands of teams</span>
-               </div>
-             </div>
-
+          <div className="relative h-full w-full overflow-hidden rounded-[1.75rem] border border-slate-200/60 dark:border-white/10 shadow-inner">
+             <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+             <Image 
+               src="/login-day.jpg" 
+               alt="AskDocs Workspace Day" 
+               fill
+               priority
+               sizes="45vw"
+               className="object-cover dark:hidden transition-transform duration-700 hover:scale-105"
+             />
+             <Image 
+               src="/login-night.jpg" 
+               alt="AskDocs Workspace Night" 
+               fill
+               priority
+               sizes="45vw"
+               className="hidden object-cover dark:block transition-transform duration-700 hover:scale-105"
+             />
           </div>
         </div>
       </div>
