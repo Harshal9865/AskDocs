@@ -21,8 +21,19 @@ export default function ProtectedLayout({
   const [width, setWidth] = useState(264);
 
   useEffect(() => {
-    if (!loading && !user) router.replace("/login");
-  }, [loading, user, router]);
+    if (!loading && !user) {
+      router.replace("/login");
+      return;
+    }
+    if (!loading && user) {
+      const isMissingRequired =
+        !user.name?.trim() || !user.job_title?.trim() || !user.job_role?.trim();
+      const myProfilePath = `/profile/${user.id}`;
+      if (isMissingRequired && pathname !== myProfilePath) {
+        router.replace(`${myProfilePath}?edit=true`);
+      }
+    }
+  }, [loading, user, pathname, router]);
 
   useEffect(() => {
     const saved = Number(localStorage.getItem("askdocs_sidebar_width"));

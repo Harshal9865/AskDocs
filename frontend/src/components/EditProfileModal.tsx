@@ -142,9 +142,18 @@ export default function EditProfileModal({
     }
   }
 
+  const isProfileIncomplete =
+    !user?.name?.trim() || !user?.job_title?.trim() || !user?.job_role?.trim();
+
   const isControlled = controlledOpen !== undefined;
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next && isProfileIncomplete) return;
+        setOpen(next);
+      }}
+    >
       {trigger ? (
         <DialogTrigger asChild>{trigger}</DialogTrigger>
       ) : isControlled ? null : (
@@ -162,6 +171,12 @@ export default function EditProfileModal({
             Update your profile details visible to your team. Full name, job title, and department are required.
           </DialogDescription>
         </DialogHeader>
+
+        {isProfileIncomplete && (
+          <div className="rounded-xl border border-purple-200 bg-purple-50 p-3 text-xs text-purple-900 dark:border-purple-500/20 dark:bg-purple-950/40 dark:text-purple-300">
+            <span className="font-semibold">⚠️ Mandatory Details Required:</span> Please fill in your <strong>Full Name</strong>, <strong>Job Title</strong>, and <strong>Department / Role</strong> to continue.
+          </div>
+        )}
 
         <form id="profile-form" onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="max-h-[62vh] space-y-4 overflow-y-auto px-1 py-1 -mx-1">
           {/* Name */}
@@ -312,15 +327,17 @@ export default function EditProfileModal({
         )}
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => setOpen(false)}
-            disabled={busy}
-            type="button"
-          >
-            Cancel
-          </Button>
-          <Button type="submit" form="profile-form" disabled={busy}>
+          {!isProfileIncomplete && (
+            <Button
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={busy}
+              type="button"
+            >
+              Cancel
+            </Button>
+          )}
+          <Button type="submit" form="profile-form" disabled={busy} className="w-full sm:w-auto">
             {busy ? "Saving…" : "Save changes"}
           </Button>
         </DialogFooter>

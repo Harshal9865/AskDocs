@@ -16,9 +16,17 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // If already logged in, go straight to dashboard
+  // If already logged in, route to profile edit if details missing, else dashboard
   useEffect(() => {
-    if (!loading && user) router.replace("/dashboard");
+    if (!loading && user) {
+      const isMissing =
+        !user.name?.trim() || !user.job_title?.trim() || !user.job_role?.trim();
+      if (isMissing) {
+        router.replace(`/profile/${user.id}?edit=true`);
+      } else {
+        router.replace("/dashboard");
+      }
+    }
   }, [loading, user, router]);
 
   const googleLoginAction = useGoogleLogin({
@@ -28,8 +36,14 @@ export default function LoginPage() {
       try {
         const token = tokenResponse.access_token;
         if (!token) throw new Error("No token received from Google");
-        await googleLogin(token);
-        router.replace("/dashboard");
+        const me = await googleLogin(token);
+        const isMissing =
+          !me.name?.trim() || !me.job_title?.trim() || !me.job_role?.trim();
+        if (isMissing) {
+          router.replace(`/profile/${me.id}?edit=true`);
+        } else {
+          router.replace("/dashboard");
+        }
       } catch (err) {
         setError((err as Error).message || "Google sign-in failed");
         setBusy(false);
@@ -51,8 +65,14 @@ export default function LoginPage() {
     setBusy(true);
     setError(null);
     try {
-      await login(email.trim().toLowerCase(), password);
-      router.replace("/dashboard");
+      const me = await login(email.trim().toLowerCase(), password);
+      const isMissing =
+        !me.name?.trim() || !me.job_title?.trim() || !me.job_role?.trim();
+      if (isMissing) {
+        router.replace(`/profile/${me.id}?edit=true`);
+      } else {
+        router.replace("/dashboard");
+      }
     } catch (err) {
       setError((err as Error).message || "Login failed");
     } finally {

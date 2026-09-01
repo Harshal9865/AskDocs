@@ -31,6 +31,22 @@ export default function ProfilePage() {
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
 
   useEffect(() => {
+    if (searchParams.get("edit") === "true") {
+      setEditOpen(true);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (isMe && me) {
+      const isMissing =
+        !me.name?.trim() || !me.job_title?.trim() || !me.job_role?.trim();
+      if (isMissing) {
+        setEditOpen(true);
+      }
+    }
+  }, [isMe, me]);
+
+  useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
