@@ -11,8 +11,12 @@ import type { Citation, Conversation, Message } from "@/lib/types";
 import {
   ArrowDownCircle,
   ArrowLeft,
+  Bot,
   FileText,
   MessagesSquare,
+  Plus,
+  Search,
+  Sparkles,
   Trash2,
   TriangleAlert,
   UsersRound,
@@ -58,6 +62,7 @@ export default function ChatPage() {
   const { workspace } = useWorkspace();
   const { user } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [convSearch, setConvSearch] = useState("");
   const [activeConv, setActiveConv] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -208,48 +213,115 @@ export default function ChatPage() {
 
       {/* ===== CONVERSATION LIST PANEL ===== */}
       <div
-        className={`gemini-gradient-bg sb-scroll flex-col overflow-y-auto border bg-white shadow-sm dark:border-[rgba(129,140,248,0.16)] dark:bg-[#0d0d1f] rounded-xl shrink-0 p-2 sm:p-3
-          ${activeConv ? "hidden md:flex md:w-64 min-h-0" : "flex w-full md:w-64 min-h-0"}`}
+        className={`gemini-gradient-bg sb-scroll relative flex-col overflow-y-auto border bg-white/95 shadow-sm backdrop-blur-md dark:border-[rgba(129,140,248,0.16)] dark:bg-[#0d0d1f]/95 rounded-2xl shrink-0 p-2.5 sm:p-3.5
+          ${activeConv ? "hidden md:flex md:w-72 min-h-0" : "flex w-full md:w-72 min-h-0"}`}
       >
-        <div className="gemini-orb gemini-orb-1" />
-        <div className="gemini-orb gemini-orb-2" />
+        <div className="gemini-orb gemini-orb-1 opacity-40" />
+        <div className="gemini-orb gemini-orb-2 opacity-40" />
+
         <div className="relative z-10 flex flex-col">
-          <div className="mb-2 flex items-center justify-between sm:mb-3">
-            <h2 className="text-base font-bold text-slate-900 dark:text-white">AI Chat</h2>
+          {/* Header with animated gradient title and new chat button */}
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 text-white shadow-sm shadow-purple-500/30">
+                <Sparkles className="h-3.5 w-3.5" />
+              </span>
+              <h2 className="text-sm font-bold sm:text-base bg-gradient-to-r from-slate-900 via-purple-900 to-indigo-900 bg-clip-text text-transparent dark:from-white dark:via-purple-200 dark:to-indigo-200">
+                AI Chats
+              </h2>
+            </div>
             <button
               onClick={() => void newConversation()}
               aria-label="New conversation"
-              className="rounded-full bg-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-indigo-500"
+              className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-md shadow-purple-500/25 transition-all hover:scale-105 active:scale-95"
             >
-              + New
+              <Plus className="h-3.5 w-3.5" /> New
             </button>
           </div>
+
+          {/* Quick Search in AI Conversations */}
+          {conversations.length > 2 && (
+            <div className="relative mb-3">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+              <input
+                value={convSearch}
+                onChange={(e) => setConvSearch(e.target.value)}
+                placeholder="Search chats…"
+                className="w-full rounded-xl border border-slate-200/80 bg-white/80 py-1.5 pl-8 pr-3 text-xs outline-none backdrop-blur-sm transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#181824] dark:text-white"
+              />
+            </div>
+          )}
+
           {conversations.length === 0 ? (
             <div className="flex flex-1 flex-col items-center justify-center py-16 text-center">
-              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-500/10">
-                <MessagesSquare className="h-8 w-8 text-indigo-300 dark:text-indigo-500/60" />
+              <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500/10 via-indigo-500/10 to-blue-500/10 border border-purple-200/60 dark:border-purple-500/20">
+                <MessagesSquare className="h-7 w-7 text-purple-600 dark:text-purple-400" />
               </div>
-              <p className="text-sm font-medium text-slate-600 dark:text-zinc-300">No conversations yet</p>
+              <p className="text-sm font-semibold text-slate-700 dark:text-zinc-200">No conversations yet</p>
               <p className="mt-1 text-xs text-slate-400 dark:text-zinc-500">Tap + New to ask about your documents</p>
             </div>
           ) : (
-            <ul>
-              {conversations.map((c) => (
-                <li key={c.id} className="group flex items-center">
-                  <button
-                    onClick={() => void openConversation(c)}
-                    className={`min-w-0 flex-1 rounded-lg px-3 py-3 text-left transition-colors hover:bg-indigo-50 dark:hover:bg-indigo-500/10 ${activeConv?.id === c.id ? "ai-row-active" : ""}`}
-                    title={c.title}
-                  >
-                    <span className="block truncate text-sm font-medium text-slate-900 dark:text-white">{c.title}</span>
-                  </button>
-                  {canDelete(c) && (
-                    <button onClick={(e) => { e.stopPropagation(); void deleteConversation(c); }} title="Delete conversation" className="mr-1 shrink-0 rounded-md p-2 text-slate-400 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 group-hover:opacity-100">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  )}
-                </li>
-              ))}
+            <ul className="space-y-1.5">
+              {conversations
+                .filter((c) => !convSearch.trim() || c.title.toLowerCase().includes(convSearch.toLowerCase()))
+                .map((c) => {
+                  const isActive = activeConv?.id === c.id;
+                  return (
+                    <li key={c.id} className="group relative flex items-center">
+                      <button
+                        onClick={() => void openConversation(c)}
+                        className={`relative flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left transition-all duration-200 ${
+                          isActive
+                            ? "bg-gradient-to-r from-purple-500/15 via-indigo-500/10 to-blue-500/10 border border-purple-300/80 shadow-xs ring-1 ring-purple-500/20 dark:border-purple-500/30 dark:bg-purple-950/40"
+                            : "border border-transparent hover:border-slate-200/80 hover:bg-slate-50/80 dark:hover:border-white/10 dark:hover:bg-white/[0.04] hover:translate-x-0.5"
+                        }`}
+                        title={c.title}
+                      >
+                        {/* Left Active Glow Pip */}
+                        {isActive && (
+                          <span
+                            className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-purple-500 via-indigo-500 to-blue-500"
+                            aria-hidden
+                          />
+                        )}
+
+                        {/* Bot/Chat Icon Badge */}
+                        <span
+                          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-105 ${
+                            isActive
+                              ? "bg-gradient-to-br from-purple-600 to-indigo-600 text-white shadow-xs shadow-purple-500/30"
+                              : "bg-slate-100 text-slate-500 dark:bg-white/10 dark:text-zinc-400 group-hover:bg-purple-100 group-hover:text-purple-600 dark:group-hover:bg-purple-950/60 dark:group-hover:text-purple-400"
+                          }`}
+                        >
+                          <Bot className="h-3.5 w-3.5" />
+                        </span>
+
+                        <span
+                          className={`min-w-0 flex-1 truncate text-xs font-medium ${
+                            isActive
+                              ? "font-semibold text-purple-950 dark:text-white"
+                              : "text-slate-700 dark:text-zinc-300"
+                          }`}
+                        >
+                          {c.title}
+                        </span>
+                      </button>
+
+                      {canDelete(c) && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void deleteConversation(c);
+                          }}
+                          title="Delete conversation"
+                          className="absolute right-1.5 flex h-6 w-6 items-center justify-center rounded-md text-slate-400 opacity-0 transition-all hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-400 group-hover:opacity-100"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </li>
+                  );
+                })}
             </ul>
           )}
         </div>
