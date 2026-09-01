@@ -15,8 +15,41 @@ from app.services.websocket import ws_app
 
 settings = get_settings()
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Ensure database schema has subscription columns & tables automatically
+    try:
+        from app.core.deps import AsyncSessionLocal
+        from sqlalchemy import text
+        async with AsyncSessionLocal() as session:
+            await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS billing_interval VARCHAR(20) DEFAULT NULL;"))
+            await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_status VARCHAR(30) DEFAULT 'active';"))
+            await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_renews_at TIMESTAMP WITH TIME ZONE DEFAULT NULL;"))
+            await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS card_brand VARCHAR(50) DEFAULT NULL;"))
+            await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS card_last4 VARCHAR(10) DEFAULT NULL;"))
+            await session.execute(text("""
+            CREATE TABLE IF NOT EXISTS invoices (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                invoice_number VARCHAR(50) UNIQUE NOT NULL,
+                amount_cents INTEGER NOT NULL,
+                currency VARCHAR(10) NOT NULL DEFAULT 'USD',
+                plan VARCHAR(30) NOT NULL,
+                billing_interval VARCHAR(20) NOT NULL,
+                status VARCHAR(30) NOT NULL DEFAULT 'paid',
+                payment_method VARCHAR(50) NOT NULL DEFAULT 'credit_card',
+                card_brand VARCHAR(50),
+                card_last4 VARCHAR(10),
+                paid_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+            """))
+            await session.commit()
+    except Exception as e:
+        import logging
+        logging.warning("Database schema check notice: %s", e)
+
     # Startup — slack bot is optional; don't crash if token is missing
     try:
         from app.services.slack_bot import start_slack_bot
@@ -24,6 +57,7 @@ async def lifespan(app: FastAPI):
     except Exception:
         pass
     yield
+
 
 app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG, lifespan=lifespan)
 
@@ -56,7 +90,6 @@ async def unhandled_exception_handler(request, exc: Exception):
     import traceback
 
     logging.error("Unhandled error on %s: %s\n%s", request.url.path, exc, traceback.format_exc())
-    from fastapi.responses import JSONResponse
 
     return JSONResponse(
         status_code=500,
@@ -67,9 +100,3 @@ async def unhandled_exception_handler(request, exc: Exception):
             "Access-Control-Allow-Headers": "*",
         },
     )
-
-
-@app.get("/health")
-def health():
-    return {"status": "ok"}
-
