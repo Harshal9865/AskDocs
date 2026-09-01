@@ -111,46 +111,67 @@ export default function DiscoverPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <h1 className="flex items-center gap-2 text-xl font-bold dark:text-white">
-        <Globe className="h-5 w-5 text-indigo-600 dark:text-[#1DB954]" /> Discover Workspaces
-      </h1>
-      <p className="mt-1 text-sm text-slate-500 dark:text-zinc-400">Find public workspaces and request to join. Approved workspaces appear in your sidebar.</p>
+    <div className="relative mx-auto max-w-3xl">
+      {/* Header */}
+      <div className="flex items-center gap-2.5">
+        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 text-white shadow-md shadow-purple-500/25">
+          <Globe className="h-4 w-4" />
+        </span>
+        <h1 className="text-xl font-extrabold bg-gradient-to-r from-slate-900 via-purple-900 to-indigo-900 bg-clip-text text-transparent dark:from-white dark:via-purple-200 dark:to-indigo-200">
+          Discover Workspaces
+        </h1>
+      </div>
+      <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
+        Find public workspaces and request to join. Approved workspaces appear in your sidebar.
+      </p>
 
-      <form onSubmit={onSearch} className="mb-4 mt-6 flex gap-2">
+      <form onSubmit={onSearch} className="mb-4 mt-5 flex gap-2">
         <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search by name or slug…"
+            placeholder="Search by workspace name or slug…"
             aria-label="Search workspaces"
-            className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-9 pr-9 text-sm outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-white/10 dark:bg-[#181818] dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-[#1DB954] dark:focus:ring-[#1DB954]/20"
+            className="w-full rounded-2xl border border-slate-200/80 bg-white/90 py-2.5 pl-10 pr-9 text-sm outline-none placeholder:text-slate-400 shadow-xs backdrop-blur-sm transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#161622] dark:text-white dark:placeholder:text-zinc-500"
           />
           {q && (
-            <button type="button" onClick={() => { setQ(""); void load(undefined, true); }} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10">
+            <button
+              type="button"
+              onClick={() => { setQ(""); void load(undefined, true); }}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10"
+            >
               <X className="h-4 w-4" />
             </button>
           )}
         </div>
-        <button type="submit" className="hidden rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 dark:bg-[#1DB954] dark:text-black sm:block">
+        <button
+          type="submit"
+          className="hidden sm:inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-purple-500/25 transition-all hover:scale-105 active:scale-95"
+        >
           Search
         </button>
       </form>
 
-      {msg && <p className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-900/30 dark:bg-amber-950/30 dark:text-amber-200">{msg}</p>}
+      {msg && (
+        <p className="mb-3 rounded-xl border border-amber-200 bg-amber-50/80 px-3.5 py-2 text-sm font-medium text-amber-800 dark:border-amber-900/30 dark:bg-amber-950/30 dark:text-amber-200">
+          {msg}
+        </p>
+      )}
 
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 animate-pulse rounded-xl bg-slate-100 dark:bg-white/5" />
+            <div key={i} className="h-24 animate-pulse rounded-2xl bg-slate-100 dark:bg-white/5" />
           ))}
         </div>
       ) : workspaces.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center dark:border-white/10 dark:bg-white/[0.02]">
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white/50 p-8 text-center backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.02]">
           <Globe className="mx-auto mb-3 h-8 w-8 text-slate-300 dark:text-zinc-600" />
-          <p className="text-sm font-medium text-slate-700 dark:text-zinc-200">No public workspaces found.</p>
-          <p className="mx-auto mt-1 max-w-md text-xs text-slate-500 dark:text-zinc-500">Ask an admin to make a workspace discoverable in <span className="font-medium">Workspace Settings → Visibility</span>.</p>
+          <p className="text-sm font-semibold text-slate-700 dark:text-zinc-200">No public workspaces found.</p>
+          <p className="mx-auto mt-1 max-w-md text-xs text-slate-500 dark:text-zinc-500">
+            Ask an admin to make a workspace discoverable in <span className="font-semibold text-purple-600 dark:text-purple-400">Workspace Settings → Visibility</span>.
+          </p>
         </div>
       ) : (
         <>
@@ -159,37 +180,44 @@ export default function DiscoverPage() {
               const isPending = pendingIds.has(ws.id);
               const isOpen = showMsgFor === ws.id;
               return (
-                <li key={ws.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-[#121212] dark:hover:border-white/15">
+                <li
+                  key={ws.id}
+                  className="group rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-xs backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-300/60 hover:shadow-md dark:border-white/10 dark:bg-[#151520]/90 dark:hover:border-purple-500/30"
+                >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="truncate font-semibold text-slate-900 dark:text-white">{ws.name}</span>
-                        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">Public</span>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-white/5 dark:text-zinc-400">
-                          <Users className="h-3 w-3" /> {ws.member_count ?? "—"} members
+                        <span className="truncate font-bold text-slate-900 dark:text-white">{ws.name}</span>
+                        <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 ring-1 ring-emerald-600/20 dark:bg-emerald-500/15 dark:text-emerald-300">
+                          Public
+                        </span>
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-white/5 dark:text-zinc-400">
+                          <Users className="h-3 w-3 text-slate-400" /> {ws.member_count ?? "—"} members
                         </span>
                       </div>
-                      <div className="mt-1 flex items-center gap-2 text-xs text-slate-500 dark:text-zinc-500">
-                        <span>/{ws.slug}</span>
+                      <div className="mt-1 flex items-center gap-2 text-xs text-slate-400 dark:text-zinc-500">
+                        <span className="font-mono text-purple-600 dark:text-purple-400">/{ws.slug}</span>
                         <span>·</span>
-                        <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {new Date(ws.created_at).toLocaleDateString()}</span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" /> {new Date(ws.created_at).toLocaleDateString()}
+                        </span>
                       </div>
                       {isOpen && (
                         <div className="mt-3">
                           <textarea
                             value={applyMsg[ws.id] || ""}
                             onChange={(e) => setApplyMsg((m) => ({ ...m, [ws.id]: e.target.value }))}
-                            placeholder="Optional message to admins (why you want to join)…"
+                            placeholder="Optional message to admins (e.g. why you want to join)…"
                             maxLength={500}
                             rows={2}
-                            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-white/10 dark:bg-[#181818] dark:text-white"
+                            className="w-full rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2 text-xs sm:text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#101018] dark:text-white"
                           />
                         </div>
                       )}
                     </div>
                     <div className="flex shrink-0 flex-col items-end gap-1.5">
                       {ws.role ? (
-                        <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+                        <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 ring-1 ring-emerald-600/20 dark:bg-emerald-500/15 dark:text-emerald-300">
                           Joined ({ws.role})
                         </span>
                       ) : !isPending ? (
@@ -197,19 +225,24 @@ export default function DiscoverPage() {
                           <button
                             onClick={() => (isOpen ? void apply(ws.id) : setShowMsgFor(ws.id))}
                             disabled={busyId === ws.id}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 dark:bg-[#1DB954] dark:text-black"
+                            className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 px-4 py-1.5 text-xs font-bold text-white shadow-md shadow-purple-500/25 transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
                           >
                             {busyId === ws.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
                             {isOpen ? "Send request" : "Apply to join"}
                           </button>
                           {isOpen && (
-                            <button onClick={() => setShowMsgFor(null)} className="text-xs text-slate-500 hover:text-slate-700 dark:text-zinc-400">
+                            <button
+                              onClick={() => setShowMsgFor(null)}
+                              className="text-xs text-slate-500 hover:text-slate-700 dark:text-zinc-400"
+                            >
                               Cancel
                             </button>
                           )}
                         </>
                       ) : (
-                        <span className="rounded-full bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">Requested</span>
+                        <span className="rounded-full bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">
+                          Requested
+                        </span>
                       )}
                     </div>
                   </div>
@@ -218,8 +251,14 @@ export default function DiscoverPage() {
             })}
           </ul>
           <div ref={sentinelRef} className="h-6" />
-          {loadingMore && <p className="flex items-center justify-center gap-2 py-4 text-sm text-slate-500"><Loader2 className="h-4 w-4 animate-spin" /> Loading more…</p>}
-          {!hasMore && workspaces.length > 0 && <p className="py-4 text-center text-xs text-slate-400">No more workspaces</p>}
+          {loadingMore && (
+            <p className="flex items-center justify-center gap-2 py-4 text-xs font-medium text-slate-500">
+              <Loader2 className="h-4 w-4 animate-spin text-purple-600" /> Loading more…
+            </p>
+          )}
+          {!hasMore && workspaces.length > 0 && (
+            <p className="py-4 text-center text-xs text-slate-400 dark:text-zinc-500">No more workspaces</p>
+          )}
         </>
       )}
 

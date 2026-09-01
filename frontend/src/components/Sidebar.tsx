@@ -363,16 +363,9 @@ export default function Sidebar({
         {NAV.map((item) => {
           const active = pathname === item.href || (item.href === "/friends" && pathname.startsWith("/friends")) || (item.href === "/documents" && pathname.startsWith("/documents"));
           const Icon = item.icon;
-          const count = item.href === "/documents" ? docCount
-            : item.href === "/friends" ? (friendReqCount > 0 ? friendReqCount : null)
-            : item.href === "/chats" ? (unreadChatCount > 0 ? unreadChatCount : null)
-            : null;
-          const showCount = !isCollapsed && count !== null && count > 0;
-          const showBadge = isCollapsed && (
-            (item.href === "/friends" && friendReqCount > 0) ||
-            (item.href === "/documents" && docCount !== null && docCount > 0) ||
-            (item.href === "/chats" && unreadChatCount > 0)
-          );
+          const showCount = (item.href === "/friends" && friendReqCount > 0) || (item.href === "/documents" && docCount !== null && docCount > 0) || (item.href === "/chats" && unreadChatCount > 0);
+          const count = item.href === "/friends" ? friendReqCount : item.href === "/documents" ? docCount : unreadChatCount;
+
           return (
             <Link
               key={item.href}
@@ -380,29 +373,23 @@ export default function Sidebar({
               onClick={onCloseMobile}
               title={item.label}
               aria-label={item.label}
-              className={`relative mb-0.5 flex h-8 items-center gap-2 rounded-md px-2 text-[13px] font-medium transition-colors ${isCollapsed ? "justify-center px-0" : ""} ${active ? "dark:bg-slate-800 dark:text-indigo-400 bg-white text-indigo-700 shadow-sm ring-1 ring-slate-900/5" : "dark:text-slate-400 dark:hover:bg-slate-800/50 text-slate-600 hover:bg-slate-900/5"}`}
+              className={`group relative mb-1 flex h-9 items-center gap-2.5 rounded-xl px-3 text-[13.5px] font-medium transition-all duration-200 ${isCollapsed ? "justify-center px-0" : ""} ${
+                active 
+                  ? "bg-slate-900 text-white shadow-xs dark:bg-[#1a2032] dark:text-white dark:border dark:border-purple-500/20 dark:shadow-md dark:shadow-purple-500/5 font-semibold" 
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-white/[0.06]"
+              }`}
             >
-              <Icon aria-hidden className={`h-4 w-4 shrink-0 ${active ? "text-indigo-600" : "text-slate-500"}`} />
+              {active && (
+                <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-r-full bg-purple-500" aria-hidden />
+              )}
+              <Icon aria-hidden className={`h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${active ? "text-purple-400 dark:text-purple-300" : "text-slate-400 dark:text-zinc-500 group-hover:text-purple-600 dark:group-hover:text-purple-400"}`} />
               {!isCollapsed && (
                 <>
                   <span className="truncate">{item.label}</span>
                   {showCount && (
-                    <span className={`ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-bold ${item.href === "/friends" ? "bg-red-500 text-white" : item.href === "/chats" ? "bg-[#1DB954] text-black" : "bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-zinc-400"}`}>
+                    <span className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold ${item.href === "/friends" ? "bg-red-500 text-white" : item.href === "/chats" ? "bg-[#1DB954] text-black" : "bg-slate-200 text-slate-700 dark:bg-white/15 dark:text-zinc-300"}`}>
                       {count}
                     </span>
-                  )}
-                </>
-              )}
-              {isCollapsed && showBadge && (
-                <>
-                  {item.href === "/friends" && friendReqCount > 0 && (
-                    <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-black" />
-                  )}
-                  {item.href === "/documents" && docCount !== null && docCount > 0 && (
-                    <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-indigo-500 ring-2 ring-white dark:ring-black" />
-                  )}
-                  {item.href === "/chats" && unreadChatCount > 0 && (
-                    <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[#1DB954] ring-2 ring-white dark:ring-black" />
                   )}
                 </>
               )}
@@ -410,7 +397,7 @@ export default function Sidebar({
           );
         })}
 
-        <div className="sb-label mb-1 mt-5 px-2 text-[11px] font-medium uppercase tracking-wider text-slate-400">
+        <div className="sb-label mb-1.5 mt-5 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
           More
         </div>
         {NAV_SECONDARY.map((item) => {
@@ -423,9 +410,16 @@ export default function Sidebar({
               onClick={onCloseMobile}
               title={item.label}
               aria-label={item.label}
-              className={`mb-0.5 flex h-7 items-center gap-2 rounded-md px-2 text-[13px] transition-colors ${isCollapsed ? "justify-center px-0" : ""} ${active ? "dark:bg-slate-800 dark:text-indigo-400 bg-white text-indigo-700 shadow-sm ring-1 ring-slate-900/5" : "dark:text-slate-400 dark:hover:bg-slate-800/50 text-slate-600 hover:bg-slate-900/5"}`}
+              className={`group relative mb-1 flex h-8.5 items-center gap-2.5 rounded-xl px-3 text-[13px] font-medium transition-all duration-200 ${isCollapsed ? "justify-center px-0" : ""} ${
+                active 
+                  ? "bg-slate-900 text-white shadow-xs dark:bg-[#1a2032] dark:text-white dark:border dark:border-purple-500/20 dark:shadow-md dark:shadow-purple-500/5 font-semibold" 
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-white/[0.06]"
+              }`}
             >
-              <Icon aria-hidden className={`h-4 w-4 shrink-0 ${active ? "text-indigo-600" : "text-slate-500"}`} />
+              {active && (
+                <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-r-full bg-purple-500" aria-hidden />
+              )}
+              <Icon aria-hidden className={`h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${active ? "text-purple-400 dark:text-purple-300" : "text-slate-400 dark:text-zinc-500 group-hover:text-purple-600 dark:group-hover:text-purple-400"}`} />
               {!isCollapsed && <span className="truncate">{item.label}</span>}
             </Link>
           );

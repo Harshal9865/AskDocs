@@ -102,14 +102,22 @@ function SearchInner() {
   const term = q.trim();
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <h1 className="flex items-center gap-2 text-xl font-bold dark:text-white">
-        <Search className="h-5 w-5 text-indigo-600 dark:text-[#1DB954]" /> Search
-      </h1>
-      <p className="mt-1 text-sm text-slate-500 dark:text-zinc-400">Find anything across this workspace&apos;s documents and AI conversations.</p>
+    <div className="relative mx-auto max-w-3xl">
+      {/* Header */}
+      <div className="flex items-center gap-2.5">
+        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 text-white shadow-md shadow-purple-500/25">
+          <Search className="h-4 w-4" />
+        </span>
+        <h1 className="text-xl font-extrabold bg-gradient-to-r from-slate-900 via-purple-900 to-indigo-900 bg-clip-text text-transparent dark:from-white dark:via-purple-200 dark:to-indigo-200">
+          Search Workspace
+        </h1>
+      </div>
+      <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
+        Find anything across this workspace&apos;s documents, AI conversations, and indexed excerpts.
+      </p>
 
       {!workspace ? (
-        <div className="mt-6 rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500 shadow-sm dark:border-white/10 dark:bg-[#121212] dark:text-zinc-400">
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white/80 p-8 text-center text-slate-500 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-[#12121e]/80 dark:text-zinc-400">
           Select a workspace to search in.
         </div>
       ) : (
@@ -119,16 +127,16 @@ function SearchInner() {
               e.preventDefault();
               void run();
             }}
-            className="mb-3 mt-6 flex gap-2"
+            className="mb-3 mt-5 flex gap-2"
           >
             <div className="relative min-w-0 flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder='Try "pricing" or "refund window"'
+                placeholder='Try "pricing", "quarterly roadmap", or "refunds"…'
                 aria-label="Search"
-                className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-9 pr-9 text-sm outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-white/10 dark:bg-[#181818] dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-[#1DB954] dark:focus:ring-[#1DB954]/20"
+                className="w-full rounded-2xl border border-slate-200/80 bg-white/90 py-2.5 pl-10 pr-9 text-sm outline-none placeholder:text-slate-400 shadow-xs backdrop-blur-sm transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#161622] dark:text-white dark:placeholder:text-zinc-500"
               />
               {q && (
                 <button
@@ -139,7 +147,7 @@ function SearchInner() {
                     setSearched(false);
                     router.replace("/search");
                   }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10"
                   aria-label="Clear"
                 >
                   <X className="h-4 w-4" />
@@ -149,7 +157,7 @@ function SearchInner() {
             <button
               type="submit"
               disabled={busy || q.trim().length < 2}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-40 dark:bg-[#1DB954] dark:text-black dark:hover:bg-[#1ed760]"
+              className="inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-purple-500/25 transition-all hover:scale-105 active:scale-95 disabled:opacity-40"
             >
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Search
             </button>
@@ -157,68 +165,98 @@ function SearchInner() {
 
           {recent.length > 0 && !searched && (
             <div className="mb-4 flex flex-wrap items-center gap-1.5 text-xs">
-              <span className="flex items-center gap-1 text-slate-400">
+              <span className="flex items-center gap-1 text-slate-400 dark:text-zinc-500">
                 <Clock className="h-3 w-3" /> Recent:
               </span>
               {recent.map((r) => (
-                <button key={r} onClick={() => { setQ(r); void run(r); }} className="rounded-full bg-slate-100 px-2.5 py-1 text-xs hover:bg-slate-200 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10">
+                <button
+                  key={r}
+                  onClick={() => { setQ(r); void run(r); }}
+                  className="rounded-full border border-slate-200/60 bg-white/80 px-2.5 py-1 text-xs font-medium text-slate-700 shadow-2xs hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10 transition-colors"
+                >
                   {r}
                 </button>
               ))}
-              <button onClick={() => { setRecent([]); localStorage.removeItem("askdocs_recent_search"); }} className="ml-1 text-slate-400 hover:text-slate-600">
+              <button
+                onClick={() => { setRecent([]); localStorage.removeItem("askdocs_recent_search"); }}
+                className="ml-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors"
+              >
                 Clear
               </button>
             </div>
           )}
 
-          {error && <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 dark:border-red-900/30 dark:bg-red-950/30 dark:text-red-300">{error}</p>}
+          {error && (
+            <p className="mb-4 rounded-xl border border-red-200 bg-red-50/80 px-3 py-2 text-sm font-medium text-red-700 dark:border-red-900/30 dark:bg-red-950/30 dark:text-red-300">
+              {error}
+            </p>
+          )}
 
           {busy && !results && (
             <div className="mt-6 space-y-3">
-              <div className="h-20 animate-pulse rounded-xl bg-slate-100 dark:bg-white/5" />
-              <div className="h-20 animate-pulse rounded-xl bg-slate-100 dark:bg-white/5" />
+              <div className="h-20 animate-pulse rounded-2xl bg-slate-100 dark:bg-white/5" />
+              <div className="h-20 animate-pulse rounded-2xl bg-slate-100 dark:bg-white/5" />
             </div>
           )}
 
           {results && (
-            <div className="mt-2 space-y-6">
+            <div className="mt-4 space-y-6">
               {counts && (
                 <div className="flex flex-wrap items-center gap-2 text-xs">
-                  <span className="font-medium text-slate-600 dark:text-zinc-300">
-                    {counts.total} results
+                  <span className="font-bold text-slate-700 dark:text-zinc-200">
+                    {counts.total} {counts.total === 1 ? "match" : "matches"} found
                   </span>
                   <span className="text-slate-400">·</span>
-                  <div className="flex gap-1">
-                    {(["all", "docs", "chats", "excerpts"] as Filter[]).map((f) => (
-                      <button
-                        key={f}
-                        onClick={() => setFilter(f)}
-                        className={`rounded-full px-2.5 py-1 text-xs font-medium ${filter === f ? "bg-slate-900 text-white dark:bg-white dark:text-black" : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/5 dark:text-zinc-400"}`}
-                      >
-                        {f === "all" ? "All" : f === "docs" ? `Docs (${counts.docs})` : f === "chats" ? `Chats (${counts.msgs})` : `Excerpts (${counts.ex})`}
-                      </button>
-                    ))}
+                  <div className="flex flex-wrap gap-1.5">
+                    {(["all", "docs", "chats", "excerpts"] as Filter[]).map((f) => {
+                      const isActive = filter === f;
+                      return (
+                        <button
+                          key={f}
+                          onClick={() => setFilter(f)}
+                          className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
+                            isActive
+                              ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-xs shadow-purple-500/25"
+                              : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/5 dark:text-zinc-400 dark:hover:bg-white/10"
+                          }`}
+                        >
+                          {f === "all"
+                            ? "All"
+                            : f === "docs"
+                            ? `Docs (${counts.docs})`
+                            : f === "chats"
+                            ? `Chats (${counts.msgs})`
+                            : `Excerpts (${counts.ex})`}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
 
               {counts?.total === 0 ? (
-                <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-400">
-                  No results for “{q}”. Try a different keyword or check another workspace.
-                </p>
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-white/50 p-8 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-white/[0.02] dark:text-zinc-400">
+                  <p className="font-medium">No results found for &ldquo;{q}&rdquo;</p>
+                  <p className="mt-1 text-xs text-slate-400 dark:text-zinc-500">Try broader keywords or upload related documents to this workspace.</p>
+                </div>
               ) : (
                 <>
                   {(filter === "all" || filter === "docs") && results.documents.length > 0 && (
                     <section>
-                      <h2 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                        <FileText className="h-3.5 w-3.5" /> Documents · {results.documents.length}
+                      <h2 className="mb-2.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
+                        <FileText className="h-3.5 w-3.5" /> Documents ({results.documents.length})
                       </h2>
                       <ul className="space-y-2">
                         {results.documents.map((d) => (
-                          <li key={d.id} className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:border-indigo-200 dark:border-white/10 dark:bg-[#1a1a1a]">
-                            <Link href={`/documents/${workspace.id}/${d.id}`} className="flex items-center gap-2 text-sm font-medium text-indigo-700 hover:underline dark:text-[#1DB954]">
-                              <FileText className="h-4 w-4 shrink-0" /> <span className="truncate">{highlight(d.title, term)}</span>
-                              <span className="ml-auto shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] uppercase text-slate-500 dark:bg-white/10">{d.file_type}</span>
+                          <li key={d.id} className="group rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-xs backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-300 hover:shadow-md dark:border-white/10 dark:bg-[#151520]/90 dark:hover:border-purple-500/30">
+                            <Link href={`/documents/${workspace.id}/${d.id}`} className="flex items-center gap-2.5 text-sm font-semibold text-slate-900 group-hover:text-purple-600 dark:text-white dark:group-hover:text-purple-300 transition-colors">
+                              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400">
+                                <FileText className="h-4 w-4" />
+                              </span>
+                              <span className="truncate">{highlight(d.title, term)}</span>
+                              <span className="ml-auto shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-600 dark:bg-white/10 dark:text-zinc-400">
+                                {d.file_type}
+                              </span>
                             </Link>
                           </li>
                         ))}
@@ -228,17 +266,21 @@ function SearchInner() {
 
                   {(filter === "all" || filter === "chats") && results.messages.length > 0 && (
                     <section>
-                      <h2 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                        <MessageSquare className="h-3.5 w-3.5" /> AI conversations · {results.messages.length}
+                      <h2 className="mb-2.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                        <MessageSquare className="h-3.5 w-3.5" /> AI Conversations ({results.messages.length})
                       </h2>
                       <ul className="space-y-2">
                         {results.messages.map((m) => (
-                          <li key={m.id} className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-[#1a1a1a]">
-                            <Link href={`/chat?conv=${m.conversation_id}`} className="text-xs font-semibold uppercase text-indigo-500 hover:underline dark:text-[#1DB954]">
-                              {m.conversation_title || "Conversation"}
-                            </Link>
-                            <span className="ml-2 rounded bg-slate-100 px-1 py-0.5 text-[10px] uppercase text-slate-500 dark:bg-white/10">{m.role}</span>
-                            <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-slate-700 dark:text-zinc-300">{highlight(m.snippet, term)}</p>
+                          <li key={m.id} className="group rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-xs backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md dark:border-white/10 dark:bg-[#151520]/90 dark:hover:border-indigo-500/30">
+                            <div className="flex items-center justify-between gap-2">
+                              <Link href={`/chat?conv=${m.conversation_id}`} className="text-xs font-bold uppercase tracking-wider text-indigo-600 group-hover:underline dark:text-indigo-400">
+                                {m.conversation_title || "AI Conversation"}
+                              </Link>
+                              <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold uppercase text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-300">{m.role}</span>
+                            </div>
+                            <p className="mt-1.5 line-clamp-2 text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-zinc-300">
+                              {highlight(m.snippet, term)}
+                            </p>
                           </li>
                         ))}
                       </ul>
@@ -247,14 +289,18 @@ function SearchInner() {
 
                   {(filter === "all" || filter === "excerpts") && results.excerpts.length > 0 && searched && (
                     <section>
-                      <h2 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                        <BookOpen className="h-3.5 w-3.5" /> Document excerpts · {results.excerpts.length}
+                      <h2 className="mb-2.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                        <BookOpen className="h-3.5 w-3.5" /> Document Excerpts ({results.excerpts.length})
                       </h2>
                       <ul className="space-y-2">
                         {results.excerpts.map((x) => (
-                          <li key={x.id} className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-[#1a1a1a]">
-                            <p className="text-[11px] font-semibold uppercase tracking-wide text-indigo-500 dark:text-[#1DB954]">{x.document_title || "Document"}</p>
-                            <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-zinc-300">{highlight(x.snippet, term)}</p>
+                          <li key={x.id} className="rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-xs backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md dark:border-white/10 dark:bg-[#151520]/90 dark:hover:border-emerald-500/30">
+                            <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                              {x.document_title || "Document"}
+                            </p>
+                            <p className="mt-1.5 whitespace-pre-wrap text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-zinc-300">
+                              {highlight(x.snippet, term)}
+                            </p>
                           </li>
                         ))}
                       </ul>

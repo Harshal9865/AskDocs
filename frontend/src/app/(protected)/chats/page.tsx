@@ -392,7 +392,7 @@ export default function ChatsPage() {
 
       {/* ===== CHAT LIST PANEL ===== */}
       <div
-        className={`gemini-gradient-bg sb-scroll flex-col overflow-y-auto border bg-white shadow-sm dark:border-white/10 dark:bg-[#0b0f14] rounded-2xl shrink-0 p-2 sm:p-3
+        className={`gemini-gradient-bg sb-scroll no-scrollbar flex-col overflow-y-auto border bg-white shadow-sm dark:border-white/10 dark:bg-[#0b0f14] rounded-3xl shrink-0 p-2.5 sm:p-3.5
           ${activeChat ? "hidden md:flex md:w-80 min-h-0" : "flex w-full md:w-80 min-h-0"}`}
         style={{ WebkitOverflowScrolling: "touch" }}
       >
@@ -401,15 +401,15 @@ export default function ChatsPage() {
         <div className="relative z-10 flex flex-col h-full">
           
           {/* Top Sticky Bar */}
-          <div className="sticky top-0 z-10 border-b border-slate-100 bg-white/95 px-2 pb-3 pt-2 backdrop-blur dark:border-white/5 dark:bg-[#0b0f14]/95">
-            <div className="mb-2.5 flex items-center justify-between gap-1">
-              <h2 className="text-base font-bold text-slate-900 dark:text-white">Office Chats</h2>
-              <div className="flex shrink-0 items-center gap-1.5">
+          <div className="sticky top-0 z-10 border-b border-slate-100 bg-white/95 px-2 pb-3.5 pt-2 backdrop-blur dark:border-white/5 dark:bg-[#0b0f14]/95">
+            <div className="mb-3 flex items-center justify-between gap-1">
+              <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">Office Chats</h2>
+              <div className="flex shrink-0 items-center gap-2">
                 <button 
                   onClick={() => setShowNewChat(true)} 
                   title="New Direct Message" 
                   aria-label="New chat" 
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-500 dark:text-white transition-colors shadow-sm"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-[#9333ea] hover:bg-[#7c3aed] text-white transition-all shadow-md shadow-purple-500/25 hover:scale-105 active:scale-95"
                 >
                   <MessagesSquare className="h-4 w-4" />
                 </button>
@@ -417,7 +417,7 @@ export default function ChatsPage() {
                   onClick={() => setShowNewGroup(true)} 
                   title="New Group Chat" 
                   aria-label="New group" 
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1DB954] text-black hover:bg-[#1ed760] transition-colors shadow-sm"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1DB954] hover:bg-[#1ed760] text-white transition-all shadow-md shadow-emerald-500/25 hover:scale-105 active:scale-95"
                 >
                   <UsersRound className="h-4 w-4" />
                 </button>
@@ -425,32 +425,41 @@ export default function ChatsPage() {
             </div>
 
             {/* Search Input */}
-            <div className="relative mb-2.5">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <div className="relative mb-3">
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
               <input 
                 value={query} 
                 onChange={(e) => setQuery(e.target.value)} 
                 placeholder="Search chats or teammates…" 
-                className="w-full rounded-full border border-slate-200 bg-slate-50 py-1.5 pl-9 pr-3 text-xs outline-none placeholder:text-slate-400 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-zinc-500 transition-all" 
+                className="w-full rounded-full border border-slate-200/80 bg-slate-50/90 py-2 pl-9 pr-4 text-xs outline-none placeholder:text-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#16161e] dark:text-white dark:placeholder:text-zinc-500 transition-all" 
               />
             </div>
 
-            {/* Filter Pills */}
-            <div className="flex flex-wrap gap-1.5">
-              {chips.map((c) => (
-                <button 
-                  key={c.key} 
-                  onClick={() => setFilter(c.key)} 
-                  className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold transition-all ${filter === c.key ? "bg-purple-600 text-white shadow-sm dark:bg-purple-600" : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/5 dark:text-zinc-400 dark:hover:bg-white/10"}`}
-                >
-                  {c.label}
-                  {c.count !== undefined && c.count > 0 && (
-                    <span className={`ml-1 px-1 rounded-full text-[10px] ${filter === c.key ? "bg-white/20 text-white" : "bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-zinc-400"}`}>
-                      {c.count}
-                    </span>
-                  )}
-                </button>
-              ))}
+            {/* Filter Pills matching Image 3 */}
+            <div className="flex flex-wrap gap-2">
+              {chips.map((c) => {
+                const isActive = filter === c.key;
+                return (
+                  <button 
+                    key={c.key} 
+                    onClick={() => setFilter(c.key)} 
+                    className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-bold transition-all duration-200 ${
+                      isActive 
+                        ? "bg-gradient-to-r from-[#7c3aed] to-[#9333ea] text-white shadow-md shadow-purple-500/25 ring-1 ring-purple-400/30" 
+                        : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-[#1a1a24] dark:text-zinc-300 dark:hover:bg-white/10"
+                    }`}
+                  >
+                    <span>{c.label}</span>
+                    {c.count !== undefined && c.count > 0 && (
+                      <span className={`ml-1.5 inline-flex items-center justify-center rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
+                        isActive ? "bg-white/25 text-white" : "bg-slate-200 text-slate-700 dark:bg-white/10 dark:text-zinc-300"
+                      }`}>
+                        {c.count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -458,12 +467,12 @@ export default function ChatsPage() {
           {onlineColleagues.length > 0 && (
             <div className="border-b border-slate-100 px-2 py-2.5 dark:border-white/5">
               <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Active Now</div>
-              <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none">
+              <div className="flex gap-2.5 overflow-x-auto pb-1 no-scrollbar">
                 {onlineColleagues.map((m) => (
-                  <button key={m.user_id} onClick={() => void openDM(m)} className="flex shrink-0 flex-col items-center gap-1 hover:opacity-80 transition-opacity" title={`Message ${m.name || m.email}`}>
+                  <Link key={m.user_id} href={`/profile/${m.user_id}`} className="flex shrink-0 flex-col items-center gap-1 hover:opacity-80 transition-opacity" title={`View profile of ${m.name || m.email}`}>
                     <ChatAvatar user={m} size={48} ring />
                     <span className="max-w-[52px] truncate text-[10px] font-medium text-slate-700 dark:text-zinc-300">{(m.name || m.email).split(" ")[0]}</span>
-                  </button>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -529,7 +538,7 @@ export default function ChatsPage() {
       </div>
 
       {/* ===== THREAD / MESSAGE PANEL ===== */}
-      <div className={`gemini-gradient-bg relative flex-col overflow-hidden border bg-white shadow-sm dark:border-white/10 dark:bg-[#181818] rounded-2xl ${activeChat ? "flex flex-1 min-w-0 min-h-0" : "hidden md:flex md:flex-1 md:min-w-0 md:min-h-0"}`}>
+      <div className={`gemini-gradient-bg relative flex-col overflow-hidden border bg-white shadow-sm dark:border-white/10 dark:bg-[#181818] rounded-3xl ${activeChat ? "flex flex-1 min-w-0 min-h-0" : "hidden md:flex md:flex-1 md:min-w-0 md:min-h-0"}`}>
         <div className="gemini-orb gemini-orb-1" />
         <div className="gemini-orb gemini-orb-2" />
         <div className="gemini-orb gemini-orb-3" />
@@ -549,20 +558,43 @@ export default function ChatsPage() {
               <button onClick={() => { setActiveChat(null); setMessages([]); }} aria-label="Back" className="rounded-full p-2 text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 md:hidden">
                 <ArrowLeft className="h-5 w-5" />
               </button>
-              {activeChat.type === "direct" ? (
-                <ChatAvatar user={otherParticipant(activeChat, user?.email) ?? {}} size={38} />
+
+              {activeChat.type === "direct" && otherParticipant(activeChat, user?.email) ? (
+                (() => {
+                  const other = otherParticipant(activeChat, user?.email)!;
+                  return (
+                    <Link
+                      href={`/profile/${other.user_id || other.id}`}
+                      className="flex items-center gap-2.5 min-w-0 flex-1 hover:opacity-85 transition-opacity"
+                      title={`View profile of ${other.name || other.email}`}
+                    >
+                      <ChatAvatar user={other} size={38} />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 truncate text-sm font-bold text-slate-900 hover:text-purple-600 dark:text-white dark:hover:text-purple-400 transition-colors">
+                          <PresenceDot online={other.online ?? false} />
+                          {chatTitle(activeChat, user?.email)}
+                        </div>
+                        <div className="truncate text-[11px] text-slate-400 dark:text-zinc-500">
+                          {other.online ? "Online" : "Offline"} · Tap to view profile
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })()
               ) : (
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 font-bold"><UsersRound className="h-4 w-4" /></span>
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 font-bold"><UsersRound className="h-4 w-4" /></span>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-bold text-slate-900 dark:text-white">
+                      {chatTitle(activeChat, user?.email)}
+                    </div>
+                    <div className="truncate text-[11px] text-slate-400 dark:text-zinc-500">
+                      {activeChat.participants.length} members · {activeChat.participants.map((p) => p.name || p.email).join(", ")}
+                    </div>
+                  </div>
+                </div>
               )}
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5 truncate text-sm font-bold text-slate-900 dark:text-white">
-                  {activeChat.type === "direct" && <PresenceDot online={otherParticipant(activeChat, user?.email)?.online ?? false} />}
-                  {chatTitle(activeChat, user?.email)}
-                </div>
-                <div className="truncate text-[11px] text-slate-400 dark:text-zinc-500">
-                  {activeChat.type === "direct" ? (otherParticipant(activeChat, user?.email)?.online ? "Online" : "Offline") : `${activeChat.participants.length} members · ${activeChat.participants.map((p) => p.name || p.email).join(", ")}`}
-                </div>
-              </div>
+
               <div className="flex shrink-0 items-center gap-1">
                 {/* Wallpaper Customizer - Uppermost Layer */}
                 <div className="relative">
@@ -614,7 +646,7 @@ export default function ChatsPage() {
               ref={scrollRef}
               onScroll={handleScroll}
               style={WALLPAPERS.find((w) => w.id === wallpaper)?.style}
-              className="scroll-touch wa-thread relative z-10 flex-1 min-h-0 space-y-2 overflow-y-auto px-3 py-4 sm:px-6 transition-all duration-300"
+              className="scroll-touch wa-thread no-scrollbar relative z-10 flex-1 min-h-0 space-y-2 overflow-y-auto px-3 py-4 sm:px-6 transition-all duration-300"
             >
               {hasMoreMessages && (
                 <div className="flex justify-center py-2">
@@ -633,9 +665,13 @@ export default function ChatsPage() {
                   <div key={m.id} className={`flex ${isMe ? "justify-end" : "justify-start"} group`}>
                     <div className={`relative max-w-[82%] sm:max-w-[70%] rounded-2xl px-3.5 py-2 text-sm shadow-sm ${isMe ? "bg-purple-600 text-white rounded-br-sm" : "bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white rounded-bl-sm"}`}>
                       {!isMe && activeChat.type === "group" && (
-                        <p className="mb-1 text-[11px] font-bold text-purple-600 dark:text-purple-400">
+                        <Link
+                          href={`/profile/${m.sender_id}`}
+                          className="mb-1 block text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline"
+                          title="View Profile"
+                        >
                           {senderName(m.sender_id)}
-                        </p>
+                        </Link>
                       )}
                       <p className="whitespace-pre-wrap break-words">{m.content}</p>
                       {m.attachments && m.attachments.length > 0 && (

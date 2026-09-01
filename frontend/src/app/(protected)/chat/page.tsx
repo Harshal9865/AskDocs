@@ -285,21 +285,15 @@ export default function ChatPage() {
                           />
                         )}
 
-                        {/* Bot/Chat Icon Badge */}
-                        <span
-                          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-105 ${
-                            isActive
-                              ? "bg-gradient-to-br from-purple-600 to-indigo-600 text-white shadow-xs shadow-purple-500/30"
-                              : "bg-slate-100 text-slate-500 dark:bg-white/10 dark:text-zinc-400 group-hover:bg-purple-100 group-hover:text-purple-600 dark:group-hover:bg-purple-950/60 dark:group-hover:text-purple-400"
-                          }`}
-                        >
-                          <Bot className="h-3.5 w-3.5" />
-                        </span>
+                        {/* AIAvatarIcon Logo (Image 1) */}
+                        <div className="shrink-0 transition-transform duration-200 group-hover:scale-110">
+                          <AIAvatarIcon className="h-6 w-6" streaming={isActive && busy} />
+                        </div>
 
                         <span
                           className={`min-w-0 flex-1 truncate text-xs font-medium ${
                             isActive
-                              ? "font-semibold text-purple-950 dark:text-white"
+                              ? "font-bold text-purple-950 dark:text-white"
                               : "text-slate-700 dark:text-zinc-300"
                           }`}
                         >

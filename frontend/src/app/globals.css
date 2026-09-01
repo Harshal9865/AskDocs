@@ -994,3 +994,20 @@ button.bg-indigo-600:hover {
   }
 }
 
+/* Hide scrollbars completely while preserving scrolling functionality */
+.no-scrollbar::-webkit-scrollbar,
+.wa-thread::-webkit-scrollbar,
+.sb-scroll::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar,
+.wa-thread,
+.sb-scroll {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+
