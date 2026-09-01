@@ -82,6 +82,28 @@ app.include_router(api_router, prefix="/api/v1")
 app.mount("/ws", ws_app)
 
 
+@app.get("/health")
+@app.get("/")
+@app.head("/")
+@app.head("/health")
+async def health_check():
+    """Health check endpoint for Render/uptime monitors."""
+    db_status = "ok"
+    try:
+        from app.core.deps import AsyncSessionLocal
+        from sqlalchemy import text
+        async with AsyncSessionLocal() as session:
+            await session.execute(text("SELECT 1"))
+    except Exception as e:
+        db_status = f"error: {e}"
+
+    return {
+        "status": "healthy",
+        "app": settings.APP_NAME,
+        "database": db_status,
+    }
+
+
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request, exc: Exception):
     """Return CORS-headed JSON on unhandled errors instead of a bare 500,

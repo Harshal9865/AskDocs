@@ -17,7 +17,8 @@ engine = create_async_engine(
     settings.DATABASE_URL,
     echo=settings.DEBUG,
     pool_pre_ping=True,   # Pings DB before checkout; auto-reconnects on restart/disconnect
-    pool_recycle=1800,    # Recycles stale connections every 30m
+    pool_recycle=300,     # Recycles connections every 5m to avoid cloud idle disconnects
+    pool_timeout=30,
     pool_size=10,
     max_overflow=20,
 )
