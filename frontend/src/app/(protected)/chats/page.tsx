@@ -11,16 +11,22 @@ import Avatar from "@/components/Avatar";
 import {
   ArrowDownCircle,
   ArrowLeft,
+  Bell,
+  BellRing,
   Check,
   CheckCheck,
   EyeOff,
+  FileUp,
   MessagesSquare,
   Palette,
   Search,
   Trash2,
   UsersRound,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import type { Member, TeamChat, TeamMessage, ChatAttachment } from "@/lib/types";
+import { playMessageChime, requestDesktopNotification, showDesktopPush } from "@/lib/utils";
 
 const WALLPAPERS = [
   {
@@ -169,11 +175,34 @@ export default function ChatsPage() {
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [wallpaper, setWallpaper] = useState<string>("whatsapp-doodle");
   const [showWallpaperMenu, setShowWallpaperMenu] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [notifEnabled, setNotifEnabled] = useState(false);
+  const [dragOverThread, setDragOverThread] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("askdocs_chat_wallpaper");
-    if (saved) setWallpaper(saved);
+    const savedWp = localStorage.getItem("askdocs_chat_wallpaper");
+    if (savedWp) setWallpaper(savedWp);
+    const savedSound = localStorage.getItem("askdocs_chat_sound");
+    if (savedSound !== null) setSoundEnabled(savedSound !== "false");
+    if (typeof window !== "undefined" && "Notification" in window) {
+      setNotifEnabled(Notification.permission === "granted");
+    }
   }, []);
+
+  const toggleSound = () => {
+    const next = !soundEnabled;
+    setSoundEnabled(next);
+    localStorage.setItem("askdocs_chat_sound", String(next));
+  };
+
+  const toggleNotifications = async () => {
+    if (notifEnabled) {
+      setNotifEnabled(false);
+      return;
+    }
+    const granted = await requestDesktopNotification();
+    setNotifEnabled(granted);
+  };
 
   const selectWallpaper = (wpId: string) => {
     setWallpaper(wpId);
@@ -214,6 +243,22 @@ export default function ChatsPage() {
       try { 
         const msgs = await api.listTeamMessages(activeChat.id); 
         if (!cancelled) {
+          if (msgs.length > prevMsgCount.current && prevMsgCount.current > 0) {
+            const newMsgs = msgs.slice(prevMsgCount.current);
+            const incoming = newMsgs.filter((m) => m.sender_id !== user?.id);
+            if (incoming.length > 0) {
+              if (soundEnabled) {
+                playMessageChime();
+              }
+              if (typeof document !== "undefined" && document.hidden) {
+                const latest = incoming[incoming.length - 1];
+                showDesktopPush(
+                  latest.sender_name || "New Message",
+                  latest.content || "Sent an attachment"
+                );
+              }
+            }
+          }
           setMessages(msgs);
           if (msgs.length > prevMsgCount.current) {
             void loadChats();
@@ -224,7 +269,7 @@ export default function ChatsPage() {
     void poll();
     const t = setInterval(poll, 3000);
     return () => { cancelled = true; clearInterval(t); };
-  }, [activeChat, loadChats]);
+  }, [activeChat, loadChats, soundEnabled, user?.id]);
 
   const prevMsgCount = useRef(0);
 
@@ -236,6 +281,30 @@ export default function ChatsPage() {
       prev.map((c) => (c.id === chat.id ? { ...c, unread_count: 0 } : c))
     );
     window.dispatchEvent(new CustomEvent("askdocs_chat_read", { detail: { chatId: chat.id } }));
+  };
+
+  const handleThreadDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOverThread(false);
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length === 0 || !activeChat) return;
+
+    for (const file of files) {
+      try {
+        const att = await api.uploadChatAttachment(file);
+        await api.sendTeamMessage(activeChat.id, {
+          content: file.name,
+          attachment_ids: [att.id],
+        });
+      } catch (err) {
+        showToast("error", (err as Error).message);
+      }
+    }
+    try {
+      const msgs = await api.listTeamMessages(activeChat.id);
+      setMessages(msgs);
+      void loadChats();
+    } catch { /* ignore */ }
   };
   
   function scrollToBottom(smooth = true) {
@@ -625,6 +694,34 @@ export default function ChatsPage() {
               )}
 
               <div className="flex shrink-0 items-center gap-1">
+                {/* Sound Chime Toggle */}
+                <button
+                  onClick={toggleSound}
+                  title={soundEnabled ? "Mute chat sounds" : "Enable chat sounds"}
+                  aria-label={soundEnabled ? "Mute chat sounds" : "Enable chat sounds"}
+                  className={`rounded-lg p-2 transition-colors ${
+                    soundEnabled
+                      ? "text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40"
+                      : "text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10"
+                  }`}
+                >
+                  {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                </button>
+
+                {/* Desktop Notifications Toggle */}
+                <button
+                  onClick={() => void toggleNotifications()}
+                  title={notifEnabled ? "Desktop notifications enabled" : "Enable desktop notifications"}
+                  aria-label="Toggle desktop notifications"
+                  className={`rounded-lg p-2 transition-colors ${
+                    notifEnabled
+                      ? "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                      : "text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10"
+                  }`}
+                >
+                  {notifEnabled ? <BellRing className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
+                </button>
+
                 {/* Wallpaper Customizer - Uppermost Layer */}
                 <div className="relative">
                   <button
@@ -670,13 +767,37 @@ export default function ChatsPage() {
               </div>
             </div>
 
-            {/* Messages with upward infinite scroll & custom wallpaper */}
+            {/* Messages with upward infinite scroll & drag-and-drop dropzone */}
             <div
               ref={scrollRef}
               onScroll={handleScroll}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setDragOverThread(true);
+              }}
+              onDragLeave={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+                setDragOverThread(false);
+              }}
+              onDrop={(e) => void handleThreadDrop(e)}
               style={WALLPAPERS.find((w) => w.id === wallpaper)?.style}
               className="scroll-touch wa-thread no-scrollbar relative z-10 flex-1 min-h-0 space-y-2 overflow-y-auto px-3 py-4 sm:px-6 transition-all duration-300"
             >
+              {/* Drag Over Overlay */}
+              {dragOverThread && (
+                <div className="absolute inset-0 z-40 flex flex-col items-center justify-center gap-3 bg-purple-950/80 p-6 text-center text-white backdrop-blur-md animate-in fade-in duration-150">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-3xl border-2 border-dashed border-purple-300 bg-purple-600/40 shadow-xl shadow-purple-500/30">
+                    <FileUp className="h-8 w-8 text-white animate-bounce" />
+                  </div>
+                  <div>
+                    <p className="text-base font-bold">Drop files to share in chat</p>
+                    <p className="text-xs text-purple-200">PDF, DOCX, TXT, or images will be sent instantly</p>
+                  </div>
+                </div>
+              )}
               {hasMoreMessages && (
                 <div className="flex justify-center py-2">
                   <button 
