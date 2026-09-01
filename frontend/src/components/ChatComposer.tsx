@@ -9,6 +9,32 @@ export interface AttachedFile {
   videoUrl?: string; // for videos
 }
 
+interface ISpeechRecognitionEvent {
+  resultIndex: number;
+  results: {
+    length: number;
+    [index: number]: {
+      [index: number]: {
+        transcript: string;
+      };
+    };
+  };
+}
+
+interface ISpeechRecognitionInstance {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: (() => void) | null;
+  onresult: ((event: ISpeechRecognitionEvent) => void) | null;
+  onerror: (() => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+}
+
+type SpeechRecognitionConstructor = new () => ISpeechRecognitionInstance;
+
 const EMOJIS = ["😀", "😂", "🥹", "😍", "🤔", "👍", "🙏", "🔥", "❤️", "🎉", "😅", "😮", "😢", "😡", "👏", "💯", "🚀", "✅", "❌", "⚡", "🌟", "💡", "📎", "☕"];
 
 export default function ChatComposer({
@@ -43,7 +69,7 @@ export default function ChatComposer({
   const fileRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const emojiRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<ISpeechRecognitionInstance | null>(null);
   const [attachments, setAttachments] = useState<AttachedFile[]>([]);
   const [dragOver, setDragOver] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -99,9 +125,11 @@ export default function ChatComposer({
 
   const toggleListening = () => {
     if (typeof window === "undefined") return;
-    const SpeechRec =
-      (window as unknown as { SpeechRecognition?: any; webkitSpeechRecognition?: any }).SpeechRecognition ||
-      (window as unknown as { SpeechRecognition?: any; webkitSpeechRecognition?: any }).webkitSpeechRecognition;
+    const windowWithSpeech = window as unknown as {
+      SpeechRecognition?: SpeechRecognitionConstructor;
+      webkitSpeechRecognition?: SpeechRecognitionConstructor;
+    };
+    const SpeechRec = windowWithSpeech.SpeechRecognition || windowWithSpeech.webkitSpeechRecognition;
     if (!SpeechRec) {
       alert("Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.");
       return;
@@ -123,7 +151,7 @@ export default function ChatComposer({
         setIsListening(true);
       };
 
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: ISpeechRecognitionEvent) => {
         let transcript = "";
         for (let i = event.resultIndex; i < event.results.length; i++) {
           transcript += event.results[i][0].transcript;
