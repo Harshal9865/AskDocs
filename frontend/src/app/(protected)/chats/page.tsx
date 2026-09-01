@@ -480,32 +480,50 @@ export default function ChatsPage() {
           )}
 
           {/* Unified Chat Feed */}
-          <div className="flex-1 overflow-y-auto px-1 py-2">
+          <div
+            className="no-scrollbar flex-1 overflow-y-auto px-1 py-2"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
             {visibleChats.length === 0 ? (
               <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
-                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5">
-                  <MessagesSquare className="h-7 w-7 text-slate-300 dark:text-zinc-600" />
+                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500/10 via-indigo-500/10 to-blue-500/10 border border-purple-200/50 dark:border-purple-500/20">
+                  <MessagesSquare className="h-7 w-7 text-purple-600 dark:text-purple-400" />
                 </div>
-                <p className="text-sm font-semibold text-slate-700 dark:text-zinc-300">No {filter === "group" ? "group" : filter === "direct" ? "personal" : ""} chats found</p>
+                <p className="text-sm font-bold text-slate-700 dark:text-zinc-200">No {filter === "group" ? "group" : filter === "direct" ? "personal" : ""} chats found</p>
                 <p className="mt-1 text-xs text-slate-400 dark:text-zinc-500">
                   {filter === "group" ? "Click the 👥 button above to create a group chat" : "Start a conversation using the buttons above"}
                 </p>
               </div>
             ) : (
-              <ul className="space-y-1">
+              <ul className="space-y-1.5">
                 {visibleChats.map((chat) => {
                   const other = otherParticipant(chat, user?.email);
                   const isActive = activeChat?.id === chat.id;
                   return (
-                    <li key={chat.id} className="group flex items-center">
+                    <li key={chat.id} className="group relative flex items-center">
                       <button
                         onClick={() => { setActiveChat(chat); setMessages([]); }}
-                        className={`wa-row flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-colors ${isActive ? "bg-purple-50/80 dark:bg-purple-950/30 border border-purple-200/50 dark:border-purple-800/30" : "hover:bg-slate-100/70 dark:hover:bg-white/[0.04]"}`}
+                        className={`relative flex min-w-0 flex-1 items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-all duration-200 ${
+                          isActive
+                            ? "bg-gradient-to-r from-purple-500/15 via-indigo-500/10 to-blue-500/10 border border-purple-300/80 shadow-xs ring-1 ring-purple-500/20 dark:border-purple-500/30 dark:bg-purple-950/40"
+                            : "border border-transparent hover:border-slate-200/80 hover:bg-slate-50/80 dark:hover:border-white/10 dark:hover:bg-white/[0.04] hover:translate-x-0.5"
+                        }`}
                       >
-                        {chat.type === "direct" && other ? <ChatAvatar user={other} size={42} /> : <GroupAvatar chat={chat} size={42} />}
+                        {/* Left Active Glow Pip */}
+                        {isActive && (
+                          <span
+                            className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-purple-500 via-indigo-500 to-blue-500"
+                            aria-hidden
+                          />
+                        )}
+
+                        <div className="shrink-0 transition-transform duration-200 group-hover:scale-105">
+                          {chat.type === "direct" && other ? <ChatAvatar user={other} size={42} /> : <GroupAvatar chat={chat} size={42} />}
+                        </div>
+
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center justify-between gap-2">
-                            <span className={`truncate ${chat.unread_count > 0 ? "text-sm font-bold text-slate-900 dark:text-white" : "text-sm font-medium text-slate-800 dark:text-zinc-200"}`}>
+                            <span className={`truncate ${chat.unread_count > 0 ? "text-sm font-bold text-purple-950 dark:text-white" : isActive ? "text-sm font-bold text-purple-950 dark:text-white" : "text-sm font-semibold text-slate-800 dark:text-zinc-200"}`}>
                               {chatTitle(chat, user?.email)}
                             </span>
                             <span className="shrink-0 text-[10px] font-medium text-slate-400 dark:text-zinc-500">{fmtTime(chat.last_message_at)}</span>
@@ -515,7 +533,7 @@ export default function ChatsPage() {
                               {chat.last_message_preview || "No messages yet"}
                             </span>
                             {chat.unread_count > 0 && (
-                              <span className="flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-purple-600 px-1 text-[10px] font-bold text-white shadow-sm">
+                              <span className="flex h-4.5 min-w-4.5 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 px-1.5 text-[10px] font-bold text-white shadow-xs shadow-purple-500/30">
                                 {chat.unread_count}
                               </span>
                             )}
@@ -525,7 +543,7 @@ export default function ChatsPage() {
                       <button 
                         onClick={(e) => { e.stopPropagation(); void deleteChat(chat.id); }} 
                         title="Delete chat" 
-                        className="mr-1 shrink-0 rounded-lg p-1.5 text-slate-400 opacity-0 transition-all hover:bg-red-50 hover:text-red-600 dark:text-zinc-500 dark:hover:bg-red-900/20 dark:hover:text-red-400 group-hover:opacity-100"
+                        className="absolute right-2 flex h-6 w-6 items-center justify-center rounded-md text-slate-400 opacity-0 transition-all hover:bg-red-50 hover:text-red-600 dark:text-zinc-500 dark:hover:bg-red-900/30 dark:hover:text-red-400 group-hover:opacity-100"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
