@@ -528,137 +528,137 @@ async def delete_me(db: DbSession, user: CurrentUser):
     from sqlalchemy import text
 
     logger = logging.getLogger(__name__)
-    uid = str(user.id)
+    uid = user.id
     email = str(user.email).strip().lower()
 
     try:
         # Step 1: Clean up child records pointing to user directly
-        await db.execute(text("DELETE FROM invoices WHERE user_id = :uid::uuid"), {"uid": uid})
+        await db.execute(text("DELETE FROM invoices WHERE user_id = :uid"), {"uid": uid})
         await db.execute(
-            text("DELETE FROM friendships WHERE requester_id = :uid::uuid OR addressee_id = :uid::uuid"),
+            text("DELETE FROM friendships WHERE requester_id = :uid OR addressee_id = :uid"),
             {"uid": uid},
         )
-        await db.execute(text("DELETE FROM activity_log WHERE actor_id = :uid::uuid"), {"uid": uid})
+        await db.execute(text("DELETE FROM activity_log WHERE actor_id = :uid"), {"uid": uid})
         await db.execute(
-            text("DELETE FROM invitations WHERE inviter_id = :uid::uuid OR email = :email"),
+            text("DELETE FROM invitations WHERE inviter_id = :uid OR email = :email"),
             {"uid": uid, "email": email},
         )
         await db.execute(
-            text("DELETE FROM workspace_join_requests WHERE user_id = :uid::uuid OR reviewed_by = :uid::uuid"),
+            text("DELETE FROM workspace_join_requests WHERE user_id = :uid OR reviewed_by = :uid"),
             {"uid": uid},
         )
-        await db.execute(text("DELETE FROM conversation_hidden WHERE user_id = :uid::uuid"), {"uid": uid})
-        await db.execute(text("DELETE FROM conversation_read_states WHERE user_id = :uid::uuid"), {"uid": uid})
-        await db.execute(text("DELETE FROM conversation_participants WHERE user_id = :uid::uuid"), {"uid": uid})
+        await db.execute(text("DELETE FROM conversation_hidden WHERE user_id = :uid"), {"uid": uid})
+        await db.execute(text("DELETE FROM conversation_read_states WHERE user_id = :uid"), {"uid": uid})
+        await db.execute(text("DELETE FROM conversation_participants WHERE user_id = :uid"), {"uid": uid})
 
         # Step 2: Delete message attachments & messages sent by this user
         await db.execute(
             text(
                 "DELETE FROM message_attachments WHERE message_id IN "
-                "(SELECT id FROM messages WHERE sender_id = :uid::uuid)"
+                "(SELECT id FROM messages WHERE sender_id = :uid)"
             ),
             {"uid": uid},
         )
-        await db.execute(text("DELETE FROM messages WHERE sender_id = :uid::uuid"), {"uid": uid})
+        await db.execute(text("DELETE FROM messages WHERE sender_id = :uid"), {"uid": uid})
 
         # Step 3: Delete user-owned conversations & their children
         await db.execute(
             text(
                 "DELETE FROM message_attachments WHERE message_id IN "
-                "(SELECT id FROM messages WHERE conversation_id IN (SELECT id FROM conversations WHERE user_id = :uid::uuid))"
+                "(SELECT id FROM messages WHERE conversation_id IN (SELECT id FROM conversations WHERE user_id = :uid))"
             ),
             {"uid": uid},
         )
         await db.execute(
-            text("DELETE FROM messages WHERE conversation_id IN (SELECT id FROM conversations WHERE user_id = :uid::uuid)"),
+            text("DELETE FROM messages WHERE conversation_id IN (SELECT id FROM conversations WHERE user_id = :uid)"),
             {"uid": uid},
         )
         await db.execute(
-            text("DELETE FROM conversation_participants WHERE conversation_id IN (SELECT id FROM conversations WHERE user_id = :uid::uuid)"),
+            text("DELETE FROM conversation_participants WHERE conversation_id IN (SELECT id FROM conversations WHERE user_id = :uid)"),
             {"uid": uid},
         )
         await db.execute(
-            text("DELETE FROM conversation_hidden WHERE conversation_id IN (SELECT id FROM conversations WHERE user_id = :uid::uuid)"),
+            text("DELETE FROM conversation_hidden WHERE conversation_id IN (SELECT id FROM conversations WHERE user_id = :uid)"),
             {"uid": uid},
         )
         await db.execute(
-            text("DELETE FROM conversation_read_states WHERE conversation_id IN (SELECT id FROM conversations WHERE user_id = :uid::uuid)"),
+            text("DELETE FROM conversation_read_states WHERE conversation_id IN (SELECT id FROM conversations WHERE user_id = :uid)"),
             {"uid": uid},
         )
-        await db.execute(text("DELETE FROM conversations WHERE user_id = :uid::uuid"), {"uid": uid})
+        await db.execute(text("DELETE FROM conversations WHERE user_id = :uid"), {"uid": uid})
 
         # Step 4: Delete user's documents & chunks
         await db.execute(
-            text("DELETE FROM chunks WHERE document_id IN (SELECT id FROM documents WHERE uploader_id = :uid::uuid)"),
+            text("DELETE FROM chunks WHERE document_id IN (SELECT id FROM documents WHERE uploader_id = :uid)"),
             {"uid": uid},
         )
-        await db.execute(text("DELETE FROM documents WHERE uploader_id = :uid::uuid"), {"uid": uid})
+        await db.execute(text("DELETE FROM documents WHERE uploader_id = :uid"), {"uid": uid})
 
         # Step 5: Delete workspace memberships
-        await db.execute(text("DELETE FROM workspace_members WHERE user_id = :uid::uuid"), {"uid": uid})
+        await db.execute(text("DELETE FROM workspace_members WHERE user_id = :uid"), {"uid": uid})
 
         # Step 6: Delete workspaces created by this user and all nested contents
         await db.execute(
             text(
                 "DELETE FROM message_attachments WHERE message_id IN "
-                "(SELECT id FROM messages WHERE conversation_id IN (SELECT id FROM conversations WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid::uuid)))"
+                "(SELECT id FROM messages WHERE conversation_id IN (SELECT id FROM conversations WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid)))"
             ),
             {"uid": uid},
         )
         await db.execute(
-            text("DELETE FROM messages WHERE conversation_id IN (SELECT id FROM conversations WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid::uuid))"),
+            text("DELETE FROM messages WHERE conversation_id IN (SELECT id FROM conversations WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid))"),
             {"uid": uid},
         )
         await db.execute(
-            text("DELETE FROM conversation_participants WHERE conversation_id IN (SELECT id FROM conversations WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid::uuid))"),
+            text("DELETE FROM conversation_participants WHERE conversation_id IN (SELECT id FROM conversations WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid))"),
             {"uid": uid},
         )
         await db.execute(
-            text("DELETE FROM conversation_hidden WHERE conversation_id IN (SELECT id FROM conversations WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid::uuid))"),
+            text("DELETE FROM conversation_hidden WHERE conversation_id IN (SELECT id FROM conversations WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid))"),
             {"uid": uid},
         )
         await db.execute(
-            text("DELETE FROM conversation_read_states WHERE conversation_id IN (SELECT id FROM conversations WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid::uuid))"),
+            text("DELETE FROM conversation_read_states WHERE conversation_id IN (SELECT id FROM conversations WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid))"),
             {"uid": uid},
         )
         await db.execute(
-            text("DELETE FROM conversations WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid::uuid)"),
+            text("DELETE FROM conversations WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid)"),
             {"uid": uid},
         )
         await db.execute(
             text(
-                "DELETE FROM chunks WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid::uuid) "
-                "OR document_id IN (SELECT id FROM documents WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid::uuid))"
+                "DELETE FROM chunks WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid) "
+                "OR document_id IN (SELECT id FROM documents WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid))"
             ),
             {"uid": uid},
         )
         await db.execute(
-            text("DELETE FROM documents WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid::uuid)"),
+            text("DELETE FROM documents WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid)"),
             {"uid": uid},
         )
         await db.execute(
-            text("DELETE FROM workspace_members WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid::uuid)"),
+            text("DELETE FROM workspace_members WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid)"),
             {"uid": uid},
         )
         await db.execute(
-            text("DELETE FROM workspace_join_requests WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid::uuid)"),
+            text("DELETE FROM workspace_join_requests WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid)"),
             {"uid": uid},
         )
         await db.execute(
-            text("DELETE FROM invitations WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid::uuid)"),
+            text("DELETE FROM invitations WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid)"),
             {"uid": uid},
         )
         await db.execute(
-            text("DELETE FROM activity_log WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid::uuid)"),
+            text("DELETE FROM activity_log WHERE workspace_id IN (SELECT id FROM workspaces WHERE created_by = :uid)"),
             {"uid": uid},
         )
         await db.execute(
-            text("DELETE FROM workspaces WHERE created_by = :uid::uuid"),
+            text("DELETE FROM workspaces WHERE created_by = :uid"),
             {"uid": uid},
         )
 
         # Step 7: Delete the user record
-        await db.execute(text("DELETE FROM users WHERE id = :uid::uuid"), {"uid": uid})
+        await db.execute(text("DELETE FROM users WHERE id = :uid"), {"uid": uid})
         await db.commit()
     except Exception as e:
         await db.rollback()
