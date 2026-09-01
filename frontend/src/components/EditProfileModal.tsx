@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Pencil } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Camera, ImagePlus, Pencil, RotateCcw, Smile } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import Avatar from "@/components/Avatar";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +15,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+
+const STICKER_IDS = [
+  "male-1", "male-2", "male-3", "male-4",
+  "female-1", "female-2", "female-3", "female-4",
+  "cute-1", "cute-2", "cute-3", "cute-4",
+  "ai-1", "ai-2",
+];
 
 const JOB_TITLES = [
   "Intern",
@@ -64,7 +72,7 @@ export default function EditProfileModal({
   onOpenChange: controlledOnChange,
   trigger,
 }: EditProfileModalProps) {
-  const { user, refreshUser } = useAuth();
+  const { user, avatarSrc, refreshUser } = useAuth();
   const [internalOpen, setInternalOpen] = useState(false);
 
   const open = controlledOpen ?? internalOpen;
@@ -81,6 +89,55 @@ export default function EditProfileModal({
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
+  // Profile Photo / Avatar state
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [avatarMsg, setAvatarMsg] = useState<string | null>(null);
+  const [showStickers, setShowStickers] = useState(false);
+
+  async function onPhotoChosen(file?: File | null) {
+    if (!file) return;
+    setAvatarBusy(true);
+    setAvatarMsg(null);
+    try {
+      await api.uploadAvatarPhoto(file);
+      await refreshUser();
+      setAvatarMsg("Photo uploaded successfully!");
+    } catch (err) {
+      setAvatarMsg((err as Error).message);
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
+
+  async function pickSticker(id: string) {
+    setAvatarBusy(true);
+    setAvatarMsg(null);
+    try {
+      await api.setAvatar("sticker", id);
+      await refreshUser();
+      setAvatarMsg("Sticker chosen!");
+    } catch (err) {
+      setAvatarMsg((err as Error).message);
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
+
+  async function resetToInitials() {
+    setAvatarBusy(true);
+    setAvatarMsg(null);
+    try {
+      await api.setAvatar("initials");
+      await refreshUser();
+      setAvatarMsg("Reset to initials.");
+    } catch (err) {
+      setAvatarMsg((err as Error).message);
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
+
   useEffect(() => {
     if (open && user) {
       setName(user.name || "");
@@ -92,6 +149,8 @@ export default function EditProfileModal({
       setJobTitle(user.job_title || "");
       setJobRole(user.job_role || "");
       setMsg(null);
+      setAvatarMsg(null);
+      setShowStickers(false);
     }
   }, [open, user]);
 
@@ -183,6 +242,111 @@ export default function EditProfileModal({
               <span className="font-semibold">⚠️ Mandatory Details Required:</span> Please fill in your <strong>Full Name</strong>, <strong>Job Title</strong>, and <strong>Department / Role</strong> to continue.
             </div>
           )}
+
+          {/* Profile Photo / Avatar Section */}
+          <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5 sm:p-4 dark:border-white/10 dark:bg-[#181818]">
+            <div className="flex items-center gap-3.5 sm:gap-4">
+              <div className="relative shrink-0">
+                <Avatar
+                  name={name || user?.name || "?"}
+                  size={56}
+                  src={avatarSrc}
+                  stickerId={
+                    user?.avatar_kind === "sticker" ? user.avatar_value ?? null : null
+                  }
+                />
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  disabled={avatarBusy}
+                  aria-label="Upload photo"
+                  title="Upload photo"
+                  className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-purple-600 text-white shadow-sm hover:bg-purple-700 disabled:opacity-50 dark:border-[#181818]"
+                >
+                  <Camera className="h-3 w-3" />
+                </button>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept=".png,.jpg,.jpeg,.webp"
+                  hidden
+                  onChange={(e) => void onPhotoChosen(e.target.files?.[0])}
+                />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-slate-700 dark:text-zinc-300">
+                  Profile Photo
+                </p>
+                <p className="text-[11px] text-slate-400 dark:text-zinc-500">
+                  PNG, JPG, or WebP photo or sticker
+                </p>
+                {avatarMsg && (
+                  <p className="mt-0.5 text-[11px] font-medium text-purple-600 dark:text-purple-400">
+                    {avatarMsg}
+                  </p>
+                )}
+                <div className="mt-2 flex flex-wrap gap-1.5 sm:gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    disabled={avatarBusy}
+                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-xs hover:bg-slate-50 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10"
+                  >
+                    <ImagePlus className="h-3 w-3" /> Upload photo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowStickers((s) => !s)}
+                    disabled={avatarBusy}
+                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-xs hover:bg-slate-50 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10"
+                  >
+                    <Smile className="h-3 w-3" /> {showStickers ? "Hide stickers" : "Choose sticker"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void resetToInitials()}
+                    disabled={avatarBusy}
+                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-500 hover:bg-slate-50 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400 dark:hover:bg-white/10"
+                  >
+                    <RotateCcw className="h-3 w-3" /> Initials
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Sticker Picker */}
+            {showStickers && (
+              <div className="mt-3 border-t border-slate-200/60 pt-3 dark:border-white/10">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+                  Select an avatar sticker
+                </p>
+                <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+                  {STICKER_IDS.map((id) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => void pickSticker(id)}
+                      disabled={avatarBusy}
+                      aria-label={`Choose ${id} sticker`}
+                      className={`flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl border p-1 transition-transform hover:scale-105 ${
+                        user?.avatar_kind === "sticker" && user?.avatar_value === id
+                          ? "border-purple-600 bg-purple-50 ring-2 ring-purple-600/30 dark:border-purple-400 dark:bg-purple-950/30"
+                          : "border-slate-200 bg-white hover:border-slate-300 dark:border-white/10 dark:bg-[#202020]"
+                      }`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`/stickers/${id}.svg`}
+                        alt={id}
+                        className="h-full w-full object-contain"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
           <form id="profile-form" onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-4">
             {/* Name */}

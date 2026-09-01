@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import Avatar from "@/components/Avatar";
 import { useUserAvatar } from "@/lib/use-user-avatar";
-import { ArrowLeft, Mail, Phone, MapPin, MessageCircle, Briefcase, Pencil, UserPlus, UserCheck, Clock, X, Trash2, Shield, UserSearch } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, MessageCircle, Briefcase, Pencil, UserPlus, UserCheck, Clock, X, Trash2, Shield, UserSearch, Camera } from "lucide-react";
 import EditProfileModal from "@/components/EditProfileModal";
 import { showToast } from "@/components/Toast";
 import type { User } from "@/lib/types";
@@ -267,16 +267,33 @@ export default function ProfilePage() {
         </div>
         <div className="relative px-4 sm:px-6 pb-6 sm:pb-8">
           <div className="flex items-end gap-4">
-            <button onClick={() => setLightbox(true)} aria-label="View photo" className="-mt-12 shrink-0 rounded-full ring-[6px] ring-white dark:ring-[#121214]">
-              <Avatar
-                name={profile.name}
-                size={96}
-                src={src}
-                stickerId={stickerId}
-                showPresence={!isMe}
-                online={profile.online ?? false}
-              />
-            </button>
+            <div className="relative -mt-12 shrink-0">
+              <button
+                onClick={() => (isMe ? setEditOpen(true) : setLightbox(true))}
+                aria-label={isMe ? "Change photo" : "View photo"}
+                className="group block rounded-full ring-[6px] ring-white dark:ring-[#121214] transition-transform hover:scale-105"
+              >
+                <Avatar
+                  name={profile.name}
+                  size={96}
+                  src={src}
+                  stickerId={stickerId}
+                  showPresence={!isMe}
+                  online={profile.online ?? false}
+                />
+              </button>
+              {isMe && (
+                <button
+                  type="button"
+                  onClick={() => setEditOpen(true)}
+                  aria-label="Change profile photo"
+                  title="Change photo"
+                  className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-purple-600 text-white shadow-md hover:bg-purple-700 dark:border-[#121214] transition-colors"
+                >
+                  <Camera className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
             <div className="min-w-0 flex-1 pt-2 pb-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="truncate text-xl font-bold text-slate-900 dark:text-white sm:text-2xl">
