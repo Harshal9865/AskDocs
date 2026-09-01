@@ -1,4 +1,4 @@
-﻿import json
+import json
 import uuid
 
 from fastapi import APIRouter, HTTPException, status
@@ -301,6 +301,37 @@ async def ask_question_stream(
     db.add(user_msg)
     await db.flush()
     for att in atts:
+async def ask_question_stream(
+    conversation_id: uuid.UUID,
+    payload: MessageCreate,
+    db: DbSession,
+    user: CurrentUser,
+):
+    """SSE streaming Q&A. Events: {type: answer|done|error}."""
+    conv = await _get_conversation_checked(db, conversation_id, user)
+    role = await _workspace_role(db, conv.workspace_id, user.id)
+    if role is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Conversation not found")
+    if conv.user_id != user.id and role == "viewer":
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Viewers can only use their own conversations")
+
+    # Check question limit
+    await check_question_limit(db, user)
+
+    # Resolve attachments (images -> vision parts, docs -> text context)
+    image_parts, doc_context, atts = await _resolve_attachments(
+        db, payload.attachment_ids or [], user.id
+    )
+
+    # Link attachments to the conversation (message_id set after user msg saved)
+    user_content = payload.content.strip()
+    if not user_content and atts:
+        user_content = "Please analyze the attached file(s)."
+
+    user_msg = Message(conversation_id=conv.id, role="user", content=user_content)
+    db.add(user_msg)
+    await db.flush()
+    for att in atts:
         att.message_id = user_msg.id
     if conv.title == "New conversation":
         conv.title = (user_content or "Attachment question")[:80]
@@ -311,14 +342,27 @@ async def ask_question_stream(
     embed_text = user_content
     if not embed_text and atts and atts[0].text_excerpt:
         embed_text = atts[0].text_excerpt[:1000]
-    query_embedding = (await llm.embed([embed_text or user_content]))[0]
-    chunks = await search_chunks(db, conv.workspace_id, query_embedding)
-    suggestions = (
-        await suggest_colleagues(db, conv.workspace_id, chunks)
-        if is_low_confidence(chunks)
-        else []
-    )
-    history = await conversation_history(db, conv.id)
+
+    try:
+        query_embeddings = await llm.embed([embed_text or user_content])
+        query_embedding = query_embeddings[0] if query_embeddings else [0.0] * 768
+        chunks = await search_chunks(db, conv.workspace_id, query_embedding)
+    except Exception:
+        chunks = []
+
+    try:
+        suggestions = (
+            await suggest_colleagues(db, conv.workspace_id, chunks)
+            if is_low_confidence(chunks)
+            else []
+        )
+    except Exception:
+        suggestions = []
+
+    try:
+        history = await conversation_history(db, conv.id)
+    except Exception:
+        history = []
 
     # If attachments carry text (pdf/doc) and no RAG chunks, still answer from them
     has_attachment_context = bool(doc_context) or bool(image_parts)
@@ -336,23 +380,35 @@ async def ask_question_stream(
                 async for token in llm.stream_answer(question_with_ctx, chunks, history, image_parts):
                     answer_parts.append(token)
                     yield f"data: {json.dumps({'type': 'answer', 'text': token})}\n\n"
-                conflict = await llm.detect_conflict(chunks) if chunks else None
-                freshness = await get_freshness(db, chunks) if chunks else None
+                try:
+                    conflict = await llm.detect_conflict(chunks) if chunks else None
+                except Exception:
+                    conflict = None
+                try:
+                    freshness = await get_freshness(db, chunks) if chunks else None
+                except Exception:
+                    freshness = None
+
             citations = _citations_json(chunks)
             yield f"data: {json.dumps({'type': 'done', 'citations': citations, 'suggested_colleagues': suggestions, 'conflict': conflict, 'freshness': freshness})}\n\n"
 
-            async with AsyncSessionLocal() as session:
-                saved = Message(
-                    conversation_id=conv.id,
-                    role="assistant",
-                    content="".join(answer_parts),
-                    citations=citations,
-                )
-                session.add(saved)
-                await session.commit()
-                yield f"data: {json.dumps({'type': 'saved', 'message_id': str(saved.id)})}\n\n"
+            if answer_parts:
+                try:
+                    async with AsyncSessionLocal() as session:
+                        saved = Message(
+                            conversation_id=conv.id,
+                            role="assistant",
+                            content="".join(answer_parts),
+                            citations=citations,
+                        )
+                        session.add(saved)
+                        await session.commit()
+                        yield f"data: {json.dumps({'type': 'saved', 'message_id': str(saved.id)})}\n\n"
+                except Exception:
+                    pass
         except Exception as exc:  # noqa: BLE001
-            yield f"data: {json.dumps({'type': 'error', 'message': str(exc)[:300]})}\n\n"
+            err_msg = str(exc)[:300] or "An unexpected issue occurred while generating the answer."
+            yield f"data: {json.dumps({'type': 'error', 'message': err_msg})}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
@@ -409,7 +465,3 @@ async def get_answer_permalink(
         "workspace_id": str(conv.workspace_id),
         "created_at": msg.created_at.isoformat(),
     }
-
-
-
-

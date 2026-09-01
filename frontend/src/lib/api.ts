@@ -577,10 +577,17 @@ export const api = {
           signal,
         },
       );
-        if (!res.ok || !res.body) {
-          onError?.(`Request failed (${res.status})`);
-          return;
+      if (!res.ok || !res.body) {
+        let errDetail = "";
+        try {
+          const errJson = (await res.json()) as { detail?: string; message?: string };
+          errDetail = errJson.detail || errJson.message || "";
+        } catch {
+          // ignore
         }
+        onError?.(errDetail ? `Notice: ${errDetail}` : `Request failed (${res.status})`);
+        return;
+      }
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
@@ -631,6 +638,3 @@ export const api = {
     }
   },
 };
-
-
-
