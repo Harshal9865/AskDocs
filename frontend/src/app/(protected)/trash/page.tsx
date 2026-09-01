@@ -66,6 +66,7 @@ export default function TrashPage() {
   // Multi-select & Batch States
   const [selectedDocIds, setSelectedDocIds] = useState<Set<string>>(new Set());
   const [batchBusy, setBatchBusy] = useState(false);
+  const [actionProgress, setActionProgress] = useState<string | null>(null);
 
   // Search, Filter & Sorting States
   const [searchQuery, setSearchQuery] = useState("");
@@ -537,6 +538,11 @@ export default function TrashPage() {
               {selectedDocIds.size}
             </span>
             <span className="text-xs font-bold text-slate-800 dark:text-white">Selected</span>
+            {actionProgress && (
+              <span className="hidden sm:inline text-[11px] font-medium text-purple-600 dark:text-purple-400">
+                · {actionProgress}
+              </span>
+            )}
           </div>
 
           <button
