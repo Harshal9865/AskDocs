@@ -87,70 +87,100 @@ export default function WorkspaceSettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-xl">
-      <h1 className="mb-1 text-xl font-bold">Workspace settings</h1>
-      <p className="mb-6 text-sm text-slate-500">Configuration for “{workspace.name}”.</p>
+    <div className="relative mx-auto max-w-xl space-y-5">
+      {/* Header */}
+      <div>
+        <h1 className="text-xl font-extrabold bg-gradient-to-r from-slate-900 via-purple-900 to-indigo-900 bg-clip-text text-transparent dark:from-white dark:via-purple-200 dark:to-indigo-200">
+          Workspace Settings
+        </h1>
+        <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
+          Configuration and security preferences for &ldquo;{workspace.name}&rdquo;.
+        </p>
+      </div>
 
       {!isAdmin && (
-        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-          You are a {workspace.role} in this workspace. Only admins can change these settings.
+        <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-xs sm:text-sm font-medium text-amber-800 backdrop-blur-sm dark:border-amber-900/30 dark:bg-amber-950/30 dark:text-amber-200">
+          You are a <span className="font-bold">{workspace.role}</span> in this workspace. Only workspace admins can modify these settings.
         </div>
       )}
 
-      <section className="mb-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <form onSubmit={save} className="space-y-3">
-          <label className="block text-sm font-medium" htmlFor="ws-name">Workspace name</label>
+      {/* General Settings Card */}
+      <section className="rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-[#13111f]/90">
+        <form onSubmit={save} className="space-y-3.5">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-zinc-300" htmlFor="ws-name">
+            Workspace Name
+          </label>
           <input
             id="ws-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={100}
             disabled={!isAdmin}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:opacity-50"
+            className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-2.5 text-sm font-medium outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 disabled:opacity-50 dark:border-white/10 dark:bg-[#181628] dark:text-white"
           />
-          {msg && <p className="text-xs font-medium text-indigo-700">{msg}</p>}
+          {msg && (
+            <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+              {msg}
+            </p>
+          )}
           <button
             type="submit"
             disabled={busy || !name.trim() || !isAdmin}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 px-5 py-2 text-xs font-bold text-white shadow-md shadow-purple-500/25 transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
           >
-            {busy ? "Saving…" : "Save"}
+            {busy ? "Saving…" : "Save Changes"}
           </button>
         </form>
       </section>
 
-      <section className="mb-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      {/* Discoverability Card */}
+      <section className="rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-[#13111f]/90">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-sm font-semibold text-slate-800">Discoverable</h2>
-            <p className="text-xs text-slate-500">Allow others to find and request to join this workspace.</p>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+              Public Discoverability
+            </h2>
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-zinc-400">
+              Allow others on AskDocs to find and request to join this workspace in Discover.
+            </p>
           </div>
           <button
             onClick={() => void togglePublic()}
             disabled={!isAdmin}
-            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors disabled:opacity-50 ${
-              isPublic ? "bg-indigo-600" : "bg-slate-300"
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-all duration-200 focus:outline-none disabled:opacity-50 ${
+              isPublic ? "bg-gradient-to-r from-emerald-500 to-teal-500 shadow-xs shadow-emerald-500/30" : "bg-slate-200 dark:bg-white/10"
             }`}
             aria-pressed={isPublic}
             aria-label="Toggle discoverability"
           >
-            <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition ${isPublic ? "translate-x-5" : "translate-x-0"}`} />
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                isPublic ? "translate-x-5" : "translate-x-0"
+              }`}
+            />
           </button>
         </div>
-        {visMsg && <p className="mt-2 text-xs font-medium text-indigo-600">{visMsg}</p>}
+        {visMsg && (
+          <p className="mt-2 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+            {visMsg}
+          </p>
+        )}
       </section>
 
-      <section className="rounded-xl border border-red-200 bg-red-50 p-5">
-        <h2 className="mb-2 text-sm font-bold text-red-800">Danger zone</h2>
-        <p className="mb-3 text-xs text-red-700">
-          Deleting removes every document, chat and member in this workspace. Only admins can do this.
+      {/* Danger Zone */}
+      <section className="rounded-3xl border border-red-200/80 bg-red-50/50 p-5 backdrop-blur-md dark:border-red-900/30 dark:bg-red-950/20">
+        <h2 className="text-sm font-bold text-red-700 dark:text-red-400">
+          Danger Zone
+        </h2>
+        <p className="mt-1 text-xs text-red-600/90 dark:text-red-300/80">
+          Deleting this workspace permanently removes all documents, AI chat history, office messages, and memberships. This action cannot be undone.
         </p>
         <button
           onClick={() => void deleteWs()}
           disabled={busy || !isAdmin}
-          className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+          className="mt-3.5 inline-flex items-center gap-1.5 rounded-full bg-red-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-red-500/20 transition-all hover:bg-red-700 hover:scale-105 active:scale-95 disabled:opacity-50"
         >
-          Delete this workspace
+          Delete Workspace
         </button>
       </section>
     </div>

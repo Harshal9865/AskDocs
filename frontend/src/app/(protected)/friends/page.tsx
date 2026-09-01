@@ -22,27 +22,25 @@ function FriendCard({
 }) {
   const { src, stickerId } = useUserAvatar(member.user_id, member.avatar_kind, member.avatar_value);
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-slate-300 hover:shadow-md dark:border-white/10 dark:bg-[#121212] dark:hover:border-white/15">
+    <div className="group flex items-center gap-3.5 rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-2xs backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-300/80 hover:shadow-md hover:shadow-purple-500/5 dark:border-white/10 dark:bg-[#13111f]/90 dark:hover:border-purple-500/30">
       <Link
         href={`/profile/${member.user_id}`}
         className="flex items-center gap-3 min-w-0 flex-1"
         onClick={(e) => {
-          // Prevent the action buttons from triggering navigation
           if ((e.target as HTMLElement).closest('button')) {
             e.preventDefault();
           }
         }}
       >
-        <Avatar name={member.name || member.email} size={52} src={src} stickerId={stickerId} showPresence online={member.online} />
+        <Avatar name={member.name || member.email} size={50} src={src} stickerId={stickerId} showPresence online={member.online} />
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5 truncate text-sm font-semibold dark:text-white">
+          <div className="flex items-center gap-1.5 truncate text-xs sm:text-sm font-bold text-slate-900 group-hover:text-purple-600 dark:text-white dark:group-hover:text-purple-400 transition-colors">
             <span className="truncate">{member.name || member.email}</span>
-            {member.pronouns && <span className="shrink-0 text-xs font-normal text-slate-500">({member.pronouns})</span>}
-            {member.online && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />}
+            {member.pronouns && <span className="shrink-0 text-xs font-normal text-slate-400">({member.pronouns})</span>}
           </div>
-          <div className="truncate text-xs text-slate-500 dark:text-zinc-400">
+          <div className="truncate text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
             {member.status || member.bio?.slice(0, 44) || member.email}
-            {member.online ? <span className="ml-1.5 text-emerald-600 font-medium">· Online</span> : null}
+            {member.online ? <span className="ml-1.5 font-semibold text-emerald-500">· Online</span> : null}
           </div>
         </div>
       </Link>
@@ -185,87 +183,94 @@ export default function FriendsPage() {
   const dedupedGlobal = globalResults.filter((g) => !existingIds.has(g.user_id));
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <h1 className="flex items-center gap-2 text-xl font-bold dark:text-white">
-        <UsersRound className="h-5 w-5 text-indigo-600 dark:text-[#1DB954]" /> Friends
-      </h1>
-      <p className="mt-1 text-sm text-slate-500 dark:text-zinc-400">
-        Add people from any workspace. Requests notify instantly — no invite needed.
-      </p>
+    <div className="relative mx-auto max-w-3xl space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-xl font-extrabold bg-gradient-to-r from-slate-900 via-purple-900 to-indigo-900 bg-clip-text text-transparent dark:from-white dark:via-purple-200 dark:to-indigo-200">
+          Colleagues & Friends
+        </h1>
+        <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
+          Connect with team members across workspaces. Requests notify instantly with instant messaging access.
+        </p>
+      </div>
 
-      <div role="tablist" aria-label="Friends sections" className="mt-4 flex gap-1.5 overflow-x-auto pb-1">
+      {/* Tabs */}
+      <div role="tablist" aria-label="Friends sections" className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
         {tabs.map((t) => (
           <button
             key={t.key}
             role="tab"
             aria-selected={tab === t.key}
             onClick={() => setTab(t.key)}
-            className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-              tab === t.key ? "bg-slate-900 text-white dark:bg-white dark:text-black" : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/5 dark:text-zinc-400 dark:hover:bg-white/10"
+            className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-bold transition-all ${
+              tab === t.key
+                ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-xs"
+                : "border border-slate-200/80 bg-white/80 text-slate-600 hover:text-slate-900 dark:border-white/10 dark:bg-[#13111f]/90 dark:text-zinc-400 dark:hover:text-white"
             }`}
           >
-            {t.label} {t.count !== undefined && t.count > 0 && <span className="ml-1 opacity-60">({t.count})</span>}
+            {t.label} {t.count !== undefined && t.count > 0 && <span className="ml-1 opacity-75">({t.count})</span>}
           </button>
         ))}
       </div>
 
-      <div className="relative mt-4">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+      {/* Search */}
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by name or email…"
+          placeholder="Search colleagues by name or email…"
           aria-label="Search friends"
-          className="w-full rounded-full border border-slate-200 bg-white py-2.5 pl-9 pr-10 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-white/10 dark:bg-[#181818] dark:text-white dark:focus:border-[#1DB954] dark:focus:ring-[#1DB954]/20"
+          className="w-full rounded-2xl border border-slate-200/80 bg-white/80 py-2.5 pl-10 pr-10 text-xs sm:text-sm font-medium outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#13111f]/90 dark:text-white"
         />
-        {searchLoading && <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-slate-400" />}
+        {searchLoading && <Loader2 className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-purple-600 dark:text-purple-400" />}
       </div>
 
-      <div className="mt-6 space-y-3">
+      <div className="space-y-3">
         {tab === "suggested" && (
           <>
-            {/* Global search results (any workspace) when searching */}
+            {/* Global search results */}
             {query.trim().length >= 2 && (
               <>
-                <h2 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  <UserSearch className="h-3.5 w-3.5" /> Global results
+                <h2 className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+                  <UserSearch className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" /> Global Results
                 </h2>
                 {searchLoading ? (
                   <div className="mb-6 space-y-3">
                     <SkeletonCard /><SkeletonCard />
                   </div>
                 ) : dedupedGlobal.length === 0 ? (
-                  <p className="mb-6 rounded-xl border border-dashed p-6 text-center text-sm text-slate-500 dark:border-white/10 dark:text-zinc-400">
-                    No new users found for “{query.trim()}”.
+                  <p className="mb-6 rounded-3xl border border-dashed border-slate-200/80 bg-white/50 p-6 text-center text-xs font-medium text-slate-500 dark:border-white/10 dark:bg-white/[0.02] dark:text-zinc-400">
+                    No new users found for &ldquo;{query.trim()}&rdquo;.
                   </p>
                 ) : (
                   <div className="mb-6 space-y-3">
                     {dedupedGlobal.map((g) => (
-                        <FriendCard
-                          key={g.user_id}
-                          member={g}
-                          action={
-                            <button
-                              disabled={busy === g.user_id}
-                              onClick={() => act(g.user_id, () => api.sendFriendRequest(g.user_id), "Request sent")}
-                              className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50 dark:bg-[#1DB954] dark:text-black dark:hover:bg-[#1ed760]"
-                            >
-                              {busy === g.user_id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UserPlus className="h-3.5 w-3.5" />} Add
-                            </button>
-                          }
-                        />
-                      ))}
+                      <FriendCard
+                        key={g.user_id}
+                        member={g}
+                        action={
+                          <button
+                            disabled={busy === g.user_id}
+                            onClick={() => act(g.user_id, () => api.sendFriendRequest(g.user_id), "Request sent")}
+                            className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition-all hover:scale-105 disabled:opacity-50"
+                          >
+                            {busy === g.user_id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UserPlus className="h-3.5 w-3.5" />} Add
+                          </button>
+                        }
+                      />
+                    ))}
                   </div>
                 )}
               </>
             )}
-            <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">From your workspaces</h2>
+            <h2 className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">From Your Workspaces</h2>
             {loading ? (
               <div className="space-y-3">
                 <SkeletonCard /><SkeletonCard /><SkeletonCard />
               </div>
             ) : filterByQuery(suggested).length === 0 ? (
-              <EmptyState icon={UserSearch} title={query ? `No match for “${query}”` : "No suggestions yet"} hint="Join more workspaces or invite colleagues from Members — they'll appear here." />
+              <EmptyState icon={UserSearch} title={query ? `No match for “${query}”` : "No suggestions yet"} hint="Join more workspaces or invite colleagues — they'll appear here." />
             ) : (
               filterByQuery(suggested).map((m) => (
                 <FriendCard
@@ -275,7 +280,7 @@ export default function FriendsPage() {
                     <button
                       disabled={busy === m.user_id}
                       onClick={() => act(m.user_id, () => api.sendFriendRequest(m.user_id), "Request sent")}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50 dark:bg-[#1DB954] dark:text-black dark:hover:bg-[#1ed760]"
+                      className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition-all hover:scale-105 disabled:opacity-50"
                     >
                       {busy === m.user_id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UserPlus className="h-3.5 w-3.5" />} Add
                     </button>
@@ -304,7 +309,7 @@ export default function FriendsPage() {
                         <button
                           disabled={busy === fid}
                           onClick={() => act(fid, () => api.acceptFriend(fid), "You are now friends")}
-                          className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                          className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition-all hover:bg-emerald-700 disabled:opacity-50"
                         >
                           {busy === fid ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />} Accept
                         </button>
@@ -317,7 +322,7 @@ export default function FriendsPage() {
                           className="rounded-full border border-slate-200 bg-white p-1.5 hover:bg-slate-50 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
                           aria-label="Decline"
                         >
-                          <X className="h-4 w-4" />
+                          <X className="h-4 w-4 text-slate-500" />
                         </button>
                       </span>
                     }
@@ -335,9 +340,9 @@ export default function FriendsPage() {
               <EmptyState
                 icon={HeartHandshake}
                 title="No friends yet"
-                hint="Your accepted friends appear here. Discover people in Suggested below."
+                hint="Your accepted colleagues appear here. Discover people in Suggested."
                 action={
-                  <button onClick={() => setTab("suggested")} className="rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 dark:bg-[#1DB954] dark:text-black">
+                  <button onClick={() => setTab("suggested")} className="rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 px-5 py-2 text-xs font-bold text-white shadow-md shadow-purple-500/25 transition-all hover:scale-105">
                     Browse Suggested →
                   </button>
                 }
@@ -350,12 +355,12 @@ export default function FriendsPage() {
                     key={m.user_id}
                     member={m}
                     action={
-                      <span className="flex gap-1">
+                      <span className="flex items-center gap-1.5">
                         <button
                           onClick={() => router.push(`/profile/${m.user_id}`)}
-                          className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+                          className="rounded-full border border-slate-200/80 bg-white/80 px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10 transition-all"
                         >
-                          View
+                          Profile
                         </button>
                         <button
                           disabled={busy === fid}
@@ -363,7 +368,7 @@ export default function FriendsPage() {
                             if (!confirm(`Remove ${m.name || m.email} from friends?`)) return;
                             void act(fid, () => api.unfriend(fid), "Removed");
                           }}
-                          className="rounded-full p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:hover:bg-red-900/20"
+                          className="rounded-full p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:hover:bg-red-950/30 dark:hover:text-red-400 transition-colors"
                           title="Remove friend"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -374,7 +379,7 @@ export default function FriendsPage() {
                             if (!confirm(`Block ${m.name || m.email}? They won't be able to add you again.`)) return;
                             void act(fid, () => api.blockFriend(fid), "Blocked");
                           }}
-                          className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 disabled:opacity-50 dark:hover:bg-white/10"
+                          className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 disabled:opacity-50 dark:hover:bg-white/10 transition-colors"
                           title="Block"
                         >
                           <Shield className="h-4 w-4" />
@@ -404,7 +409,7 @@ export default function FriendsPage() {
                       <button
                         disabled={busy === fid}
                         onClick={() => act(fid, () => api.unblockFriend(fid).catch(() => api.unfriend(fid)), "Unblocked")}
-                        className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium hover:bg-slate-50 disabled:opacity-50 dark:border-white/10 dark:bg-white/5"
+                        className="rounded-full border border-slate-200/80 bg-white/80 px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 transition-all"
                       >
                         Unblock
                       </button>
@@ -419,3 +424,4 @@ export default function FriendsPage() {
     </div>
   );
 }
+
