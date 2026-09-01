@@ -50,6 +50,9 @@
 
 html {
   color-scheme: light dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* Modern Geometric Sans: Plus Jakarta Sans for crisp, premium, attractive typography */

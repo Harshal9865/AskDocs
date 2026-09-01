@@ -84,30 +84,31 @@ export default function RegisterPage() {
   if (loading || (user && !busy)) return null;
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-3 py-6 sm:px-6 lg:px-8 dark:bg-[#090810]">
-      {/* Dynamic Animated Gradient Background Blobs */}
-      <div className="pointer-events-none absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-gradient-to-br from-purple-500/25 to-indigo-500/0 blur-3xl dark:from-purple-900/30 dark:to-indigo-900/0 animate-pulse" />
-      <div className="pointer-events-none absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full bg-gradient-to-tl from-indigo-500/25 to-cyan-500/0 blur-3xl dark:from-indigo-900/30 dark:to-cyan-900/0 animate-pulse" style={{ animationDelay: "2s" }} />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-slate-100 via-purple-50/40 to-indigo-50/50 p-3 sm:p-6 lg:p-8 dark:from-[#07060e] dark:via-[#0e0c1c] dark:to-[#05040a] transition-colors duration-500">
+      {/* Ambient Day/Night Animated Aura Blobs */}
+      <div className="pointer-events-none absolute -top-32 -left-32 h-72 w-72 sm:h-96 sm:w-96 rounded-full bg-gradient-to-br from-purple-400/25 via-indigo-400/20 to-transparent blur-3xl dark:from-purple-600/20 dark:via-indigo-600/15 dark:to-transparent animate-pulse" />
+      <div className="pointer-events-none absolute -bottom-32 -right-32 h-72 w-72 sm:h-96 sm:w-96 rounded-full bg-gradient-to-tl from-indigo-400/25 via-sky-400/15 to-transparent blur-3xl dark:from-indigo-700/20 dark:via-cyan-700/15 dark:to-transparent animate-pulse" style={{ animationDelay: "2.5s" }} />
+      <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-80 w-80 rounded-full bg-gradient-to-tr from-fuchsia-400/10 via-purple-400/10 to-transparent blur-3xl dark:from-fuchsia-600/10 dark:to-transparent" />
 
-      {/* Main Glass Card */}
-      <div className="relative z-10 flex w-full max-w-sm sm:max-w-md lg:max-w-4xl flex-col overflow-hidden rounded-[2.25rem] sm:rounded-[2.75rem] border border-slate-200/80 bg-white/90 shadow-2xl backdrop-blur-2xl transition-all duration-300 dark:border-white/10 dark:bg-[#121020]/90 dark:shadow-[0_0_80px_-20px_rgba(147,51,234,0.18)] lg:flex-row">
+      {/* Main Responsive Glass Card */}
+      <div className="relative z-10 flex w-full max-w-[420px] lg:max-w-4xl flex-col overflow-hidden rounded-3xl sm:rounded-[2.25rem] border border-slate-200/90 bg-white/90 shadow-2xl shadow-purple-500/10 backdrop-blur-2xl transition-all duration-300 dark:border-white/10 dark:bg-[#121022]/90 dark:shadow-[0_0_70px_-15px_rgba(147,51,234,0.25)] lg:flex-row">
         
-        {/* Left Panel: Form */}
-        <div className="flex flex-col justify-center p-6 sm:p-10 lg:w-[55%] lg:p-12">
+        {/* Left Panel: Compact Form */}
+        <div className="flex flex-col justify-center p-5 sm:p-8 lg:w-[54%] lg:p-10">
           {/* Header */}
-          <div className="mb-5 sm:mb-6 text-center sm:text-left">
-            <div className="inline-flex items-center gap-2 rounded-full border border-purple-200/80 bg-purple-50/80 px-3 py-1 text-[11px] font-bold text-purple-700 dark:border-purple-900/40 dark:bg-purple-950/40 dark:text-purple-300 mb-2.5 shadow-xs">
-              <Sparkles className="h-3 w-3" /> Get Started Free
+          <div className="mb-4 sm:mb-5 text-center sm:text-left">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-purple-200/80 bg-purple-50/90 px-2.5 py-0.5 text-[11px] font-bold text-purple-700 dark:border-purple-800/40 dark:bg-purple-950/50 dark:text-purple-300 mb-2 shadow-2xs">
+              <Sparkles className="h-3 w-3 text-purple-600 dark:text-purple-400 animate-pulse" /> Get Started Free
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-slate-900 via-purple-950 to-indigo-900 bg-clip-text text-transparent dark:from-white dark:via-purple-100 dark:to-indigo-200">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-purple-950 to-indigo-900 bg-clip-text text-transparent dark:from-white dark:via-purple-100 dark:to-indigo-200">
               Create your account
             </h1>
-            <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-zinc-400">
               Join your team workspace and chat with documents instantly.
             </p>
           </div>
           
-          <form onSubmit={onSubmit} className="mx-auto w-full space-y-3 sm:space-y-3.5">
+          <form onSubmit={onSubmit} className="mx-auto w-full space-y-3">
             {/* Name Input */}
             <div className="space-y-1">
               <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-zinc-300">
@@ -121,7 +122,7 @@ export default function RegisterPage() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="block w-full rounded-2xl border border-slate-200/80 bg-slate-50/70 py-2.5 sm:py-3 pl-10 pr-4 text-xs sm:text-sm text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#181628]/70 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:bg-[#181628]"
+                  className="block w-full rounded-xl border border-slate-200/90 bg-slate-50/80 py-2.5 sm:py-2.5 pl-10 pr-3.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#181628]/80 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:bg-[#181628]"
                   placeholder="e.g. Alex Morgan"
                   required
                 />
@@ -141,7 +142,7 @@ export default function RegisterPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full rounded-2xl border border-slate-200/80 bg-slate-50/70 py-2.5 sm:py-3 pl-10 pr-4 text-xs sm:text-sm text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#181628]/70 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:bg-[#181628]"
+                  className="block w-full rounded-xl border border-slate-200/90 bg-slate-50/80 py-2.5 sm:py-2.5 pl-10 pr-3.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#181628]/80 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:bg-[#181628]"
                   placeholder="name@company.com"
                   required
                 />
@@ -149,7 +150,7 @@ export default function RegisterPage() {
             </div>
 
             {/* Password Inputs */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div className="space-y-1">
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-zinc-300">
                   Password
@@ -162,7 +163,7 @@ export default function RegisterPage() {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full rounded-2xl border border-slate-200/80 bg-slate-50/70 py-2.5 sm:py-3 pl-10 pr-9 text-xs text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#181628]/70 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:bg-[#181628]"
+                    className="block w-full rounded-xl border border-slate-200/90 bg-slate-50/80 py-2 sm:py-2.5 pl-10 pr-8 text-xs text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#181628]/80 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:bg-[#181628]"
                     placeholder="Min 8 chars"
                     required
                   />
@@ -189,8 +190,8 @@ export default function RegisterPage() {
                     type={showConfirm ? "text" : "password"}
                     value={confirm}
                     onChange={(e) => setConfirm(e.target.value)}
-                    className="block w-full rounded-2xl border border-slate-200/80 bg-slate-50/70 py-2.5 sm:py-3 pl-10 pr-9 text-xs text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#181628]/70 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:bg-[#181628]"
-                    placeholder="Repeat password"
+                    className="block w-full rounded-xl border border-slate-200/90 bg-slate-50/80 py-2 sm:py-2.5 pl-10 pr-8 text-xs text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#181628]/80 dark:text-white dark:placeholder-zinc-600 dark:focus:border-purple-500 dark:focus:bg-[#181628]"
+                    placeholder="Repeat"
                     required
                   />
                   <button
@@ -206,7 +207,7 @@ export default function RegisterPage() {
             </div>
 
             {error && (
-              <p className="rounded-2xl border border-red-200 bg-red-50/80 px-4 py-2 text-center text-xs font-bold text-red-600 dark:border-red-900/30 dark:bg-red-950/30 dark:text-red-300 animate-in fade-in">
+              <p className="rounded-xl border border-red-200 bg-red-50/80 px-3.5 py-2 text-center text-xs font-bold text-red-600 dark:border-red-900/30 dark:bg-red-950/30 dark:text-red-300 animate-in fade-in">
                 {error}
               </p>
             )}
@@ -215,18 +216,26 @@ export default function RegisterPage() {
             <button 
               type="submit" 
               disabled={busy} 
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 py-3 sm:py-3.5 text-xs sm:text-sm font-bold tracking-wide text-white shadow-lg shadow-purple-500/25 transition-all hover:scale-102 hover:shadow-purple-500/35 active:scale-98 disabled:opacity-60"
+              className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 py-2.5 sm:py-3 text-xs sm:text-sm font-bold tracking-wide text-white shadow-md shadow-purple-500/25 transition-all hover:scale-[1.02] hover:shadow-purple-500/35 active:scale-[0.98] disabled:opacity-60 cursor-pointer"
             >
               {busy ? "Creating Account…" : "Create Free Account"}
               {!busy && <ArrowRight className="h-4 w-4" />}
             </button>
+
+            {/* Divider */}
+            <div className="relative flex items-center justify-center py-0.5">
+              <div className="w-full border-t border-slate-200/80 dark:border-white/10" />
+              <span className="absolute bg-white px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:bg-[#121022] dark:text-zinc-500">
+                or
+              </span>
+            </div>
 
             {/* Google OAuth Button */}
             <button 
               type="button" 
               onClick={() => googleLoginAction()} 
               disabled={busy}
-              className="flex w-full items-center justify-center gap-2.5 rounded-full border border-slate-200/90 bg-white/80 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-slate-700 shadow-xs transition-all hover:bg-slate-50 hover:scale-101 active:scale-98 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10"
+              className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-slate-200/90 bg-white/80 py-2.5 text-xs sm:text-sm font-bold text-slate-700 shadow-2xs transition-all hover:bg-slate-50 hover:scale-[1.01] active:scale-[0.98] dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10 cursor-pointer"
             >
               <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24">
                 <path d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.81002 8.87028 4.75 12.0003 4.75Z" fill="#EA4335"/>
@@ -237,7 +246,7 @@ export default function RegisterPage() {
               Sign up with Google
             </button>
 
-            <p className="mt-3 text-center text-xs text-slate-500 dark:text-zinc-400">
+            <p className="pt-1 text-center text-xs text-slate-500 dark:text-zinc-400">
               Already have an account?{" "}
               <Link href="/login" className="font-bold text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
                 Log In →
@@ -246,28 +255,34 @@ export default function RegisterPage() {
           </form>
         </div>
 
-        {/* Right Panel: Aesthetic Showcase with Glass Badges */}
-        <div className="w-full h-48 sm:h-64 lg:h-auto lg:w-[45%] order-first lg:order-last shrink-0 p-3 sm:p-4 relative">
-          <div className="relative h-full w-full overflow-hidden rounded-2xl sm:rounded-[2.25rem]">
-             <div className="absolute inset-0 z-10 bg-gradient-to-t lg:bg-gradient-to-tr from-[#121020]/80 via-[#121020]/30 to-transparent" />
-             
-             {/* Dynamic scenery image based on theme */}
+        {/* Right Panel: Showcase Image (Desktop Only for Sleek Mobile Experience) */}
+        <div className="hidden lg:block lg:w-[46%] shrink-0 p-3 relative">
+          <div className="relative h-full w-full overflow-hidden rounded-[1.75rem] border border-slate-200/60 dark:border-white/10 shadow-inner">
+             <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#0e0c1c]/90 via-[#0e0c1c]/30 to-transparent" />
              <Image 
                src="/login-day.jpg" 
-               alt="Scenery" 
+               alt="AskDocs Workspace Day" 
                fill
                priority
-               sizes="(max-width: 768px) 100vw, 45vw"
-               className="object-cover dark:hidden"
+               sizes="45vw"
+               className="object-cover dark:hidden transition-transform duration-700 hover:scale-105"
              />
              <Image 
                src="/login-night.jpg" 
-               alt="Scenery" 
+               alt="AskDocs Workspace Night" 
                fill
                priority
-               sizes="(max-width: 768px) 100vw, 45vw"
-               className="hidden object-cover dark:block"
+               sizes="45vw"
+               className="hidden object-cover dark:block transition-transform duration-700 hover:scale-105"
              />
+
+             {/* Floating Glassmorphic Branding Banner */}
+             <div className="absolute bottom-5 left-5 right-5 z-20 rounded-2xl border border-white/20 bg-white/20 p-4 backdrop-blur-md dark:border-white/10 dark:bg-black/30">
+               <div className="text-xs font-bold text-white">Intelligent Team Workspace</div>
+               <div className="mt-0.5 text-[11px] text-white/80 leading-relaxed">
+                 Fast cited answers, document intelligence, and real-time team collaboration.
+               </div>
+             </div>
           </div>
         </div>
 

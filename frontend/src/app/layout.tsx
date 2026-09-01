@@ -42,9 +42,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={jakartaSans.className}>
       <body
-        className={`${jakartaSans.variable} ${jetbrainsMono.variable} antialiased`}
+        className={`${jakartaSans.variable} ${jetbrainsMono.variable} ${jakartaSans.className} font-sans antialiased`}
       >
         <GoogleProvider>
           <AuthProvider>{children}</AuthProvider>
