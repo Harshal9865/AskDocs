@@ -14,7 +14,6 @@ interface PricingModalProps {
 export default function PricingModal({
   isOpen,
   onClose,
-  initialPlan: _initialPlan = "premium",
 }: PricingModalProps) {
   const { user } = useAuth();
   const [interval, setInterval] = useState<"monthly" | "annual">("monthly");

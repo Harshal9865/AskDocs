@@ -23,7 +23,6 @@ import {
   Search,
   Sparkles,
   Trash2,
-  UserPlus,
   UsersRound,
   Volume2,
   VolumeX,
@@ -623,9 +622,7 @@ export default function ChatsPage() {
                         }`}
                       >
                         {chat.type === "group" ? (
-                          <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 font-bold">
-                            <UsersRound className="h-5 w-5" />
-                          </div>
+                          <GroupAvatar chat={chat} size={44} />
                         ) : other ? (
                           <ChatAvatar user={other} size={44} />
                         ) : (
@@ -642,7 +639,7 @@ export default function ChatsPage() {
                               </span>
                             </div>
                             <span className="ml-1 shrink-0 text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
-                              {fmtDate(chat.last_message_at ?? chat.created_at)}
+                              {fmtTime(chat.last_message_at ?? chat.created_at)}
                             </span>
                           </div>
                           <div className="flex items-center justify-between mt-0.5">
