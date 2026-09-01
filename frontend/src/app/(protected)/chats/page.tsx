@@ -17,10 +17,13 @@ import {
   CheckCheck,
   EyeOff,
   FileUp,
+  MessageCirclePlus,
   MessagesSquare,
   Palette,
   Search,
+  Sparkles,
   Trash2,
+  UserPlus,
   UsersRound,
   Volume2,
   VolumeX,
@@ -582,14 +585,27 @@ export default function ChatsPage() {
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {visibleChats.length === 0 ? (
-              <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
-                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500/10 via-indigo-500/10 to-blue-500/10 border border-purple-200/50 dark:border-purple-500/20">
+              <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
+                <div className="relative mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500/15 via-indigo-500/15 to-pink-500/15 border border-purple-200/60 dark:border-purple-500/30 shadow-inner">
                   <MessagesSquare className="h-7 w-7 text-purple-600 dark:text-purple-400" />
+                  <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                  </span>
                 </div>
-                <p className="text-sm font-bold text-slate-700 dark:text-zinc-200">No {filter === "group" ? "group" : filter === "direct" ? "personal" : ""} chats found</p>
-                <p className="mt-1 text-xs text-slate-400 dark:text-zinc-500">
-                  {filter === "group" ? "Click the 👥 button above to create a group chat" : "Start a conversation using the buttons above"}
+                <p className="text-sm font-extrabold text-slate-800 dark:text-zinc-100">
+                  {chats.length === 0 ? "No office chats yet" : `No ${filter === "group" ? "group" : filter === "direct" ? "personal" : ""} chats found`}
                 </p>
+                <p className="mt-1 text-xs text-slate-400 dark:text-zinc-400 max-w-[210px]">
+                  {chats.length === 0 ? "Start your first conversation with a workspace teammate" : "Try a different search or filter"}
+                </p>
+                <button
+                  onClick={() => setShowNewChat(true)}
+                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 px-4 py-2 text-xs font-extrabold text-white shadow-md shadow-purple-500/25 transition-all duration-300 hover:scale-105 hover:shadow-purple-500/40 active:scale-95 cursor-pointer"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span>Start a New Chat</span>
+                </button>
               </div>
             ) : (
               <ul className="space-y-1.5">
@@ -600,49 +616,60 @@ export default function ChatsPage() {
                     <li key={chat.id} className="group relative flex items-center">
                       <button
                         onClick={() => openChat(chat)}
-                        className={`relative flex min-w-0 flex-1 items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-all duration-200 ${
+                        className={`wa-row flex flex-1 items-center gap-3 rounded-2xl p-2.5 text-left transition-all ${
                           isActive
-                            ? "bg-gradient-to-r from-purple-500/15 via-indigo-500/10 to-blue-500/10 border border-purple-300/80 shadow-xs ring-1 ring-purple-500/20 dark:border-purple-500/30 dark:bg-purple-950/40"
-                            : "border border-transparent hover:border-slate-200/80 hover:bg-slate-50/80 dark:hover:border-white/10 dark:hover:bg-white/[0.04] hover:translate-x-0.5"
+                            ? "bg-purple-50/80 shadow-xs dark:bg-white/10 ring-1 ring-purple-500/20"
+                            : "hover:bg-slate-50 dark:hover:bg-white/5"
                         }`}
                       >
-                        {/* Left Active Glow Pip */}
-                        {isActive && (
-                          <span
-                            className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-purple-500 via-indigo-500 to-blue-500"
-                            aria-hidden
-                          />
+                        {chat.type === "group" ? (
+                          <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 font-bold">
+                            <UsersRound className="h-5 w-5" />
+                          </div>
+                        ) : other ? (
+                          <ChatAvatar user={other} size={44} />
+                        ) : (
+                          <div className="h-11 w-11 shrink-0 rounded-full bg-slate-200 dark:bg-white/10" />
                         )}
-
-                        <div className="shrink-0 transition-transform duration-200 group-hover:scale-105">
-                          {chat.type === "direct" && other ? <ChatAvatar user={other} size={42} /> : <GroupAvatar chat={chat} size={42} />}
-                        </div>
-
-                        <span className="min-w-0 flex-1">
-                          <span className="flex items-center justify-between gap-2">
-                            <span className={`truncate ${chat.unread_count > 0 ? "text-sm font-bold text-purple-950 dark:text-white" : isActive ? "text-sm font-bold text-purple-950 dark:text-white" : "text-sm font-semibold text-slate-800 dark:text-zinc-200"}`}>
-                              {chatTitle(chat, user?.email)}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1.5 truncate">
+                              {chat.type === "direct" && other && (
+                                <PresenceDot online={other.online} />
+                              )}
+                              <span className="truncate text-xs font-bold text-slate-900 dark:text-white">
+                                {chatTitle(chat, user?.email)}
+                              </span>
+                            </div>
+                            <span className="ml-1 shrink-0 text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
+                              {fmtDate(chat.last_message_at ?? chat.created_at)}
                             </span>
-                            <span className="shrink-0 text-[10px] font-medium text-slate-400 dark:text-zinc-500">{fmtTime(chat.last_message_at)}</span>
-                          </span>
-                          <span className="mt-0.5 flex items-center justify-between gap-2">
-                            <span className={`truncate text-xs ${chat.unread_count > 0 ? "font-semibold text-slate-900 dark:text-zinc-100" : "text-slate-500 dark:text-zinc-400"}`}>
-                              {chat.last_message_preview || "No messages yet"}
-                            </span>
+                          </div>
+                          <div className="flex items-center justify-between mt-0.5">
+                            <p className="truncate text-[11px] text-slate-500 dark:text-zinc-400">
+                              {chat.last_message_preview || (
+                                <span className="italic text-slate-400 dark:text-zinc-500">
+                                  No messages yet
+                                </span>
+                              )}
+                            </p>
                             {chat.unread_count > 0 && (
-                              <span className="flex h-4.5 min-w-4.5 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 px-1.5 text-[10px] font-bold text-white shadow-xs shadow-purple-500/30">
+                              <span className="ml-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-purple-600 px-1 text-[9px] font-bold text-white shadow-xs">
                                 {chat.unread_count}
                               </span>
                             )}
-                          </span>
-                        </span>
+                          </div>
+                        </div>
                       </button>
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); void deleteChat(chat.id); }} 
-                        title="Delete chat" 
-                        className="absolute right-2 flex h-6 w-6 items-center justify-center rounded-md text-slate-400 opacity-0 transition-all hover:bg-red-50 hover:text-red-600 dark:text-zinc-500 dark:hover:bg-red-900/30 dark:hover:text-red-400 group-hover:opacity-100"
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          void hideChat(chat.id);
+                        }}
+                        title="Hide conversation"
+                        className="absolute right-2 opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 transition-all"
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <EyeOff className="h-3.5 w-3.5" />
                       </button>
                     </li>
                   );
@@ -660,11 +687,76 @@ export default function ChatsPage() {
         <div className="gemini-orb gemini-orb-3" />
 
         {!activeChat ? (
-          <div className="relative z-10 flex h-full items-center justify-center px-4 text-center">
-            <div>
-              <div className="mb-4 mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 dark:bg-white/5"><MessagesSquare className="h-8 w-8 text-slate-300 dark:text-zinc-600" /></div>
-              <p className="text-base font-semibold text-slate-700 dark:text-zinc-200">Select a conversation</p>
-              <p className="mt-1 text-xs text-slate-400 dark:text-zinc-500">Pick a colleague or group chat from the list to start messaging</p>
+          <div className="relative z-10 flex h-full items-center justify-center px-4 py-8 text-center">
+            <div className="max-w-md w-full">
+              <div className="relative mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-purple-500/15 via-indigo-500/15 to-pink-500/15 border border-purple-200/60 dark:border-white/10 shadow-lg shadow-purple-500/10">
+                <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-lg animate-pulse" />
+                <MessagesSquare className="relative z-10 h-10 w-10 text-purple-600 dark:text-purple-400" />
+              </div>
+              
+              <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                {chats.length === 0 ? "Welcome to Office Chats! 👋" : "Select a conversation"}
+              </h3>
+              <p className="mt-1.5 text-xs sm:text-sm text-slate-500 dark:text-zinc-400 max-w-sm mx-auto">
+                {chats.length === 0
+                  ? "Connect and chat with teammates across your workspace in real-time."
+                  : "Pick a colleague or group chat from the left panel to continue messaging."}
+              </p>
+
+              {/* Animated Gradient CTA Button */}
+              <div className="mt-5 flex justify-center">
+                <button
+                  onClick={() => setShowNewChat(true)}
+                  className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 p-[1px] shadow-lg shadow-purple-500/30 transition-all duration-300 hover:scale-105 hover:shadow-purple-500/50 active:scale-95 cursor-pointer"
+                >
+                  <span className="flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 px-6 py-2.5 text-xs sm:text-sm font-extrabold text-white transition-colors">
+                    <Sparkles className="h-4 w-4 animate-spin" style={{ animationDuration: '4s' }} />
+                    <span>Start a New Chat</span>
+                  </span>
+                </button>
+              </div>
+
+              {/* Teammates suggestions quick-row if workspace has colleagues */}
+              {colleagues.length > 0 && (
+                <div className="mt-8 border-t border-slate-100 dark:border-white/5 pt-6 text-left">
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-400">
+                      Suggested Teammates to Message
+                    </span>
+                    <button
+                      onClick={() => setShowNewChat(true)}
+                      className="text-[11px] font-bold text-purple-600 hover:text-purple-700 dark:text-purple-400 cursor-pointer"
+                    >
+                      View all ({colleagues.length}) →
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-48 overflow-y-auto no-scrollbar">
+                    {colleagues.slice(0, 4).map((m) => (
+                      <button
+                        key={m.user_id}
+                        onClick={() => void openDM(m)}
+                        className="group flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white/70 p-2.5 hover:border-purple-400 hover:bg-purple-50/50 dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-purple-500/40 dark:hover:bg-purple-950/20 transition-all duration-200 cursor-pointer shadow-xs text-left"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <ChatAvatar user={m} size={36} />
+                          <div className="min-w-0">
+                            <p className="truncate text-xs font-bold text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                              {m.name || m.email}
+                            </p>
+                            <span className="flex items-center gap-1 text-[10px] text-slate-400 dark:text-zinc-500">
+                              <PresenceDot online={m.online} />
+                              {m.online ? "Online" : "Offline"}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="shrink-0 rounded-full bg-purple-100 px-2.5 py-1 text-[10px] font-bold text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                          Message
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -898,31 +990,92 @@ export default function ChatsPage() {
 
       {/* New chat modal */}
       {showNewChat && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" onClick={() => { setShowNewChat(false); setNewChatQuery(""); setNewChatResults([]); }}>
-          <div className="max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-5 shadow-xl dark:bg-[#181818]" onClick={(e) => e.stopPropagation()}>
-            <h2 className="mb-3 text-lg font-bold text-slate-900 dark:text-white">New chat</h2>
-            <div className="relative mb-4">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input autoFocus value={newChatQuery} onChange={(e) => setNewChatQuery(e.target.value)} placeholder="Search name or email (any workspace)…" className="w-full rounded-full border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm dark:border-white/10 dark:bg-[#242424] dark:text-white" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4" onClick={() => { setShowNewChat(false); setNewChatQuery(""); setNewChatResults([]); }}>
+          <div className="max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-3xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xl dark:border-white/10 dark:bg-[#15151c]" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-4 flex items-center gap-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                <MessageCirclePlus className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-base font-extrabold text-slate-900 dark:text-white">Start a New Chat</h2>
+                <p className="text-[11px] text-slate-400 dark:text-zinc-400">Select a teammate to start a direct conversation</p>
+              </div>
             </div>
+
+            <div className="relative mb-4">
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+              <input autoFocus value={newChatQuery} onChange={(e) => setNewChatQuery(e.target.value)} placeholder="Search teammate name or email…" className="w-full rounded-full border border-slate-200/80 bg-slate-50/80 py-2.5 pl-9 pr-3 text-xs outline-none placeholder:text-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#1e1e28] dark:text-white transition-all" />
+            </div>
+
             {newChatQuery.trim().length < 2 ? (
               <>
-                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Your workspace</h3>
-                {colleagues.length === 0 ? <p className="mb-4 text-sm text-slate-500">No colleagues yet.</p> : (
-                  <ul className="mb-4 space-y-1">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+                    Workspace Teammates ({colleagues.length})
+                  </span>
+                </div>
+                {colleagues.length === 0 ? (
+                  <div className="rounded-2xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02] p-6 text-center">
+                    <UsersRound className="mx-auto mb-2 h-7 w-7 text-slate-300 dark:text-zinc-600" />
+                    <p className="text-xs font-bold text-slate-700 dark:text-zinc-300">No colleagues in this workspace yet</p>
+                    <p className="mt-0.5 text-[11px] text-slate-400 dark:text-zinc-500">Invite teammates to your workspace from the Workspaces page</p>
+                  </div>
+                ) : (
+                  <ul className="space-y-1.5 max-h-64 overflow-y-auto no-scrollbar">
                     {colleagues.map((m) => (
-                      <li key={m.user_id}><button onClick={() => { setShowNewChat(false); void openDM(m); }} className="wa-row flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left"><ChatAvatar user={m} size={36} /><span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium text-slate-900 dark:text-white">{m.name || m.email}</span><span className={`block text-xs ${m.online ? "text-[#1DB954]" : "text-slate-400 dark:text-zinc-500"}`}>{m.online ? "Online" : "Offline"}</span></span></button></li>
+                      <li key={m.user_id}>
+                        <button
+                          onClick={() => { setShowNewChat(false); void openDM(m); }}
+                          className="group flex w-full items-center justify-between rounded-2xl p-2 text-left hover:bg-purple-50/60 dark:hover:bg-purple-950/20 transition-all cursor-pointer"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <ChatAvatar user={m} size={38} />
+                            <div className="min-w-0">
+                              <span className="block truncate text-xs font-bold text-slate-900 group-hover:text-purple-600 dark:text-white dark:group-hover:text-purple-400 transition-colors">
+                                {m.name || m.email}
+                              </span>
+                              <span className="flex items-center gap-1 text-[10px] text-slate-400 dark:text-zinc-500">
+                                <PresenceDot online={m.online} />
+                                {m.online ? "Online" : "Offline"}
+                              </span>
+                            </div>
+                          </div>
+                          <span className="rounded-full bg-slate-100 group-hover:bg-purple-600 group-hover:text-white dark:bg-white/10 px-3 py-1 text-[10px] font-bold text-slate-700 dark:text-zinc-300 transition-all shrink-0">
+                            Chat
+                          </span>
+                        </button>
+                      </li>
                     ))}
                   </ul>
                 )}
               </>
             ) : (
               <>
-                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Global results</h3>
-                {newChatResults.length === 0 ? <p className="text-sm text-slate-500">No users found.</p> : (
-                  <ul className="space-y-1">
+                <h3 className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Global search results</h3>
+                {newChatResults.length === 0 ? (
+                  <p className="py-4 text-center text-xs text-slate-400 dark:text-zinc-500">No matching users found.</p>
+                ) : (
+                  <ul className="space-y-1.5 max-h-64 overflow-y-auto no-scrollbar">
                     {newChatResults.map((m) => (
-                      <li key={m.user_id}><button onClick={() => { setShowNewChat(false); void openDM(m); }} className="wa-row flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left"><ChatAvatar user={m} size={36} /><span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium text-slate-900 dark:text-white">{m.name || m.email}</span><span className="block truncate text-xs text-slate-400 dark:text-zinc-500">{m.email}</span></span></button></li>
+                      <li key={m.user_id}>
+                        <button
+                          onClick={() => { setShowNewChat(false); void openDM(m); }}
+                          className="group flex w-full items-center justify-between rounded-2xl p-2 text-left hover:bg-purple-50/60 dark:hover:bg-purple-950/20 transition-all cursor-pointer"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <ChatAvatar user={m} size={38} />
+                            <div className="min-w-0">
+                              <span className="block truncate text-xs font-bold text-slate-900 group-hover:text-purple-600 dark:text-white dark:group-hover:text-purple-400 transition-colors">
+                                {m.name || m.email}
+                              </span>
+                              <span className="block truncate text-[10px] text-slate-400 dark:text-zinc-500">{m.email}</span>
+                            </div>
+                          </div>
+                          <span className="rounded-full bg-slate-100 group-hover:bg-purple-600 group-hover:text-white dark:bg-white/10 px-3 py-1 text-[10px] font-bold text-slate-700 dark:text-zinc-300 transition-all shrink-0">
+                            Chat
+                          </span>
+                        </button>
+                      </li>
                     ))}
                   </ul>
                 )}
