@@ -10,10 +10,7 @@ import {
   Mail,
   Lock,
   User,
-  ChevronRight,
   Sparkles,
-  ShieldCheck,
-  Zap,
   Eye,
   EyeOff,
   ArrowRight,
@@ -271,22 +268,6 @@ export default function RegisterPage() {
                sizes="(max-width: 768px) 100vw, 45vw"
                className="hidden object-cover dark:block"
              />
-
-             {/* Floating Feature Badges */}
-             <div className="absolute bottom-4 left-4 right-4 z-20 space-y-2 hidden sm:block">
-               <div className="flex items-center gap-2 rounded-2xl border border-white/20 bg-black/40 p-2.5 backdrop-blur-md text-white text-xs font-semibold shadow-lg">
-                 <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-purple-500/80 text-white shadow-xs">
-                   <Zap className="h-4 w-4" />
-                 </div>
-                 <span>Multimodal AI Q&A with full citations</span>
-               </div>
-               <div className="flex items-center gap-2 rounded-2xl border border-white/20 bg-black/40 p-2.5 backdrop-blur-md text-white text-xs font-semibold shadow-lg">
-                 <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-emerald-500/80 text-white shadow-xs">
-                   <ShieldCheck className="h-4 w-4" />
-                 </div>
-                 <span>Enterprise security & workspace privacy</span>
-               </div>
-             </div>
           </div>
         </div>
 
