@@ -351,9 +351,15 @@ async def update_me(payload: SchemaProfileUpdate, db: DbSession, user: CurrentUs
     if payload.pronouns is not None:
         user.pronouns = payload.pronouns.strip()[:50] or None
     if payload.job_title is not None:
-        user.job_title = payload.job_title.strip()[:120] or None
+        title = payload.job_title.strip()[:120]
+        if not title:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Job title is required")
+        user.job_title = title
     if payload.job_role is not None:
-        user.job_role = payload.job_role.strip()[:120] or None
+        role = payload.job_role.strip()[:120]
+        if not role:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Department / Role is required")
+        user.job_role = role
     await db.commit()
     await db.refresh(user)
     return user

@@ -100,6 +100,14 @@ export default function EditProfileModal({
       setMsg("Full name is required.");
       return;
     }
+    if (!jobTitle.trim()) {
+      setMsg("Job title is required.");
+      return;
+    }
+    if (!jobRole.trim()) {
+      setMsg("Department / Role is required.");
+      return;
+    }
     // Phone validation
     if (phone.trim() && !/^\+?[0-9\s\-()]{7,20}$/.test(phone.trim())) {
       setMsg("Invalid input: Phone number contains invalid characters.");
@@ -121,8 +129,8 @@ export default function EditProfileModal({
         status: status.trim() || null,
         location: location.trim() || null,
         pronouns: pronouns.trim() || null,
-        job_title: jobTitle.trim() || null,
-        job_role: jobRole.trim() || null,
+        job_title: jobTitle.trim(),
+        job_role: jobRole.trim(),
       });
       await refreshUser();
       setMsg("Profile updated successfully!");
@@ -151,7 +159,7 @@ export default function EditProfileModal({
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
           <DialogDescription>
-            Update your profile details visible to your team. Only your name is required.
+            Update your profile details visible to your team. Full name, job title, and department are required.
           </DialogDescription>
         </DialogHeader>
 
@@ -203,10 +211,11 @@ export default function EditProfileModal({
           {/* Job Title & Role */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-zinc-400">
-                Job Title <span className="text-[10px] text-slate-400 dark:text-zinc-500">(optional)</span>
+              <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-zinc-300">
+                Job Title <span className="text-purple-600">*</span>
               </label>
               <input
+                required
                 list="edit-job-titles"
                 value={jobTitle}
                 onChange={(e) => setJobTitle(e.target.value)}
@@ -221,10 +230,11 @@ export default function EditProfileModal({
               </datalist>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-zinc-400">
-                Department / Role <span className="text-[10px] text-slate-400 dark:text-zinc-500">(optional)</span>
+              <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-zinc-300">
+                Department / Role <span className="text-purple-600">*</span>
               </label>
               <input
+                required
                 list="edit-job-roles"
                 value={jobRole}
                 onChange={(e) => setJobRole(e.target.value)}
