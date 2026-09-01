@@ -85,34 +85,75 @@ export default function RegisterPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-3 sm:p-6 lg:p-8">
-      {/* Full-Screen Immersive Day / Night Theme Background */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <Image
-          src="/login-day.jpg"
-          alt="Day Background"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-center dark:hidden scale-105 transition-all duration-700 filter brightness-95"
-        />
-        <Image
-          src="/login-night.jpg"
-          alt="Night Background"
-          fill
-          priority
-          sizes="100vw"
-          className="hidden object-cover object-center dark:block scale-105 transition-all duration-700 filter brightness-75"
-        />
-        {/* Soft Day / Night Tint Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-purple-900/25 via-slate-900/15 to-indigo-900/20 backdrop-blur-xs dark:from-[#090812]/85 dark:via-[#0e0c1c]/70 dark:to-[#05040a]/85" />
+      {/* Pure Generative Gradient Wave Art Background */}
+      <div className="absolute inset-0 -z-10 overflow-hidden bg-slate-50 dark:bg-[#07060e] transition-colors duration-700">
+        {/* Luminous Ambient Aurora Blobs */}
+        <div className="absolute -top-[15%] -left-[10%] h-[60vw] w-[60vw] rounded-full bg-gradient-to-br from-purple-400/35 via-indigo-300/25 to-transparent blur-[100px] dark:from-purple-900/35 dark:via-indigo-900/25 animate-pulse duration-[8000ms]" />
+        <div className="absolute -bottom-[15%] -right-[10%] h-[60vw] w-[60vw] rounded-full bg-gradient-to-tl from-cyan-400/25 via-indigo-400/20 to-pink-400/20 blur-[120px] dark:from-cyan-900/25 dark:via-purple-900/30 dark:to-indigo-900/20 animate-pulse duration-[10000ms]" />
+        <div className="absolute top-[35%] left-[20%] h-[45vw] w-[45vw] rounded-full bg-gradient-to-tr from-violet-300/25 via-fuchsia-300/20 to-transparent blur-[90px] dark:from-violet-800/20 dark:via-fuchsia-900/15" />
+
+        {/* Fluid SVG Waves Art Layer */}
+        <svg
+          className="absolute inset-0 h-full w-full opacity-80 dark:opacity-70 transition-opacity duration-700"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 1440 900"
+          preserveAspectRatio="none"
+        >
+          <defs>
+            {/* Light Theme Wave Gradients */}
+            <linearGradient id="regWaveDay1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#c084fc" stopOpacity="0.45" />
+              <stop offset="50%" stopColor="#818cf8" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.25" />
+            </linearGradient>
+            <linearGradient id="regWaveDay2" x1="100%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#f472b6" stopOpacity="0.35" />
+              <stop offset="50%" stopColor="#a855f7" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#6366f1" stopOpacity="0.4" />
+            </linearGradient>
+            <linearGradient id="regWaveDay3" x1="0%" y1="50%" x2="100%" y2="50%">
+              <stop offset="0%" stopColor="#818cf8" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#c084fc" stopOpacity="0.35" />
+            </linearGradient>
+
+            {/* Dark Theme Wave Gradients */}
+            <linearGradient id="regWaveNight1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.4" />
+              <stop offset="50%" stopColor="#4f46e5" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.2" />
+            </linearGradient>
+            <linearGradient id="regWaveNight2" x1="100%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#db2777" stopOpacity="0.3" />
+              <stop offset="50%" stopColor="#9333ea" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.3" />
+            </linearGradient>
+            <linearGradient id="regWaveNight3" x1="0%" y1="50%" x2="100%" y2="50%">
+              <stop offset="0%" stopColor="#4338ca" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#6d28d9" stopOpacity="0.3" />
+            </linearGradient>
+          </defs>
+
+          {/* Undulating Dynamic Curves */}
+          <path
+            d="M0,280 C320,140 460,460 760,340 C1060,220 1180,480 1440,360 L1440,900 L0,900 Z"
+            className="fill-[url(#regWaveDay1)] dark:fill-[url(#regWaveNight1)]"
+          />
+          <path
+            d="M0,420 C260,560 520,300 820,460 C1120,620 1280,360 1440,480 L1440,900 L0,900 Z"
+            className="fill-[url(#regWaveDay2)] dark:fill-[url(#regWaveNight2)]"
+          />
+          <path
+            d="M0,580 C380,460 640,700 980,560 C1220,460 1360,660 1440,600 L1440,900 L0,900 Z"
+            className="fill-[url(#regWaveDay3)] dark:fill-[url(#regWaveNight3)]"
+          />
+        </svg>
+
+        {/* Subtle Tech Grid Accent */}
+        <div className="absolute inset-0 bg-[radial-gradient(#818cf8_1px,transparent_1px)] [background-size:32px_32px] opacity-25 dark:opacity-15 pointer-events-none" />
       </div>
 
-      {/* Ambient Animated Aura Lights */}
-      <div className="pointer-events-none absolute -top-32 -left-32 h-72 w-72 sm:h-96 sm:w-96 rounded-full bg-gradient-to-br from-purple-400/30 via-indigo-400/20 to-transparent blur-3xl dark:from-purple-600/25 dark:via-indigo-600/20 dark:to-transparent animate-pulse" />
-      <div className="pointer-events-none absolute -bottom-32 -right-32 h-72 w-72 sm:h-96 sm:w-96 rounded-full bg-gradient-to-tl from-indigo-400/30 via-sky-400/20 to-transparent blur-3xl dark:from-indigo-700/25 dark:via-cyan-700/20 dark:to-transparent animate-pulse" style={{ animationDelay: "2.5s" }} />
-
       {/* Main Responsive Glass Card */}
-      <div className="relative z-10 flex w-full max-w-[420px] lg:max-w-4xl flex-col overflow-hidden rounded-3xl sm:rounded-[2.25rem] border border-white/40 bg-white/85 shadow-2xl shadow-purple-950/20 backdrop-blur-2xl transition-all duration-300 dark:border-white/10 dark:bg-[#121022]/90 dark:shadow-[0_0_80px_-15px_rgba(147,51,234,0.3)] lg:flex-row">
+      <div className="relative z-10 flex w-full max-w-[420px] lg:max-w-4xl flex-col overflow-hidden rounded-3xl sm:rounded-[2.25rem] border border-white/60 bg-white/80 shadow-2xl shadow-purple-950/15 backdrop-blur-2xl transition-all duration-300 dark:border-white/10 dark:bg-[#110f22]/85 dark:shadow-[0_0_80px_-15px_rgba(147,51,234,0.3)] lg:flex-row">
         
         {/* Left Panel: Compact Form */}
         <div className="flex flex-col justify-center p-5 sm:p-8 lg:w-[54%] lg:p-10">
@@ -247,7 +288,7 @@ export default function RegisterPage() {
             {/* Divider */}
             <div className="relative flex items-center justify-center py-0.5">
               <div className="w-full border-t border-slate-200/80 dark:border-white/10" />
-              <span className="absolute bg-white px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:bg-[#121022] dark:text-zinc-500">
+              <span className="absolute bg-white px-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:bg-[#110f22] dark:text-zinc-500">
                 or
               </span>
             </div>
@@ -277,26 +318,55 @@ export default function RegisterPage() {
           </form>
         </div>
 
-        {/* Right Panel: Clean Showcase Image (Desktop Only, Pure Scenery) */}
-        <div className="hidden lg:block lg:w-[46%] shrink-0 p-3 relative">
-          <div className="relative h-full w-full overflow-hidden rounded-[1.75rem] border border-slate-200/60 dark:border-white/10 shadow-inner">
-             <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
-             <Image 
-               src="/login-day.jpg" 
-               alt="AskDocs Workspace Day" 
-               fill
-               priority
-               sizes="45vw"
-               className="object-cover dark:hidden transition-transform duration-700 hover:scale-105"
-             />
-             <Image 
-               src="/login-night.jpg" 
-               alt="AskDocs Workspace Night" 
-               fill
-               priority
-               sizes="45vw"
-               className="hidden object-cover dark:block transition-transform duration-700 hover:scale-105"
-             />
+        {/* Right Panel: Generative Wave Art Showcase (Desktop Only, No Photos) */}
+        <div className="hidden lg:flex lg:w-[46%] shrink-0 p-4 relative flex-col justify-between overflow-hidden rounded-r-[2.25rem] bg-gradient-to-br from-purple-600/10 via-indigo-600/10 to-blue-600/10 dark:from-purple-950/40 dark:via-indigo-950/30 dark:to-[#0c0a1a]">
+          {/* Layered Abstract Wave Geometry */}
+          <div className="absolute inset-0 -z-10 opacity-70">
+            <div className="absolute -top-16 -right-16 h-64 w-64 rounded-full bg-gradient-to-br from-purple-500/30 to-indigo-500/0 blur-2xl animate-pulse" />
+            <div className="absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-gradient-to-tl from-cyan-500/30 to-blue-500/0 blur-2xl animate-pulse" style={{ animationDelay: "3s" }} />
+            
+            <svg className="h-full w-full opacity-60" viewBox="0 0 400 600" preserveAspectRatio="none">
+              <path d="M0,100 C150,200 250,50 400,150 L400,600 L0,600 Z" fill="url(#regPanelGrad1)" />
+              <path d="M0,250 C180,350 220,180 400,280 L400,600 L0,600 Z" fill="url(#regPanelGrad2)" />
+              <defs>
+                <linearGradient id="regPanelGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#818cf8" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="#c084fc" stopOpacity="0.1" />
+                </linearGradient>
+                <linearGradient id="regPanelGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#6366f1" stopOpacity="0.25" />
+                  <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.15" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
+          {/* Floating Aesthetic Glass Nodes */}
+          <div className="relative z-10 flex flex-col justify-between h-full space-y-6">
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 rounded-2xl border border-white/60 bg-white/70 px-3.5 py-2 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-white/5">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+                <span className="text-xs font-semibold text-slate-800 dark:text-zinc-200">AI Knowledge Mesh Active</span>
+              </div>
+            </div>
+
+            <div className="space-y-2.5">
+              <div className="rounded-2xl border border-white/60 bg-white/65 p-4 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5">
+                <div className="text-xs font-bold text-slate-900 dark:text-white">Start Collaborating Today</div>
+                <p className="mt-1 text-[11px] text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  Connect your workspace team, upload documents, and get fast cited intelligence.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="flex -space-x-1.5 overflow-hidden">
+                  <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-zinc-900 bg-gradient-to-br from-purple-500 to-indigo-500 text-[9px] font-bold text-white flex items-center justify-center">AI</div>
+                  <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-zinc-900 bg-gradient-to-br from-blue-500 to-cyan-500 text-[9px] font-bold text-white flex items-center justify-center">KB</div>
+                  <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-zinc-900 bg-gradient-to-br from-emerald-500 to-teal-500 text-[9px] font-bold text-white flex items-center justify-center">✦</div>
+                </div>
+                <span className="text-[11px] font-medium text-slate-500 dark:text-zinc-400">Join thousands of teams</span>
+              </div>
+            </div>
           </div>
         </div>
 
