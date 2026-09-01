@@ -5,7 +5,6 @@ import { Camera, Check, ImagePlus, RotateCcw, Pencil, Trash2 } from "lucide-reac
 import EditProfileModal from "@/components/EditProfileModal";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { useWorkspace } from "@/lib/workspace-context";
 import PasswordInput from "@/components/PasswordInput";
 import Avatar from "@/components/Avatar";
 
@@ -34,7 +33,6 @@ function Section({
 
 export default function SettingsPage() {
   const { user, avatarSrc, refreshUser } = useAuth();
-  const { workspace, refresh: refreshWs } = useWorkspace();
 
   // profile name
   const [name, setName] = useState("");
@@ -53,13 +51,6 @@ export default function SettingsPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [avatarBusy, setAvatarBusy] = useState(false);
   const [avatarMsg, setAvatarMsg] = useState<string | null>(null);
-
-  // brand
-  const brandRef = useRef<HTMLInputElement>(null);
-  const [brandBusy, setBrandBusy] = useState(false);
-  const [brandMsg, setBrandMsg] = useState<string | null>(null);
-  const [brandSrcLocal, setBrandSrcLocal] = useState<string | null>(null);
-  const [brandStickerLocal, setBrandStickerLocal] = useState<string | null>(null);
 
   useEffect(() => {
     setName(user?.name ?? "");
@@ -145,43 +136,7 @@ export default function SettingsPage() {
     }
   }
 
-  async function applyBrand(kind: "default" | "sticker", value?: string) {
-    if (!workspace) return;
-    setBrandBusy(true);
-    setBrandMsg(null);
-    try {
-      await api.setBrand(workspace.id, kind, value);
-      setBrandStickerLocal(kind === "sticker" ? value ?? null : null);
-      setBrandSrcLocal(null);
-      await refreshWs();
-      setBrandMsg("Brand updated.");
-    } catch (err) {
-      setBrandMsg((err as Error).message);
-    } finally {
-      setBrandBusy(false);
-    }
-  }
 
-  async function onBrandPhotoChosen(file?: File | null) {
-    if (!workspace || !file) return;
-    setBrandBusy(true);
-    setBrandMsg(null);
-    try {
-      await api.uploadBrandPhoto(workspace.id, file);
-      setBrandStickerLocal(null);
-      try {
-        setBrandSrcLocal(await api.getBrandLogoUrl(workspace.id));
-      } catch {
-        setBrandSrcLocal(null);
-      }
-      await refreshWs();
-      setBrandMsg("Logo uploaded.");
-    } catch (err) {
-      setBrandMsg((err as Error).message);
-    } finally {
-      setBrandBusy(false);
-    }
-  }
 
   const previewSticker =
     user?.avatar_kind === "sticker" ? user.avatar_value ?? null : null;
@@ -390,70 +345,7 @@ export default function SettingsPage() {
         </form>
       </Section>
 
-      {/* ---------- Workspace brand logo (admin) ---------- */}
-      {workspace && (
-        <Section title={`Workspace Brand Logo — ${workspace.name}`}>
-          <p className="mb-4 text-xs text-slate-500 dark:text-zinc-400">
-            Displayed in the top navigation for all members in this workspace.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center gap-5">
-            <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-slate-200/80 bg-white/80 shadow-xs dark:border-white/10 dark:bg-[#181628]">
-              {brandSrcLocal ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={brandSrcLocal} alt="Brand" className="h-full w-full object-cover" />
-              ) : brandStickerLocal ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={`/stickers/${brandStickerLocal}.svg`} alt="Brand" className="h-full w-full" />
-              ) : workspace.brand_kind === "sticker" && workspace.brand_value ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={`/stickers/${workspace.brand_value}.svg`} alt="Brand" className="h-full w-full" />
-              ) : (
-                <span className="text-2xl font-black bg-gradient-to-br from-purple-600 to-indigo-600 bg-clip-text text-transparent">A</span>
-              )}
-            </div>
-            <div className="flex flex-col gap-2.5 min-w-0 flex-1">
-              <input
-                ref={brandRef}
-                type="file"
-                accept=".png,.jpg,.jpeg,.webp"
-                hidden
-                onChange={(e) => void onBrandPhotoChosen(e.target.files?.[0])}
-              />
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  onClick={() => brandRef.current?.click()}
-                  disabled={brandBusy}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/80 px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10 transition-all disabled:opacity-50"
-                >
-                  <ImagePlus className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" /> Upload custom logo
-                </button>
-                <button
-                  onClick={() => void applyBrand("default")}
-                  disabled={brandBusy}
-                  className="inline-flex items-center rounded-full border border-slate-200/80 bg-white/80 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 transition-all disabled:opacity-50"
-                >
-                  Default
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {AVATARS.map((av) => (
-                  <button
-                    key={av.id}
-                    onClick={() => void applyBrand("sticker", av.id)}
-                    disabled={brandBusy}
-                    aria-label={`Use ${av.name} as logo`}
-                    className="overflow-hidden rounded-full ring-1 ring-slate-200 dark:ring-white/10 transition-all hover:scale-110 hover:ring-purple-400 disabled:opacity-60"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={`/stickers/${av.id}.svg`} alt={av.name} className="h-9 w-9" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-          {brandMsg && <p className="mt-3 text-xs font-bold text-purple-600 dark:text-purple-400">{brandMsg}</p>}
-        </Section>
-      )}
+
 
       {/* ---------- Danger zone ---------- */}
       <DeleteAccountSection />
