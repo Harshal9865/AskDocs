@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, Check, ImagePlus, RotateCcw, Pencil, Trash2 } from "lucide-react";
+import { Camera, Check, ImagePlus, RotateCcw, Pencil, Trash2, Sparkles, CreditCard } from "lucide-react";
 import EditProfileModal from "@/components/EditProfileModal";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import PasswordInput from "@/components/PasswordInput";
 import Avatar from "@/components/Avatar";
+import PlanBadge from "@/components/PlanBadge";
+import PricingModal from "@/components/PricingModal";
 
 const AVATARS = [
   { id: "male-1", name: "Ginger Curls", tag: "Yellow BG", color: "from-amber-400 to-yellow-500" },
@@ -347,9 +349,246 @@ export default function SettingsPage() {
 
 
 
+      {/* ---------- Subscription & Billing ---------- */}
+      <SubscriptionSection />
+
       {/* ---------- Danger zone ---------- */}
       <DeleteAccountSection />
     </div>
+  );
+}
+
+function SubscriptionSection() {
+  const { user, refreshUser } = useAuth();
+  const [sub, setSub] = useState<any>(null);
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [pricingOpen, setPricingOpen] = useState(false);
+  const [cancelBusy, setCancelBusy] = useState(false);
+  const [cancelMsg, setCancelMsg] = useState<string | null>(null);
+
+  async function loadData() {
+    try {
+      setLoading(true);
+      const [subData, invData] = await Promise.all([
+        api.getSubscription().catch(() => null),
+        api.listInvoices().catch(() => []),
+      ]);
+      setSub(subData);
+      setInvoices(invData);
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadData();
+  }, [user]);
+
+  async function handleCancel() {
+    if (!confirm("Are you sure you want to cancel your subscription and downgrade to the Free tier?")) return;
+    setCancelBusy(true);
+    setCancelMsg(null);
+    try {
+      await api.cancelSubscription();
+      await refreshUser();
+      await loadData();
+      setCancelMsg("Subscription canceled. You have been downgraded to Free.");
+    } catch (err: any) {
+      setCancelMsg(err?.message || "Failed to cancel subscription.");
+    } finally {
+      setCancelBusy(false);
+    }
+  }
+
+  const plan = (user?.plan || sub?.plan || "free").toLowerCase();
+  const isPaid = plan === "premium" || plan === "ultra_premium";
+
+  const docUsed = sub?.documents_used ?? user?.documents_used ?? 0;
+  const docLimit = sub?.documents_limit ?? (plan === "free" ? 100 : plan === "premium" ? 1000 : -1);
+  const docPct = docLimit === -1 ? 10 : Math.min(100, Math.round((docUsed / docLimit) * 100));
+
+  const qUsed = sub?.questions_used ?? user?.questions_used ?? 0;
+  const qLimit = sub?.questions_limit ?? (plan === "free" ? 200 : plan === "premium" ? 3000 : -1);
+  const qPct = qLimit === -1 ? 10 : Math.min(100, Math.round((qUsed / qLimit) * 100));
+
+  return (
+    <Section title="Subscription & Billing">
+      <div className="space-y-6">
+        {/* Current Plan Overview Card */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-gradient-to-br from-slate-50/80 to-white/90 p-4 sm:p-5 dark:border-white/10 dark:from-[#181628] dark:to-[#121020]">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-extrabold text-slate-900 dark:text-white">
+                Current Plan:
+              </span>
+              <PlanBadge plan={plan} size="md" />
+            </div>
+            <p className="text-xs text-slate-500 dark:text-zinc-400">
+              {plan === "ultra_premium"
+                ? "Full access to Gemini 2.5 Pro Ultra Reasoning, unlimited storage & executive dossiers."
+                : plan === "premium"
+                  ? "Priority Gemini 2.5 Flash speed, speech voice answers & 1,000 documents."
+                  : "Standard cited document analysis and team chat on the Free tier."}
+            </p>
+            {isPaid && sub?.subscription_renews_at && (
+              <p className="text-[11px] font-semibold text-purple-600 dark:text-purple-400">
+                Renews on: {new Date(sub.subscription_renews_at).toLocaleDateString()} ({sub.billing_interval || "monthly"})
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setPricingOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-purple-500/25 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>{isPaid ? "Change Plan" : "Upgrade Plan"}</span>
+            </button>
+            {isPaid && (
+              <button
+                type="button"
+                onClick={handleCancel}
+                disabled={cancelBusy}
+                className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 dark:border-white/10 dark:bg-white/5 dark:text-red-400 dark:hover:bg-red-950/30 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {cancelBusy ? "Canceling…" : "Cancel Plan"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {cancelMsg && (
+          <p className="rounded-xl border border-purple-200 bg-purple-50/80 p-3 text-xs font-semibold text-purple-700 dark:border-purple-900/30 dark:bg-purple-950/30 dark:text-purple-300">
+            {cancelMsg}
+          </p>
+        )}
+
+        {/* Quota Usage Meters */}
+        <div className="space-y-3">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-zinc-300">
+            Monthly Quota & Storage
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Documents Meter */}
+            <div className="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 dark:border-white/10 dark:bg-white/5 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-slate-700 dark:text-zinc-300">Document Uploads</span>
+                <span className="font-extrabold text-slate-900 dark:text-white font-mono">
+                  {docUsed} / {docLimit === -1 ? "∞ Unlimited" : docLimit}
+                </span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-purple-600 to-indigo-500 transition-all duration-500"
+                  style={{ width: `${docLimit === -1 ? 100 : docPct}%` }}
+                />
+              </div>
+              <div className="text-[10px] text-slate-400 dark:text-zinc-500">
+                {docLimit === -1 ? "Unlimited document capacity active" : `${docLimit - docUsed} uploads remaining`}
+              </div>
+            </div>
+
+            {/* Questions Meter */}
+            <div className="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 dark:border-white/10 dark:bg-white/5 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-slate-700 dark:text-zinc-300">AI Questions / Month</span>
+                <span className="font-extrabold text-slate-900 dark:text-white font-mono">
+                  {qUsed} / {qLimit === -1 ? "∞ Unlimited" : qLimit}
+                </span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 transition-all duration-500"
+                  style={{ width: `${qLimit === -1 ? 100 : qPct}%` }}
+                />
+              </div>
+              <div className="text-[10px] text-slate-400 dark:text-zinc-500">
+                {qLimit === -1 ? "Unlimited AI queries active" : `${qLimit - qUsed} queries remaining this month`}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Method on File */}
+        {isPaid && (
+          <div className="space-y-2">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-zinc-300">
+              Payment Method
+            </h3>
+            <div className="flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white p-3.5 dark:border-white/10 dark:bg-white/5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400">
+                  <CreditCard className="h-4 w-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-white">
+                    {sub?.card_brand || "Credit Card"} •••• {sub?.card_last4 || "4242"}
+                  </div>
+                  <div className="text-[10px] text-slate-400 dark:text-zinc-500">
+                    Simulated Sandbox Payment
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPricingOpen(true)}
+                className="text-xs font-bold text-purple-600 hover:text-purple-700 dark:text-purple-400"
+              >
+                Update →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Invoices History Table */}
+        {invoices.length > 0 && (
+          <div className="space-y-2">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-zinc-300">
+              Simulated Invoices & Receipts
+            </h3>
+            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white dark:border-white/10 dark:bg-white/5">
+              <div className="divide-y divide-slate-100 dark:divide-white/5">
+                {invoices.map((inv) => (
+                  <div key={inv.id} className="flex items-center justify-between p-3 text-xs">
+                    <div className="space-y-0.5">
+                      <div className="font-mono font-bold text-slate-900 dark:text-white">
+                        {inv.invoice_number}
+                      </div>
+                      <div className="text-[10px] text-slate-400">
+                        {new Date(inv.paid_at).toLocaleDateString()} • {inv.plan.toUpperCase()} ({inv.billing_interval})
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-extrabold text-slate-900 dark:text-white font-mono">
+                        ${(inv.amount_cents / 100).toFixed(2)}
+                      </span>
+                      <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                        Paid
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {pricingOpen && (
+        <PricingModal
+          isOpen={true}
+          onClose={() => {
+            setPricingOpen(false);
+            loadData();
+          }}
+        />
+      )}
+    </Section>
   );
 }
 

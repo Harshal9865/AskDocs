@@ -25,6 +25,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
 import { showToast } from "@/components/Toast";
+import PricingModal from "@/components/PricingModal";
 import type { DocumentItem } from "@/lib/types";
 
 const PAGE_SIZE = 20;
@@ -95,6 +96,7 @@ export default function DocumentsPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
   const [viewMode, setViewMode] = useState<"workspace" | "mine">(getInitialView());
+  const [pricingOpen, setPricingOpen] = useState(false);
 
   // upload state
   const [uploadQueue, setUploadQueue] = useState<UploadItem[]>([]);
@@ -190,7 +192,11 @@ export default function DocumentsPage() {
           setUploadQueue((q) => q.map((x) => x.id === item.id ? { ...x, status: "done" } : x));
         } catch (err) {
           failed++;
-          setUploadQueue((q) => q.map((x) => x.id === item.id ? { ...x, status: "failed", error: (err as Error).message } : x));
+          const msg = (err as Error).message || "";
+          if (msg.toLowerCase().includes("limit") || msg.toLowerCase().includes("upgrade") || msg.toLowerCase().includes("exceeds")) {
+            setPricingOpen(true);
+          }
+          setUploadQueue((q) => q.map((x) => x.id === item.id ? { ...x, status: "failed", error: msg } : x));
         }
       }
     }
@@ -673,6 +679,13 @@ export default function DocumentsPage() {
             <X className="h-4 w-4" />
           </button>
         </div>
+      )}
+
+      {pricingOpen && (
+        <PricingModal
+          isOpen={true}
+          onClose={() => setPricingOpen(false)}
+        />
       )}
     </div>
   );

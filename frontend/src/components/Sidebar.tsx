@@ -16,7 +16,7 @@ import {
   Settings,
   Sparkles,
   Trash2,
-  UserCog,
+  Crown,
   UsersRound,
 } from "lucide-react";
 import { api } from "@/lib/api";
@@ -24,6 +24,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
 import Colleagues from "@/components/Colleagues";
 import FriendsQuickAccess from "@/components/FriendsQuickAccess";
+import PlanBadge from "@/components/PlanBadge";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -36,11 +37,12 @@ const NAV = [
 ];
 
 const NAV_SECONDARY = [
+  { href: "/pricing", label: "Plans & Pricing", icon: Crown },
   { href: "/insights", label: "Insights", icon: BarChart3 },
   { href: "/activity", label: "Activity log", icon: History },
   { href: "/members", label: "Members", icon: UsersRound },
   { href: "/settings/workspace", label: "Workspace settings", icon: Settings },
-  { href: "/settings", label: "Account settings", icon: UserCog },
+  { href: "/settings", label: "Account settings", icon: Settings },
   { href: "/help", label: "Help & FAQ", icon: CircleHelp },
   { href: "/trash", label: "Trash", icon: Trash2 },
 ];
@@ -441,14 +443,16 @@ export default function Sidebar({
         </div>
       </nav>
 
-      <div className="dark:border-slate-700/50 border-t border-slate-100 p-4">
+      <div className="dark:border-slate-700/50 border-t border-slate-100 p-3.5">
         <div className="flex items-center justify-between">
-          <div className="min-w-0">
-            <div className="sb-label dark:text-slate-300 truncate text-sm font-medium">{user?.name}</div>
-            <div className="sb-label dark:text-slate-500 truncate text-xs text-slate-500">{user?.email}</div>
-            <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${planBadge}`}>
-              {user?.plan || "free"}
-            </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5">
+              <span className="sb-label dark:text-slate-200 truncate text-xs font-bold">{user?.name}</span>
+              <div className="sb-label">
+                <PlanBadge plan={user?.plan} size="xs" />
+              </div>
+            </div>
+            <div className="sb-label dark:text-slate-500 truncate text-[11px] text-slate-500">{user?.email}</div>
             <span
               title={`${user?.name} (${user?.email})`}
               className="sb-collapsed-show sb-center mx-auto h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold uppercase text-slate-700"
@@ -457,6 +461,16 @@ export default function Sidebar({
             </span>
           </div>
         </div>
+
+        {(!user?.plan || user.plan.toLowerCase() === "free") && (
+          <Link
+            href="/pricing"
+            className="sb-label mt-2.5 flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 py-1.5 text-[11px] font-bold text-white shadow-xs hover:scale-[1.02] transition-all"
+          >
+            <Sparkles className="h-3 w-3" />
+            <span>Upgrade Tier</span>
+          </Link>
+        )}
         <button
           onClick={() => {
             logout();

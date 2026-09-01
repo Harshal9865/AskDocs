@@ -306,6 +306,7 @@ export default function LoginPage() {
                className="hidden object-cover dark:block transition-transform duration-700 hover:scale-105"
              />
           </div>
+        </div>
       </div>
     </div>
   );

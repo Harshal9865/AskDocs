@@ -28,8 +28,15 @@ class User(BaseModel):
     job_title: Mapped[str | None] = mapped_column(String(120), nullable=True)
     job_role: Mapped[str | None] = mapped_column(String(120), nullable=True)
 
-    # Plan fields
-    plan: Mapped[str] = mapped_column(String(20), default="free", server_default="free")  # free | pro | enterprise
+    # Plan & Subscription fields
+    plan: Mapped[str] = mapped_column(String(30), default="free", server_default="free")  # free | premium | ultra_premium
+    billing_interval: Mapped[str | None] = mapped_column(String(20), nullable=True, default=None)  # monthly | annual
+    subscription_status: Mapped[str] = mapped_column(String(30), default="active", server_default="active")  # active | canceled | past_due
+    subscription_renews_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, default=None
+    )
+    card_brand: Mapped[str | None] = mapped_column(String(50), nullable=True, default=None)
+    card_last4: Mapped[str | None] = mapped_column(String(10), nullable=True, default=None)
     documents_used: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     questions_used: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     plan_reset_at: Mapped[datetime | None] = mapped_column(

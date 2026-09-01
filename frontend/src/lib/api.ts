@@ -1,15 +1,18 @@
 import type {
   Citation,
+  CheckoutPayload,
   ConflictWarning,
   FreshnessWarning,
   Conversation,
   DocumentItem,
   Invitation,
+  InvoiceRecord,
   JoinRequest,
   Member,
   Message,
   PlanInfo,
   Role,
+  SubscriptionInfo,
   TeamChat,
   TeamMessage,
   TokenPair,
@@ -636,5 +639,27 @@ export const api = {
     } catch (err) {
       if ((err as Error).name !== "AbortError") onError?.(String(err));
     }
+  },
+
+  // Billing & Subscriptions
+  async getSubscription(): Promise<SubscriptionInfo> {
+    return request<SubscriptionInfo>("/billing/subscription");
+  },
+
+  async checkoutPlan(payload: CheckoutPayload): Promise<SubscriptionInfo> {
+    return request<SubscriptionInfo>("/billing/checkout", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async cancelSubscription(): Promise<SubscriptionInfo> {
+    return request<SubscriptionInfo>("/billing/cancel", {
+      method: "POST",
+    });
+  },
+
+  async listInvoices(): Promise<InvoiceRecord[]> {
+    return request<InvoiceRecord[]>("/billing/invoices");
   },
 };

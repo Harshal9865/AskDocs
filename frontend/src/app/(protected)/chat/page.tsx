@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
 import ChatComposer from "@/components/ChatComposer";
 import { AIAvatarIcon } from "@/components/AIAvatarIcon";
+import PricingModal from "@/components/PricingModal";
 import type { Citation, Conversation, Message } from "@/lib/types";
 import {
   ArrowDownCircle,
@@ -167,6 +168,7 @@ export default function ChatPage() {
   const [askedIdx, setAskedIdx] = useState<number | null>(null);
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
   const [showJump, setShowJump] = useState(false);
+  const [pricingOpen, setPricingOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const threadEnd = useRef<HTMLDivElement>(null);
 
@@ -321,7 +323,18 @@ export default function ChatPage() {
         void loadConversations();
       },
       (messageId) => setMessages((prev) => { const next = [...prev]; next[next.length - 1] = { ...next[next.length - 1], id: messageId }; return next; }),
-      (message) => { done = true; setMessages((prev) => { const next = [...prev]; next[next.length - 1] = { ...next[next.length - 1], streaming: false, content: next[next.length - 1].content || `Error: ${message}` }; return next; }); },
+      (message) => {
+        done = true;
+        const msgStr = String(message || "");
+        if (msgStr.toLowerCase().includes("limit") || msgStr.toLowerCase().includes("upgrade")) {
+          setPricingOpen(true);
+        }
+        setMessages((prev) => {
+          const next = [...prev];
+          next[next.length - 1] = { ...next[next.length - 1], streaming: false, content: next[next.length - 1].content || `Notice: ${msgStr}` };
+          return next;
+        });
+      },
       undefined, attachmentIds,
     );
 
@@ -595,6 +608,13 @@ export default function ChatPage() {
           citations={showCitations}
           workspaceId={workspace?.id}
           onClose={() => setShowCitations(null)}
+        />
+      )}
+
+      {pricingOpen && (
+        <PricingModal
+          isOpen={true}
+          onClose={() => setPricingOpen(false)}
         />
       )}
     </div>

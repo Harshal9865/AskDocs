@@ -15,6 +15,11 @@ export interface User {
   job_title?: string | null;
   job_role?: string | null;
   plan?: string;
+  billing_interval?: "monthly" | "annual" | null;
+  subscription_status?: "active" | "canceled" | "past_due";
+  subscription_renews_at?: string | null;
+  card_brand?: string | null;
+  card_last4?: string | null;
   documents_used?: number;
   questions_used?: number;
   online?: boolean;
@@ -183,4 +188,44 @@ export interface PlanInfo {
   questions_limit: number;
   workspaces_limit: number;
   plan_reset_at: string | null;
+}
+
+export interface SubscriptionInfo {
+  plan: "free" | "premium" | "ultra_premium" | string;
+  plan_name: string;
+  billing_interval: "monthly" | "annual" | string;
+  subscription_status: "active" | "canceled" | "past_due" | string;
+  subscription_renews_at: string | null;
+  card_brand: string | null;
+  card_last4: string | null;
+  documents_used: number;
+  questions_used: number;
+  documents_limit: number;
+  questions_limit: number;
+  workspaces_limit: number;
+  max_file_size_mb: number;
+}
+
+export interface CheckoutPayload {
+  plan: "premium" | "ultra_premium" | string;
+  billing_interval: "monthly" | "annual";
+  payment_method: "credit_card" | "apple_pay" | "google_pay" | "paypal" | string;
+  card_number?: string;
+  card_exp?: string;
+  card_cvc?: string;
+  cardholder_name?: string;
+}
+
+export interface InvoiceRecord {
+  id: string;
+  invoice_number: string;
+  amount_cents: number;
+  currency: string;
+  plan: string;
+  billing_interval: string;
+  status: string;
+  payment_method: string;
+  card_brand?: string | null;
+  card_last4?: string | null;
+  paid_at: string;
 }

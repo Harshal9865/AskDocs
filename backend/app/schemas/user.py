@@ -26,6 +26,14 @@ class UserOut(BaseModel):
     pronouns: str | None = None
     job_title: str | None = None
     job_role: str | None = None
+    plan: str = "free"
+    billing_interval: str | None = None
+    subscription_status: str = "active"
+    subscription_renews_at: datetime | None = None
+    card_brand: str | None = None
+    card_last4: str | None = None
+    documents_used: int = 0
+    questions_used: int = 0
     online: bool = False
     friendship_status: str = "none"
     friendship_id: str | None = None

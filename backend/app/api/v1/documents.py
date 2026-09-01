@@ -1,4 +1,4 @@
-﻿import uuid
+import uuid
 
 from fastapi import (
     APIRouter,
@@ -16,7 +16,7 @@ from app.core.deps import AdminMembership, CurrentUser, DbSession, MemberMembers
 from app.models.activity import log_activity
 from app.models.document import Chunk, Document
 from app.services.ingestion import ingest_document
-from app.services.plan_enforcement import check_document_limit
+from app.services.plan_enforcement import check_document_limit, check_file_size_limit
 from app.storage.db_storage import get_storage
 
 router = APIRouter()
@@ -82,12 +82,13 @@ async def upload_document(
     settings = get_settings()
     file_type = _detect_file_type(file.filename or "", file.content_type)
     if file_type is None:
-        raise HTTPException(400, "Unsupported file type (allowed: pdf, docx, md, txt)")
+        raise HTTPException(400, "Unsupported file type (allowed: pdf, docx, md, txt, image)")
     data = await file.read()
-    if len(data) > settings.MAX_UPLOAD_BYTES:
-        raise HTTPException(413, "File too large (max 20 MB)")
+    
+    # Enforce tier-based maximum file upload size
+    check_file_size_limit(user, len(data))
 
-    # Check plan limits
+    # Check plan limits for total document count
     await check_document_limit(db, user)
 
     storage = get_storage()
@@ -236,7 +237,3 @@ async def retry_document(
     await db.refresh(document)
     background_tasks.add_task(_run_ingest, document.id)
     return document
-
-
-
-
