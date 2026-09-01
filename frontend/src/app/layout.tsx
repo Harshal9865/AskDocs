@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import GoogleProvider from "@/components/GoogleProvider";
@@ -10,7 +10,7 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-const jakartaSans = Plus_Jakarta_Sans({
+const inter = Inter({
   variable: "--font-sans-primary",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
@@ -42,9 +42,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={jakartaSans.className}>
+    <html lang="en" className={inter.className}>
       <body
-        className={`${jakartaSans.variable} ${jetbrainsMono.variable} ${jakartaSans.className} font-sans antialiased`}
+        className={`${inter.variable} ${jetbrainsMono.variable} ${inter.className} font-sans antialiased`}
       >
         <GoogleProvider>
           <AuthProvider>{children}</AuthProvider>

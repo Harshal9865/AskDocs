@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: var(--font-sans-primary), "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-sans-primary), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: var(--font-mono-primary), "JetBrains Mono", monospace;
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -55,7 +55,7 @@ html {
   text-rendering: optimizeLegibility;
 }
 
-/* Modern Geometric Sans: Plus Jakarta Sans for crisp, premium, attractive typography */
+/* Crisp Modern Sans: Inter for razor-sharp, elegant typography */
 body,
 h1,
 h2,
@@ -72,15 +72,15 @@ select,
 textarea,
 label,
 li {
-  font-family: var(--font-sans-primary), "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system,
+  font-family: var(--font-sans-primary), "Inter", -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, sans-serif;
 }
 
 body {
   @apply bg-slate-50 text-slate-900;
-  font-family: var(--font-sans-primary), "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system,
+  font-family: var(--font-sans-primary), "Inter", -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, sans-serif;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.011em;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
