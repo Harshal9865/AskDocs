@@ -205,7 +205,6 @@ async def upload_brand_photo(
     file: UploadFile = File(...),
 ):
     import os
-
     from app.storage.db_storage import DbStorage
 
     if file.content_type not in ("image/png", "image/jpeg", "image/webp"):
@@ -213,7 +212,6 @@ async def upload_brand_photo(
     data = await file.read()
     if len(data) > 5 * 1024 * 1024:
         raise HTTPException(status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, "Max image size is 5 MB")
-    ext = {".png": ".png"}.get("", "")
     ext = ".png" if file.content_type == "image/png" else ".jpg" if file.content_type == "image/jpeg" else ".webp"
     storage = DbStorage()
     key = await storage.save(f"brands/{membership.workspace_id}", f"logo{ext}", data)
@@ -229,7 +227,6 @@ async def upload_brand_photo(
 async def get_brand_logo(workspace_id: uuid.UUID, db: DbSession, membership: Membership):
     """Serve the uploaded brand logo bytes (404 unless kind == upload)."""
     import mimetypes
-
     from fastapi.responses import Response
 
     ws = await db.get(Workspace, membership.workspace_id)
@@ -285,7 +282,13 @@ async def delete_workspace(workspace_id: uuid.UUID, db: DbSession, membership: A
     ws_id = membership.workspace_id
 
     conversation_ids = select(Conversation.id).where(Conversation.workspace_id == ws_id)
+    msg_ids = select(Message.id).where(Message.conversation_id.in_(conversation_ids))
+
+    await db.execute(delete(MessageAttachment).where(MessageAttachment.message_id.in_(msg_ids)))
     await db.execute(delete(Message).where(Message.conversation_id.in_(conversation_ids)))
+    await db.execute(delete(ConversationParticipant).where(ConversationParticipant.conversation_id.in_(conversation_ids)))
+    await db.execute(delete(ConversationHidden).where(ConversationHidden.conversation_id.in_(conversation_ids)))
+    await db.execute(delete(ConversationReadState).where(ConversationReadState.conversation_id.in_(conversation_ids)))
     await db.execute(delete(Conversation).where(Conversation.workspace_id == ws_id))
 
     document_ids = select(Document.id).where(Document.workspace_id == ws_id)
@@ -293,9 +296,6 @@ async def delete_workspace(workspace_id: uuid.UUID, db: DbSession, membership: A
     await db.execute(delete(Document).where(Document.workspace_id == ws_id))
 
     await db.execute(delete(WorkspaceMember).where(WorkspaceMember.workspace_id == ws_id))
-    from app.models.invitation import Invitation
-    from app.models.activity import ActivityLog
-
     await db.execute(delete(Invitation).where(Invitation.workspace_id == ws_id))
     await db.execute(delete(WorkspaceJoinRequest).where(WorkspaceJoinRequest.workspace_id == ws_id))
     await db.execute(delete(ActivityLog).where(ActivityLog.workspace_id == ws_id))
@@ -375,7 +375,7 @@ async def add_member(
         email=email,
         role=Role(payload.role),
     )
-    await log_activity(db, membership.workspace_id, membership.user_id, 'member.invited', email)
+    await log_activity(db, membership.workspace_id, membership.user_id, "member.invited", email)
     db.add(invite)
     await db.commit()
     await db.refresh(invite)

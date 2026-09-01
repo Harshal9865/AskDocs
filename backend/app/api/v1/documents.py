@@ -204,16 +204,22 @@ async def delete_document(
     workspace_id: uuid.UUID,
     document_id: uuid.UUID,
     db: DbSession,
-    membership: AdminMembership,
+    membership: Membership,
+    user: CurrentUser,
 ):
-    """Soft-delete to trash (restore via /trash endpoints)."""
+    """Soft-delete to trash (restore via /trash endpoints). Owner or admin can delete."""
     from app.models.base import utcnow
 
     document = await db.get(Document, document_id)
     if document is None or document.workspace_id != membership.workspace_id or document.deleted_at is not None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Document not found")
+    
+    role = membership.role.value if hasattr(membership.role, "value") else str(membership.role)
+    if role != "admin" and document.user_id != user.id:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Only the document uploader or workspace admin can delete this document")
+
     document.deleted_at = utcnow()
-    await log_activity(db, membership.workspace_id, membership.user_id, "document.trashed", document.title)
+    await log_activity(db, membership.workspace_id, user.id, "document.trashed", document.title)
     await db.commit()
 
 

@@ -524,27 +524,86 @@ async def reset_password(payload: ResetPasswordRequest, db: DbSession):
 @router.delete("/me", status_code=204)
 async def delete_me(db: DbSession, user: CurrentUser):
     """Delete the current user's account and all associated data."""
-    from app.models.workspace import WorkspaceMember, Workspace
-    from app.models.document import Document
+    from app.models.workspace import WorkspaceMember, Workspace, WorkspaceJoinRequest
+    from app.models.document import Document, Chunk
     from app.models.file import FileBlob
-    from app.models.chat import Conversation, Message
-    from sqlalchemy import delete as sa_delete
+    from app.models.chat import (
+        Conversation,
+        Message,
+        MessageAttachment,
+        ConversationParticipant,
+        ConversationHidden,
+        ConversationReadState,
+    )
+    from app.models.invoice import Invoice
+    from app.models.friendship import Friendship
+    from app.models.activity import ActivityLog
+    from app.models.invitation import Invitation
+    from sqlalchemy import delete as sa_delete, or_
 
     uid = user.id
 
-    # Remove from all workspaces
-    await db.execute(sa_delete(WorkspaceMember).where(WorkspaceMember.user_id == uid))
+    # 1. Clean up invoices
+    await db.execute(sa_delete(Invoice).where(Invoice.user_id == uid))
 
-    # Delete messages by user
-    await db.execute(sa_delete(Message).where(Message.user_id == uid))
+    # 2. Clean up friendships (both requester and addressee)
+    await db.execute(
+        sa_delete(Friendship).where(
+            or_(Friendship.requester_id == uid, Friendship.addressee_id == uid)
+        )
+    )
 
-    # Delete conversations owned by user
+    # 3. Clean up activity logs
+    await db.execute(sa_delete(ActivityLog).where(ActivityLog.user_id == uid))
+
+    # 4. Clean up invitations sent or received
+    await db.execute(
+        sa_delete(Invitation).where(
+            or_(Invitation.inviter_id == uid, Invitation.invitee_email == user.email)
+        )
+    )
+
+    # 5. Clean up join requests
+    await db.execute(sa_delete(WorkspaceJoinRequest).where(WorkspaceJoinRequest.user_id == uid))
+
+    # 6. Clean up chat states & participants
+    await db.execute(sa_delete(ConversationHidden).where(ConversationHidden.user_id == uid))
+    await db.execute(sa_delete(ConversationReadState).where(ConversationReadState.user_id == uid))
+    await db.execute(sa_delete(ConversationParticipant).where(ConversationParticipant.user_id == uid))
+
+    # 7. Clean up message attachments & messages sent by user
+    user_msg_subq = select(Message.id).where(Message.sender_id == uid)
+    await db.execute(sa_delete(MessageAttachment).where(MessageAttachment.message_id.in_(user_msg_subq)))
+    await db.execute(sa_delete(Message).where(Message.sender_id == uid))
+
+    # 8. Clean up conversations owned by user
+    user_conv_ids = select(Conversation.id).where(Conversation.user_id == uid)
+    conv_msg_subq = select(Message.id).where(Message.conversation_id.in_(user_conv_ids))
+    await db.execute(sa_delete(MessageAttachment).where(MessageAttachment.message_id.in_(conv_msg_subq)))
+    await db.execute(sa_delete(Message).where(Message.conversation_id.in_(user_conv_ids)))
+    await db.execute(sa_delete(ConversationParticipant).where(ConversationParticipant.conversation_id.in_(user_conv_ids)))
+    await db.execute(sa_delete(ConversationHidden).where(ConversationHidden.conversation_id.in_(user_conv_ids)))
+    await db.execute(sa_delete(ConversationReadState).where(ConversationReadState.conversation_id.in_(user_conv_ids)))
     await db.execute(sa_delete(Conversation).where(Conversation.user_id == uid))
 
-    # Delete documents owned by user
+    # 9. Clean up document chunks & documents owned by user
+    user_doc_ids = select(Document.id).where(Document.user_id == uid)
+    await db.execute(sa_delete(Chunk).where(Chunk.document_id.in_(user_doc_ids)))
     await db.execute(sa_delete(Document).where(Document.user_id == uid))
 
-    # Delete the user
+    # 10. Clean up workspace memberships
+    await db.execute(sa_delete(WorkspaceMember).where(WorkspaceMember.user_id == uid))
+
+    # 11. Delete workspaces owned by this user
+    owned_ws_rows = await db.execute(select(Workspace.id).where(Workspace.owner_id == uid))
+    for (ws_id,) in owned_ws_rows.all():
+        await db.execute(sa_delete(WorkspaceMember).where(WorkspaceMember.workspace_id == ws_id))
+        await db.execute(sa_delete(WorkspaceJoinRequest).where(WorkspaceJoinRequest.workspace_id == ws_id))
+        await db.execute(sa_delete(Invitation).where(Invitation.workspace_id == ws_id))
+        await db.execute(sa_delete(ActivityLog).where(ActivityLog.workspace_id == ws_id))
+        await db.execute(sa_delete(Workspace).where(Workspace.id == ws_id))
+
+    # 12. Delete the user
     await db.delete(user)
     await db.commit()
 

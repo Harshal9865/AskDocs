@@ -208,7 +208,16 @@ async def delete_conversation(
         raise HTTPException(
             status.HTTP_403_FORBIDDEN, "Not allowed to delete this conversation"
         )
+    # Clean up message attachments first
+    msg_ids_subq = select(Message.id).where(Message.conversation_id == conv.id)
+    await db.execute(delete(MessageAttachment).where(MessageAttachment.message_id.in_(msg_ids_subq)))
     await db.execute(delete(Message).where(Message.conversation_id == conv.id))
+    
+    from app.models.chat import ConversationParticipant, ConversationHidden, ConversationReadState
+    await db.execute(delete(ConversationParticipant).where(ConversationParticipant.conversation_id == conv.id))
+    await db.execute(delete(ConversationHidden).where(ConversationHidden.conversation_id == conv.id))
+    await db.execute(delete(ConversationReadState).where(ConversationReadState.conversation_id == conv.id))
+    
     await db.delete(conv)
     await db.commit()
 
