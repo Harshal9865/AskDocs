@@ -15,7 +15,6 @@ const AVATARS = [
   { id: "female-1", name: "Lavender Bob", tag: "Day Theme", color: "from-indigo-400 to-purple-500" },
   { id: "female-2", name: "Modern Teal", tag: "Day Theme", color: "from-sky-400 to-teal-500" },
   { id: "ai-1", name: "Violet Night", tag: "Dark Theme", color: "from-violet-600 to-indigo-900" },
-  { id: "ai-2", name: "Emerald Lead", tag: "Dark Theme", color: "from-emerald-600 to-teal-900" },
 ];
 
 function Section({
@@ -251,11 +250,11 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* 6 Modern 3D Avatars (2 Yellow, 2 Day, 2 Dark) */}
+        {/* Modern 3D Avatars */}
         <div className="mt-6 border-t border-slate-100 dark:border-white/5 pt-5">
           <div className="mb-3 flex items-center justify-between">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-400">
-              Select 3D Character Avatar (6 Exclusive Styles)
+              Select 3D Character Avatar
             </p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">

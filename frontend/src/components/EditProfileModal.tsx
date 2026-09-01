@@ -22,7 +22,6 @@ const STICKER_IDS = [
   "female-1", // 3D Lavender Bob (Day Theme)
   "female-2", // 3D Modern Cyan/Teal (Day Theme)
   "ai-1", // 3D Violet Night (Dark Theme)
-  "ai-2", // 3D Emerald Lead (Dark Theme)
 ];
 
 const JOB_TITLES = [
@@ -321,9 +320,9 @@ export default function EditProfileModal({
             {showStickers && (
               <div className="mt-3 border-t border-slate-200/60 pt-3 dark:border-white/10">
                 <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
-                  Select 3D Character Avatar (6 Styles: 2 Yellow, 2 Day, 2 Dark)
+                  Select 3D Character Avatar
                 </p>
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                <div className="grid grid-cols-5 gap-2">
                   {STICKER_IDS.map((id) => (
                     <button
                       key={id}
