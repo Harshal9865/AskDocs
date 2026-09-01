@@ -301,37 +301,6 @@ async def ask_question_stream(
     db.add(user_msg)
     await db.flush()
     for att in atts:
-async def ask_question_stream(
-    conversation_id: uuid.UUID,
-    payload: MessageCreate,
-    db: DbSession,
-    user: CurrentUser,
-):
-    """SSE streaming Q&A. Events: {type: answer|done|error}."""
-    conv = await _get_conversation_checked(db, conversation_id, user)
-    role = await _workspace_role(db, conv.workspace_id, user.id)
-    if role is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Conversation not found")
-    if conv.user_id != user.id and role == "viewer":
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "Viewers can only use their own conversations")
-
-    # Check question limit
-    await check_question_limit(db, user)
-
-    # Resolve attachments (images -> vision parts, docs -> text context)
-    image_parts, doc_context, atts = await _resolve_attachments(
-        db, payload.attachment_ids or [], user.id
-    )
-
-    # Link attachments to the conversation (message_id set after user msg saved)
-    user_content = payload.content.strip()
-    if not user_content and atts:
-        user_content = "Please analyze the attached file(s)."
-
-    user_msg = Message(conversation_id=conv.id, role="user", content=user_content)
-    db.add(user_msg)
-    await db.flush()
-    for att in atts:
         att.message_id = user_msg.id
     if conv.title == "New conversation":
         conv.title = (user_content or "Attachment question")[:80]
