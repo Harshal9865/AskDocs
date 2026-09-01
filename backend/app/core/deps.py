@@ -1,9 +1,9 @@
 from typing import Annotated
 import uuid
+import jwt
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, WebSocket, Query
 from fastapi.security import OAuth2PasswordBearer
-from fastapi import WebSocket, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
@@ -11,11 +11,16 @@ from app.core.config import get_settings
 from app.core.security import decode_token
 from app.models.user import User
 
-import jwt
-
 settings = get_settings()
 
-engine = create_async_engine(settings.DATABASE_URL, echo=settings.DEBUG)
+engine = create_async_engine(
+    settings.DATABASE_URL,
+    echo=settings.DEBUG,
+    pool_pre_ping=True,   # Pings DB before checkout; auto-reconnects on restart/disconnect
+    pool_recycle=1800,    # Recycles stale connections every 30m
+    pool_size=10,
+    max_overflow=20,
+)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
