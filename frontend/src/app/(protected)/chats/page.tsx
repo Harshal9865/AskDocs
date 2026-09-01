@@ -278,6 +278,7 @@ export default function ChatsPage() {
 
   const openChat = (chat: TeamChat) => {
     setActiveChat(chat);
+    prevMsgCount.current = 0;
     setMessages([]);
     // Optimistically clear unread badge for this chat
     setChats((prev) =>
@@ -308,27 +309,27 @@ export default function ChatsPage() {
   };
   
   function scrollToBottom(smooth = true) {
-    requestAnimationFrame(() => {
+    const run = () => {
       const el = scrollRef.current;
-      if (!el) return;
-      el.scrollTo({ top: el.scrollHeight, behavior: smooth ? "smooth" : "auto" });
-    });
+      if (el) {
+        el.scrollTop = el.scrollHeight + 9999;
+      }
+      if (threadEnd.current) {
+        threadEnd.current.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "end" });
+      }
+    };
+    run();
+    requestAnimationFrame(run);
+    setTimeout(run, 40);
+    setTimeout(run, 120);
+    setTimeout(run, 300);
   }
   
   useEffect(() => {
     const count = messages.length;
     if (count > 0) {
       const isInitial = prevMsgCount.current === 0;
-      const isNew = count > prevMsgCount.current;
-      
-      const el = scrollRef.current;
-      const isAtBottom = el ? (el.scrollHeight - el.scrollTop - el.clientHeight < 300) : true;
-
-      if (isInitial || isAtBottom) {
-        scrollToBottom(!isInitial);
-      } else if (isNew) {
-        setShowJump(true);
-      }
+      scrollToBottom(!isInitial);
     }
     prevMsgCount.current = count;
   }, [messages]);

@@ -200,47 +200,78 @@ export default function ChatPage() {
 
   const loadConversations = useCallback(async () => {
     if (!workspace) return;
-    setConversations(await api.listConversations(workspace.id));
+    try {
+      const list = await api.listConversations(workspace.id);
+      setConversations(list);
+      // Auto-restore active conversation on reload or initial render
+      if (list.length > 0) {
+        setActiveConv((current) => {
+          if (current) return current;
+          let targetId = "";
+          try {
+            targetId = localStorage.getItem(`askdocs_last_ai_conv_${workspace.id}`) || "";
+          } catch {}
+          const target = list.find((c) => c.id === targetId) || list[0];
+          if (target) {
+            void openConversation(target);
+          }
+          return target || null;
+        });
+      }
+    } catch {}
   }, [workspace]);
 
-  useEffect(() => { setActiveConv(null); setMessages([]); void loadConversations(); }, [workspace, loadConversations]);
+  useEffect(() => {
+    void loadConversations();
+  }, [workspace, loadConversations]);
 
   const prevMsgCount = useRef(0);
   
   function scrollToBottom(smooth = true) {
-    requestAnimationFrame(() => {
+    const run = () => {
       const el = scrollRef.current;
-      if (!el) return;
-      el.scrollTo({ top: el.scrollHeight, behavior: smooth ? "smooth" : "auto" });
-    });
+      if (el) {
+        el.scrollTop = el.scrollHeight + 9999;
+      }
+      if (threadEnd.current) {
+        threadEnd.current.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "end" });
+      }
+    };
+    run();
+    requestAnimationFrame(run);
+    setTimeout(run, 40);
+    setTimeout(run, 120);
+    setTimeout(run, 300);
   }
 
   useEffect(() => {
     const count = messages.length;
     if (count > 0) {
       const isInitial = prevMsgCount.current === 0;
-      const isNew = count > prevMsgCount.current;
-      
-      const el = scrollRef.current;
-      const isAtBottom = el ? (el.scrollHeight - el.scrollTop - el.clientHeight < 300) : true;
-
-      if (isInitial || isAtBottom) {
-        scrollToBottom(!isInitial);
-      } else if (isNew) {
-        setShowJump(true);
-      }
+      scrollToBottom(!isInitial && !busy);
     }
     prevMsgCount.current = count;
-  }, [messages]);
+  }, [messages, busy]);
 
   async function openConversation(conv: Conversation) {
     setActiveConv(conv);
-    const history = await api.listMessages(conv.id);
-    setMessages(history.map((m: Message) => ({
-      id: m.id, role: m.role, content: m.content, citations: m.citations,
-      conflict: m.conflict ?? null, freshness: m.freshness ?? null,
-      suggested: m.suggested_colleagues && (!m.citations || m.citations.length === 0) ? m.suggested_colleagues : [],
-    })));
+    if (workspace) {
+      try {
+        localStorage.setItem(`askdocs_last_ai_conv_${workspace.id}`, conv.id);
+      } catch {}
+    }
+    prevMsgCount.current = 0;
+    try {
+      const history = await api.listMessages(conv.id);
+      setMessages(history.map((m: Message) => ({
+        id: m.id, role: m.role, content: m.content, citations: m.citations,
+        conflict: m.conflict ?? null, freshness: m.freshness ?? null,
+        suggested: m.suggested_colleagues && (!m.citations || m.citations.length === 0) ? m.suggested_colleagues : [],
+      })));
+      scrollToBottom(false);
+    } catch {
+      setMessages([]);
+    }
   }
 
   async function askColleague(colleague: SuggestedColleague, question: string, idx: number) {
