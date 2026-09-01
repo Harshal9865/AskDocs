@@ -213,26 +213,44 @@ const FAQS = [
   {
     q: "How does AskDocs cite its answers?",
     a: "Every answer is generated from retrieved chunks of your documents. AskDocs attaches the source document, page and paragraph to each claim, so you can verify anything in one click.",
+    icon: Sparkles,
+    badge: "Accurate Citations",
+    gradient: "from-purple-600 via-indigo-600 to-blue-600",
   },
   {
     q: "Which file types are supported?",
     a: "PDF, DOCX, TXT and CSV today — with more formats landing regularly. Files are chunked, embedded and indexed automatically on upload.",
+    icon: FileText,
+    badge: "File Formats",
+    gradient: "from-cyan-500 via-blue-600 to-indigo-600",
   },
   {
     q: "Can I chat with my team inside AskDocs?",
     a: "Yes. Office Chats give you WhatsApp-style DMs and groups with presence dots, read receipts, typing indicators and emoji reactions — no context switch needed.",
+    icon: MessagesSquare,
+    badge: "Team Chats",
+    gradient: "from-emerald-500 via-teal-600 to-cyan-600",
   },
   {
     q: "Is my data private?",
     a: "Workspaces can be public or private with role-based access (admin / member / viewer). Deleted items go to a recoverable trash, and every action is recorded in the activity log.",
+    icon: Shield,
+    badge: "Privacy & Security",
+    gradient: "from-rose-500 via-pink-600 to-purple-600",
   },
   {
     q: "Do answers warn me when sources disagree?",
     a: "Yes — conflict detection flags when two documents contradict each other so your team never acts on stale information.",
+    icon: Target,
+    badge: "Conflict Detection",
+    gradient: "from-amber-500 via-orange-500 to-rose-500",
   },
   {
     q: "How long does setup take?",
     a: "Under five minutes: create a workspace, invite colleagues by email, drag in documents, and ask your first question.",
+    icon: Zap,
+    badge: "Instant Setup",
+    gradient: "from-yellow-500 via-amber-500 to-orange-500",
   },
 ];
 
@@ -829,23 +847,43 @@ export default function Home() {
       </section>
 
       {/* FAQ — themed gradient cards with glow */}
-      <section id="faq" className="scroll-mt-16 border-t border-slate-100 bg-white py-14 dark:border-white/5 dark:bg-[#0a0a0f] sm:py-20">
+      <section id="faq" className="relative scroll-mt-16 overflow-hidden border-t border-slate-100 bg-white py-14 dark:border-white/5 dark:bg-[#0a0a0f] sm:py-20">
+        {/* Ambient background glow orbs */}
+        <div className="pointer-events-none absolute -top-12 left-1/2 -z-10 h-72 w-full max-w-3xl -translate-x-1/2 overflow-hidden opacity-30 blur-3xl dark:opacity-20" aria-hidden>
+          <div className="absolute top-0 left-1/4 h-56 w-56 rounded-full bg-purple-500 animate-pulse" style={{ animationDuration: "7s" }} />
+          <div className="absolute top-10 right-1/4 h-56 w-56 rounded-full bg-indigo-500 animate-pulse" style={{ animationDuration: "9s", animationDelay: "1s" }} />
+        </div>
+
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <Reveal dir="left">
-            <p className="text-center text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">FAQ</p>
-            <h2 className="mt-3 text-center text-2xl font-bold sm:text-3xl">Frequently asked questions</h2>
+            <div className="mb-2 flex justify-center">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-purple-200/80 bg-purple-50/80 px-3 py-0.5 text-xs font-semibold text-purple-700 backdrop-blur-md dark:border-purple-500/20 dark:bg-purple-950/40 dark:text-purple-300">
+                <Sparkles className="h-3 w-3" /> Questions & Answers
+              </span>
+            </div>
+            <h2 className="mt-2 text-center text-2xl font-bold sm:text-3xl">
+              <span className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent dark:from-purple-400 dark:via-indigo-300 dark:to-blue-400">
+                Frequently asked questions
+              </span>
+            </h2>
             <p className="mx-auto mt-3 max-w-md text-center text-sm text-slate-500 dark:text-zinc-400">
               Everything teams ask before switching. Still curious?{" "}
-              <a href="#contact" className="font-medium text-indigo-600 hover:underline dark:text-[#1DB954]">
+              <a href="#contact" className="font-medium text-purple-600 hover:underline dark:text-purple-400">
                 Talk to us
               </a>
               .
             </p>
           </Reveal>
-          <div className="mt-10 space-y-3">
+          <div className="mt-10 space-y-3.5">
             {FAQS.map((f, i) => (
               <Reveal key={f.q} dir={i % 2 === 0 ? "left" : "right"} delay={i * 60}>
-                <AccordionItem question={f.q} answer={f.a} />
+                <AccordionItem
+                  question={f.q}
+                  answer={f.a}
+                  icon={<f.icon className="h-4 w-4" />}
+                  badge={f.badge}
+                  gradient={f.gradient}
+                />
               </Reveal>
             ))}
           </div>

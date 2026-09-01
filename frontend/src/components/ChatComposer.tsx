@@ -20,6 +20,7 @@ export default function ChatComposer({
   placeholder,
   busy,
   showAttach = false,
+  showEmoji = false,
   inputId,
   variant = "default",
 }: {
@@ -31,6 +32,7 @@ export default function ChatComposer({
   placeholder?: string;
   busy?: boolean;
   showAttach?: boolean;
+  showEmoji?: boolean;
   inputId?: string;
   variant?: "default" | "aurora" | "green";
 }) {
@@ -75,9 +77,20 @@ export default function ChatComposer({
   }, [menuOpen, emojiOpen]);
 
   function insertEmoji(emo: string) {
-    onChange(value + emo);
-    setEmojiOpen(false);
-    textareaRef.current?.focus();
+    const textarea = textareaRef.current;
+    if (textarea) {
+      const start = textarea.selectionStart ?? value.length;
+      const end = textarea.selectionEnd ?? value.length;
+      const nextVal = value.substring(0, start) + emo + value.substring(end);
+      onChange(nextVal);
+      requestAnimationFrame(() => {
+        textarea.focus();
+        const newPos = start + emo.length;
+        textarea.setSelectionRange(newPos, newPos);
+      });
+    } else {
+      onChange(value + emo);
+    }
   }
 
   function send() {
@@ -285,33 +298,36 @@ export default function ChatComposer({
           </div>
         )}
 
-        {/* emoji picker */}
-        <div className="relative shrink-0" ref={emojiRef}>
-          <button
-            onClick={() => !disabled && setEmojiOpen((o) => !o)}
-            disabled={disabled}
-            aria-label="Emoji"
-            title="Emoji"
-            className="dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-amber-300 flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-amber-500 disabled:opacity-40"
-          >
-            <Smile className="h-5 w-5" />
-          </button>
-          {emojiOpen && (
-            <div className="dark:border-white/10 dark:bg-[#282828] absolute bottom-full left-0 z-50 mb-2 w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
-              <div className="grid grid-cols-8 gap-1">
-                {EMOJIS.map((emo) => (
-                  <button
-                    key={emo}
-                    onClick={() => insertEmoji(emo)}
-                    className="rounded-lg p-1 text-lg transition-transform hover:scale-125 hover:bg-slate-100 dark:hover:bg-white/10"
-                  >
-                    {emo}
-                  </button>
-                ))}
+        {/* emoji picker — only shown when showEmoji is enabled (e.g. Office Chats) */}
+        {showEmoji && (
+          <div className="relative shrink-0" ref={emojiRef}>
+            <button
+              onClick={() => !disabled && setEmojiOpen((o) => !o)}
+              disabled={disabled}
+              aria-label="Emoji"
+              title="Emoji"
+              className="dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-amber-300 flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-amber-500 disabled:opacity-40"
+            >
+              <Smile className="h-5 w-5" />
+            </button>
+            {emojiOpen && (
+              <div className="dark:border-white/10 dark:bg-[#282828] absolute bottom-full left-0 z-50 mb-2 w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
+                <div className="grid grid-cols-8 gap-1">
+                  {EMOJIS.map((emo) => (
+                    <button
+                      key={emo}
+                      type="button"
+                      onClick={() => insertEmoji(emo)}
+                      className="rounded-lg p-1 text-lg transition-transform hover:scale-125 hover:bg-slate-100 dark:hover:bg-white/10"
+                    >
+                      {emo}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         <textarea
           ref={textareaRef}

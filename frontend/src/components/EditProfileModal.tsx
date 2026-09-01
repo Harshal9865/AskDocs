@@ -358,38 +358,9 @@ export default function EditProfileModal({
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Your Name"
+                placeholder="Enter your full name"
                 maxLength={80}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all"
-              />
-            </div>
-
-            {/* Status */}
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-zinc-400">
-                Status <span className="text-[10px] text-slate-400 dark:text-zinc-500">(optional)</span>
-              </label>
-              <input
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                placeholder="Hey there! I'm on AskDocs"
-                maxLength={120}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all"
-              />
-            </div>
-
-            {/* Bio */}
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-zinc-400">
-                Bio <span className="text-[10px] text-slate-400 dark:text-zinc-500">(optional)</span>
-              </label>
-              <textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="Tell your team a little about yourself"
-                maxLength={500}
-                rows={3}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all placeholder:text-slate-400 dark:placeholder:text-zinc-500"
               />
             </div>
 
@@ -404,9 +375,9 @@ export default function EditProfileModal({
                   list="edit-job-titles"
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
-                  placeholder="e.g. Senior Engineer"
+                  placeholder="Select or type job title"
                   maxLength={120}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all placeholder:text-slate-400 dark:placeholder:text-zinc-500"
                 />
                 <datalist id="edit-job-titles">
                   {JOB_TITLES.map((t) => (
@@ -423,9 +394,9 @@ export default function EditProfileModal({
                   list="edit-job-roles"
                   value={jobRole}
                   onChange={(e) => setJobRole(e.target.value)}
-                  placeholder="e.g. Engineering"
+                  placeholder="Select or type department"
                   maxLength={120}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all placeholder:text-slate-400 dark:placeholder:text-zinc-500"
                 />
                 <datalist id="edit-job-roles">
                   {JOB_ROLES.map((r) => (
@@ -435,19 +406,49 @@ export default function EditProfileModal({
               </div>
             </div>
 
+            {/* Status */}
+            <div>
+              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-zinc-400">
+                Status <span className="text-[10px] text-slate-400 dark:text-zinc-500">(optional)</span>
+              </label>
+              <input
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                placeholder="Set status message (e.g. Focused, In meetings)"
+                maxLength={120}
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all placeholder:text-slate-400 dark:placeholder:text-zinc-500"
+              />
+            </div>
+
+            {/* Bio */}
+            <div>
+              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-zinc-400">
+                Bio <span className="text-[10px] text-slate-400 dark:text-zinc-500">(optional)</span>
+              </label>
+              <textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Write a brief intro about yourself, your role, or what you work on"
+                maxLength={500}
+                rows={3}
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all placeholder:text-slate-400 dark:placeholder:text-zinc-500"
+              />
+            </div>
+
             {/* Phone & Pronouns */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-zinc-400">
-                  Phone <span className="text-[10px] text-slate-400 dark:text-zinc-500">(optional)</span>
+                  Phone Number <span className="text-[10px] text-slate-400 dark:text-zinc-500">(optional)</span>
                 </label>
                 <input
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+1 555 123 4567"
+                  placeholder="Enter phone number"
                   maxLength={32}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all placeholder:text-slate-400 dark:placeholder:text-zinc-500"
                 />
+                <p className="mt-1 text-[10px] text-slate-400 dark:text-zinc-500">Include country code with + (e.g. +1 202 555 0199)</p>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-zinc-400">
@@ -457,9 +458,9 @@ export default function EditProfileModal({
                   list="edit-pronouns"
                   value={pronouns}
                   onChange={(e) => setPronouns(e.target.value)}
-                  placeholder="he/him, she/her, they/them"
+                  placeholder="Select or type pronouns"
                   maxLength={50}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all placeholder:text-slate-400 dark:placeholder:text-zinc-500"
                 />
                 <datalist id="edit-pronouns">
                   {PRONOUNS.map((p) => (
@@ -477,9 +478,9 @@ export default function EditProfileModal({
               <input
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder="San Francisco, CA"
+                placeholder="Enter city, state or country"
                 maxLength={120}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all placeholder:text-slate-400 dark:placeholder:text-zinc-500"
               />
             </div>
           </form>

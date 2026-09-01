@@ -684,6 +684,7 @@ export default function ChatsPage() {
                 onSend={handleSend}
                 disabled={sending}
                 showAttach
+                showEmoji
                 placeholder={`Message ${chatTitle(activeChat, user?.email)}…`}
               />
             </div>
