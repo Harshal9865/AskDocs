@@ -7,7 +7,6 @@ import {
   Bot,
   FileText,
   HelpCircle,
-  Lock,
   Mail,
   MessageSquare,
   Radio,

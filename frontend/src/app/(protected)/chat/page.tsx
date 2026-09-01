@@ -11,7 +11,6 @@ import type { Citation, Conversation, Message } from "@/lib/types";
 import {
   ArrowDownCircle,
   ArrowLeft,
-  Bot,
   FileText,
   MessagesSquare,
   Plus,
