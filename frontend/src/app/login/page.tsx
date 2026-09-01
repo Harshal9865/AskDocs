@@ -92,14 +92,35 @@ export default function LoginPage() {
   if (loading || user) return null;
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-slate-100 via-purple-50/40 to-indigo-50/50 p-3 sm:p-6 lg:p-8 dark:from-[#07060e] dark:via-[#0e0c1c] dark:to-[#05040a] transition-colors duration-500">
-      {/* Ambient Day/Night Animated Aura Blobs */}
-      <div className="pointer-events-none absolute -top-32 -left-32 h-72 w-72 sm:h-96 sm:w-96 rounded-full bg-gradient-to-br from-purple-400/25 via-indigo-400/20 to-transparent blur-3xl dark:from-purple-600/20 dark:via-indigo-600/15 dark:to-transparent animate-pulse" />
-      <div className="pointer-events-none absolute -bottom-32 -right-32 h-72 w-72 sm:h-96 sm:w-96 rounded-full bg-gradient-to-tl from-indigo-400/25 via-sky-400/15 to-transparent blur-3xl dark:from-indigo-700/20 dark:via-cyan-700/15 dark:to-transparent animate-pulse" style={{ animationDelay: "2.5s" }} />
-      <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-80 w-80 rounded-full bg-gradient-to-tr from-fuchsia-400/10 via-purple-400/10 to-transparent blur-3xl dark:from-fuchsia-600/10 dark:to-transparent" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-3 sm:p-6 lg:p-8">
+      {/* Full-Screen Immersive Day / Night Theme Background */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <Image
+          src="/login-day.jpg"
+          alt="Day Background"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center dark:hidden scale-105 transition-all duration-700 filter brightness-95"
+        />
+        <Image
+          src="/login-night.jpg"
+          alt="Night Background"
+          fill
+          priority
+          sizes="100vw"
+          className="hidden object-cover object-center dark:block scale-105 transition-all duration-700 filter brightness-75"
+        />
+        {/* Soft Day / Night Tint Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-purple-900/25 via-slate-900/15 to-indigo-900/20 backdrop-blur-xs dark:from-[#090812]/85 dark:via-[#0e0c1c]/70 dark:to-[#05040a]/85" />
+      </div>
+
+      {/* Ambient Animated Aura Lights */}
+      <div className="pointer-events-none absolute -top-32 -left-32 h-72 w-72 sm:h-96 sm:w-96 rounded-full bg-gradient-to-br from-purple-400/30 via-indigo-400/20 to-transparent blur-3xl dark:from-purple-600/25 dark:via-indigo-600/20 dark:to-transparent animate-pulse" />
+      <div className="pointer-events-none absolute -bottom-32 -right-32 h-72 w-72 sm:h-96 sm:w-96 rounded-full bg-gradient-to-tl from-indigo-400/30 via-sky-400/20 to-transparent blur-3xl dark:from-indigo-700/25 dark:via-cyan-700/20 dark:to-transparent animate-pulse" style={{ animationDelay: "2.5s" }} />
 
       {/* Main Responsive Glass Card */}
-      <div className="relative z-10 flex w-full max-w-[420px] lg:max-w-4xl flex-col overflow-hidden rounded-3xl sm:rounded-[2.25rem] border border-slate-200/90 bg-white/90 shadow-2xl shadow-purple-500/10 backdrop-blur-2xl transition-all duration-300 dark:border-white/10 dark:bg-[#121022]/90 dark:shadow-[0_0_70px_-15px_rgba(147,51,234,0.25)] lg:flex-row">
+      <div className="relative z-10 flex w-full max-w-[420px] lg:max-w-4xl flex-col overflow-hidden rounded-3xl sm:rounded-[2.25rem] border border-white/40 bg-white/85 shadow-2xl shadow-purple-950/20 backdrop-blur-2xl transition-all duration-300 dark:border-white/10 dark:bg-[#121022]/90 dark:shadow-[0_0_80px_-15px_rgba(147,51,234,0.3)] lg:flex-row">
         
         {/* Left Panel: Form */}
         <div className="flex flex-col justify-center p-5 sm:p-8 lg:w-[54%] lg:p-10">
