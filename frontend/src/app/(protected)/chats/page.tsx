@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import type { Member, TeamChat, TeamMessage, ChatAttachment } from "@/lib/types";
 import { playMessageChime, requestDesktopNotification, showDesktopPush } from "@/lib/utils";
+import { showToast } from "@/components/Toast";
 
 const WALLPAPERS = [
   {
