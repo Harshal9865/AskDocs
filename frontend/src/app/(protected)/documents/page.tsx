@@ -19,6 +19,7 @@ import {
   RotateCcw,
   ArrowUpDown,
   ChevronDown,
+  X,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -244,15 +245,33 @@ export default function DocumentsPage() {
   }
 
   async function bulkDelete() {
-    if (!workspace || selected.size === 0) return;
-    if (!confirm(`Delete ${selected.size} document${selected.size > 1 ? "s" : ""}?`)) return;
+    if (selected.size === 0) return;
+    if (!confirm(`Move ${selected.size} document${selected.size > 1 ? "s" : ""} to trash?`)) return;
     setBulkBusy(true);
+    const toDelete = Array.from(selected);
+    let successCount = 0;
     try {
-      await api.bulkDeleteDocuments(workspace.id, Array.from(selected));
+      if (workspace && viewMode === "workspace") {
+        await api.bulkDeleteDocuments(workspace.id, toDelete);
+        successCount = toDelete.length;
+      } else {
+        for (const docId of toDelete) {
+          const doc = docs.find((d) => d.id === docId);
+          const wsId = workspace?.id || doc?.workspace_id;
+          if (wsId) {
+            try {
+              await api.deleteDocument(wsId, docId);
+              successCount++;
+            } catch {
+              // continue
+            }
+          }
+        }
+      }
       setDocs((prev) => prev.filter((d) => !selected.has(d.id)));
-      setTotalCount((c) => c - selected.size);
+      setTotalCount((c) => Math.max(0, c - successCount));
       setSelected(new Set());
-      showToast("success", `${selected.size} document${selected.size > 1 ? "s" : ""} moved to trash`);
+      showToast("success", `${successCount} document${successCount > 1 ? "s" : ""} moved to trash`);
     } catch (err) {
       showToast("error", (err as Error).message);
     } finally {
@@ -501,7 +520,7 @@ export default function DocumentsPage() {
       ) : (
         <>
           {/* Select all header */}
-          {myRole === "admin" && (
+          {(myRole === "admin" || viewMode === "mine") && (
             <div className="flex items-center gap-3 px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
               <button
                 onClick={toggleSelectAll}
@@ -526,7 +545,7 @@ export default function DocumentsPage() {
                   key={d.id}
                   className="group flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-2xs backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-300/80 hover:shadow-md hover:shadow-purple-500/5 dark:border-white/10 dark:bg-[#13111f]/90 dark:hover:border-purple-500/30"
                 >
-                  {myRole === "admin" && (
+                  {(myRole === "admin" || viewMode === "mine") && (
                     <button
                       onClick={() => {
                         setSelected((prev) => {
@@ -629,6 +648,31 @@ export default function DocumentsPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* Floating Sticky Batch Action Toolbar */}
+      {selected.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2 flex items-center gap-3 rounded-full border border-slate-200/80 bg-white/95 px-5 py-2.5 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#13111f]/95 animate-in slide-in-from-bottom duration-200">
+          <span className="text-xs font-bold text-slate-900 dark:text-white">
+            {selected.size} document{selected.size > 1 ? "s" : ""} selected
+          </span>
+          <div className="h-4 w-px bg-slate-200 dark:bg-white/10" />
+          <button
+            onClick={() => void bulkDelete()}
+            disabled={bulkBusy}
+            className="flex items-center gap-1.5 rounded-full bg-red-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-red-700 disabled:opacity-50 transition-all"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Delete selected
+          </button>
+          <button
+            onClick={() => setSelected(new Set())}
+            className="rounded-full p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+            title="Clear selection"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       )}
     </div>
   );
