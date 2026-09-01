@@ -1,63 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
   <defs>
-    <radialGradient id="bgGrad6" cx="50%" cy="40%" r="60%">
-      <stop offset="0%" stop-color="#065F46"/>
-      <stop offset="60%" stop-color="#064E3B"/>
-      <stop offset="100%" stop-color="#022C22"/>
+    <radialGradient id="bgGrad5" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#2e1065" />
+      <stop offset="100%" stop-color="#0f0524" />
     </radialGradient>
-    <linearGradient id="skinGrad6" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#FED7AA"/>
-      <stop offset="100%" stop-color="#FDBA74"/>
+    <radialGradient id="planetGrad" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#818cf8" />
+      <stop offset="50%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#312e81" />
+    </radialGradient>
+    <linearGradient id="orbitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#c084fc" />
+      <stop offset="100%" stop-color="#f43f5e" />
     </linearGradient>
-    <linearGradient id="hairGrad6" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#334155"/>
-      <stop offset="50%" stop-color="#1E293B"/>
-      <stop offset="100%" stop-color="#0F172A"/>
-    </linearGradient>
-    <linearGradient id="clothGrad6" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#0F766E"/>
-      <stop offset="100%" stop-color="#042F2E"/>
-    </linearGradient>
+    <filter id="glow5" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
   </defs>
 
-  <!-- Background Circle (Dark Theme Midnight Emerald) -->
-  <circle cx="80" cy="80" r="80" fill="url(#bgGrad6)"/>
+  <circle cx="60" cy="60" r="56" fill="url(#bgGrad5)" stroke="rgba(192,132,252,0.3)" stroke-width="2" />
 
-  <!-- Body / Dark Emerald Crewneck -->
-  <path d="M34 160 C34 125 54 116 80 116 C106 116 126 125 126 160 Z" fill="url(#clothGrad6)"/>
-  <!-- Collar Trim -->
-  <path d="M64 116 C64 126 96 126 96 116 Z" fill="#134E4A"/>
+  <!-- Background Stars -->
+  <circle cx="30" cy="32" r="1.5" fill="#ffffff" opacity="0.8" />
+  <circle cx="88" cy="28" r="1" fill="#ffffff" opacity="0.7" />
+  <circle cx="92" cy="85" r="1.5" fill="#ffffff" opacity="0.8" />
 
-  <!-- Neck -->
-  <rect x="70" y="96" width="20" height="24" rx="8" fill="url(#skinGrad6)"/>
+  <!-- Back Orbit Arc -->
+  <path d="M22,74 C16,66 24,50 48,42 C72,34 98,36 104,46" fill="none" stroke="url(#orbitGrad)" stroke-width="4" opacity="0.4" />
 
-  <!-- Head Base -->
-  <ellipse cx="80" cy="76" rx="33" ry="37" fill="url(#skinGrad6)"/>
+  <!-- 3D Planet Sphere -->
+  <circle cx="60" cy="60" r="28" fill="url(#planetGrad)" />
+  <!-- Sphere Atmosphere Highlight -->
+  <path d="M38,44 Q60,34 78,48 Q60,40 38,44 Z" fill="rgba(255,255,255,0.4)" />
+  <!-- Planet Surface Swirl -->
+  <path d="M36,64 Q60,72 84,60 Q60,66 36,64 Z" fill="#4338ca" opacity="0.6" />
 
-  <!-- Ears -->
-  <ellipse cx="46" cy="76" rx="6" ry="9" fill="url(#skinGrad6)"/>
-  <ellipse cx="114" cy="76" rx="6" ry="9" fill="url(#skinGrad6)"/>
+  <!-- Front Orbit Ring -->
+  <path d="M104,46 C110,56 100,72 74,80 C48,88 24,84 22,74" fill="none" stroke="url(#orbitGrad)" stroke-width="4.5" stroke-linecap="round" filter="url(#glow5)" />
+  <path d="M104,46 C110,56 100,72 74,80 C48,88 24,84 22,74" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
 
-  <!-- Eyes -->
-  <ellipse cx="64" cy="72" rx="5.5" ry="6.5" fill="#022C22"/>
-  <ellipse cx="96" cy="72" rx="5.5" ry="6.5" fill="#022C22"/>
-  <circle cx="62" cy="70" r="2.2" fill="#FFFFFF"/>
-  <circle cx="94" cy="70" r="2.2" fill="#FFFFFF"/>
-
-  <!-- Eyebrows -->
-  <path d="M56 61 Q65 58 74 62" stroke="#0F172A" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-  <path d="M86 62 Q95 58 104 61" stroke="#0F172A" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-
-  <!-- Smile -->
-  <path d="M70 96 Q80 102 90 96" stroke="#9A3412" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-
-  <!-- Sleek Glasses with Ambient Teal Reflection -->
-  <rect x="52" y="62" width="24" height="19" rx="5" stroke="#10B981" stroke-width="2.5" fill="none" opacity="0.9"/>
-  <rect x="84" y="62" width="24" height="19" rx="5" stroke="#10B981" stroke-width="2.5" fill="none" opacity="0.9"/>
-  <path d="M76 70 L84 70" stroke="#10B981" stroke-width="2.5"/>
-
-  <!-- Modern Styled Hair -->
-  <path d="M46 64 C42 40 56 28 80 28 C104 28 118 40 114 64 C110 40 98 34 80 34 C62 34 50 40 46 64 Z" fill="url(#hairGrad6)"/>
-  <ellipse cx="80" cy="36" rx="32" ry="12" fill="url(#hairGrad6)"/>
-</svg>
+  <!-- Orbiting Satellites -->
+  <circle cx="28" cy="76" r="4" fill="#38bdf8" filter="url(#glow5)" />
+  <circle cx="28" cy="76" r="2" fill="#ffffff" />
+  <circle cx="96" cy="52" r="3" fill="#f43f5e" filter="url(#glow5)" />
 </svg>

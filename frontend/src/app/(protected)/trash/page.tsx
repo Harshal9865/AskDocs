@@ -10,15 +10,11 @@ import {
   MessageSquare,
   RotateCcw,
   Trash2,
-  AlertTriangle,
   Loader2,
   Search,
   CheckSquare,
   Square,
   MinusSquare,
-  ArrowUpDown,
-  Filter,
-  Check,
   X,
   Clock,
   ShieldAlert,
@@ -70,7 +66,6 @@ export default function TrashPage() {
   // Multi-select & Batch States
   const [selectedDocIds, setSelectedDocIds] = useState<Set<string>>(new Set());
   const [batchBusy, setBatchBusy] = useState(false);
-  const [actionProgress, setActionProgress] = useState<string | null>(null);
 
   // Search, Filter & Sorting States
   const [searchQuery, setSearchQuery] = useState("");

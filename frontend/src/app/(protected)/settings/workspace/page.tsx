@@ -8,6 +8,14 @@ import { useWorkspace } from "@/lib/workspace-context";
 import { useAuth } from "@/lib/auth-context";
 import Avatar from "@/components/Avatar";
 
+const WORKSPACE_EMBLEMS = [
+  { id: "cute-1", name: "Nexus Prism", tag: "Quantum 3D" },
+  { id: "cute-2", name: "Aero Launch", tag: "Velocity 3D" },
+  { id: "cute-3", name: "Quantum Spark", tag: "Energy 3D" },
+  { id: "cute-4", name: "Cyber Shield", tag: "Security 3D" },
+  { id: "ai-2", name: "Global Orbit", tag: "Planetary 3D" },
+];
+
 export default function WorkspaceSettingsPage() {
   const { workspace, refresh } = useWorkspace();
   const router = useRouter();
@@ -22,6 +30,7 @@ export default function WorkspaceSettingsPage() {
   const [brandBusy, setBrandBusy] = useState(false);
   const [brandMsg, setBrandMsg] = useState<string | null>(null);
   const [brandSrcLocal, setBrandSrcLocal] = useState<string | null>(null);
+  const [brandStickerLocal, setBrandStickerLocal] = useState<string | null>(null);
 
   const [isAdmin, setIsAdmin] = useState(false);
   const { user } = useAuth();
@@ -42,11 +51,16 @@ export default function WorkspaceSettingsPage() {
     if (workspace?.brand_kind === "upload") {
       api.getBrandLogoUrl(workspace.id).then((url) => {
         setBrandSrcLocal(url);
+        setBrandStickerLocal(null);
       }).catch(() => {
         setBrandSrcLocal(null);
       });
+    } else if (workspace?.brand_kind === "sticker" && workspace.brand_value) {
+      setBrandStickerLocal(workspace.brand_value);
+      setBrandSrcLocal(null);
     } else {
       setBrandSrcLocal(null);
+      setBrandStickerLocal(null);
     }
   }, [workspace]);
 
@@ -90,6 +104,29 @@ export default function WorkspaceSettingsPage() {
     }
   }
 
+  async function applyBrand(kind: "default" | "sticker", value?: string) {
+    if (!wsId || !isAdmin) return;
+    setBrandBusy(true);
+    setBrandMsg(null);
+    try {
+      await api.setBrand(wsId, kind, value);
+      await refresh();
+      if (kind === "default") {
+        setBrandSrcLocal(null);
+        setBrandStickerLocal(null);
+        setBrandMsg("Reset to workspace initials.");
+      } else {
+        setBrandSrcLocal(null);
+        setBrandStickerLocal(value ?? null);
+        setBrandMsg("Workspace brand emblem updated.");
+      }
+    } catch (err) {
+      setBrandMsg((err as Error).message);
+    } finally {
+      setBrandBusy(false);
+    }
+  }
+
   async function resetBrandToDefault() {
     if (!wsId || !isAdmin) return;
     setBrandBusy(true);
@@ -98,6 +135,7 @@ export default function WorkspaceSettingsPage() {
       await api.setBrand(wsId, "default");
       await refresh();
       setBrandSrcLocal(null);
+      setBrandStickerLocal(null);
       setBrandMsg("Reset to default workspace initials.");
     } catch (err) {
       setBrandMsg((err as Error).message);
@@ -115,6 +153,7 @@ export default function WorkspaceSettingsPage() {
       await api.uploadBrandPhoto(wsId, file);
       const url = await api.getBrandLogoUrl(wsId);
       setBrandSrcLocal(url);
+      setBrandStickerLocal(null);
       await refresh();
       setBrandMsg("Brand logo uploaded successfully.");
     } catch (err) {
@@ -164,10 +203,10 @@ export default function WorkspaceSettingsPage() {
           <div>
             <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Building2 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-              Workspace Brand Logo
+              Workspace Brand Logo & 3D Emblem
             </h2>
             <p className="mt-0.5 text-xs text-slate-500 dark:text-zinc-400">
-              Upload a custom logo or emblem for &ldquo;{workspace.name}&rdquo;.
+              Customize the logo or 3D brand emblem displayed across your workspace.
             </p>
           </div>
         </div>
@@ -179,6 +218,7 @@ export default function WorkspaceSettingsPage() {
               name={workspace.name}
               size={64}
               src={brandSrcLocal}
+              stickerId={brandStickerLocal}
             />
             {isAdmin && (
               <button
@@ -200,6 +240,8 @@ export default function WorkspaceSettingsPage() {
             <p className="text-xs text-slate-400 dark:text-zinc-500">
               {brandSrcLocal
                 ? "Custom logo uploaded and active"
+                : brandStickerLocal
+                ? `Active emblem: ${WORKSPACE_EMBLEMS.find(e => e.id === brandStickerLocal)?.name || brandStickerLocal}`
                 : "Using default workspace initials"}
             </p>
           </div>
@@ -221,7 +263,7 @@ export default function WorkspaceSettingsPage() {
               >
                 <ImagePlus className="h-3.5 w-3.5" /> Upload Logo
               </button>
-              {brandSrcLocal && (
+              {(brandSrcLocal || brandStickerLocal) && (
                 <button
                   type="button"
                   onClick={() => void resetBrandToDefault()}
@@ -235,6 +277,46 @@ export default function WorkspaceSettingsPage() {
             </div>
           )}
         </div>
+
+        {/* 3D Brand Logo Emblems Picker */}
+        {isAdmin && (
+          <div>
+            <span className="block mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+              Or Choose 3D Brand Emblem
+            </span>
+            <div className="grid grid-cols-5 gap-2">
+              {WORKSPACE_EMBLEMS.map((emblem) => {
+                const selected = brandStickerLocal === emblem.id && !brandSrcLocal;
+                return (
+                  <button
+                    key={emblem.id}
+                    type="button"
+                    onClick={() => void applyBrand("sticker", emblem.id)}
+                    disabled={brandBusy}
+                    className={`group relative flex flex-col items-center gap-1.5 rounded-2xl border p-2.5 transition-all ${
+                      selected
+                        ? "border-purple-600 bg-purple-50/80 shadow-md shadow-purple-500/10 ring-2 ring-purple-600 dark:border-purple-400 dark:bg-purple-950/40"
+                        : "border-slate-200/80 bg-slate-50/60 hover:-translate-y-0.5 hover:border-purple-300 dark:border-white/10 dark:bg-[#181628]/60 dark:hover:border-purple-500/30"
+                    }`}
+                  >
+                    <Avatar name={emblem.name} size={42} stickerId={emblem.id} />
+                    <span className="truncate text-[10px] font-bold text-slate-700 dark:text-zinc-300 max-w-full">
+                      {emblem.name}
+                    </span>
+                    <span className="text-[9px] font-medium text-slate-400 dark:text-zinc-500">
+                      {emblem.tag}
+                    </span>
+                    {selected && (
+                      <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-purple-600 text-white shadow-xs">
+                        <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {brandMsg && (
           <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
