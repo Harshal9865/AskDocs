@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, FileText, ImageIcon, Paperclip, Plus, Smile, X } from "lucide-react";
+import { ArrowUp, FileText, ImageIcon, Mic, MicOff, Paperclip, Plus, Smile, X } from "lucide-react";
 
 export interface AttachedFile {
   file: File;
@@ -21,6 +21,7 @@ export default function ChatComposer({
   busy,
   showAttach = false,
   showEmoji = false,
+  showVoice = true,
   inputId,
   variant = "default",
 }: {
@@ -33,6 +34,7 @@ export default function ChatComposer({
   busy?: boolean;
   showAttach?: boolean;
   showEmoji?: boolean;
+  showVoice?: boolean;
   inputId?: string;
   variant?: "default" | "aurora" | "green";
 }) {
@@ -41,10 +43,12 @@ export default function ChatComposer({
   const fileRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const emojiRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
   const [attachments, setAttachments] = useState<AttachedFile[]>([]);
   const [dragOver, setDragOver] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [emojiOpen, setEmojiOpen] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const aurora = variant === "aurora" || variant === "green";
 
   // auto-grow textarea
@@ -93,7 +97,62 @@ export default function ChatComposer({
     }
   }
 
+  const toggleListening = () => {
+    if (typeof window === "undefined") return;
+    const SpeechRec =
+      (window as unknown as { SpeechRecognition?: any; webkitSpeechRecognition?: any }).SpeechRecognition ||
+      (window as unknown as { SpeechRecognition?: any; webkitSpeechRecognition?: any }).webkitSpeechRecognition;
+    if (!SpeechRec) {
+      alert("Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.");
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRec();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = "en-US";
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event: any) => {
+        let transcript = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        if (transcript) {
+          onChange(value ? `${value} ${transcript}`.trim() : transcript);
+        }
+      };
+
+      recognition.onerror = () => {
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
+      recognitionRef.current = recognition;
+    } catch {
+      setIsListening(false);
+    }
+  };
+
   function send() {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    }
     const text = value.trim();
     if ((!text && attachments.length === 0) || disabled || busy) return;
     onSend(text, attachments);
@@ -340,6 +399,24 @@ export default function ChatComposer({
           id={inputId}
           className="dark:text-white dark:placeholder:text-zinc-500 max-h-28 min-h-[36px] flex-1 resize-none border-0 bg-transparent px-1 py-2 text-[14px] leading-5 placeholder:text-slate-400 focus:ring-0 disabled:text-slate-400"
         />
+
+        {/* Voice Input Button */}
+        {showVoice && (
+          <button
+            type="button"
+            onClick={toggleListening}
+            disabled={disabled}
+            aria-label={isListening ? "Stop voice listening" : "Voice query"}
+            title={isListening ? "Listening... Click to stop" : "Voice input"}
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all ${
+              isListening
+                ? "bg-red-500 text-white animate-pulse shadow-md shadow-red-500/30"
+                : "text-slate-400 hover:bg-slate-100 hover:text-purple-600 dark:hover:bg-white/10 dark:hover:text-purple-400"
+            }`}
+          >
+            {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+          </button>
+        )}
 
         <button
           onClick={send}

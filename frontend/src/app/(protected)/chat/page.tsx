@@ -11,6 +11,10 @@ import type { Citation, Conversation, Message } from "@/lib/types";
 import {
   ArrowDownCircle,
   ArrowLeft,
+  BookOpen,
+  Check,
+  Copy,
+  ExternalLink,
   FileText,
   MessagesSquare,
   Plus,
@@ -19,6 +23,7 @@ import {
   Trash2,
   TriangleAlert,
   UsersRound,
+  X,
 } from "lucide-react";
 
 interface SuggestedColleague { user_id: string; name: string; }
@@ -36,22 +41,113 @@ interface ChatMessage {
   fileChips?: string[];
 }
 
-function CitationsModal({ citations, onClose }: { citations: Citation[]; onClose: () => void }) {
+function CitationsModal({
+  citations,
+  workspaceId,
+  onClose,
+}: {
+  citations: Citation[];
+  workspaceId?: string;
+  onClose: () => void;
+}) {
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+
+  const copySnippet = (text: string, index: number) => {
+    navigator.clipboard.writeText(text);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" onClick={onClose}>
-      <div className="max-h-[80vh] w-full max-w-xl overflow-y-auto rounded-xl bg-white p-6 shadow-xl ring-1 ring-slate-200" onClick={(e) => e.stopPropagation()}>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold">Sources used</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-700">✕</button>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-end bg-slate-900/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="flex h-full w-full max-w-lg flex-col bg-white shadow-2xl ring-1 ring-slate-200 dark:bg-[#13111f] dark:ring-white/10 sm:h-[90vh] sm:rounded-3xl animate-in slide-in-from-right duration-250 overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02]">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400 font-bold">
+              <BookOpen className="h-4 w-4" />
+            </span>
+            <div>
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                Sources & Citations
+              </h2>
+              <p className="text-[11px] text-slate-400 dark:text-zinc-500">
+                {citations.length} document chunk{citations.length > 1 ? "s" : ""} referenced by AI
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-white transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
-        <ul className="space-y-3">
+
+        {/* Citations List */}
+        <div className="flex-1 space-y-3.5 overflow-y-auto p-6 scroll-touch">
           {citations.map((c, i) => (
-            <li key={i} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-              <div className="mb-1 text-sm font-semibold">{c.document_title} <span className="font-normal text-slate-500">· chunk #{c.chunk_ordinal}</span></div>
-              <p className="whitespace-pre-wrap text-xs text-slate-700">{c.snippet}</p>
-            </li>
+            <div
+              key={i}
+              className="group relative rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-xs backdrop-blur-md transition-all hover:border-purple-300 dark:border-white/10 dark:bg-[#181628]/90 dark:hover:border-purple-500/30"
+            >
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-purple-600 text-[10px] font-black text-white">
+                    {i + 1}
+                  </span>
+                  <span className="truncate text-xs font-bold text-slate-900 dark:text-white">
+                    {c.document_title}
+                  </span>
+                </div>
+                <span className="shrink-0 rounded-md bg-purple-50 px-2 py-0.5 text-[10px] font-bold text-purple-700 dark:bg-purple-950/60 dark:text-purple-300">
+                  Chunk #{c.chunk_ordinal}
+                </span>
+              </div>
+
+              <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-3 text-xs leading-relaxed text-slate-700 dark:border-white/5 dark:bg-black/20 dark:text-zinc-300 font-sans">
+                <p className="whitespace-pre-wrap">{c.snippet}</p>
+              </div>
+
+              <div className="mt-3 flex items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-white/5">
+                {workspaceId && c.document_id ? (
+                  <Link
+                    href={`/documents/${workspaceId}/${c.document_id}`}
+                    target="_blank"
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 transition-colors"
+                  >
+                    <ExternalLink className="h-3 w-3" /> View original document
+                  </Link>
+                ) : (
+                  <span className="text-[11px] text-slate-400 dark:text-zinc-500">
+                    Source referenced
+                  </span>
+                )}
+
+                <button
+                  onClick={() => copySnippet(c.snippet, i)}
+                  className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10 transition-colors"
+                >
+                  {copiedIndex === i ? (
+                    <>
+                      <Check className="h-3 w-3 text-emerald-500" /> Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3 w-3" /> Copy
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     </div>
   );
@@ -463,7 +559,13 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {showCitations && <CitationsModal citations={showCitations} onClose={() => setShowCitations(null)} />}
+      {showCitations && (
+        <CitationsModal
+          citations={showCitations}
+          workspaceId={workspace?.id}
+          onClose={() => setShowCitations(null)}
+        />
+      )}
     </div>
   );
 }

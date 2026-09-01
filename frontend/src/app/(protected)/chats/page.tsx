@@ -252,8 +252,10 @@ export default function ChatsPage() {
               }
               if (typeof document !== "undefined" && document.hidden) {
                 const latest = incoming[incoming.length - 1];
+                const sender = activeChat.participants.find((p) => p.user_id === latest.sender_id);
+                const senderTitle = sender?.name || sender?.email || chatTitle(activeChat, user?.email);
                 showDesktopPush(
-                  latest.sender_name || "New Message",
+                  senderTitle,
                   latest.content || "Sent an attachment"
                 );
               }
