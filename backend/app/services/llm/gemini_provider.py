@@ -16,11 +16,10 @@ Your mission is to provide articulate, beautifully formatted, insightful, and di
 STRICT ANSWER FORMATTING INSTRUCTIONS:
 1. **Direct Synthesized Intro**: Always open with a polite, direct 1-sentence intro (e.g., "Based on the provided excerpts, here is a detailed breakdown answering your query:" or "Based on your uploaded workspace documents, several key insights are revealed across the texts:").
 2. **Grouped by Document / Story**: When analyzing multiple documents or stories, group your response cleanly under bold section headers (e.g. `### ***The Star***` or `**From *The Last Question* excerpts:**`).
-3. **Rich Concept Bullet Points with Bold Titles**: Present key takeaways, plot developments, or character insights using structured bullet points with bold descriptive titles:
-   * **Concept / Character Title:** Articulate, insightful explanation summarizing the concept [Source 1, Source 2].
+3. **Rich Concept Bullet Points with Bold Titles**: Present key takeaways, plot developments, or character insights using structured bullet points with meaningful bold descriptive titles (e.g. `* **A Lost Civilization's Legacy:** Explanation... [Source 1, Source 2]` or `* **The Fate of the Universe (Entropy):** Explanation... [Source 4, Source 5]`).
 4. **Subtle Source Citations**: End key facts with subtle source tags like `[Source 1, Source 2]` or `[Source: DocumentName.pdf]`.
 5. **Polite Follow-up Offer**: Conclude with a helpful, engaging question (e.g., "Would you like a summary of the next section or a deeper analysis of any specific story?").
-6. **No Raw Excerpt Dumps**: Never output unedited raw file dumps, repetitive raw headers, or robotic placeholder text. Write fluent, articulate, intelligent prose.
+6. **No Mechanical Word Cutting**: Write natural, fluent, intelligent prose. Do NOT slice raw sentences into artificial titles.
 """
 
 CHAT_MODELS = [
@@ -32,7 +31,7 @@ EMBED_MODELS = ["text-embedding-004", "gemini-embedding-001"]
 
 
 def _synthesize_intelligent_fallback(question: str, contexts: list[RetrievedChunk]) -> str:
-    """Synthesize an articulate, beautifully formatted answer matching exact user preference."""
+    """Synthesize a clean, natural fallback answer directly from document context without mechanical word slicing."""
     if not contexts:
         return "Hello! I am AskDocs AI. How can I assist you with your workspace documents today?"
 
@@ -41,7 +40,7 @@ def _synthesize_intelligent_fallback(question: str, contexts: list[RetrievedChun
         by_title.setdefault(c.document_title, []).append(c)
 
     lines = [
-        "Based on the provided excerpts, here is a detailed breakdown answering your query:\n",
+        "Based on the provided excerpts, here is a detailed summary of the texts:\n",
     ]
 
     doc_idx = 1
@@ -59,13 +58,7 @@ def _synthesize_intelligent_fallback(question: str, contexts: list[RetrievedChun
 
             if len(sentences) > 2:
                 for s in sentences[2:6]:
-                    words = s.split()
-                    if len(words) > 4:
-                        bullet_title = " ".join(words[:4]).strip(",:.-")
-                        bullet_body = " ".join(words[4:])
-                        lines.append(f"* **{bullet_title}:** {bullet_body}. [Source {doc_idx}]")
-                    else:
-                        lines.append(f"* **Key Insight:** {s}. [Source {doc_idx}]")
+                    lines.append(f"* {s}. [Source {doc_idx}]")
                 lines.append("")
         else:
             lines.append(f"{clean_text[:400]}... [Source {doc_idx}]\n")
@@ -144,8 +137,8 @@ class GeminiProvider(LLMProvider):
                 logger.warning("OCR with %s failed: %s", model_name, e)
         return ""
 
-    def _build_prompt_text(self, question: str, contexts: list[RetrievedChunk], history: list[dict] | None) -> str:
-        parts = []
+    def _build_contents(self, question: str, contexts: list[RetrievedChunk], history: list[dict] | None) -> list:
+        parts = [SYSTEM_PROMPT, "\n\n"]
 
         if contexts:
             parts.append("WORKSPACE DOCUMENT CONTEXT EXCERPTS:")
@@ -155,7 +148,7 @@ class GeminiProvider(LLMProvider):
                 "\nINSTRUCTIONS: Follow the strict answer formatting guidelines. "
                 "Open with a direct 1-sentence intro ('Based on the provided excerpts, here is a detailed breakdown answering your query:'). "
                 "Group findings by Document/Story (`### ***Title***` or `**From *Title* Excerpts:**`). "
-                "Use bullet points with bold descriptive titles (`* **Concept Title:** Description... [Source 1, Source 2]`). "
+                "Use bullet points with meaningful bold descriptive titles (`* **Concept Title:** Description... [Source 1, Source 2]`). "
                 "End with a polite follow-up question."
             )
         else:
@@ -168,7 +161,8 @@ class GeminiProvider(LLMProvider):
                 parts.append(f"{role_label}: {turn.get('content', '')}")
 
         parts.append(f"\nUser Question: {question}")
-        return "\n\n".join(parts)
+        full_text = "\n\n".join(parts)
+        return [full_text]
 
     async def answer(
         self,
@@ -177,22 +171,15 @@ class GeminiProvider(LLMProvider):
         history: list[dict] | None = None,
         image_parts: list | None = None,
     ) -> str:
-        prompt_text = self._build_prompt_text(question, contexts, history)
-        contents: list = [prompt_text]
+        contents = self._build_contents(question, contexts, history)
         if image_parts:
             contents.extend(image_parts)
-
-        config = types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
-            temperature=0.2,
-        )
 
         for model_name in self.chat_models:
             try:
                 response = await self.client.aio.models.generate_content(
                     model=model_name,
                     contents=contents,
-                    config=config,
                 )
                 if response.text and response.text.strip():
                     return response.text
@@ -208,15 +195,9 @@ class GeminiProvider(LLMProvider):
         history: list[dict] | None = None,
         image_parts: list | None = None,
     ) -> AsyncGenerator[str, None]:
-        prompt_text = self._build_prompt_text(question, contexts, history)
-        contents: list = [prompt_text]
+        contents = self._build_contents(question, contexts, history)
         if image_parts:
             contents.extend(image_parts)
-
-        config = types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
-            temperature=0.2,
-        )
 
         # Attempt 1: Stream generation across models
         for model_name in self.chat_models:
@@ -224,7 +205,6 @@ class GeminiProvider(LLMProvider):
                 response_stream = await self.client.aio.models.generate_content_stream(
                     model=model_name,
                     contents=contents,
-                    config=config,
                 )
                 emitted = False
                 async for chunk in response_stream:
@@ -253,7 +233,6 @@ class GeminiProvider(LLMProvider):
                 res = await self.client.aio.models.generate_content(
                     model=model_name,
                     contents=contents,
-                    config=config,
                 )
                 if res and res.text and res.text.strip():
                     yield res.text
