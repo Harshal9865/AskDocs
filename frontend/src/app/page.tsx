@@ -35,7 +35,11 @@ import {
   LogOut,
   Pencil,
   ChevronDown,
-  LayoutDashboard
+  LayoutDashboard,
+  Pin,
+  Layers,
+  Bot,
+  Brain
 } from "lucide-react";
 
 function AuroraHeroMock() {
@@ -187,6 +191,45 @@ const FEATURES = [
     desc: "Public or private spaces, role-based access (admin / member / viewer), soft-delete trash and full activity log.",
     color: "from-rose-500 to-red-500",
     glow: "glow-rose",
+  },
+];
+
+const NEW_CAPABILITIES = [
+  {
+    badge: "Next-Gen AI Engine",
+    title: "Gemini 2.5/3.6 Multi-Modal Reasoning",
+    desc: "Powered by Google's frontier Gemini models. Fast responses with real-time SSE token streaming, high-speed semantic extraction across massive PDF/DOCX corpora, and instant title generation.",
+    icon: Sparkles,
+    color: "from-purple-500 via-indigo-500 to-cyan-400",
+    glow: "glow-violet",
+    tags: ["Real-time Streaming", "Auto-Generated Titles", "Zero Latency"],
+  },
+  {
+    badge: "Smart Workspace",
+    title: "ChatGPT & Gemini-Style AI Chat Hub",
+    desc: "Organize unlimited team conversations effortlessly with chronological date groups (Today, Yesterday, Previous 7 Days), infinite scroll, pin favorites to top, inline renaming, and bulk delete.",
+    icon: MessagesSquare,
+    color: "from-indigo-500 via-purple-500 to-pink-500",
+    glow: "glow-indigo",
+    tags: ["Pin Chats", "Date Grouping", "Infinite Scroll", "Bulk Actions"],
+  },
+  {
+    badge: "Instant Acceleration",
+    title: "1-Click Knowledge Accelerators",
+    desc: "Kickstart inquiries instantly with tailored AI action cards: executive summaries, critical deadline extraction, contract compliance audits, and prioritized action checklists.",
+    icon: Zap,
+    color: "from-cyan-500 via-blue-500 to-indigo-500",
+    glow: "glow-sky",
+    tags: ["Instant Summaries", "Deadline Extraction", "Action Checklists"],
+  },
+  {
+    badge: "Institutional Memory",
+    title: "Cross-Document Conflict Detection",
+    desc: "AskDocs actively inspects contradictory clauses, policies, or stale metrics across your entire document repository, citing specific page references before decisions are made.",
+    icon: Target,
+    color: "from-amber-500 via-rose-500 to-purple-500",
+    glow: "glow-amber",
+    tags: ["Contradiction Alerts", "Direct Chunk Citations", "Verified Facts"],
   },
 ];
 
@@ -383,6 +426,10 @@ export default function Home() {
           </a>
           <a href="#features" className="px-1 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-zinc-300 dark:hover:text-white">
             Features
+          </a>
+          <a href="#whats-new" className="px-1 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-zinc-300 dark:hover:text-white flex items-center gap-1">
+            <span>What&apos;s new</span>
+            <span className="flex h-1.5 w-1.5 rounded-full bg-purple-500 animate-pulse" />
           </a>
           <a href="#reviews" className="px-1 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-zinc-300 dark:hover:text-white">
             Reviews
@@ -710,6 +757,76 @@ export default function Home() {
               </div>
             </Reveal>
           ))}
+        </div>
+      </section>
+
+      {/* What's New Section — Highlighting Latest Functionalities */}
+      <section id="whats-new" className="relative overflow-hidden py-16 sm:py-20 border-t border-slate-100 dark:border-white/5 bg-gradient-to-b from-transparent via-purple-50/20 to-transparent dark:via-purple-950/10">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <Reveal dir="up">
+            <div className="text-center">
+              <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-purple-300 bg-purple-50 px-3.5 py-1 text-xs font-semibold text-purple-700 shadow-sm backdrop-blur-md dark:border-purple-500/30 dark:bg-purple-950/50 dark:text-purple-300">
+                <Sparkles className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400 animate-pulse" />
+                <span>LATEST CAPABILITIES</span>
+              </div>
+              <h2 className="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl bg-gradient-to-r from-slate-900 via-purple-900 to-indigo-900 bg-clip-text text-transparent dark:from-white dark:via-purple-200 dark:to-indigo-200">
+                Engineered for next-level intelligence.
+              </h2>
+              <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-zinc-400">
+                Explore our latest frontier upgrades built to streamline how your organization synthesizes knowledge, detects discrepancies, and collaborates.
+              </p>
+            </div>
+          </Reveal>
+
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
+            {NEW_CAPABILITIES.map((cap, i) => (
+              <Reveal key={cap.title} dir={i % 2 === 0 ? "left" : "right"} delay={i * 120}>
+                <div className={`glow-card ${cap.glow} relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-300 hover:shadow-xl dark:border-white/10 dark:bg-[#111122]/90 dark:hover:border-purple-500/40`}>
+                  <div>
+                    {/* Header: Icon + Badge */}
+                    <div className="mb-4 flex items-center justify-between gap-2">
+                      <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${cap.color} text-white shadow-md shadow-purple-500/20`}>
+                        <cap.icon className="h-5 w-5" />
+                      </div>
+                      <span className="rounded-full border border-purple-200/70 bg-purple-50/70 px-2.5 py-0.5 text-[11px] font-semibold text-purple-700 dark:border-purple-500/20 dark:bg-purple-950/40 dark:text-purple-300">
+                        {cap.badge}
+                      </span>
+                    </div>
+
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                      {cap.title}
+                    </h3>
+                    <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-zinc-400">
+                      {cap.desc}
+                    </p>
+                  </div>
+
+                  {/* Feature Tags Pill List */}
+                  <div className="mt-5 flex flex-wrap gap-1.5 border-t border-slate-100 pt-4 dark:border-white/5">
+                    {cap.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-1 rounded-lg bg-slate-100/80 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-white/[0.05] dark:text-zinc-300"
+                      >
+                        <Check className="h-2.5 w-2.5 text-purple-500" />
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+
+          <div className="mt-10 text-center">
+            <Link
+              href={user ? "/chat" : "/register"}
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/25 transition-all hover:scale-105 active:scale-95"
+            >
+              <span>Experience New AI Chat</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </section>
 
