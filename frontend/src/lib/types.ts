@@ -169,6 +169,17 @@ export interface ChatAttachment {
   url: string;
 }
 
+export interface ApprovalCard {
+  approval_id: string;
+  action_type: string;
+  requested_amount?: string | null;
+  requested_by?: string | null;
+  policy_citation?: string | null;
+  status: "pending" | "approved" | "rejected";
+  approved_by?: string | null;
+  updated_at?: string | null;
+}
+
 export interface TeamMessage {
   id: string;
   sender_id: string | null;
@@ -176,6 +187,7 @@ export interface TeamMessage {
   created_at: string;
   attachments: ChatAttachment[];
   read_by: string[];
+  approval_card?: ApprovalCard | null;
 }
 
 export interface Citation {
@@ -276,4 +288,41 @@ export interface WorkspaceHealthReport {
   warning_issues_count: number;
   healthy_documents_count: number;
   issues: DocumentHealthIssue[];
+}
+
+export interface CanvasChecklistItem {
+  id: string;
+  task: string;
+  source_doc: string;
+  completed: boolean;
+}
+
+export interface RiskHeatMapItem {
+  category: string;
+  risk_level: "critical" | "warning" | "info" | string;
+  clause_title: string;
+  description: string;
+  recommendation: string;
+}
+
+export interface MatrixRow {
+  topic: string;
+  summary: string;
+  values: string[];
+}
+
+export interface ComparisonMatrix {
+  headers: string[];
+  rows: MatrixRow[];
+}
+
+export interface WorkspaceCanvas {
+  id: string;
+  workspace_id: string;
+  title: string;
+  document_ids: string[];
+  matrix_data: ComparisonMatrix;
+  checklists: CanvasChecklistItem[];
+  heat_map: RiskHeatMapItem[];
+  created_at: string;
 }

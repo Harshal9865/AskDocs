@@ -94,6 +94,7 @@ class TeamMessageOut(BaseModel):
     created_at: object
     attachments: list[AttachmentOut] = []
     read_by: list[str] = []
+    approval_card: dict | None = None
 
     class Config:
         from_attributes = True
@@ -220,13 +221,25 @@ async def _build_message_out(db, msg: Message, user_id: uuid.UUID | None = None)
         )
         read_by = [str(uid) for (uid,) in read_result.all() if str(uid) != str(msg.sender_id)]
 
+    approval_card = None
+    clean_content = msg.content or ""
+    if clean_content and "<!--APPROVAL_CARD:" in clean_content:
+        try:
+            parts = clean_content.split("<!--APPROVAL_CARD:", 1)
+            raw_json = parts[1].split("-->", 1)[0]
+            approval_card = json.loads(raw_json)
+            clean_content = parts[0].strip()
+        except Exception:
+            approval_card = None
+
     return TeamMessageOut(
         id=msg.id,
         sender_id=msg.sender_id,
-        content=msg.content,
+        content=clean_content,
         created_at=msg.created_at,
         attachments=atts,
         read_by=read_by,
+        approval_card=approval_card,
     )
 
 
@@ -552,6 +565,23 @@ async def send_team_message(
 
             ai_answer = await llm.answer(clean_query, chunks)
 
+            # Check if prompt requests expenditure / action approval
+            approval_keywords = ["refund", "reimburse", "approve", "approval", "expenditure", "budget", "limit", "payment", "contract", "discount"]
+            if any(k in low_content for k in approval_keywords):
+                import re
+                amounts = re.findall(r"\$\d+(?:,\d+)*(?:\.\d+)?|\d+\s*(?:dollars|USD)", clean_query)
+                req_amt = amounts[0] if amounts else "Action Request"
+                approval_id = f"appr-{uuid.uuid4().hex[:8]}"
+                card_data = {
+                    "approval_id": approval_id,
+                    "action_type": "Expenditure & Policy Approval",
+                    "requested_amount": req_amt,
+                    "requested_by": user.full_name or user.email,
+                    "policy_citation": "Workspace Policy & Contract SOP Section 4.2",
+                    "status": "pending",
+                }
+                ai_answer += f"\n\n<!--APPROVAL_CARD:{json.dumps(card_data)}-->"
+
             bot_msg = Message(
                 conversation_id=conv.id,
                 sender_id=None,
@@ -562,6 +592,41 @@ async def send_team_message(
             await db.commit()
         except Exception as err:
             logger.warning("Error in @AskDocs AI teammate trigger: %s", err)
+
+    return await _build_message_out(db, msg, user.id)
+
+
+class MessageApprovalPayload(BaseModel):
+    status: str
+
+
+@router.post("/team-chats/{conversation_id}/messages/{message_id}/approval", response_model=TeamMessageOut)
+async def update_message_approval(
+    conversation_id: uuid.UUID,
+    message_id: uuid.UUID,
+    payload: MessageApprovalPayload,
+    db: DbSession,
+    user: CurrentUser,
+):
+    """Update status of an interactive approval card in team chat."""
+    conv = await _get_team_conversation_checked(db, conversation_id, user)
+    msg = await db.get(Message, message_id)
+    if not msg or msg.conversation_id != conv.id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Message not found")
+
+    if msg.content and "<!--APPROVAL_CARD:" in msg.content:
+        parts = msg.content.split("<!--APPROVAL_CARD:", 1)
+        raw_json = parts[1].split("-->", 1)[0]
+        try:
+            card = json.loads(raw_json)
+            card["status"] = payload.status
+            card["approved_by"] = user.full_name or user.email
+            card["updated_at"] = datetime.now(timezone.utc).isoformat()
+            msg.content = f"{parts[0].strip()}\n\n<!--APPROVAL_CARD:{json.dumps(card)}-->"
+            await db.commit()
+            await db.refresh(msg)
+        except Exception as err:
+            logger.warning("Failed to update message approval card: %s", err)
 
     return await _build_message_out(db, msg, user.id)
 

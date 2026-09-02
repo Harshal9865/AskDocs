@@ -20,6 +20,8 @@ import type {
   TokenPair,
   User,
   Workspace,
+  WorkspaceCanvas,
+  CanvasChecklistItem,
   WorkspaceDigest,
   WorkspaceHealthReport,
 } from "./types";
@@ -648,6 +650,12 @@ export const api = {
       if ((err as Error).name !== "AbortError") onError?.(String(err));
     }
   },
+  async updateMessageApprovalStatus(convId: string, msgId: string, status: "approved" | "rejected"): Promise<TeamMessage> {
+    return request<TeamMessage>(`/team-chats/${convId}/messages/${msgId}/approval`, {
+      method: "POST",
+      body: JSON.stringify({ status }),
+    });
+  },
 
   // Billing & Subscriptions
   async getSubscription(): Promise<SubscriptionInfo> {
@@ -728,6 +736,35 @@ export const api = {
     return request<DocumentHealthIssue>(`/workspaces/${wsId}/health/issues/${issueId}`, {
       method: "PATCH",
       body: JSON.stringify({ status }),
+    });
+  },
+
+  // AskDocs Live AI Canvas
+  async getWorkspaceCanvases(wsId: string): Promise<WorkspaceCanvas[]> {
+    return request<WorkspaceCanvas[]>(`/workspaces/${wsId}/canvas`);
+  },
+
+  async getWorkspaceCanvas(wsId: string, canvasId: string): Promise<WorkspaceCanvas> {
+    return request<WorkspaceCanvas>(`/workspaces/${wsId}/canvas/${canvasId}`);
+  },
+
+  async generateWorkspaceCanvas(wsId: string, documentIds: string[], title?: string): Promise<WorkspaceCanvas> {
+    return request<WorkspaceCanvas>(`/workspaces/${wsId}/canvas/generate`, {
+      method: "POST",
+      body: JSON.stringify({ document_ids: documentIds, title }),
+    });
+  },
+
+  async updateWorkspaceCanvas(wsId: string, canvasId: string, payload: { title?: string; checklists?: CanvasChecklistItem[] }): Promise<WorkspaceCanvas> {
+    return request<WorkspaceCanvas>(`/workspaces/${wsId}/canvas/${canvasId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async deleteWorkspaceCanvas(wsId: string, canvasId: string): Promise<void> {
+    return request<void>(`/workspaces/${wsId}/canvas/${canvasId}`, {
+      method: "DELETE",
     });
   },
 };

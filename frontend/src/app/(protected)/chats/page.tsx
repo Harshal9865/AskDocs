@@ -1030,6 +1030,80 @@ export default function ChatsPage() {
                         ) : null
                       )}
                       <p className="whitespace-pre-wrap break-words">{m.content}</p>
+
+                      {/* Autonomous Interactive Approval Card */}
+                      {m.approval_card && (
+                        <div className="mt-3 rounded-2xl border border-purple-500/30 bg-slate-900 p-3.5 text-white shadow-xl backdrop-blur-md dark:border-purple-500/40 dark:bg-[#1a172c]">
+                          <div className="flex items-center justify-between gap-2 pb-2 border-b border-white/10">
+                            <div className="flex items-center gap-1.5 text-xs font-black text-purple-300">
+                              <Sparkles className="h-3.5 w-3.5 text-purple-400 animate-pulse" />
+                              <span>APPROVAL WORKFLOW</span>
+                            </div>
+                            <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
+                              m.approval_card.status === "approved"
+                                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                                : m.approval_card.status === "rejected"
+                                ? "bg-red-500/20 text-red-300 border border-red-500/30"
+                                : "bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse"
+                            }`}>
+                              {m.approval_card.status}
+                            </span>
+                          </div>
+
+                          <div className="mt-2.5 space-y-1 text-xs">
+                            <div className="flex justify-between">
+                              <span className="text-slate-400">Action:</span>
+                              <span className="font-bold text-white">{m.approval_card.action_type}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-slate-400">Requested Amount:</span>
+                              <span className="font-black text-emerald-400">{m.approval_card.requested_amount}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-slate-400">Policy Citation:</span>
+                              <span className="font-medium text-slate-300 truncate max-w-[180px]">{m.approval_card.policy_citation}</span>
+                            </div>
+                            {m.approval_card.approved_by && (
+                              <div className="flex justify-between pt-1 border-t border-white/5 text-[11px] text-slate-400">
+                                <span>Decided By:</span>
+                                <span className="font-bold text-purple-300">{m.approval_card.approved_by}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {m.approval_card.status === "pending" && (
+                            <div className="mt-3 flex items-center gap-2 pt-2 border-t border-white/10">
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    const updatedMsg = await api.updateMessageApprovalStatus(activeChat.id, m.id, "approved");
+                                    setMessages((prev) => prev.map((msgItem) => (msgItem.id === m.id ? updatedMsg : msgItem)));
+                                  } catch {
+                                    alert("Failed to approve request.");
+                                  }
+                                }}
+                                className="flex-1 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 py-1.5 text-xs font-black text-white shadow-md hover:from-emerald-500 hover:to-teal-500 active:scale-95 transition-all cursor-pointer"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    const updatedMsg = await api.updateMessageApprovalStatus(activeChat.id, m.id, "rejected");
+                                    setMessages((prev) => prev.map((msgItem) => (msgItem.id === m.id ? updatedMsg : msgItem)));
+                                  } catch {
+                                    alert("Failed to reject request.");
+                                  }
+                                }}
+                                className="flex-1 rounded-xl bg-slate-800 py-1.5 text-xs font-black text-slate-300 hover:bg-red-600 hover:text-white active:scale-95 transition-all cursor-pointer"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       {m.attachments && m.attachments.length > 0 && (
                         <div className="mt-2 space-y-1">
                           {m.attachments.map((att) => (
