@@ -776,7 +776,7 @@ export default function ChatPage() {
                         onDoubleClick={() => {
                           if (!isSelectMode) startRename(c);
                         }}
-                        className={`relative flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left transition-all duration-150 ${
+                        className={`relative flex w-full items-center gap-2.5 rounded-xl pl-3 pr-2.5 py-2 text-left transition-all duration-150 group-hover:pr-24 overflow-hidden ${
                           isSelected
                             ? "border border-purple-400/80 bg-purple-50/80 dark:border-purple-500/40 dark:bg-purple-950/50"
                             : isActive
@@ -785,19 +785,19 @@ export default function ChatPage() {
                         }`}
                         title={c.title}
                       >
-                        {/* Active pip */}
+                        {/* Active indicator bar */}
                         {isActive && (
-                          <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-purple-500 via-indigo-500 to-blue-500" aria-hidden />
+                          <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-purple-500 via-indigo-500 to-cyan-500" aria-hidden />
                         )}
                         {/* Avatar */}
-                        <div className="shrink-0 transition-transform duration-200 group-hover:scale-110">
-                          <AIAvatarIcon className="h-5 w-5" streaming={isActive && busy} />
+                        <div className="shrink-0 transition-transform duration-200 group-hover:scale-105">
+                          <AIAvatarIcon className="h-6 w-6" streaming={isActive && busy} />
                         </div>
                         {/* Title + timestamp */}
                         <div className="flex min-w-0 flex-1 flex-col">
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-1 min-w-0">
                             {c.is_pinned && (
-                              <Pin className="h-2.5 w-2.5 shrink-0 text-amber-500 fill-amber-500/30" />
+                              <Pin className="h-3 w-3 shrink-0 text-amber-500 fill-amber-500" />
                             )}
                             <span
                               className={`truncate text-xs font-medium leading-tight ${
@@ -807,40 +807,39 @@ export default function ChatPage() {
                               {c.title}
                             </span>
                           </div>
-                          <span className="text-[10px] text-slate-400 dark:text-zinc-500">
+                          <span className="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">
                             {getRelativeTime(c.created_at)}
                           </span>
                         </div>
                       </button>
 
-                      {/* Hover actions: pin + rename + delete */}
+                      {/* Floating Action Pill with solid contrast and distinct icons */}
                       {!isSelectMode && (
-                        <div className="absolute right-1.5 flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                        <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5 rounded-xl border border-slate-200/90 bg-white/95 px-1.5 py-1 shadow-md opacity-0 backdrop-blur-md transition-all duration-150 group-hover:opacity-100 dark:border-white/15 dark:bg-[#18182c]/95 dark:shadow-xl z-20 pointer-events-auto">
                           <button
+                            type="button"
                             onClick={(e) => { e.stopPropagation(); void togglePin(c); }}
                             title={c.is_pinned ? "Unpin chat" : "Pin chat to top"}
-                            className={`flex h-6 w-6 items-center justify-center rounded-md transition-colors ${
-                              c.is_pinned
-                                ? "text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/40"
-                                : "text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-white/10 dark:hover:text-zinc-200"
-                            }`}
+                            className="flex h-6 w-6 items-center justify-center rounded-lg text-slate-600 hover:bg-amber-50 hover:text-amber-600 dark:text-zinc-300 dark:hover:bg-amber-950/60 dark:hover:text-amber-400 transition-colors"
                           >
-                            {c.is_pinned ? <PinOff className="h-3 w-3" /> : <Pin className="h-3 w-3" />}
+                            {c.is_pinned ? <PinOff className="h-3.5 w-3.5 text-amber-500 fill-amber-500/20" /> : <Pin className="h-3.5 w-3.5" />}
                           </button>
                           <button
+                            type="button"
                             onClick={(e) => { e.stopPropagation(); startRename(c); }}
                             title="Rename"
-                            className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-white/10 dark:hover:text-zinc-200"
+                            className="flex h-6 w-6 items-center justify-center rounded-lg text-slate-600 hover:bg-purple-50 hover:text-purple-600 dark:text-zinc-300 dark:hover:bg-purple-950/60 dark:hover:text-purple-300 transition-colors"
                           >
-                            <Pencil className="h-3 w-3" />
+                            <Pencil className="h-3.5 w-3.5" />
                           </button>
                           {canDelete(c) && (
                             <button
+                              type="button"
                               onClick={(e) => { e.stopPropagation(); void deleteConversation(c); }}
                               title="Delete"
-                              className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                              className="flex h-6 w-6 items-center justify-center rounded-lg text-slate-600 hover:bg-red-50 hover:text-red-600 dark:text-zinc-300 dark:hover:bg-red-950/60 dark:hover:text-red-400 transition-colors"
                             >
-                              <Trash2 className="h-3 w-3" />
+                              <Trash2 className="h-3.5 w-3.5" />
                             </button>
                           )}
                         </div>
@@ -966,19 +965,62 @@ export default function ChatPage() {
           className="scroll-touch ai-thread relative z-10 flex-1 min-h-0 space-y-3 overflow-y-auto px-3 py-4 sm:px-6"
         >
           {!activeConv ? (
-            <div className="flex h-full items-center justify-center text-center">
-              <div>
-                <AIAvatarIcon className="mx-auto mb-4 h-16 w-16" />
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Start a new conversation</p>
-                <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Ask about your documents and get AI-powered answers</p>
-              </div>
+            <div className="flex h-full flex-col items-center justify-center text-center px-4 py-8">
+              <AIAvatarIcon className="mx-auto mb-4 h-16 w-16" />
+              <h3 className="text-base font-bold text-slate-800 dark:text-white">AskDocs Intelligence</h3>
+              <p className="mt-1 max-w-sm text-xs text-slate-400 dark:text-zinc-400">
+                Select or create a conversation from the sidebar to chat with your workspace knowledge.
+              </p>
             </div>
           ) : messages.length === 0 ? (
-            <div className="flex h-full items-center justify-center text-center">
-              <div>
-                <AIAvatarIcon className="mx-auto mb-4 h-16 w-16" />
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Ask anything</p>
-                <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Get answers from your documents, powered by AI</p>
+            <div className="flex h-full flex-col items-center justify-center text-center px-4 py-6">
+              <AIAvatarIcon className="mx-auto mb-4 h-16 w-16" />
+              <h3 className="text-base font-bold bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 bg-clip-text text-transparent dark:from-purple-300 dark:via-indigo-300 dark:to-cyan-300">
+                How can I help you today?
+              </h3>
+              <p className="mt-1 max-w-md text-xs text-slate-500 dark:text-zinc-400">
+                Ask questions, synthesize findings, or extract obligations across your uploaded documents.
+              </p>
+
+              {/* Quick Prompt Suggestions */}
+              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-lg w-full text-left">
+                {[
+                  {
+                    title: "Summarize Documents",
+                    desc: "Provide an executive summary of key files",
+                    query: "Can you provide a comprehensive summary of all documents in this workspace?",
+                  },
+                  {
+                    title: "Key Deadlines & Obligations",
+                    desc: "Extract actionable dates and contract terms",
+                    query: "What are the most critical obligations, renewal dates, and deadlines mentioned?",
+                  },
+                  {
+                    title: "Risk & Conflict Analysis",
+                    desc: "Identify contradictory clauses or discrepancies",
+                    query: "Are there any conflicting statements, ambiguities, or compliance risks in our files?",
+                  },
+                  {
+                    title: "Action Item Checklist",
+                    desc: "Generate a step-by-step priority to-do list",
+                    query: "Generate a prioritized checklist of next steps and action items based on the documents.",
+                  },
+                ].map((item, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => void sendWithText(item.query, [])}
+                    className="group flex flex-col rounded-2xl border border-slate-200/80 bg-white/70 p-3.5 shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-300 hover:bg-white hover:shadow-md dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-purple-500/40 dark:hover:bg-white/[0.07]"
+                  >
+                    <span className="text-xs font-bold text-slate-800 dark:text-zinc-200 group-hover:text-purple-600 dark:group-hover:text-purple-400 flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-purple-500 shrink-0" />
+                      {item.title}
+                    </span>
+                    <span className="mt-1 text-[11px] text-slate-500 dark:text-zinc-400 leading-snug">
+                      {item.desc}
+                    </span>
+                  </button>
+                ))}
               </div>
             </div>
           ) : (
