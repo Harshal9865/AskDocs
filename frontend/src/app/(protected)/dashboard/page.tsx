@@ -23,6 +23,9 @@ import {
   Brain,
   FileSignature,
   Activity,
+  Scale,
+  ShieldCheck,
+  Radar,
 } from "lucide-react";
 import type { ContractObligation, DocumentItem, PlanInfo, TeamChat, WorkspaceMemory } from "@/lib/types";
 
@@ -532,7 +535,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Intelligence & Workflow Highlight Cards */}
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {/* Contracts & Deadlines Quick Card */}
         <Link
           href="/contracts"
@@ -556,6 +559,27 @@ export default function DashboardPage() {
           </p>
         </Link>
 
+        {/* Contract Redline Diff Studio */}
+        <Link
+          href="/contracts/compare"
+          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-rose-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-rose-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#24131d]/80"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400">
+                <Scale className="h-4 w-4" />
+              </span>
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Redline Diff Studio</h3>
+            </div>
+            <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 group-hover:translate-x-0.5 transition-transform">
+              Diff →
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
+            Compare 2 contract versions side-by-side with automated liability & risk detection.
+          </p>
+        </Link>
+
         {/* Institutional Memory Card */}
         <Link
           href="/memory"
@@ -576,6 +600,48 @@ export default function DashboardPage() {
             {memories.length > 0
               ? `${memories.length} organizational decisions and facts recorded in graph.`
               : "Ingest meeting transcripts and preserve team decisions automatically."}
+          </p>
+        </Link>
+
+        {/* Decision Governance Card */}
+        <Link
+          href="/governance"
+          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-emerald-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#12241d]/80"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
+                <ShieldCheck className="h-4 w-4" />
+              </span>
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Decision Audit Log</h3>
+            </div>
+            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 group-hover:translate-x-0.5 transition-transform">
+              Audit →
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
+            Immutable chronological ledger of approvals, budget limits, and contract amendments.
+          </p>
+        </Link>
+
+        {/* Policy vs Reality Gaps Card */}
+        <Link
+          href="/gaps"
+          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-amber-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-amber-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#241d12]/80"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400">
+                <Radar className="h-4 w-4" />
+              </span>
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Policy vs. Chat Gaps</h3>
+            </div>
+            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 group-hover:translate-x-0.5 transition-transform">
+              Radar →
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
+            Automated scan flagging conflicts between written company SOPs and daily chat practices.
           </p>
         </Link>
 

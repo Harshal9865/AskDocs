@@ -367,3 +367,56 @@ export interface MemoryQueryResponse {
   answer: string;
   relevant_memories: WorkspaceMemory[];
 }
+
+export interface DiffClause {
+  clause_title: string;
+  category: "liability" | "pricing" | "termination" | "sla" | "general" | string;
+  risk_level: "critical" | "warning" | "favorable" | "neutral";
+  doc_a_text: string;
+  doc_b_text: string;
+  analysis: string;
+  recommendation?: string;
+}
+
+export interface ContractDiffResult {
+  id: string;
+  doc_a_id: string;
+  doc_a_title: string;
+  doc_b_id: string;
+  doc_b_title: string;
+  overall_risk: "high_risk" | "moderate_risk" | "favorable" | "neutral";
+  summary: string;
+  key_changes: string[];
+  clauses: DiffClause[];
+  created_at: string;
+}
+
+export interface DecisionAuditRecord {
+  id: string;
+  workspace_id: string;
+  title: string;
+  decision_type: "expenditure" | "policy_exception" | "contract_signed" | "vendor_approval" | "general";
+  actor_name: string;
+  actor_email: string;
+  context_source: "chat" | "document" | "contract" | "manual";
+  context_ref?: string;
+  rationale: string;
+  status: "verified" | "flagged" | "pending";
+  created_at: string;
+}
+
+export interface PolicyGapItem {
+  id: string;
+  workspace_id: string;
+  policy_document_id?: string;
+  policy_title: string;
+  policy_clause: string;
+  actual_practice_snippet: string;
+  chat_id?: string;
+  severity: "critical" | "warning" | "info";
+  description: string;
+  suggested_remedy: string;
+  status: "open" | "reconciled" | "dismissed";
+  detected_at: string;
+}
+

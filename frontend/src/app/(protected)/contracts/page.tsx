@@ -15,6 +15,7 @@ import {
   Sparkles,
   Trash2,
   X,
+  Scale,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -157,13 +158,23 @@ export default function ContractsPage() {
             </p>
           </div>
 
-          <button
-            onClick={() => setScanModalOpen(true)}
-            className="group relative flex items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-6 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 active:scale-95 transition-all duration-300 cursor-pointer shrink-0"
-          >
-            <Sparkles className="h-4 w-4 transition-transform duration-300 group-hover:rotate-12" />
-            <span>Scan Contract with AI</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <Link
+              href="/contracts/compare"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3.5 text-xs font-black uppercase tracking-wider text-white backdrop-blur-md hover:bg-white/20 active:scale-95 transition-all cursor-pointer"
+            >
+              <Scale className="h-4 w-4 text-purple-300" />
+              <span>Redline & Diff Studio</span>
+            </Link>
+
+            <button
+              onClick={() => setScanModalOpen(true)}
+              className="group relative flex items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-6 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 active:scale-95 transition-all duration-300 cursor-pointer"
+            >
+              <Sparkles className="h-4 w-4 transition-transform duration-300 group-hover:rotate-12" />
+              <span>Scan Contract with AI</span>
+            </button>
+          </div>
         </div>
       </div>
 

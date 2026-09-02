@@ -22,7 +22,10 @@ import {
   FileSignature,
   Activity,
   FileSpreadsheet,
-  LayoutGrid
+  LayoutGrid,
+  Scale,
+  ShieldCheck,
+  Radar,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -41,7 +44,10 @@ const NAV = [
 
 const NAV_INTELLIGENCE = [
   { href: "/contracts", label: "Contracts", icon: FileSignature },
+  { href: "/contracts/compare", label: "Redline Diff", icon: Scale },
   { href: "/memory", label: "Memory Graph", icon: Brain },
+  { href: "/governance", label: "Decision Log", icon: ShieldCheck },
+  { href: "/gaps", label: "Policy Gaps", icon: Radar },
   { href: "/health", label: "Doc Health", icon: Activity },
   { href: "/digest", label: "Weekly Digest", icon: FileSpreadsheet },
   { href: "/canvas", label: "Canvas", icon: LayoutGrid },
