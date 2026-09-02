@@ -387,8 +387,10 @@ async def ask_question_stream(
         except Exception as exc:  # noqa: BLE001
             import logging
             logging.error("Error in AI chat stream: %s", exc)
-            yield f"data: {json.dumps({'type': 'answer', 'text': 'I couldn\'t find an answer to this in the uploaded documents.'})}\n\n"
-            yield f"data: {json.dumps({'type': 'done', 'citations': [], 'suggested_colleagues': []})}\n\n"
+            payload_ans = json.dumps({"type": "answer", "text": "I couldn't find an answer to this in the uploaded documents."})
+            payload_done = json.dumps({"type": "done", "citations": [], "suggested_colleagues": []})
+            yield f"data: {payload_ans}\n\n"
+            yield f"data: {payload_done}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
