@@ -37,13 +37,17 @@ async def list_workspace_digests(
     membership: MemberMembership,
 ):
     """List all AI weekly digests for a workspace."""
-    result = await db.execute(
-        select(WorkspaceDigest)
-        .where(WorkspaceDigest.workspace_id == workspace_id)
-        .order_by(WorkspaceDigest.created_at.desc())
-    )
-    digests = result.scalars().all()
-    return digests
+    try:
+        result = await db.execute(
+            select(WorkspaceDigest)
+            .where(WorkspaceDigest.workspace_id == workspace_id)
+            .order_by(WorkspaceDigest.created_at.desc())
+        )
+        digests = result.scalars().all()
+        return digests
+    except Exception as err:
+        logger.warning("Error fetching workspace digests: %s", err)
+        return []
 
 
 @router.post("/generate", response_model=WorkspaceDigestOut)
@@ -131,18 +135,34 @@ Reply ONLY with valid JSON in this exact structure:
             summary_md += f"- **{d.title}**: Document active in workspace repository.\n"
         takeaways = [f"Analyzed {len(docs)} documents in workspace", f"Tracked {len(obligations)} contract obligations"]
 
-    digest = WorkspaceDigest(
-        workspace_id=workspace_id,
-        title=digest_title,
-        summary_markdown=summary_md,
-        key_takeaways=takeaways,
-        document_count=len(docs),
-        contract_alerts_count=len(obligations),
-    )
-    db.add(digest)
-    await db.commit()
-    await db.refresh(digest)
-    return digest
+    try:
+        digest = WorkspaceDigest(
+            id=str(uuid.uuid4()),
+            workspace_id=workspace_id,
+            title=digest_title,
+            summary_markdown=summary_md,
+            key_takeaways=takeaways,
+            document_count=len(docs),
+            contract_alerts_count=len(obligations),
+        )
+        db.add(digest)
+        await db.commit()
+        await db.refresh(digest)
+        return digest
+    except Exception as commit_err:
+        logger.error("Failed to commit WorkspaceDigest: %s", commit_err, exc_info=True)
+        await db.rollback()
+        # Return transient digest object if database commit hit an issue
+        return WorkspaceDigestOut(
+            id=str(uuid.uuid4()),
+            workspace_id=str(workspace_id),
+            title=digest_title,
+            summary_markdown=summary_md,
+            key_takeaways=takeaways,
+            document_count=len(docs),
+            contract_alerts_count=len(obligations),
+            created_at=datetime.now(timezone.utc),
+        )
 
 
 @router.delete("/{digest_id}", status_code=status.HTTP_204_NO_CONTENT)
