@@ -786,4 +786,11 @@ export const api = {
       body: JSON.stringify({ query }),
     });
   },
+
+  async ingestMeetingTranscript(wsId: string, title: string, transcriptText: string): Promise<WorkspaceMemory> {
+    return request<WorkspaceMemory>(`/workspaces/${wsId}/memory/transcript`, {
+      method: "POST",
+      body: JSON.stringify({ title, transcript_text: transcriptText }),
+    });
+  },
 };

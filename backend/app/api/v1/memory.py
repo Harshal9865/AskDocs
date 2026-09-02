@@ -196,3 +196,84 @@ Provide an articulate, structured chronological answer summarizing decisions, ag
             answer="No relevant institutional memory records found matching your query.",
             relevant_memories=[],
         )
+
+
+class IngestTranscriptPayload(BaseModel):
+    title: str
+    transcript_text: str
+
+
+@router.post("/transcript", response_model=WorkspaceMemoryOut)
+async def ingest_meeting_transcript(
+    workspace_id: uuid.UUID,
+    payload: IngestTranscriptPayload,
+    db: DbSession,
+    membership: Membership,
+):
+    """Parse meeting transcript or call summary with Gemini AI and index into Institutional Memory."""
+    try:
+        prompt = f"""You are an elite Institutional Memory Preserver. Analyze this meeting transcript / call summary:
+
+TITLE: {payload.title}
+TRANSCRIPT:
+{payload.transcript_text[:4000]}
+
+Return ONLY valid JSON matching this exact structure:
+{{
+  "title": "{payload.title}",
+  "summary": "Concise summary of key decisions, agreements, attendees, and action items",
+  "entities": ["Attendee / Project Name 1", "Entity 2"],
+  "tags": ["meeting", "decision", "action-item"]
+}}
+"""
+
+        llm = get_llm()
+        raw_res = await llm.answer(prompt, [])
+        clean_res = (raw_res or "").strip()
+        if clean_res.startswith("```"):
+            clean_res = clean_res.strip("`")
+            if clean_res.lower().startswith("json"):
+                clean_res = clean_res[4:].strip()
+
+        try:
+            parsed = json.loads(clean_res)
+            mem_title = parsed.get("title", payload.title)
+            mem_summary = parsed.get("summary", payload.transcript_text[:300])
+            entities = parsed.get("entities", ["Meeting Notes"])
+            tags = parsed.get("tags", ["meeting", "notes"])
+        except Exception:
+            mem_title = payload.title
+            mem_summary = payload.transcript_text[:300]
+            entities = ["Meeting Notes"]
+            tags = ["meeting"]
+
+        mem = WorkspaceMemory(
+            id=str(uuid.uuid4()),
+            workspace_id=workspace_id,
+            source_type="chat",
+            title=mem_title,
+            summary=mem_summary,
+            entities=entities,
+            tags=tags,
+        )
+        db.add(mem)
+        await db.commit()
+        await db.refresh(mem)
+        return mem
+
+    except Exception as exc:
+        logger.error("Error ingesting meeting transcript: %s", exc, exc_info=True)
+        await db.rollback()
+        mem = WorkspaceMemory(
+            id=str(uuid.uuid4()),
+            workspace_id=workspace_id,
+            source_type="chat",
+            title=payload.title,
+            summary=payload.transcript_text[:300],
+            entities=["Meeting Notes"],
+            tags=["meeting"],
+        )
+        db.add(mem)
+        await db.commit()
+        await db.refresh(mem)
+        return mem

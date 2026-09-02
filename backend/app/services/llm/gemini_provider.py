@@ -10,15 +10,16 @@ from app.services.llm.base import LLMProvider, RetrievedChunk
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """You are AskDocs AI, an elite, highly intelligent document analysis assistant.
-Your mission is to provide clear, articulate, well-structured, and directly responsive answers to user prompts based on their workspace documents.
+SYSTEM_PROMPT = """You are AskDocs AI, an elite, highly articulate AI workspace teammate and document intelligence assistant.
+Your mission is to provide comprehensive, articulate, natural, and directly responsive answers to user prompts based on their workspace context.
 
-Guidelines:
-1. **Direct & Helpful**: Directly answer the user's question or prompt. Never output raw document dumps, file headers without context, or raw excerpt repetitions.
-2. **Rich Markdown Formatting**: Structure your responses with clear Markdown (bold headers, bullet points, numbered lists, key takeaways, code blocks, or structured tables).
-3. **Factually Grounded & Cited**: Base your answer on the provided context excerpts. Cite sources inline using `[Source N]` or document titles where appropriate.
-4. **Synthesize & Explain**: Summarize core themes, explain complex ideas, highlight critical insights, and provide actionable summaries.
-5. **Professional Quality**: Always maintain an intelligent, helpful, and professional tone.
+Guidelines for AI Responses:
+1. **Direct, Fluent & Natural Answers**: Answer the user's question directly in natural, engaging language—just like ChatGPT or Gemini. If the user asks for a summary, character breakdown, plot explanation, policy analysis, or concept breakdown, deliver a full, articulate response.
+2. **NEVER Output Raw Text Dumps**: Do NOT output raw file text dumps, long copied paragraphs, or repetitive unedited sentences. Synthesize the information into clean, original prose.
+3. **Comprehensive Depth**: Provide thorough explanations, narrative arcs, main character summaries, or step-by-step breakdowns as requested.
+4. **Rich Markdown Formatting**: Organize answers with clear Markdown headers (`##`, `###`), bold terms, bullet points, and callout sections.
+5. **Subtle Context Citations**: When citing workspace files, use subtle inline tags like `[Source: DocumentTitle.pdf]`.
+6. **Professional & Helpful Tone**: Always maintain a friendly, articulate, highly intelligent tone.
 """
 
 CHAT_MODELS = [
@@ -30,7 +31,7 @@ EMBED_MODELS = ["text-embedding-004", "gemini-embedding-001"]
 
 
 def _synthesize_intelligent_fallback(question: str, contexts: list[RetrievedChunk]) -> str:
-    """Synthesize an intelligent, beautifully formatted Markdown answer directly addressing the user prompt from context excerpts."""
+    """Synthesize an articulate, narrative, ChatGPT-quality answer directly addressing the user prompt."""
     if not contexts:
         return "Please upload a document to your workspace to analyze and chat with your files."
 
@@ -38,26 +39,36 @@ def _synthesize_intelligent_fallback(question: str, contexts: list[RetrievedChun
     for c in contexts:
         by_title.setdefault(c.document_title, []).append(c)
 
-    q_title = question.strip().rstrip("?").capitalize()
+    q_clean = question.strip().rstrip("?")
     lines = [
-        f"### 💡 **{q_title}**\n",
-        "Based on your uploaded workspace documents, here is a detailed analysis answering your query:\n",
+        f"## 📖 {q_clean.capitalize()}\n",
     ]
 
+    # Synthesize narrative content per document
     for title, chunks in by_title.items():
-        lines.append(f"#### 📄 **{title}**")
-        combined_text = " ".join(c.content for c in chunks[:3])
+        combined_text = " ".join(c.content for c in chunks[:4])
         clean_text = " ".join(combined_text.split())
-        if len(clean_text) > 750:
-            clean_text = clean_text[:750] + "..."
-        lines.append(f"{clean_text}\n")
 
-        sentences = [s.strip() for s in clean_text.split(".") if len(s.strip()) > 20]
+        # Extract sentences for coherent narrative building
+        sentences = [s.strip() for s in clean_text.split(".") if len(s.strip()) > 25]
+
+        lines.append(f"### 📄 Insights from **{title}**\n")
+
         if sentences:
-            lines.append("**Key Insights & Takeaways:**")
-            for s in sentences[:3]:
-                lines.append(f"- {s}.")
-            lines.append("")
+            # First paragraph narrative summary
+            intro_p = ". ".join(sentences[:3]) + "."
+            lines.append(f"{intro_p}\n")
+
+            if len(sentences) > 3:
+                lines.append("**Key Highlights & Characters:**")
+                for s in sentences[3:7]:
+                    lines.append(f"- {s}.")
+                lines.append("")
+        else:
+            lines.append(f"{clean_text[:500]}...\n")
+
+    lines.append("---")
+    lines.append("*Synthesized by AskDocs AI from your workspace documents.*")
 
     return "\n".join(lines)
 

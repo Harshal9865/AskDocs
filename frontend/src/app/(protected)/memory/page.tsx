@@ -11,10 +11,12 @@ import {
   FileSignature,
   FileText,
   Network,
+  Plus,
   RefreshCw,
   Search,
   Sparkles,
   Tag,
+  X,
   Zap,
 } from "lucide-react";
 
@@ -27,6 +29,12 @@ export default function InstitutionalMemoryPage() {
   const [querying, setQuerying] = useState<boolean>(false);
   const [queryAnswer, setQueryAnswer] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>("all");
+
+  // Transcript Ingestion Modal State
+  const [transcriptModalOpen, setTranscriptModalOpen] = useState<boolean>(false);
+  const [transcriptTitle, setTranscriptTitle] = useState<string>("");
+  const [transcriptText, setTranscriptText] = useState<string>("");
+  const [ingesting, setIngesting] = useState<boolean>(false);
 
   const loadMemoryData = useCallback(async () => {
     if (!workspace?.id) return;
@@ -62,6 +70,27 @@ export default function InstitutionalMemoryPage() {
     }
   };
 
+  const handleIngestTranscript = async () => {
+    if (!workspace?.id || !transcriptTitle.trim() || !transcriptText.trim() || ingesting) return;
+    setIngesting(true);
+    try {
+      const newMem = await api.ingestMeetingTranscript(
+        workspace.id,
+        transcriptTitle.trim(),
+        transcriptText.trim()
+      );
+      setMemories((prev) => [newMem, ...prev]);
+      setTranscriptModalOpen(false);
+      setTranscriptTitle("");
+      setTranscriptText("");
+      await loadMemoryData();
+    } catch {
+      alert("Failed to process meeting transcript.");
+    } finally {
+      setIngesting(false);
+    }
+  };
+
   const filteredMemories = memories.filter((m) => {
     if (activeFilter === "all") return true;
     return m.source_type === activeFilter;
@@ -94,18 +123,28 @@ export default function InstitutionalMemoryPage() {
               Institutional Memory & Knowledge Graph
             </h1>
             <p className="max-w-2xl text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Never lose context. Index workspace decisions, policy exceptions, and document relationships into an immutable Knowledge Graph.
+              Never lose context. Automatically index workspace decisions, meeting transcripts, policy exceptions, and document relationships into an immutable Knowledge Mind Map.
             </p>
           </div>
 
-          <button
-            onClick={loadMemoryData}
-            disabled={loading}
-            className="group relative flex items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-6 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 active:scale-95 disabled:opacity-50 transition-all duration-300 cursor-pointer shrink-0"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : "group-hover:rotate-180"}`} />
-            <span>Sync Mind Map</span>
-          </button>
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              onClick={() => setTranscriptModalOpen(true)}
+              className="group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-5 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 active:scale-95 transition-all duration-300 cursor-pointer"
+            >
+              <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
+              <span>Add Meeting Transcript</span>
+            </button>
+
+            <button
+              onClick={loadMemoryData}
+              disabled={loading}
+              className="flex items-center justify-center rounded-2xl bg-slate-800/80 p-3.5 text-white hover:bg-slate-700 active:scale-95 transition-all cursor-pointer"
+              title="Sync Mind Map"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -237,6 +276,7 @@ export default function InstitutionalMemoryPage() {
               { id: "all", label: "All Memory Records", count: memories.length },
               { id: "decision", label: "Decisions & Approvals", count: memories.filter((m) => m.source_type === "decision").length },
               { id: "contract", label: "Contract Obligations", count: memories.filter((m) => m.source_type === "contract").length },
+              { id: "chat", label: "Meeting Transcripts & Calls", count: memories.filter((m) => m.source_type === "chat").length },
               { id: "document", label: "Document Syntheses", count: memories.filter((m) => m.source_type === "document").length },
             ].map((tab) => (
               <button
@@ -265,7 +305,7 @@ export default function InstitutionalMemoryPage() {
             <Brain className="h-10 w-10 text-purple-500 mb-3 animate-bounce" />
             <h3 className="text-base font-black text-slate-900 dark:text-white">No Memory Records Indexed Yet</h3>
             <p className="mt-1.5 text-xs text-slate-500 dark:text-zinc-400 max-w-md leading-relaxed">
-              As your team uploads documents, executes contract approvals in chat, and generates AI digests, memory records will automatically populate here.
+              Click 'Add Meeting Transcript' above to ingest call summaries, or execute chat approvals in Office Chats to populate memory records automatically.
             </p>
           </div>
         ) : (
@@ -305,6 +345,80 @@ export default function InstitutionalMemoryPage() {
           </div>
         )}
       </div>
+
+      {/* Modal: Add Meeting Transcript */}
+      {transcriptModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-lg rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-2xl backdrop-blur-xl dark:border-white/15 dark:bg-[#15151c]/95 space-y-4">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/20">
+                  <Brain className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900 dark:text-white">Add Meeting Transcript / Call Notes</h3>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400">Gemini will extract key decisions & index into memory</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setTranscriptModalOpen(false)}
+                className="rounded-full p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Title */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-extrabold text-slate-700 dark:text-zinc-300">Meeting / Call Title:</label>
+              <input
+                type="text"
+                placeholder="e.g. Client X Strategy & SLA Alignment Meeting"
+                value={transcriptTitle}
+                onChange={(e) => setTranscriptTitle(e.target.value)}
+                className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/60 px-4 py-2.5 text-xs font-bold text-slate-800 outline-none dark:border-white/15 dark:bg-[#1f1f2e] dark:text-white"
+              />
+            </div>
+
+            {/* Transcript Text */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-extrabold text-slate-700 dark:text-zinc-300">Paste Transcript / Notes:</label>
+              <textarea
+                rows={5}
+                placeholder="Paste call notes, Zoom transcript, or meeting minutes here…"
+                value={transcriptText}
+                onChange={(e) => setTranscriptText(e.target.value)}
+                className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 text-xs font-medium text-slate-800 outline-none dark:border-white/15 dark:bg-[#1f1f2e] dark:text-white leading-relaxed resize-none"
+              />
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-white/10">
+              <button
+                onClick={() => setTranscriptModalOpen(false)}
+                className="rounded-2xl border border-slate-200/80 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={!transcriptTitle.trim() || !transcriptText.trim() || ingesting}
+                onClick={handleIngestTranscript}
+                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-purple-500/25 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-50 transition-all cursor-pointer"
+              >
+                {ingesting ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 animate-spin" /> Indexing Transcript…
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" /> Ingest into Memory
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
