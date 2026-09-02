@@ -20,6 +20,7 @@ import {
   ArrowUpDown,
   ChevronDown,
   X,
+  Sparkles,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -610,6 +611,15 @@ export default function DocumentsPage() {
                       >
                         <RotateCcw className="h-4 w-4" />
                       </button>
+                    )}
+                    {d.status === "ready" && (
+                      <Link
+                        href={`/chat?q=${encodeURIComponent(`Summarize key points and takeaways from "${d.title}"`)}`}
+                        className="rounded-lg p-1.5 text-slate-400 opacity-0 transition-all hover:bg-purple-50 hover:text-purple-600 group-hover:opacity-100 dark:text-zinc-500 dark:hover:bg-purple-950/40 dark:hover:text-purple-300"
+                        title="Ask AI about this document"
+                      >
+                        <Sparkles className="h-4 w-4" />
+                      </Link>
                     )}
                     {(myRole === "admin" || viewMode === "mine") && (
                       <button
