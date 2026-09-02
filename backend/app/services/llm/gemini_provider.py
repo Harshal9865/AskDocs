@@ -62,6 +62,16 @@ def _synthesize_intelligent_fallback(question: str, contexts: list[RetrievedChun
     return "\n".join(lines)
 
 
+_llm_instance = None
+
+
+def get_llm() -> "GeminiProvider":
+    global _llm_instance
+    if _llm_instance is None:
+        _llm_instance = GeminiProvider()
+    return _llm_instance
+
+
 class GeminiProvider(LLMProvider):
     def __init__(self):
         settings = get_settings()
