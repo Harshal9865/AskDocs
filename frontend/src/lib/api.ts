@@ -548,7 +548,7 @@ export const api = {
   listConversations: (wsId: string, cursor?: string) => {
     const params = new URLSearchParams({ limit: "20" });
     if (cursor) params.set("cursor", cursor);
-    return request<ConversationPage>(`/workspaces/${wsId}/conversations?${params.toString()}`);
+    return request<ConversationPage | Conversation[]>(`/workspaces/${wsId}/conversations?${params.toString()}`);
   },
   listMessages: (convId: string) =>
     request<Message[]>(`/conversations/${convId}/messages`),

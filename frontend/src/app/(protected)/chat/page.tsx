@@ -291,9 +291,16 @@ export default function ChatPage() {
     if (!workspace) return;
     try {
       const res = await api.listConversations(workspace.id);
-      const list = res.items || [];
+      let list: Conversation[] = [];
+      let next: string | null = null;
+      if (Array.isArray(res)) {
+        list = res;
+      } else if (res && Array.isArray((res as unknown as { items?: Conversation[] }).items)) {
+        list = (res as unknown as { items: Conversation[] }).items;
+        next = (res as unknown as { next_cursor?: string | null }).next_cursor || null;
+      }
       setConversations(list);
-      setNextCursor(res.next_cursor || null);
+      setNextCursor(next);
       // Auto-restore active conversation on reload or initial render
       if (list.length > 0) {
         setActiveConv((current) => {
@@ -309,7 +316,9 @@ export default function ChatPage() {
           return target || null;
         });
       }
-    } catch {}
+    } catch {
+      setConversations([]);
+    }
   }, [workspace, openConversation]);
 
   const loadMoreConversations = useCallback(async () => {
@@ -317,12 +326,21 @@ export default function ChatPage() {
     setLoadingMore(true);
     try {
       const res = await api.listConversations(workspace.id, nextCursor);
+      let items: Conversation[] = [];
+      let next: string | null = null;
+      if (Array.isArray(res)) {
+        items = res;
+      } else if (res && Array.isArray((res as unknown as { items?: Conversation[] }).items)) {
+        items = (res as unknown as { items: Conversation[] }).items;
+        next = (res as unknown as { next_cursor?: string | null }).next_cursor || null;
+      }
       setConversations((prev) => {
-        const existingIds = new Set(prev.map((c) => c.id));
-        const newItems = (res.items || []).filter((c) => !existingIds.has(c.id));
-        return [...prev, ...newItems];
+        const currentList = Array.isArray(prev) ? prev : [];
+        const existingIds = new Set(currentList.map((c) => c.id));
+        const newItems = items.filter((c) => !existingIds.has(c.id));
+        return [...currentList, ...newItems];
       });
-      setNextCursor(res.next_cursor || null);
+      setNextCursor(next);
     } catch {}
     finally {
       setLoadingMore(false);
@@ -433,8 +451,8 @@ export default function ChatPage() {
     if (!activeConv || (!question && attachments.length === 0) || busy) return;
     setBusy(true);
 
-    const imgPreviews = attachments.filter((a) => a.previewUrl).map((a) => a.previewUrl!);
-    const fileNames = attachments.filter((a) => !a.previewUrl).map((a) => a.file.name);
+    const imgPreviews = (attachments || []).filter((a) => a.previewUrl).map((a) => a.previewUrl!);
+    const fileNames = (attachments || []).filter((a) => !a.previewUrl).map((a) => a.file.name);
     const previewLabel = question || (attachments.length > 0 ? attachments.map((a) => (a.previewUrl ? "🖼️" : `📄 ${a.file.name}`)).join(" ") : "");
     setMessages((prev) => [...prev, { role: "user", content: previewLabel, previews: imgPreviews.length > 0 ? imgPreviews : undefined, fileChips: fileNames.length > 0 ? fileNames : undefined }, { role: "assistant", content: "", streaming: true }]);
 
@@ -573,8 +591,9 @@ export default function ChatPage() {
         tabIndex={0}
         onKeyDown={(e) => {
           if (renamingId || isSelectMode) return;
-          const filtered = conversations.filter(
-            (c) => !convSearch.trim() || c.title.toLowerCase().includes(convSearch.toLowerCase())
+          const convList = Array.isArray(conversations) ? conversations : [];
+          const filtered = convList.filter(
+            (c) => !convSearch.trim() || (c.title && c.title.toLowerCase().includes(convSearch.toLowerCase()))
           );
           if (filtered.length === 0) return;
           if (e.key === "ArrowDown") {
@@ -613,7 +632,7 @@ export default function ChatPage() {
               </h2>
             </div>
             <div className="flex items-center gap-1">
-              {conversations.length > 0 && (
+              {(Array.isArray(conversations) ? conversations.length : 0) > 0 && (
                 <button
                   onClick={() => {
                     setIsSelectMode(!isSelectMode);
@@ -640,7 +659,7 @@ export default function ChatPage() {
           </div>
 
           {/* Quick Search in AI Conversations */}
-          {conversations.length > 2 && (
+          {(Array.isArray(conversations) ? conversations.length : 0) > 2 && (
             <div className="relative mb-3">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
               <input
@@ -653,8 +672,9 @@ export default function ChatPage() {
           )}
 
           {(() => {
-            const filtered = conversations.filter(
-              (c) => !convSearch.trim() || c.title.toLowerCase().includes(convSearch.toLowerCase())
+            const convList = Array.isArray(conversations) ? conversations : [];
+            const filtered = convList.filter(
+              (c) => !convSearch.trim() || (c.title && c.title.toLowerCase().includes(convSearch.toLowerCase()))
             );
             if (filtered.length === 0) {
               return (
@@ -879,10 +899,17 @@ export default function ChatPage() {
                 </span>
                 <button
                   type="button"
-                  onClick={() => toggleSelectAll(conversations.map((c) => c.id))}
+                  onClick={() =>
+                    toggleSelectAll(
+                      (Array.isArray(conversations) ? conversations : []).map((c) => c.id)
+                    )
+                  }
                   className="text-purple-600 hover:underline dark:text-purple-400"
                 >
-                  {selectedIds.size === conversations.length ? "Deselect All" : "Select All"}
+                  {selectedIds.size ===
+                  (Array.isArray(conversations) ? conversations.length : 0)
+                    ? "Deselect All"
+                    : "Select All"}
                 </button>
               </div>
               <div className="flex items-center gap-2 mt-1">
