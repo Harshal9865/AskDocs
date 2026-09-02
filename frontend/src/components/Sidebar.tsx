@@ -26,7 +26,9 @@ import {
   Scale,
   ShieldCheck,
   Radar,
-  AudioLines,
+  Table,
+  GraduationCap,
+  Headphones,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -44,12 +46,12 @@ const NAV = [
 ];
 
 const NAV_INTELLIGENCE = [
+  { href: "/extract", label: "Data Extractor", icon: Table },
+  { href: "/study-guide", label: "Study Studio", icon: GraduationCap },
+  { href: "/listen", label: "Audio Briefs", icon: Headphones },
   { href: "/contracts", label: "Contracts", icon: FileSignature },
   { href: "/contracts/compare", label: "Redline Diff", icon: Scale },
-  { href: "/transcripts", label: "Meeting AI", icon: AudioLines },
   { href: "/memory", label: "Memory Graph", icon: Brain },
-  { href: "/governance", label: "Decision Log", icon: ShieldCheck },
-  { href: "/gaps", label: "Policy Gaps", icon: Radar },
   { href: "/health", label: "Doc Health", icon: Activity },
   { href: "/digest", label: "Weekly Digest", icon: FileSpreadsheet },
   { href: "/canvas", label: "Canvas", icon: LayoutGrid },

@@ -447,16 +447,58 @@ export interface SpeakerParticipation {
 export interface MeetingTranscript {
   id: string;
   workspace_id: string;
+export interface ExtractedTableData {
+  id: string;
+  document_id?: string;
+  document_title: string;
+  table_name: string;
+  columns: string[];
+  rows: Record<string, string | number>[];
+  total_records: number;
+  confidence_score: number;
+  summary_insights: string[];
+  created_at: string;
+}
+
+export interface FlashcardItem {
+  id: string;
+  question: string;
+  answer: string;
+  category?: string;
+  difficulty?: "easy" | "medium" | "hard";
+  mastered?: boolean;
+}
+
+export interface QuizQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  correct_option_index: number;
+  explanation: string;
+  source_citation?: string;
+}
+
+export interface StudyGuideDeck {
+  id: string;
+  workspace_id: string;
   title: string;
-  meeting_date: string;
-  duration_minutes: number;
-  speakers: string[];
-  executive_summary: string;
-  key_decisions: string[];
-  action_items: TranscriptActionItem[];
-  contradictions: TranscriptContradiction[];
-  speaker_stats: SpeakerParticipation[];
-  raw_transcript: string;
+  document_titles: string[];
+  executive_cheat_sheet: string;
+  key_concepts: { term: string; definition: string }[];
+  flashcards: FlashcardItem[];
+  quiz: QuizQuestion[];
+  created_at: string;
+}
+
+export interface AudioBriefItem {
+  id: string;
+  document_id?: string;
+  title: string;
+  speaker_format: "solo_brief" | "dialogue_podcast";
+  script_content: string;
+  duration_estimate_seconds: number;
+  chapter_timestamps: { title: string; timestamp: string }[];
+  key_takeaways: string[];
   created_at: string;
 }
 
