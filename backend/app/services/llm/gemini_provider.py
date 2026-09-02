@@ -1,3 +1,8 @@
+"""
+Gemini AI provider — uses google-genai >= 1.0 SDK.
+This is the single source of truth for all LLM calls in AskDocs.
+"""
+
 import json
 import logging
 from typing import AsyncGenerator
@@ -10,86 +15,94 @@ from app.services.llm.base import LLMProvider, RetrievedChunk
 
 logger = logging.getLogger(__name__)
 
-CHAT_MODELS = [
-    "gemini-2.5-flash",
-    "gemini-1.5-flash",
-    "gemini-1.5-pro",
-]
-EMBED_MODELS = [
-    "text-embedding-004",
-    "gemini-embedding-001",
-]
+# ---------------------------------------------------------------------------
+# Model lists — tried in order, first success wins
+# ---------------------------------------------------------------------------
+CHAT_MODELS = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
+EMBED_MODELS = ["text-embedding-004", "gemini-embedding-001"]
 
-SYSTEM_INSTRUCTION = """You are AskDocs AI, an elite, highly intelligent document analysis assistant.
-Your role is to provide articulate, insightful, well-structured answers based on the provided workspace document excerpts.
+# ---------------------------------------------------------------------------
+# System instruction — defines AskDocs AI personality & answer format
+# ---------------------------------------------------------------------------
+SYSTEM_INSTRUCTION = (
+    "You are AskDocs AI, an expert document analysis assistant. "
+    "You answer questions using the provided document excerpts and synthesize rich, intelligent responses.\n\n"
+    "RESPONSE FORMAT RULES:\n"
+    "1. Start with ONE polite intro sentence referencing the documents.\n"
+    "2. Organize by document with bold headers: ### ***Document Name***\n"
+    "3. Write rich, narrative bullet points with bold descriptive titles:\n"
+    "   * **The Central Theme:** <your synthesis and analysis here>. [Source 1, Source 2]\n"
+    "4. NEVER slice raw PDF sentences into fake titles. Always write NATURAL prose.\n"
+    "5. Add source citations after each fact: [Source 1] or [Source 1, Source 3]\n"
+    "6. End with an engaging follow-up offer.\n"
+    "7. For story questions — narrate the plot, characters, themes. Be like a smart book reviewer.\n"
+    "8. For factual questions — be precise, structured, cite everything.\n"
+    "9. For greetings — respond warmly without needing documents.\n"
+    "10. You have access to FULL document excerpts below. Use them to give COMPLETE answers."
+)
 
-HOW TO ANSWER:
-- Open with a single polite intro sentence like "Based on the provided excerpts, here is a detailed breakdown:" or "Based on your uploaded workspace documents, several key insights are revealed:".
-- Group your response by document/story using bold section headers like `### ***The Star***` or `**From *The Last Question* excerpts:**`.
-- Present key takeaways using bullet points with meaningful bold descriptive titles:
-  * **The Fate of the Universe (Entropy):** Stars and the universe are gradually dying... [Source 4, Source 5]
-  * **A Lost Civilization's Legacy:** An innocent civilization built a mile-high pylon... [Source 1, Source 2]
-- End key facts with subtle source tags like `[Source 1, Source 2]`.
-- Conclude with a polite follow-up like "Would you like a deeper analysis of any specific section?"
-- Never copy raw PDF text verbatim. Always synthesize into articulate, natural prose.
-- For conversational messages ("hi", "hello"), respond warmly and helpfully.
-"""
 
-
-def _build_full_prompt(question: str, contexts: list[RetrievedChunk], history: list[dict] | None) -> str:
-    """Build the complete prompt text, embedding system instructions + context + history + question."""
-    parts = []
+# ---------------------------------------------------------------------------
+# Prompt builder — context + history + question, all in one string
+# ---------------------------------------------------------------------------
+def _build_prompt(question: str, contexts: list[RetrievedChunk], history: list[dict] | None) -> str:
+    lines = []
 
     if contexts:
-        parts.append("DOCUMENT CONTEXT (from workspace documents):\n")
+        lines.append("=== DOCUMENT EXCERPTS FROM WORKSPACE ===")
         for i, c in enumerate(contexts, 1):
-            snippet = c.content[:1200] if len(c.content) > 1200 else c.content
-            parts.append(f"[Source {i} | Document: {c.document_title} | Chunk #{c.ordinal}]\n{snippet}\n")
-        parts.append("---")
+            snippet = c.content if len(c.content) <= 1500 else c.content[:1500]
+            lines.append(f"\n[Source {i}] Document: \"{c.document_title}\" | Section #{c.ordinal}")
+            lines.append(snippet)
+        lines.append("\n=== END OF DOCUMENT EXCERPTS ===\n")
 
     if history:
-        parts.append("CONVERSATION HISTORY:\n")
-        for turn in history[-6:]:
-            role = "User" if turn.get("role") == "user" else "AskDocs AI"
-            content = (turn.get("content") or "")[:500]
-            parts.append(f"{role}: {content}")
-        parts.append("---")
+        lines.append("=== RECENT CONVERSATION ===")
+        for turn in history[-8:]:
+            role_label = "User" if turn.get("role") == "user" else "AskDocs AI"
+            msg = (turn.get("content") or "")[:400]
+            lines.append(f"{role_label}: {msg}")
+        lines.append("=== END CONVERSATION ===\n")
 
-    parts.append(f"User Question: {question}")
-    return "\n\n".join(parts)
+    lines.append(f"User: {question}")
+    lines.append("\nAskDocs AI (provide a thorough, intelligent, well-cited answer):")
+    return "\n".join(lines)
 
 
-def _fallback_answer(question: str, contexts: list[RetrievedChunk]) -> str:
-    """Emergency human-readable fallback — only runs if ALL Gemini API calls fail."""
+# ---------------------------------------------------------------------------
+# Emergency fallback — only used if ALL Gemini API calls fail
+# ---------------------------------------------------------------------------
+def _emergency_fallback(question: str, contexts: list[RetrievedChunk]) -> str:
     if not contexts:
         return (
-            "Hello! I'm AskDocs AI. Please upload documents to your workspace and I'll "
-            "analyze and answer questions about them instantly."
+            "Hello! I'm AskDocs AI. Upload documents to your workspace and I'll "
+            "analyze and answer questions about them with citations."
         )
-
     by_title: dict[str, list[RetrievedChunk]] = {}
     for c in contexts:
         by_title.setdefault(c.document_title, []).append(c)
 
-    lines = ["Based on the provided excerpts:\n"]
+    lines = ["Based on the provided documents:\n"]
     for idx, (title, chunks) in enumerate(by_title.items(), 1):
-        text = " ".join(c.content for c in chunks[:3])
+        text = " ".join(c.content for c in chunks[:2])
         text = " ".join(text.split())
-        sents = [s.strip() for s in text.split(".") if len(s.strip()) > 30]
+        sentences = [s.strip() for s in text.split(".") if len(s.strip()) > 40]
         lines.append(f"### ***{title}***")
-        if sents:
-            lines.append(". ".join(sents[:3]) + f". [Source {idx}]\n")
-            for s in sents[3:6]:
-                lines.append(f"* {s}. [Source {idx}]")
+        if sentences:
+            summary = ". ".join(sentences[:4]) + f". [Source {idx}]"
+            lines.append(summary)
         else:
-            lines.append(f"{text[:400]}... [Source {idx}]")
+            lines.append(f"{text[:500]} [Source {idx}]")
         lines.append("")
 
     lines.append("Would you like a deeper analysis of any specific section?")
     return "\n".join(lines)
 
 
-_llm_instance = None
+# ---------------------------------------------------------------------------
+# Singleton
+# ---------------------------------------------------------------------------
+_llm_instance: "GeminiProvider | None" = None
 
 
 def get_llm() -> "GeminiProvider":
@@ -99,46 +112,62 @@ def get_llm() -> "GeminiProvider":
     return _llm_instance
 
 
+# ---------------------------------------------------------------------------
+# Main provider class
+# ---------------------------------------------------------------------------
 class GeminiProvider(LLMProvider):
     def __init__(self):
         settings = get_settings()
         if not settings.GEMINI_API_KEY:
-            raise RuntimeError("GEMINI_API_KEY is not set")
+            raise RuntimeError("GEMINI_API_KEY is not configured")
 
         self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        logger.info("GeminiProvider initialized with API key (len=%d)", len(settings.GEMINI_API_KEY))
 
-        raw_list = [settings.GEMINI_CHAT_MODEL] + CHAT_MODELS
-        seen: set[str] = set()
-        clean: list[str] = []
-        for m in raw_list:
-            if m and m not in seen:
-                seen.add(m)
-                clean.append(m)
-        self.chat_models = clean or ["gemini-2.5-flash", "gemini-1.5-flash"]
+        # Build deduplicated model lists, preferred model first
+        def _dedup(preferred: str | None, defaults: list[str]) -> list[str]:
+            seen: set[str] = set()
+            out: list[str] = []
+            for m in ([preferred] if preferred else []) + defaults:
+                if m and m not in seen:
+                    seen.add(m)
+                    out.append(m)
+            return out or defaults[:1]
 
-        raw_embed = [settings.GEMINI_EMBED_MODEL] + EMBED_MODELS
-        seen_e: set[str] = set()
-        clean_e: list[str] = []
-        for m in raw_embed:
-            if m and m not in seen_e:
-                seen_e.add(m)
-                clean_e.append(m)
-        self.embed_models = clean_e or ["text-embedding-004"]
+        self.chat_models = _dedup(settings.GEMINI_CHAT_MODEL, CHAT_MODELS)
+        self.embed_models = _dedup(settings.GEMINI_EMBED_MODEL, EMBED_MODELS)
+        logger.info("Chat models: %s | Embed models: %s", self.chat_models, self.embed_models)
 
+    # ------------------------------------------------------------------
+    # Embed
+    # ------------------------------------------------------------------
     async def embed(self, texts: list[str]) -> list[list[float]]:
+        """Embed a list of texts. Returns list of float vectors."""
         for model_name in self.embed_models:
             try:
-                result = await self.client.aio.models.embed_content(
-                    model=model_name,
-                    contents=texts,
-                    config=types.EmbedContentConfig(output_dimensionality=768),
-                )
-                return [list(e.values) for e in result.embeddings]
+                # Embed one at a time to avoid batch issues across SDK versions
+                vectors = []
+                for text in texts:
+                    result = await self.client.aio.models.embed_content(
+                        model=model_name,
+                        contents=text,
+                    )
+                    # google-genai v1: result.embeddings is a list of ContentEmbedding
+                    if hasattr(result, "embeddings") and result.embeddings:
+                        vectors.append(list(result.embeddings[0].values))
+                    else:
+                        raise ValueError(f"Unexpected embed result shape: {result}")
+                logger.info("embed() model %s OK for %d texts", model_name, len(texts))
+                return vectors
             except Exception as e:
                 logger.warning("embed() model %s failed: %s", model_name, e)
-        logger.error("All embed models failed")
+
+        logger.error("All embed models failed — returning zero vectors")
         return [[0.0] * 768 for _ in texts]
 
+    # ------------------------------------------------------------------
+    # OCR image
+    # ------------------------------------------------------------------
     async def ocr_image(self, image_bytes: bytes, mime_type: str = "image/png") -> str:
         """Extract text from an image using Gemini vision."""
         prompt = (
@@ -154,11 +183,15 @@ class GeminiProvider(LLMProvider):
                     contents=[prompt, image_part],
                 )
                 if response.text:
+                    logger.info("ocr_image() model %s OK", model_name)
                     return response.text
             except Exception as e:
                 logger.warning("ocr_image() model %s failed: %s", model_name, e)
         return ""
 
+    # ------------------------------------------------------------------
+    # Non-streaming answer
+    # ------------------------------------------------------------------
     async def answer(
         self,
         question: str,
@@ -166,26 +199,32 @@ class GeminiProvider(LLMProvider):
         history: list[dict] | None = None,
         image_parts: list | None = None,
     ) -> str:
-        prompt_text = _build_full_prompt(question, contexts, history)
+        prompt = _build_prompt(question, contexts, history)
+        config = types.GenerateContentConfig(system_instruction=SYSTEM_INSTRUCTION)
 
         for model_name in self.chat_models:
             try:
-                contents = [SYSTEM_INSTRUCTION, prompt_text]
+                contents: list = [prompt]
                 if image_parts:
                     contents.extend(image_parts)
                 response = await self.client.aio.models.generate_content(
                     model=model_name,
                     contents=contents,
+                    config=config,
                 )
                 if response.text and response.text.strip():
-                    logger.info("answer() model %s OK", model_name)
+                    logger.info("answer() model=%s SUCCESS (len=%d)", model_name, len(response.text))
                     return response.text
+                logger.warning("answer() model=%s returned empty text", model_name)
             except Exception as e:
-                logger.warning("answer() model %s failed: %s", model_name, e)
+                logger.warning("answer() model=%s FAILED: %s", model_name, e)
 
-        logger.error("answer() — all models failed, using fallback")
-        return _fallback_answer(question, contexts)
+        logger.error("answer() — all models failed — using emergency fallback")
+        return _emergency_fallback(question, contexts)
 
+    # ------------------------------------------------------------------
+    # Streaming answer (SSE)
+    # ------------------------------------------------------------------
     async def stream_answer(
         self,
         question: str,
@@ -193,17 +232,19 @@ class GeminiProvider(LLMProvider):
         history: list[dict] | None = None,
         image_parts: list | None = None,
     ) -> AsyncGenerator[str, None]:
-        prompt_text = _build_full_prompt(question, contexts, history)
+        prompt = _build_prompt(question, contexts, history)
+        config = types.GenerateContentConfig(system_instruction=SYSTEM_INSTRUCTION)
 
-        # Attempt 1: Streaming
+        # ---- Pass 1: streaming ----------------------------------------
         for model_name in self.chat_models:
             try:
-                contents = [SYSTEM_INSTRUCTION, prompt_text]
+                contents: list = [prompt]
                 if image_parts:
                     contents.extend(image_parts)
                 stream = await self.client.aio.models.generate_content_stream(
                     model=model_name,
                     contents=contents,
+                    config=config,
                 )
                 emitted = False
                 async for chunk in stream:
@@ -215,34 +256,39 @@ class GeminiProvider(LLMProvider):
                     except Exception:
                         pass
                 if emitted:
-                    logger.info("stream_answer() model %s OK", model_name)
+                    logger.info("stream_answer() model=%s STREAMING OK", model_name)
                     return
+                logger.warning("stream_answer() model=%s streamed but emitted nothing", model_name)
             except Exception as e:
-                logger.warning("stream_answer() streaming model %s failed: %s", model_name, e)
+                logger.warning("stream_answer() streaming model=%s FAILED: %s", model_name, e)
 
-        # Attempt 2: Non-streaming fallback
+        # ---- Pass 2: non-streaming fallback ---------------------------
         for model_name in self.chat_models:
             try:
-                contents = [SYSTEM_INSTRUCTION, prompt_text]
+                contents = [prompt]
                 if image_parts:
                     contents.extend(image_parts)
                 response = await self.client.aio.models.generate_content(
                     model=model_name,
                     contents=contents,
+                    config=config,
                 )
                 if response.text and response.text.strip():
-                    logger.info("stream_answer() non-stream model %s OK", model_name)
+                    logger.info("stream_answer() model=%s NON-STREAM OK (len=%d)", model_name, len(response.text))
                     yield response.text
                     return
+                logger.warning("stream_answer() non-stream model=%s empty", model_name)
             except Exception as e:
-                logger.warning("stream_answer() non-stream model %s failed: %s", model_name, e)
+                logger.warning("stream_answer() non-stream model=%s FAILED: %s", model_name, e)
 
-        # Attempt 3: Emergency synthesized fallback
-        logger.error("stream_answer() — all models failed, using synthesized fallback")
-        yield _fallback_answer(question, contexts)
+        # ---- Pass 3: emergency fallback --------------------------------
+        logger.error("stream_answer() — ALL models failed — using emergency fallback")
+        yield _emergency_fallback(question, contexts)
 
+    # ------------------------------------------------------------------
+    # Conflict detection
+    # ------------------------------------------------------------------
     async def detect_conflict(self, contexts: list[RetrievedChunk]) -> dict | None:
-        """Detect if excerpts from 2+ documents contradict each other."""
         by_doc: dict[str, list[RetrievedChunk]] = {}
         for c in contexts:
             by_doc.setdefault(c.document_id, []).append(c)
@@ -272,5 +318,5 @@ class GeminiProvider(LLMProvider):
                     if data.get("has_conflict"):
                         return data
             except Exception as e:
-                logger.warning("detect_conflict() model %s failed: %s", model_name, e)
+                logger.warning("detect_conflict() model=%s failed: %s", model_name, e)
         return None
