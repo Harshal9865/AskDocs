@@ -4,7 +4,11 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
+  Check,
   CheckCircle2,
+  Copy,
+  FileCheck,
+  FileSignature,
   FileText,
   MessagesSquare,
   Radar,
@@ -12,6 +16,7 @@ import {
   Search,
   ShieldAlert,
   Sparkles,
+  X,
   Zap,
 } from "lucide-react";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -26,11 +31,16 @@ export default function PolicyRealityGapPage() {
   const [filterSeverity, setFilterSeverity] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // SOP Generator Modal state
+  const [draftingGap, setDraftingGap] = useState<PolicyGapItem | null>(null);
+  const [generatedSOP, setGeneratedSOP] = useState<string>("");
+  const [draftingBusy, setDraftingBusy] = useState<boolean>(false);
+  const [copiedSOP, setCopiedSOP] = useState<boolean>(false);
+
   const loadGapData = useCallback(async () => {
     if (!workspace) return;
     setLoading(true);
     try {
-      // Simulate real-time scanning of workspace SOPs against team chat channels
       const initialGaps: PolicyGapItem[] = [
         {
           id: "gap-1",
@@ -100,6 +110,45 @@ export default function PolicyRealityGapPage() {
     setGaps((prev) => prev.map((g) => (g.id === gapId ? { ...g, status } : g)));
   };
 
+  const openSOPDraftModal = async (gap: PolicyGapItem) => {
+    setDraftingGap(gap);
+    setDraftingBusy(true);
+    setCopiedSOP(false);
+
+    // Simulate AI synthesis of formal SOP amendment
+    setTimeout(() => {
+      const generatedClause = `### Standard Operating Procedure (SOP) Amendment — Ref: ${gap.policy_title}
+**Effective Date:** ${new Date().toLocaleDateString()}
+**Governing Department:** Operations & Compliance Lead
+
+#### 1. Purpose & Scope
+This amendment harmonizes operational day-to-day practices with formal organizational policy regarding ${gap.policy_title}.
+
+#### 2. Revised Operating Rule
+> **Updated Clause:** ${gap.suggested_remedy}
+
+#### 3. Delegation of Authority & Approval Thresholds
+- **Standard Threshold:** Tier 1 actions up to $500 authorized for Senior Leads with recorded justification.
+- **Escalation Threshold:** Deviations exceeding standard limits require verified in-chat approval via \`@AskDocs\` or direct VP sign-off.
+- **Audit Logging:** All approvals are committed to the Immutable Decision Governance Ledger for SOC2 compliance.
+
+#### 4. Verification & Review Cadence
+This procedure is audited on a quarterly cadence by the Workspace Intelligence Auditor.`;
+
+      setGeneratedSOP(generatedClause);
+      setDraftingBusy(false);
+    }, 600);
+  };
+
+  const copySOPText = () => {
+    void navigator.clipboard.writeText(generatedSOP);
+    setCopiedSOP(true);
+    setTimeout(() => setCopiedSOP(false), 2000);
+  };
+
+  const openGapsCount = gaps.filter((g) => g.status === "open").length;
+  const complianceRate = gaps.length === 0 ? 100 : Math.round(((gaps.length - openGapsCount) / gaps.length) * 100);
+
   const filteredGaps = gaps.filter((g) => {
     if (filterSeverity !== "all" && g.severity !== filterSeverity) return false;
     if (searchQuery.trim()) {
@@ -126,8 +175,8 @@ export default function PolicyRealityGapPage() {
       <div className="gemini-orb gemini-orb-2" />
 
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 p-6 sm:p-8 text-white shadow-2xl dark:border-white/10">
-        <div className="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl" />
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 p-6 sm:p-8 text-white shadow-2xl dark:border-white/10 animate-gradient-shift">
+        <div className="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl animate-float" />
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="space-y-2.5">
             <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/20 px-3.5 py-1 text-xs font-bold text-indigo-300 backdrop-blur-md shadow-inner">
@@ -142,27 +191,41 @@ export default function PolicyRealityGapPage() {
             </p>
           </div>
 
-          <button
-            onClick={handleScanGaps}
-            disabled={scanning}
-            className="group relative flex items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-6 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 active:scale-95 disabled:opacity-50 transition-all duration-300 cursor-pointer shrink-0"
-          >
-            <RefreshCw className={`h-4 w-4 transition-transform duration-500 ${scanning ? "animate-spin" : "group-hover:rotate-180"}`} />
-            <span>{scanning ? "Scanning Discrepancies…" : "Run Policy vs. Chat Scan"}</span>
-          </button>
+          <div className="flex items-center gap-5 shrink-0">
+            {/* Holographic Radar Scanner Animation Widget */}
+            <div className="relative hidden sm:flex h-20 w-20 shrink-0 items-center justify-center rounded-full border border-amber-500/30 bg-black/40 backdrop-blur-md shadow-xl shadow-amber-500/20 overflow-hidden">
+              <div className="absolute inset-2 rounded-full border border-amber-500/20" />
+              <div className="absolute inset-5 rounded-full border border-amber-500/30" />
+              <div className="absolute inset-8 rounded-full border border-amber-500/40" />
+              <div className="absolute inset-0 origin-center animate-radar bg-gradient-to-tr from-amber-500/40 via-purple-500/20 to-transparent pointer-events-none" />
+              <div className="relative z-10 flex h-3 w-3 items-center justify-center rounded-full bg-amber-400 shadow-md shadow-amber-400/80 animate-ping" />
+              <Radar className="absolute z-10 h-5 w-5 text-amber-300" />
+            </div>
+
+            <button
+              onClick={handleScanGaps}
+              disabled={scanning}
+              className="group relative flex items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-6 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 active:scale-95 disabled:opacity-50 transition-all duration-300 cursor-pointer"
+            >
+              <RefreshCw className={`h-4 w-4 transition-transform duration-500 ${scanning ? "animate-spin" : "group-hover:rotate-180"}`} />
+              <span>{scanning ? "Scanning Discrepancies…" : "Run Policy vs. Chat Scan"}</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Metrics Row */}
+      {/* Compliance Health & Metrics Row */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-[#15151c]/90 flex items-center justify-between">
           <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Total Discrepancies</p>
-            <p className="mt-1 text-3xl font-black text-slate-900 dark:text-white">{gaps.length}</p>
-            <p className="mt-1 text-[11px] font-medium text-slate-500 dark:text-zinc-400">Flagged policy gaps</p>
+            <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Policy Alignment Rate</p>
+            <p className="mt-1 text-3xl font-black text-slate-900 dark:text-white">{complianceRate}%</p>
+            <p className="mt-1 text-[11px] font-medium text-slate-500 dark:text-zinc-400">
+              {openGapsCount === 0 ? "100% full compliance" : `${openGapsCount} active discrepancies`}
+            </p>
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500/10 to-rose-500/10 text-red-600 dark:text-red-400 border border-red-500/20 shadow-inner">
-            <ShieldAlert className="h-6 w-6" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-inner">
+            <CheckCircle2 className="h-6 w-6" />
           </div>
         </div>
 
@@ -174,8 +237,8 @@ export default function PolicyRealityGapPage() {
             </p>
             <p className="mt-1 text-[11px] font-medium text-slate-500 dark:text-zinc-400">Urgent financial/legal drift</p>
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-inner">
-            <AlertTriangle className="h-6 w-6" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500/10 to-rose-500/10 text-red-600 dark:text-red-400 border border-red-500/20 shadow-inner">
+            <ShieldAlert className="h-6 w-6" />
           </div>
         </div>
 
@@ -187,8 +250,8 @@ export default function PolicyRealityGapPage() {
             </p>
             <p className="mt-1 text-[11px] font-medium text-slate-500 dark:text-zinc-400">Aligned with actual operations</p>
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-inner">
-            <CheckCircle2 className="h-6 w-6" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500/10 to-indigo-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 shadow-inner">
+            <FileCheck className="h-6 w-6" />
           </div>
         </div>
       </div>
@@ -212,8 +275,8 @@ export default function PolicyRealityGapPage() {
           className="rounded-2xl border border-slate-200/80 bg-slate-50/60 px-4 py-3 text-xs font-bold text-slate-800 outline-none transition-all dark:border-white/10 dark:bg-[#1f1f2e] dark:text-zinc-200 cursor-pointer w-full sm:w-auto"
         >
           <option value="all">All Severities</option>
-          <option value="critical">Critical</option>
-          <option value="warning">Warnings</option>
+          <option value="critical">Critical Drift</option>
+          <option value="warning">Warning Drift</option>
           <option value="info">Informational</option>
         </select>
       </div>
@@ -280,7 +343,6 @@ export default function PolicyRealityGapPage() {
 
               {/* Side by Side: Policy Written Rule vs Chat Reality */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {/* Official Policy Rule */}
                 <div className="space-y-1.5 rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-[#1a1a24]/80">
                   <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-zinc-400">
                     <FileText className="h-3.5 w-3.5" /> Official Written SOP / Contract
@@ -290,7 +352,6 @@ export default function PolicyRealityGapPage() {
                   </p>
                 </div>
 
-                {/* Actual Chat Reality */}
                 <div className="space-y-1.5 rounded-2xl border border-amber-200/80 bg-amber-50/50 p-4 dark:border-amber-500/20 dark:bg-amber-950/20">
                   <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-400">
                     <MessagesSquare className="h-3.5 w-3.5" /> Actual Daily Practice (Office Chat)
@@ -313,11 +374,19 @@ export default function PolicyRealityGapPage() {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => openSOPDraftModal(item)}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-3.5 py-2 text-xs font-bold text-white shadow-md shadow-purple-500/20 active:scale-95 transition-all cursor-pointer"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>Generate SOP Amendment</span>
+                  </button>
+
                   {item.status === "open" ? (
                     <button
                       onClick={() => handleStatusChange(item.id, "reconciled")}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-3.5 py-2 text-xs font-bold text-white shadow-md shadow-emerald-500/20 hover:from-emerald-500 hover:to-teal-500 active:scale-95 transition-all cursor-pointer"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-emerald-700 active:scale-95 transition-all cursor-pointer"
                     >
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       <span>Mark Reconciled</span>
@@ -333,11 +402,10 @@ export default function PolicyRealityGapPage() {
 
                   <Link
                     href={`/chat?q=${encodeURIComponent(`Let's reconcile the operational policy gap "${item.policy_title}". Official rule: "${item.policy_clause}". Actual chat practice: "${item.actual_practice_snippet}". Suggested remedy: "${item.suggested_remedy}". Draft an updated SOP clause to align them.`)}`}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-purple-50 px-3.5 py-2 text-xs font-bold text-purple-700 hover:bg-purple-100 dark:bg-purple-950/40 dark:text-purple-300 dark:hover:bg-purple-900/50 transition-all"
-                    title="Draft SOP alignment with AI"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-purple-50 px-3 py-2 text-xs font-bold text-purple-700 hover:bg-purple-100 dark:bg-purple-950/40 dark:text-purple-300 transition-all"
+                    title="Audit in Chat"
                   >
-                    <Sparkles className="h-3.5 w-3.5" />
-                    <span>Draft Alignment</span>
+                    <span>Discuss in AI Chat</span>
                   </Link>
                 </div>
               </div>
@@ -345,6 +413,66 @@ export default function PolicyRealityGapPage() {
           ))
         )}
       </div>
+
+      {/* SOP Amendment Draft Modal */}
+      {draftingGap && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="w-full max-w-2xl rounded-3xl border border-slate-200/80 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#15151c] space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-white/5">
+              <div className="flex items-center gap-2">
+                <FileSignature className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                <h3 className="text-base font-black text-slate-900 dark:text-white">
+                  AI-Generated SOP Amendment Clause
+                </h3>
+              </div>
+              <button
+                onClick={() => setDraftingGap(null)}
+                className="rounded-xl p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {draftingBusy ? (
+              <div className="flex h-48 flex-col items-center justify-center text-slate-400">
+                <RefreshCw className="h-8 w-8 animate-spin text-purple-600 mb-2" />
+                <p className="text-xs font-bold">Synthesizing SOP Amendment Text…</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-slate-200/80 bg-slate-50/90 p-4 font-mono text-xs text-slate-800 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-zinc-200 max-h-96 overflow-y-auto whitespace-pre-wrap leading-relaxed">
+                  {generatedSOP}
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-white/5">
+                  <span className="text-[11px] font-bold text-slate-400">
+                    Ready to copy into your team handbook or policy repository.
+                  </span>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={copySOPText}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-4 py-2 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-purple-500/20 hover:bg-purple-700 active:scale-95 transition-all cursor-pointer"
+                    >
+                      {copiedSOP ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                      <span>{copiedSOP ? "Copied" : "Copy SOP Amendment"}</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleStatusChange(draftingGap.id, "reconciled");
+                        setDraftingGap(null);
+                      }}
+                      className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-emerald-500/20 hover:bg-emerald-700 active:scale-95 transition-all cursor-pointer"
+                    >
+                      Apply & Reconcile
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
