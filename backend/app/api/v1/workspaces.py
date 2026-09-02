@@ -1,9 +1,10 @@
+import logging
 import re
 import uuid
 
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
 from pydantic import BaseModel
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, text
 
 from app.core.deps import AdminMembership, CurrentUser, DbSession, Membership
 from app.models.activity import log_activity
@@ -13,6 +14,9 @@ from app.models.invitation import Invitation
 from app.models.join_request import WorkspaceJoinRequest
 from app.models.user import User
 from app.models.workspace import Role, Workspace, WorkspaceMember
+
+logger = logging.getLogger(__name__)
+
 from app.schemas.workspace import (
     InvitationOut,
     JoinRequestOut,
@@ -278,29 +282,107 @@ async def set_visibility(
 
 @router.delete("/{workspace_id}", status_code=204)
 async def delete_workspace(workspace_id: uuid.UUID, db: DbSession, membership: AdminMembership):
-    """Admin-only. Removes the workspace and everything in it."""
+    """Admin-only. Removes the workspace and everything in it atomically."""
     ws_id = membership.workspace_id
+    try:
+        # Step 1: Clean up message attachments for any conversation in this workspace
+        await db.execute(
+            text(
+                "DELETE FROM message_attachments WHERE message_id IN ("
+                "SELECT id FROM messages WHERE conversation_id IN ("
+                "SELECT id FROM conversations WHERE workspace_id = :ws_id"
+                "))"
+            ),
+            {"ws_id": ws_id},
+        )
 
-    conversation_ids = select(Conversation.id).where(Conversation.workspace_id == ws_id)
-    msg_ids = select(Message.id).where(Message.conversation_id.in_(conversation_ids))
+        # Step 2: Clean up messages
+        await db.execute(
+            text(
+                "DELETE FROM messages WHERE conversation_id IN ("
+                "SELECT id FROM conversations WHERE workspace_id = :ws_id"
+                ")"
+            ),
+            {"ws_id": ws_id},
+        )
 
-    await db.execute(delete(MessageAttachment).where(MessageAttachment.message_id.in_(msg_ids)))
-    await db.execute(delete(Message).where(Message.conversation_id.in_(conversation_ids)))
-    await db.execute(delete(ConversationParticipant).where(ConversationParticipant.conversation_id.in_(conversation_ids)))
-    await db.execute(delete(ConversationHidden).where(ConversationHidden.conversation_id.in_(conversation_ids)))
-    await db.execute(delete(ConversationReadState).where(ConversationReadState.conversation_id.in_(conversation_ids)))
-    await db.execute(delete(Conversation).where(Conversation.workspace_id == ws_id))
+        # Step 3: Clean up conversation participants, hidden states, read states
+        await db.execute(
+            text(
+                "DELETE FROM conversation_participants WHERE conversation_id IN ("
+                "SELECT id FROM conversations WHERE workspace_id = :ws_id"
+                ")"
+            ),
+            {"ws_id": ws_id},
+        )
+        await db.execute(
+            text(
+                "DELETE FROM conversation_hidden WHERE conversation_id IN ("
+                "SELECT id FROM conversations WHERE workspace_id = :ws_id"
+                ")"
+            ),
+            {"ws_id": ws_id},
+        )
+        await db.execute(
+            text(
+                "DELETE FROM conversation_read_states WHERE conversation_id IN ("
+                "SELECT id FROM conversations WHERE workspace_id = :ws_id"
+                ")"
+            ),
+            {"ws_id": ws_id},
+        )
 
-    document_ids = select(Document.id).where(Document.workspace_id == ws_id)
-    await db.execute(delete(Chunk).where(Chunk.document_id.in_(document_ids)))
-    await db.execute(delete(Document).where(Document.workspace_id == ws_id))
+        # Step 4: Delete conversations
+        await db.execute(
+            text("DELETE FROM conversations WHERE workspace_id = :ws_id"),
+            {"ws_id": ws_id},
+        )
 
-    await db.execute(delete(WorkspaceMember).where(WorkspaceMember.workspace_id == ws_id))
-    await db.execute(delete(Invitation).where(Invitation.workspace_id == ws_id))
-    await db.execute(delete(WorkspaceJoinRequest).where(WorkspaceJoinRequest.workspace_id == ws_id))
-    await db.execute(delete(ActivityLog).where(ActivityLog.workspace_id == ws_id))
-    await db.execute(delete(Workspace).where(Workspace.id == ws_id))
-    await db.commit()
+        # Step 5: Clean up document chunks and documents
+        await db.execute(
+            text(
+                "DELETE FROM chunks WHERE document_id IN ("
+                "SELECT id FROM documents WHERE workspace_id = :ws_id"
+                ")"
+            ),
+            {"ws_id": ws_id},
+        )
+        await db.execute(
+            text("DELETE FROM documents WHERE workspace_id = :ws_id"),
+            {"ws_id": ws_id},
+        )
+
+        # Step 6: Clean up members, invites, join requests, activity logs
+        await db.execute(
+            text("DELETE FROM workspace_members WHERE workspace_id = :ws_id"),
+            {"ws_id": ws_id},
+        )
+        await db.execute(
+            text("DELETE FROM invitations WHERE workspace_id = :ws_id"),
+            {"ws_id": ws_id},
+        )
+        await db.execute(
+            text("DELETE FROM workspace_join_requests WHERE workspace_id = :ws_id"),
+            {"ws_id": ws_id},
+        )
+        await db.execute(
+            text("DELETE FROM activity_log WHERE workspace_id = :ws_id"),
+            {"ws_id": ws_id},
+        )
+
+        # Step 7: Delete workspace row
+        await db.execute(
+            text("DELETE FROM workspaces WHERE id = :ws_id"),
+            {"ws_id": ws_id},
+        )
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        logger.exception("Error deleting workspace %s: %s", ws_id, e)
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR,
+            f"Failed to delete workspace: {str(e)}",
+        )
 
 
 @router.get("/{workspace_id}/members", response_model=list[MemberOut])
