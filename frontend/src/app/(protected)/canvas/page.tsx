@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
-import { DocumentItem, WorkspaceCanvas } from "@/lib/types";
+import { DocumentItem, WorkspaceCanvas, MatrixRow } from "@/lib/types";
 import {
   CheckCircle2,
   FileText,
@@ -264,7 +264,7 @@ export default function WorkspaceCanvasPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-                        {activeCanvas.matrix_data.rows?.map((row: any, rIdx: number) => (
+                        {activeCanvas.matrix_data.rows?.map((row: MatrixRow, rIdx: number) => (
                           <tr key={rIdx} className="hover:bg-purple-500/5 transition-colors">
                             <td className="p-3.5 font-bold text-purple-600 dark:text-purple-300 whitespace-nowrap">{row.topic}</td>
                             <td className="p-3.5 text-slate-600 dark:text-zinc-300 max-w-xs leading-relaxed">{row.summary}</td>
