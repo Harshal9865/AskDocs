@@ -61,96 +61,99 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
 
   return (
     <>
-    <header className="dark:border-slate-700/50 dark:bg-[#181818] sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b border-slate-200 bg-white px-3 transition-colors sm:gap-3 sm:px-5">
-      {/* mobile hamburger */}
-      {onMenu && (
+    <header className="dark:border-slate-700/50 dark:bg-[#181818] sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-1 border-b border-slate-200 bg-white px-2 transition-colors sm:gap-3 sm:px-5">
+      {/* Left side cluster */}
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+        {/* mobile hamburger */}
+        {onMenu && (
+          <button
+            onClick={onMenu}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onMenu();
+              }
+            }}
+            aria-label="Open menu"
+            aria-expanded={false}
+            className="rounded-lg p-1 text-slate-600 transition-colors hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 md:hidden focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+        )}
+
+        {/* brand */}
         <button
-          onClick={onMenu}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              onMenu();
-            }
-          }}
-          aria-label="Open menu"
-          aria-expanded={false}
-          className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 md:hidden focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          onClick={() => router.push("/")}
+          className="flex shrink-0 items-center gap-1.5"
+          aria-label="AskDocs home"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
+          <span className="flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center overflow-hidden rounded-lg">
+            {brandSrc ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={brandSrc} alt="Brand" className="h-full w-full object-cover" />
+            ) : brandSticker ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={`/stickers/${brandSticker}.svg`} alt="Brand" className="h-full w-full" />
+            ) : (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logo-day.svg" alt="AskDocs" className="h-6 w-6 sm:h-7 sm:w-7 dark:hidden" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logo-night.svg" alt="AskDocs" className="hidden h-6 w-6 sm:h-7 sm:w-7 dark:block" />
+              </>
+            )}
+          </span>
+          <span className="hidden sm:inline dark:text-white text-[15px] font-bold tracking-tight text-slate-900">
+            AskDocs
+          </span>
         </button>
-      )}
 
-      {/* brand */}
-      <button
-        onClick={() => router.push("/")}
-        className="flex shrink-0 items-center gap-2"
-        aria-label="AskDocs home"
-      >
-        <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-lg">
-          {brandSrc ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={brandSrc} alt="Brand" className="h-full w-full object-cover" />
-          ) : brandSticker ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={`/stickers/${brandSticker}.svg`} alt="Brand" className="h-full w-full" />
-          ) : (
-            <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo-day.svg" alt="AskDocs" className="h-7 w-7 dark:hidden" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo-night.svg" alt="AskDocs" className="hidden h-7 w-7 dark:block" />
-            </>
-          )}
-        </span>
-        <span className="hidden sm:inline dark:text-white text-[15px] font-bold tracking-tight text-slate-900">
-          AskDocs
-        </span>
-      </button>
+        {/* Quick Nav Icons for small & tablet screens (<lg) */}
+        <div className="flex items-center gap-0.5 lg:hidden">
+          <Link
+            href="/dashboard"
+            title="Dashboard"
+            aria-label="Dashboard"
+            className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all ${
+              pathname === "/dashboard" || pathname.startsWith("/dashboard/")
+                ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
+                : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
+            }`}
+          >
+            <LayoutDashboard className="h-3.5 w-3.5" />
+          </Link>
 
-      {/* Quick Nav Icons for small & tablet screens (<lg) */}
-      <div className="flex items-center gap-0.5 sm:gap-1 lg:hidden">
-        <Link
-          href="/dashboard"
-          title="Dashboard"
-          aria-label="Dashboard"
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all ${
-            pathname === "/dashboard" || pathname.startsWith("/dashboard/")
-              ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
-              : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
-          }`}
-        >
-          <LayoutDashboard className="h-4.5 w-4.5" />
-        </Link>
+          <Link
+            href="/chat"
+            title="AI Chat"
+            aria-label="AI Chat"
+            className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all ${
+              pathname === "/chat" || pathname.startsWith("/chat/")
+                ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
+                : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
+            }`}
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+          </Link>
 
-        <Link
-          href="/chat"
-          title="AI Chat"
-          aria-label="AI Chat"
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all ${
-            pathname === "/chat" || pathname.startsWith("/chat/")
-              ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
-              : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
-          }`}
-        >
-          <Sparkles className="h-4.5 w-4.5" />
-        </Link>
-
-        <Link
-          href="/chats"
-          title="Office Chats"
-          aria-label="Office Chats"
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all ${
-            pathname === "/chats" || pathname.startsWith("/chats/")
-              ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
-              : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
-          }`}
-        >
-          <MessagesSquare className="h-4.5 w-4.5" />
-        </Link>
+          <Link
+            href="/chats"
+            title="Office Chats"
+            aria-label="Office Chats"
+            className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all ${
+              pathname === "/chats" || pathname.startsWith("/chats/")
+                ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
+                : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
+            }`}
+          >
+            <MessagesSquare className="h-3.5 w-3.5" />
+          </Link>
+        </div>
       </div>
 
       {/* desktop nav — fills the empty middle (collapses to More sheet <lg) */}
@@ -266,14 +269,14 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
       </form>
 
       {/* right side controls */}
-      <div className="flex items-center gap-0.5 sm:gap-1.5 ml-auto sm:ml-0">
+      <div className="flex items-center gap-0.5 sm:gap-1.5 ml-auto sm:ml-0 shrink-0">
         <button
           onClick={() => router.push("/search")}
           aria-label="Search"
           title="Search"
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 sm:hidden transition-colors"
+          className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 sm:hidden transition-colors"
         >
-          <Search className="h-4 w-4" />
+          <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         </button>
 
         <Link
@@ -296,14 +299,26 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
             aria-expanded={menuOpen}
             className="flex items-center gap-0.5 sm:gap-1 rounded-full p-0.5 transition-colors hover:bg-slate-100 dark:hover:bg-white/10"
           >
-            <Avatar
-              name={user?.name ?? "?"}
-              size={30}
-              src={avatarSrc}
-              stickerId={
-                user?.avatar_kind === "sticker" ? user.avatar_value ?? null : null
-              }
-            />
+            <span className="sm:hidden">
+              <Avatar
+                name={user?.name ?? "?"}
+                size={26}
+                src={avatarSrc}
+                stickerId={
+                  user?.avatar_kind === "sticker" ? user.avatar_value ?? null : null
+                }
+              />
+            </span>
+            <span className="hidden sm:inline">
+              <Avatar
+                name={user?.name ?? "?"}
+                size={30}
+                src={avatarSrc}
+                stickerId={
+                  user?.avatar_kind === "sticker" ? user.avatar_value ?? null : null
+                }
+              />
+            </span>
             <ChevronDown
               className={`hidden h-3.5 w-3.5 text-slate-400 transition-transform sm:block ${menuOpen ? "rotate-180" : ""}`}
             />
