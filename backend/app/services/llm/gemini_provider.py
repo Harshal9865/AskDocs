@@ -123,11 +123,22 @@ class GeminiProvider(LLMProvider):
                     model=model_name,
                     contents=contents,
                 )
-                if response.text:
+                if response.text and response.text.strip():
                     return response.text
             except Exception as e:
                 logger.warning("Answer generation with %s failed: %s", model_name, e)
-        return "I couldn't find an answer to this in the uploaded documents."
+
+        if contexts:
+            by_title: dict[str, list[str]] = {}
+            for c in contexts:
+                by_title.setdefault(c.document_title, []).append(c.content)
+            lines = ["Based on the provided excerpts, here is a summary of the texts:\n"]
+            for title, excerpts in by_title.items():
+                lines.append(f"### ***{title}***")
+                lines.append(excerpts[0][:1000] + "\n")
+            return "\n\n".join(lines)
+
+        return "Please upload a document to your workspace to analyze and chat with your files."
 
     async def stream_answer(
         self,
@@ -179,7 +190,19 @@ class GeminiProvider(LLMProvider):
             except Exception as e:
                 logger.warning("Non-stream fallback with model %s failed: %s", model_name, e)
 
-        yield "I couldn't find an answer to this in the uploaded documents."
+        # Fallback 3: Synthesize direct summary from context excerpts if API is unreachable
+        if contexts:
+            by_title: dict[str, list[str]] = {}
+            for c in contexts:
+                by_title.setdefault(c.document_title, []).append(c.content)
+            lines = ["Based on the provided excerpts, here is a summary of the texts:\n"]
+            for title, excerpts in by_title.items():
+                lines.append(f"### ***{title}***")
+                lines.append(excerpts[0][:1000] + "\n")
+            yield "\n\n".join(lines)
+            return
+
+        yield "Please upload a document to your workspace to analyze and chat with your files."
 
     async def detect_conflict(self, contexts: list[RetrievedChunk]) -> dict | None:
         """Ask Gemini whether the best excerpts from different documents

@@ -312,7 +312,7 @@ export default function ChatPage() {
             next[next.length - 1] = {
               ...last,
               streaming: false,
-              content: last.content || "I couldn't find an answer to this in the uploaded documents.",
+              content: last?.content || "Processing document summary...",
             };
           }
           return next;
@@ -383,7 +383,7 @@ export default function ChatPage() {
         next[next.length - 1] = {
           ...last,
           streaming: false,
-          content: last?.content || "I couldn't find an answer to this in the uploaded documents.",
+          content: last?.content || "Processing document summary...",
         };
         return next;
       });
@@ -398,7 +398,7 @@ export default function ChatPage() {
           next[next.length - 1] = {
             ...last,
             streaming: false,
-            content: last.content || "I couldn't find an answer to this in the uploaded documents.",
+            content: last?.content || "Processing document summary...",
           };
         }
         return next;

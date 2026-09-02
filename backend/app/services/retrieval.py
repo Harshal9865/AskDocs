@@ -30,7 +30,7 @@ async def search_chunks(
         sql,
         {"emb": str(query_embedding), "wsid": str(workspace_id), "k": top_k},
     )
-    return [
+    retrieved = [
         RetrievedChunk(
             chunk_id=r.chunk_id,
             document_id=r.document_id,
@@ -40,6 +40,37 @@ async def search_chunks(
             score=float(r.score),
         )
         for r in result.all()
+    ]
+    if retrieved:
+        return retrieved
+
+    # Fallback: if zero vector similarity results (e.g. generic prompt like "hi", "explain", "give summary"), retrieve top document chunks from the workspace
+    fallback_sql = text(
+        """
+        SELECT c.id::text          AS chunk_id,
+               d.id::text          AS document_id,
+               d.title             AS document_title,
+               c.ordinal           AS ordinal,
+               c.content           AS content,
+               0.5                 AS score
+        FROM chunks c
+        JOIN documents d ON d.id = c.document_id
+        WHERE c.workspace_id = :wsid AND d.deleted_at IS NULL
+        ORDER BY d.created_at DESC, c.ordinal ASC
+        LIMIT :k
+        """
+    )
+    fallback_res = await db.execute(fallback_sql, {"wsid": str(workspace_id), "k": top_k})
+    return [
+        RetrievedChunk(
+            chunk_id=r.chunk_id,
+            document_id=r.document_id,
+            document_title=r.document_title,
+            ordinal=r.ordinal,
+            content=r.content,
+            score=float(r.score),
+        )
+        for r in fallback_res.all()
     ]
 
 

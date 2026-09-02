@@ -27,7 +27,7 @@ from app.services.plan_enforcement import check_question_limit
 
 router = APIRouter()
 
-REFUSAL = "I couldn't find an answer to this in the uploaded documents."
+REFUSAL = "Welcome to AskDocs! Please upload a document to your workspace to start analyzing, summarizing, and chatting with your files."
 
 MAX_VISION_IMAGES = 4
 
