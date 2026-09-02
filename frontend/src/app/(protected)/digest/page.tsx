@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
 import { WorkspaceDigest } from "@/lib/types";
@@ -17,6 +18,8 @@ import {
   Award,
   Clock,
   Layers,
+  Copy,
+  Check,
 } from "lucide-react";
 
 export default function WorkspaceDigestPage() {
@@ -26,6 +29,7 @@ export default function WorkspaceDigestPage() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const loadDigests = useCallback(async () => {
     if (!workspace) return;
@@ -281,8 +285,31 @@ export default function WorkspaceDigestPage() {
                       Generated on {new Date(activeDigest.created_at).toLocaleString()}
                     </div>
                   </div>
-                  <div className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-500/20 px-3.5 py-1.5 text-xs font-bold text-purple-600 dark:text-purple-300 shrink-0">
-                    <Layers className="h-4 w-4" /> AI Synthesized Executive Report
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void navigator.clipboard.writeText(
+                          `# ${activeDigest.title}\n\n${activeDigest.summary_markdown}`
+                        );
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2000);
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10 transition-all cursor-pointer"
+                      title="Copy Executive Report"
+                    >
+                      {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5 text-slate-400" />}
+                      <span>{copied ? "Copied" : "Copy Report"}</span>
+                    </button>
+
+                    <Link
+                      href={`/chat?q=${encodeURIComponent(`Let's discuss the latest workspace executive digest "${activeDigest.title}". What are the biggest risks and action priorities?`)}`}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-md shadow-purple-500/20 hover:scale-105 active:scale-95 transition-all"
+                      title="Discuss Digest in AI Chat"
+                    >
+                      <Sparkles className="h-3.5 w-3.5" />
+                      <span>Discuss with AI</span>
+                    </Link>
                   </div>
                 </div>
 

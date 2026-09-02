@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
 import { DocumentItem, WorkspaceCanvas, MatrixRow } from "@/lib/types";
@@ -17,6 +18,8 @@ import {
   Trash2,
   X,
   Zap,
+  Copy,
+  Check,
 } from "lucide-react";
 
 export default function WorkspaceCanvasPage() {
@@ -29,6 +32,7 @@ export default function WorkspaceCanvasPage() {
   const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
   const [selectedDocIds, setSelectedDocIds] = useState<string[]>([]);
   const [customTitle, setCustomTitle] = useState<string>("");
+  const [copiedMatrix, setCopiedMatrix] = useState<boolean>(false);
 
   const loadData = useCallback(async () => {
     if (!workspace?.id) return;
@@ -243,6 +247,37 @@ export default function WorkspaceCanvasPage() {
                   <p className="text-xs text-slate-400 mt-0.5">
                     Synthesized from {activeCanvas.document_ids.length} workspace document(s)
                   </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  {activeCanvas.matrix_data?.headers && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const headers = activeCanvas.matrix_data.headers.join("\t");
+                        const rows = (activeCanvas.matrix_data.rows || [])
+                          .map((r) => [r.topic, r.summary, ...(r.values || [])].join("\t"))
+                          .join("\n");
+                        void navigator.clipboard.writeText(`${headers}\n${rows}`);
+                        setCopiedMatrix(true);
+                        setTimeout(() => setCopiedMatrix(false), 2000);
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10 transition-all cursor-pointer"
+                      title="Copy Comparison Matrix to clipboard (TSV for Excel/Sheets)"
+                    >
+                      {copiedMatrix ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5 text-slate-400" />}
+                      <span>{copiedMatrix ? "Copied" : "Copy Matrix"}</span>
+                    </button>
+                  )}
+
+                  <Link
+                    href={`/chat?q=${encodeURIComponent(`Let's investigate the synthesized research canvas "${activeCanvas.title}". What are the critical trade-offs and next steps?`)}`}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-3.5 py-2 text-xs font-bold text-white shadow-md shadow-purple-500/20 hover:scale-105 active:scale-95 transition-all"
+                    title="Ask AI in Chat"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>Ask AI</span>
+                  </Link>
                 </div>
               </div>
 

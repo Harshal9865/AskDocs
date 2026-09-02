@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
 import { WorkspaceHealthReport } from "@/lib/types";
@@ -291,6 +292,15 @@ export default function DocumentHealthDashboardPage() {
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                  <Link
+                    href={`/chat?q=${encodeURIComponent(`We have a document quality/health issue titled "${issue.title}": ${issue.description}. Recommended action: ${issue.suggested_action || "Investigate"}. How should we fix or audit this?`)}`}
+                    className="inline-flex items-center gap-1 rounded-xl bg-purple-50 px-3 py-2 text-xs font-bold text-purple-700 hover:bg-purple-100 dark:bg-purple-950/40 dark:text-purple-300 dark:hover:bg-purple-900/50 transition-all"
+                    title="Ask AI to investigate this issue"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>Ask AI</span>
+                  </Link>
+
                   <button
                     onClick={() => handleResolve(issue.id, "resolved")}
                     className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-3.5 py-2 text-xs font-bold text-white shadow-md shadow-emerald-500/20 hover:from-emerald-500 hover:to-teal-500 active:scale-95 transition-all cursor-pointer"
