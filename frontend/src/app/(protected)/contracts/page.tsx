@@ -291,7 +291,7 @@ export default function ContractsPage() {
           </h3>
           <p className="mt-1.5 text-xs text-slate-500 dark:text-zinc-400 max-w-md leading-relaxed">
             {obligations.length === 0
-              ? "Click 'Scan Contract with AI' to automatically parse renewal dates, notice windows, and payment terms from your workspace PDFs."
+              ? "Click &quot;Scan Contract with AI&quot; to automatically parse renewal dates, notice windows, and payment terms from your workspace PDFs."
               : "Try adjusting your search query or status filter."}
           </p>
           {obligations.length === 0 && (

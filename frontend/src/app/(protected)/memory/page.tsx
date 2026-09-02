@@ -305,7 +305,7 @@ export default function InstitutionalMemoryPage() {
             <Brain className="h-10 w-10 text-purple-500 mb-3 animate-bounce" />
             <h3 className="text-base font-black text-slate-900 dark:text-white">No Memory Records Indexed Yet</h3>
             <p className="mt-1.5 text-xs text-slate-500 dark:text-zinc-400 max-w-md leading-relaxed">
-              Click 'Add Meeting Transcript' above to ingest call summaries, or execute chat approvals in Office Chats to populate memory records automatically.
+              Click &quot;Add Meeting Transcript&quot; above to ingest call summaries, or execute chat approvals in Office Chats to populate memory records automatically.
             </p>
           </div>
         ) : (
