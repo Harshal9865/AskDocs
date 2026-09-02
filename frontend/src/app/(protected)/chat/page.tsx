@@ -304,35 +304,106 @@ export default function ChatPage() {
     const fullQuestion = [question, attachmentText].filter(Boolean).join("\n\n");
     let done = false;
     const streamTimeout = setTimeout(() => {
-      if (!done) setMessages((prev) => { const next = [...prev]; next[next.length - 1] = { ...next[next.length - 1], streaming: false }; return next; });
-    }, 45000);
-
-    await api.askStream(
-      activeConv.id, fullQuestion,
-      (text) => setMessages((prev) => { const next = [...prev]; next[next.length - 1] = { ...next[next.length - 1], content: next[next.length - 1].content + text }; return next; }),
-      (citations, suggested, conflict, freshness) => {
-        done = true;
-        setMessages((prev) => { const next = [...prev]; next[next.length - 1] = { ...next[next.length - 1], streaming: false, citations, conflict, freshness, suggested: citations && citations.length > 0 ? [] : suggested }; return next; });
-        void loadConversations();
-      },
-      (messageId) => setMessages((prev) => { const next = [...prev]; next[next.length - 1] = { ...next[next.length - 1], id: messageId }; return next; }),
-      (message) => {
-        done = true;
-        const msgStr = String(message || "");
-        if (msgStr.toLowerCase().includes("limit") || msgStr.toLowerCase().includes("upgrade")) {
-          setPricingOpen(true);
-        }
+      if (!done) {
         setMessages((prev) => {
           const next = [...prev];
-          next[next.length - 1] = { ...next[next.length - 1], streaming: false, content: next[next.length - 1].content || `Notice: ${msgStr}` };
+          const last = next[next.length - 1];
+          if (last) {
+            next[next.length - 1] = {
+              ...last,
+              streaming: false,
+              content: last.content || "I experienced a temporary connection delay. Please try asking your question again.",
+            };
+          }
           return next;
         });
-      },
-      undefined, attachmentIds,
-    );
+      }
+    }, 20000);
+
+    try {
+      await api.askStream(
+        activeConv.id,
+        fullQuestion,
+        (text) =>
+          setMessages((prev) => {
+            const next = [...prev];
+            next[next.length - 1] = {
+              ...next[next.length - 1],
+              content: next[next.length - 1].content + text,
+            };
+            return next;
+          }),
+        (citations, suggested, conflict, freshness) => {
+          done = true;
+          setMessages((prev) => {
+            const next = [...prev];
+            next[next.length - 1] = {
+              ...next[next.length - 1],
+              streaming: false,
+              citations,
+              conflict,
+              freshness,
+              suggested: citations && citations.length > 0 ? [] : suggested,
+            };
+            return next;
+          });
+          void loadConversations();
+        },
+        (messageId) =>
+          setMessages((prev) => {
+            const next = [...prev];
+            next[next.length - 1] = { ...next[next.length - 1], id: messageId };
+            return next;
+          }),
+        (message) => {
+          done = true;
+          const msgStr = String(message || "");
+          if (msgStr.toLowerCase().includes("limit") || msgStr.toLowerCase().includes("upgrade")) {
+            setPricingOpen(true);
+          }
+          setMessages((prev) => {
+            const next = [...prev];
+            const last = next[next.length - 1];
+            next[next.length - 1] = {
+              ...last,
+              streaming: false,
+              content: last?.content || `Notice: ${msgStr}`,
+            };
+            return next;
+          });
+        },
+        undefined,
+        attachmentIds,
+      );
+    } catch (err) {
+      done = true;
+      setMessages((prev) => {
+        const next = [...prev];
+        const last = next[next.length - 1];
+        next[next.length - 1] = {
+          ...last,
+          streaming: false,
+          content: last?.content || `Notice: ${String(err)}`,
+        };
+        return next;
+      });
+    }
 
     clearTimeout(streamTimeout);
-    if (!done) setMessages((prev) => { const next = [...prev]; next[next.length - 1] = { ...next[next.length - 1], streaming: false }; return next; });
+    if (!done) {
+      setMessages((prev) => {
+        const next = [...prev];
+        const last = next[next.length - 1];
+        if (last) {
+          next[next.length - 1] = {
+            ...last,
+            streaming: false,
+            content: last.content || "I couldn't find an answer to this in the uploaded documents.",
+          };
+        }
+        return next;
+      });
+    }
     setBusy(false);
   }
 

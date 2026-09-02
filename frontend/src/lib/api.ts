@@ -567,6 +567,9 @@ export const api = {
     attachmentIds?: string[],
   ) {
     try {
+      if (tokens && !tokens.access && tokens.refresh) {
+        await refreshTokens();
+      }
       const res = await fetch(
         `${API_BASE}/conversations/${convId}/messages`,
         {
