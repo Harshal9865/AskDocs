@@ -37,7 +37,11 @@ import {
   ChevronDown,
   LayoutDashboard,
   Brain,
-  FileSignature
+  FileSignature,
+  Table,
+  GraduationCap,
+  Headphones,
+  Scale,
 } from "lucide-react";
 
 function AuroraHeroMock() {
@@ -194,40 +198,58 @@ const FEATURES = [
 
 const NEW_CAPABILITIES = [
   {
+    badge: "AI Table Extractor",
+    title: "PDF Invoices & Reports to Live Excel",
+    desc: "Transform scanned invoices, receipts, balance sheets, and survey data into clean, interactive in-browser spreadsheets with 1-click Excel (.xlsx), CSV, and JSON export.",
+    icon: Table,
+    color: "from-emerald-500 via-teal-500 to-cyan-400",
+    glow: "glow-emerald",
+    tags: ["Invoice to Excel", "Interactive Grid", "1-Click CSV / JSON", "Auto-Sum"],
+  },
+  {
+    badge: "Study Studio",
+    title: "Multi-Doc Cheat Sheets, 3D Flashcards & Quizzes",
+    desc: "Select 1 to 5 workspace documents to synthesize executive cheat sheets, interactive 3D flippable flashcards with mastery tracking, and self-testing quizzes with instant scoring.",
+    icon: GraduationCap,
+    color: "from-purple-500 via-pink-500 to-indigo-500",
+    glow: "glow-violet",
+    tags: ["Multi-Doc Picker", "3D Flip Flashcards", "Instant Quiz Scoring", "Tutor Mode"],
+  },
+  {
+    badge: "Audio Brief Player",
+    title: "Listen to Any PDF in 3 Minutes",
+    desc: "Convert dense 40-page whitepapers and research reports into concise, engaging spoken audio summaries with animated frequency wave visualizers and speed controls.",
+    icon: Headphones,
+    color: "from-violet-500 via-indigo-500 to-purple-500",
+    glow: "glow-sky",
+    tags: ["3-Min Spoken Briefs", "Sound Wave Visualizer", "Speed Controls", "Audio Chapters"],
+  },
+  {
+    badge: "Universal Search",
+    title: "Multi-Document Deep Search & AI Synthesis",
+    desc: "Query across all uploaded PDFs, contracts, and office chats simultaneously with instant AI synthesis answer boxes and exact side-by-side citations.",
+    icon: Search,
+    color: "from-amber-500 via-orange-500 to-purple-500",
+    glow: "glow-amber",
+    tags: ["Cross-Doc Synthesis", "Relevance Match", "Side-by-Side Excerpts"],
+  },
+  {
+    badge: "Contract Redline",
+    title: "Side-by-Side Contract Redline & Diff Studio",
+    desc: "Compare two contract versions with automated liability detection, dynamic risk score recalculators, and 1-click counter-proposal generation.",
+    icon: Scale,
+    color: "from-rose-500 via-pink-500 to-purple-500",
+    glow: "glow-rose",
+    tags: ["Side-by-Side Redline", "Dynamic Risk Recalculator", "Counter-Proposals"],
+  },
+  {
     badge: "Institutional Memory",
     title: "Self-Evolving Knowledge & Memory Graph",
-    desc: "Ingest meeting transcripts and project decisions into a living workspace memory graph. Query institutional knowledge with auto-extracted entities and temporal relevance tracking.",
+    desc: "Ingest decisions and project commitments into a living workspace memory graph. Query institutional knowledge with auto-extracted entities and temporal relevance tracking.",
     icon: Brain,
-    color: "from-purple-500 via-indigo-500 to-cyan-400",
-    glow: "glow-violet",
-    tags: ["Knowledge Graph", "Transcript Ingestion", "Temporal Relevance"],
-  },
-  {
-    badge: "Contract Intelligence",
-    title: "Automated Contract Audits & Deadlines",
-    desc: "Scan agreements and legal documents to automatically extract financial liabilities, expiration dates, renewal terms, and critical obligations into a live compliance tracker.",
-    icon: FileSignature,
-    color: "from-indigo-500 via-purple-500 to-pink-500",
+    color: "from-indigo-500 via-purple-500 to-cyan-400",
     glow: "glow-indigo",
-    tags: ["Deadline Extraction", "Liability Tracking", "Renewal Alerts"],
-  },
-  {
-    badge: "Instant Acceleration",
-    title: "1-Click Knowledge Accelerators",
-    desc: "Kickstart inquiries instantly with tailored AI action cards: executive summaries, critical deadline extraction, contract compliance audits, and prioritized action checklists.",
-    icon: Zap,
-    color: "from-cyan-500 via-blue-500 to-indigo-500",
-    glow: "glow-sky",
-    tags: ["Instant Summaries", "Deadline Extraction", "Action Checklists"],
-  },
-  {
-    badge: "Discrepancy Engine",
-    title: "Cross-Document Conflict Detection",
-    desc: "AskDocs actively inspects contradictory clauses, policies, or stale metrics across your entire document repository, citing specific page references before decisions are made.",
-    icon: Target,
-    color: "from-amber-500 via-rose-500 to-purple-500",
-    glow: "glow-amber",
-    tags: ["Contradiction Alerts", "Direct Chunk Citations", "Verified Facts"],
+    tags: ["Knowledge Graph", "Decision Tracking", "Temporal Relevance"],
   },
 ];
 
@@ -776,7 +798,7 @@ export default function Home() {
             </div>
           </Reveal>
 
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {NEW_CAPABILITIES.map((cap, i) => (
               <Reveal key={cap.title} dir={i % 2 === 0 ? "left" : "right"} delay={i * 120}>
                 <div className={`glow-card ${cap.glow} relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-300 hover:shadow-xl dark:border-white/10 dark:bg-[#111122]/90 dark:hover:border-purple-500/40`}>
