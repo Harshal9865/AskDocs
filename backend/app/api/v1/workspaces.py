@@ -338,9 +338,13 @@ async def delete_workspace(workspace_id: uuid.UUID, db: DbSession, membership: A
             {"ws_id": ws_id},
         )
 
-        # Step 5: Clean up contract obligations, document chunks, and documents
+        # Step 5: Clean up contract obligations, digests, document chunks, and documents
         await db.execute(
             text("DELETE FROM contract_obligations WHERE workspace_id = :ws_id"),
+            {"ws_id": ws_id},
+        )
+        await db.execute(
+            text("DELETE FROM workspace_digests WHERE workspace_id = :ws_id"),
             {"ws_id": ws_id},
         )
         await db.execute(

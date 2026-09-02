@@ -19,6 +19,7 @@ import type {
   TokenPair,
   User,
   Workspace,
+  WorkspaceDigest,
 } from "./types";
 
 export const API_BASE =
@@ -689,6 +690,23 @@ export const api = {
 
   async deleteContractObligation(wsId: string, obligationId: string): Promise<void> {
     return request<void>(`/workspaces/${wsId}/contracts/obligations/${obligationId}`, {
+      method: "DELETE",
+    });
+  },
+
+  // Workspace Digests
+  async getWorkspaceDigests(wsId: string): Promise<WorkspaceDigest[]> {
+    return request<WorkspaceDigest[]>(`/workspaces/${wsId}/digests`);
+  },
+
+  async generateWorkspaceDigest(wsId: string): Promise<WorkspaceDigest> {
+    return request<WorkspaceDigest>(`/workspaces/${wsId}/digests/generate`, {
+      method: "POST",
+    });
+  },
+
+  async deleteWorkspaceDigest(wsId: string, digestId: string): Promise<void> {
+    return request<void>(`/workspaces/${wsId}/digests/${digestId}`, {
       method: "DELETE",
     });
   },

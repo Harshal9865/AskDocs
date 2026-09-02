@@ -62,6 +62,17 @@ async def lifespan(app: FastAPI):
             );
             CREATE INDEX IF NOT EXISTS ix_contract_obligations_workspace_id ON contract_obligations (workspace_id);
             CREATE INDEX IF NOT EXISTS ix_contract_obligations_document_id ON contract_obligations (document_id);
+            CREATE TABLE IF NOT EXISTS workspace_digests (
+                id VARCHAR PRIMARY KEY,
+                workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+                title VARCHAR(300) NOT NULL,
+                summary_markdown TEXT NOT NULL,
+                key_takeaways JSONB DEFAULT '[]'::jsonb,
+                document_count INTEGER DEFAULT 0,
+                contract_alerts_count INTEGER DEFAULT 0,
+                created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE INDEX IF NOT EXISTS ix_workspace_digests_workspace_id ON workspace_digests (workspace_id);
             """))
             await session.commit()
     except Exception as e:

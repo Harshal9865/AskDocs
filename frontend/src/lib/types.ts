@@ -61,6 +61,17 @@ export interface ContractObligation {
   created_at: string;
 }
 
+export interface WorkspaceDigest {
+  id: string;
+  workspace_id: string;
+  title: string;
+  summary_markdown: string;
+  key_takeaways: string[];
+  document_count: number;
+  contract_alerts_count: number;
+  created_at: string;
+}
+
 export interface JoinRequest {
   id: string;
   workspace_id: string;
