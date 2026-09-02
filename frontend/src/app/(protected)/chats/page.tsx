@@ -296,7 +296,7 @@ export default function ChatsPage() {
     void poll();
     const t = setInterval(poll, 3000);
     return () => { cancelled = true; clearInterval(t); };
-  }, [activeChat?.id, soundEnabled, user?.id, user?.email]);
+  }, [activeChat, soundEnabled, user?.id, user?.email]);
 
   const prevMsgCount = useRef(0);
 
@@ -411,12 +411,6 @@ export default function ChatsPage() {
     catch (err) { alert((err as Error).message); }
   }
 
-  async function deleteChat(chatId: string) {
-    if (!confirm("Delete this chat for you? Others will still see it. For groups, you'll leave the group.")) return;
-    try { await api.deleteTeamChat(chatId); if (activeChat?.id === chatId) { setActiveChat(null); setMessages([]); } await loadChats(); }
-    catch (err) { alert((err as Error).message); }
-  }
-
   async function clearChatMessages() {
     if (!activeChat) return;
     try {
@@ -460,7 +454,7 @@ export default function ChatsPage() {
   function deleteMessageForMe(msgId: string) {
     setMessages((prev) => prev.filter((m) => m.id !== msgId));
     setDeletingMsg(null);
-    showToast("info", "Message deleted for you");
+    showToast("success", "Message deleted for you");
   }
 
   function senderName(senderId?: string | null) {

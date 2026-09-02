@@ -254,7 +254,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           if (q.trim().length >= 2)
             router.push(`/search?q=${encodeURIComponent(q.trim())}`);
         }}
-        className="relative ml-auto mr-2 hidden sm:flex sm:mr-4 sm:w-64 lg:w-72 xl:w-80"
+        className="relative ml-auto mr-1 hidden sm:flex sm:mr-3 sm:w-64 lg:w-72 xl:w-80"
       >
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         <input
@@ -264,38 +264,41 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           className="dark:border-slate-600 dark:bg-[#242424] dark:text-white dark:placeholder:text-slate-500 dark:focus:border-indigo-500 dark:focus:bg-[#2a2a2a] w-full rounded-lg border border-slate-300 bg-white py-1.5 pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-500/20"
         />
       </form>
-      <button
-        onClick={() => router.push("/search")}
-        aria-label="Search"
-        className="ml-auto flex h-9 w-9 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 sm:hidden"
-      >
-        <Search className="h-5 w-5" />
-      </button>
 
-      {/* right side */}
-      <div className="flex items-center gap-1 sm:gap-2">
+      {/* right side controls */}
+      <div className="flex items-center gap-0.5 sm:gap-1.5 ml-auto sm:ml-0">
+        <button
+          onClick={() => router.push("/search")}
+          aria-label="Search"
+          title="Search"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 sm:hidden transition-colors"
+        >
+          <Search className="h-4 w-4" />
+        </button>
+
         <Link
           href="/"
           title="Go to Homepage"
           aria-label="Go to Homepage"
-          className="hidden sm:flex h-9 w-9 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 transition-colors"
+          className="hidden sm:flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 transition-colors"
         >
-          <Home className="h-5 w-5" />
+          <Home className="h-4 w-4" />
         </Link>
+
         <ThemeToggle dark={dark} onToggle={toggle} />
         <NotificationBell />
 
         {/* profile avatar menu */}
-        <div className="relative" ref={menuRef}>
+        <div className="relative ml-0.5" ref={menuRef}>
           <button
             onClick={() => setMenuOpen((o) => !o)}
             aria-label="Open profile menu"
             aria-expanded={menuOpen}
-            className="flex items-center gap-1 rounded-full p-0.5 transition-colors hover:bg-slate-100"
+            className="flex items-center gap-0.5 sm:gap-1 rounded-full p-0.5 transition-colors hover:bg-slate-100 dark:hover:bg-white/10"
           >
             <Avatar
               name={user?.name ?? "?"}
-              size={32}
+              size={30}
               src={avatarSrc}
               stickerId={
                 user?.avatar_kind === "sticker" ? user.avatar_value ?? null : null
