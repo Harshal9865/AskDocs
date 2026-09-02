@@ -416,6 +416,24 @@ export default function ChatComposer({
           </div>
         )}
 
+        {/* Quick @AskDocs Mention Tag */}
+        <button
+          type="button"
+          onClick={() => {
+            const tag = "@AskDocs ";
+            if (!value.includes("@AskDocs")) {
+              onChange(value ? `${tag}${value}` : tag);
+            }
+            textareaRef.current?.focus();
+          }}
+          disabled={disabled}
+          title="Tag @AskDocs AI Teammate"
+          className="flex h-7 shrink-0 items-center gap-1 rounded-full bg-gradient-to-r from-indigo-500/10 to-purple-500/10 px-2 py-0.5 text-[11px] font-bold text-purple-600 hover:from-indigo-500/20 hover:to-purple-500/20 dark:text-purple-300 transition-colors"
+        >
+          <span>🤖</span>
+          <span>@AskDocs</span>
+        </button>
+
         <textarea
           ref={textareaRef}
           rows={1}

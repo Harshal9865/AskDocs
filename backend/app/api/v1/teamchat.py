@@ -529,6 +529,40 @@ async def send_team_message(
     # bump my presence
     user.last_seen_at = utcnow()
     await db.commit()
+
+    # Check for @AskDocs AI Teammate mention trigger
+    low_content = (payload.content or "").lower()
+    if "@askdocs" in low_content or "@ask" in low_content:
+        try:
+            clean_query = payload.content or ""
+            for tag in ["@askdocs", "@AskDocs", "@ask", "@Ask"]:
+                if tag in clean_query:
+                    clean_query = clean_query.split(tag, 1)[-1].strip()
+                    break
+            if not clean_query:
+                clean_query = payload.content or "Summarize the workspace documents."
+
+            from app.services.llm.gemini_provider import get_llm
+            from app.services.retrieval import search_chunks
+
+            llm = get_llm()
+            q_embeddings = await llm.embed([clean_query])
+            q_emb = q_embeddings[0] if q_embeddings else [0.0] * 768
+            chunks = await search_chunks(db, conv.workspace_id, q_emb)
+
+            ai_answer = await llm.answer(clean_query, chunks)
+
+            bot_msg = Message(
+                conversation_id=conv.id,
+                sender_id=None,
+                role="assistant",
+                content=ai_answer,
+            )
+            db.add(bot_msg)
+            await db.commit()
+        except Exception as err:
+            logger.warning("Error in @AskDocs AI teammate trigger: %s", err)
+
     return await _build_message_out(db, msg, user.id)
 
 
