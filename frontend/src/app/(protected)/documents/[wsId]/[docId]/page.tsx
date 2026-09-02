@@ -104,14 +104,10 @@ export default function DocumentDetailPage() {
     if (!doc || !workspace) return;
     try {
       await api.deleteDocument(workspace.id, doc.id);
-      showToast({ title: "Document deleted", type: "success" });
+      showToast("success", "Document deleted");
       router.push(`/documents`);
     } catch (err) {
-      showToast({
-        title: "Delete failed",
-        description: String(err),
-        type: "error",
-      });
+      showToast("error", `Delete failed: ${String(err)}`);
     }
   }
 
@@ -124,7 +120,7 @@ export default function DocumentDetailPage() {
     void navigator.clipboard.writeText(allText);
     setCopiedAll(true);
     setTimeout(() => setCopiedAll(false), 2000);
-    showToast({ title: "All chunks copied to clipboard", type: "success" });
+    showToast("success", "All chunks copied to clipboard");
   }
 
   if (loading) {

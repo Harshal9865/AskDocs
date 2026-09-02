@@ -1,12 +1,23 @@
 "use client";
 
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
-import { Search, FileText, MessageSquare, BookOpen, Clock, X, Loader2 } from "lucide-react";
+import {
+  Search,
+  FileText,
+  MessageSquare,
+  X,
+  Loader2,
+  Sparkles,
+  Zap,
+  Copy,
+  Check,
+  ArrowRight,
+} from "lucide-react";
 
 interface Results {
   documents: { id: string; title: string; file_type: string }[];
@@ -14,7 +25,7 @@ interface Results {
   excerpts: { id: string; document_title: string; snippet: string; score?: number }[];
 }
 
-type Filter = "all" | "docs" | "chats" | "excerpts";
+type Filter = "all" | "ai" | "docs" | "excerpts" | "chats";
 
 function highlight(text: string, term: string) {
   if (!term) return text;
@@ -22,7 +33,7 @@ function highlight(text: string, term: string) {
   const parts = text.split(new RegExp(`(${esc})`, "gi"));
   return parts.map((p, i) =>
     p.toLowerCase() === term.toLowerCase() ? (
-      <mark key={i} className="rounded bg-amber-200 px-0.5 dark:bg-amber-500/30 dark:text-amber-100">
+      <mark key={i} className="rounded bg-amber-200 px-0.5 dark:bg-amber-500/30 dark:text-amber-100 font-bold">
         {p}
       </mark>
     ) : (
@@ -43,6 +54,8 @@ function SearchInner() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
   const [recent, setRecent] = useState<string[]>([]);
+  const [aiSynthesis, setAiSynthesis] = useState<string | null>(null);
+  const [copiedMemo, setCopiedMemo] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -58,285 +71,336 @@ function SearchInner() {
     localStorage.setItem("askdocs_recent_search", JSON.stringify(next));
   }
 
-  async function run(term?: string) {
-    const query = (term ?? q).trim();
-    if (!workspace || query.length < 2) return;
-
-    // Abort previous in-flight search request to prevent race conditions
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
+  const runSearch = useCallback(async (query: string) => {
+    if (!query.trim() || !workspace) return;
+    if (abortControllerRef.current) abortControllerRef.current.abort();
+    abortControllerRef.current = new AbortController();
 
     setBusy(true);
     setError(null);
+    setSearched(true);
+    setAiSynthesis(null);
+    pushRecent(query);
+
     try {
-      const res = await api.search(workspace.id, query);
-      if (!controller.signal.aborted) {
-        setResults(res);
-        setSearched(true);
-        pushRecent(query);
-        router.replace(`/search?q=${encodeURIComponent(query)}`);
+      const [res, aiRes] = await Promise.all([
+        api.search(workspace.id, query.trim()),
+        api.queryWorkspaceMemory(workspace.id, `Synthesize a concise, direct answer to this workspace search query based on all documents: "${query}"`).catch(() => null),
+      ]);
+
+      setResults(res);
+      if (aiRes?.answer) {
+        setAiSynthesis(aiRes.answer);
       }
-    } catch (err) {
-      if (!controller.signal.aborted) {
-        setError((err as Error).message);
+    } catch (err: unknown) {
+      if ((err as Error)?.name !== "AbortError") {
+        setError(String(err));
       }
     } finally {
-      if (!controller.signal.aborted) {
-        setBusy(false);
-      }
+      setBusy(false);
+    }
+  }, [workspace]);
+
+  useEffect(() => {
+    if (initialQ.trim() && workspace) {
+      void runSearch(initialQ);
+    }
+  }, [initialQ, workspace, runSearch]);
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (q.trim()) {
+      router.push(`/search?q=${encodeURIComponent(q.trim())}`);
+      void runSearch(q.trim());
     }
   }
 
-  // auto-run on initial q
-  useEffect(() => {
-    if (initialQ.trim().length >= 2 && workspace) void run(initialQ);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workspace]);
-
-  // debounced live search (250ms)
-  useEffect(() => {
-    if (q.trim().length < 2) {
-      if (q.trim().length === 0) setResults(null);
-      return;
-    }
-    const t = setTimeout(() => void run(), 250);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q]);
-
-  const counts = useMemo(() => {
-    if (!results) return null;
-    return {
-      docs: results.documents.length,
-      msgs: results.messages.length,
-      ex: results.excerpts.length,
-      total: results.documents.length + results.messages.length + results.excerpts.length,
-    };
+  const totalCount = useMemo(() => {
+    if (!results) return 0;
+    return results.documents.length + results.messages.length + results.excerpts.length;
   }, [results]);
 
-  const term = q.trim();
+  const copySynthesisMemo = () => {
+    if (!aiSynthesis || !results) return;
+    const text = `# Search Synthesis: "${q}"\n\n## AI Executive Answer\n${aiSynthesis}\n\n## Key Cross-Document Sources\n${results.excerpts.map((e) => `- **${e.document_title}:** ${e.snippet}`).join("\n")}`;
+    void navigator.clipboard.writeText(text);
+    setCopiedMemo(true);
+    setTimeout(() => setCopiedMemo(false), 2000);
+  };
 
   return (
-    <div className="relative mx-auto max-w-3xl">
-      {/* Header */}
-      <div className="flex items-center gap-2.5">
-        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 text-white shadow-md shadow-purple-500/25">
-          <Search className="h-4 w-4" />
-        </span>
-        <h1 className="text-xl font-extrabold bg-gradient-to-r from-slate-900 via-purple-900 to-indigo-900 bg-clip-text text-transparent dark:from-white dark:via-purple-200 dark:to-indigo-200">
-          Search Workspace
-        </h1>
-      </div>
-      <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
-        Find anything across this workspace&apos;s documents, AI conversations, and indexed excerpts.
-      </p>
+    <div className="relative min-h-full mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8 gemini-gradient-bg animate-in fade-in duration-300">
+      {/* Ambient Cosmic Orbs */}
+      <div className="gemini-orb gemini-orb-1" />
+      <div className="gemini-orb gemini-orb-2" />
 
-      {!workspace ? (
-        <div className="mt-6 rounded-2xl border border-slate-200 bg-white/80 p-8 text-center text-slate-500 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-[#12121e]/80 dark:text-zinc-400">
-          Select a workspace to search in.
-        </div>
-      ) : (
-        <>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              void run();
-            }}
-            className="mb-3 mt-5 flex gap-2"
-          >
-            <div className="relative min-w-0 flex-1">
-              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder='Try "pricing", "quarterly roadmap", or "refunds"…'
-                aria-label="Search"
-                className="w-full rounded-2xl border border-slate-200/80 bg-white/90 py-2.5 pl-10 pr-9 text-sm outline-none placeholder:text-slate-400 shadow-xs backdrop-blur-sm transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#161622] dark:text-white dark:placeholder:text-zinc-500"
-              />
-              {q && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setQ("");
-                    setResults(null);
-                    setSearched(false);
-                    router.replace("/search");
-                  }}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10"
-                  aria-label="Clear"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-            <button
-              type="submit"
-              disabled={busy || q.trim().length < 2}
-              className="inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-purple-500/25 transition-all hover:scale-105 active:scale-95 disabled:opacity-40"
-            >
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Search
-            </button>
-          </form>
+      {/* Header Banner */}
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-[#130f2f] to-[#1e103c] p-6 sm:p-9 text-white shadow-2xl backdrop-blur-2xl animate-gradient-shift">
+        <div className="absolute right-0 top-0 -mr-20 -mt-20 h-72 w-72 rounded-full bg-purple-500/15 blur-3xl animate-float pointer-events-none" />
+        <div className="absolute left-1/3 bottom-0 -mb-20 h-56 w-56 rounded-full bg-indigo-500/10 blur-3xl animate-float pointer-events-none" />
 
-          {recent.length > 0 && !searched && (
-            <div className="mb-4 flex flex-wrap items-center gap-1.5 text-xs">
-              <span className="flex items-center gap-1 text-slate-400 dark:text-zinc-500">
-                <Clock className="h-3 w-3" /> Recent:
+        <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-3.5 py-1 text-[11px] font-semibold tracking-wider text-purple-300 backdrop-blur-md shadow-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-purple-500"></span>
               </span>
-              {recent.map((r) => (
-                <button
-                  key={r}
-                  onClick={() => { setQ(r); void run(r); }}
-                  className="rounded-full border border-slate-200/60 bg-white/80 px-2.5 py-1 text-xs font-medium text-slate-700 shadow-2xs hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10 transition-colors"
-                >
-                  {r}
-                </button>
-              ))}
-              <button
-                onClick={() => { setRecent([]); localStorage.removeItem("askdocs_recent_search"); }}
-                className="ml-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 transition-colors"
-              >
-                Clear
-              </button>
+              <Search className="h-3.5 w-3.5 text-purple-400" />
+              <span className="uppercase font-mono tracking-widest text-[10px]">AI Universal Multi-Doc Search</span>
             </div>
-          )}
 
-          {error && (
-            <p className="mb-4 rounded-xl border border-red-200 bg-red-50/80 px-3 py-2 text-sm font-medium text-red-700 dark:border-red-900/30 dark:bg-red-950/30 dark:text-red-300">
-              {error}
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+              Search & Cross-Doc{" "}
+              <span className="bg-gradient-to-r from-purple-300 via-pink-200 to-indigo-300 bg-clip-text text-transparent">
+                Synthesis
+              </span>
+            </h1>
+
+            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
+              Query across all uploaded PDFs, contracts, study guides, and office chats simultaneously with instant AI synthesis and exact citations.
             </p>
-          )}
+          </div>
+        </div>
+      </div>
 
-          {busy && !results && (
-            <div className="mt-6 space-y-3">
-              <div className="h-20 animate-pulse rounded-2xl bg-slate-100 dark:bg-white/5" />
-              <div className="h-20 animate-pulse rounded-2xl bg-slate-100 dark:bg-white/5" />
+      {/* Main Search Input Form */}
+      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-4">
+        <form onSubmit={handleSubmit} className="relative flex items-center">
+          <Search className="pointer-events-none absolute left-4 h-5 w-5 text-purple-500" />
+          <input
+            type="text"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search any keyword, ask questions across documents, or find specific clauses…"
+            className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/80 pl-12 pr-28 py-4 text-sm font-bold text-slate-900 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white transition-all shadow-inner"
+          />
+          {q && (
+            <button
+              type="button"
+              onClick={() => {
+                setQ("");
+                setResults(null);
+                setSearched(false);
+                setAiSynthesis(null);
+              }}
+              className="absolute right-20 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+          <button
+            type="submit"
+            disabled={busy || !q.trim()}
+            className="absolute right-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-purple-500/25 hover:brightness-110 active:scale-95 disabled:opacity-50 transition-all cursor-pointer"
+          >
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
+          </button>
+        </form>
+
+        {/* Quick Sample Queries Chips */}
+        <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+          <span className="text-slate-400 font-bold text-[11px] uppercase tracking-wider flex items-center gap-1">
+            <Zap className="h-3 w-3 text-amber-500" /> Try:
+          </span>
+          {["Liability & Termination Clauses", "Infrastructure Cloud Uptime SLA", "Quarterly Budget Approvals", "Eventual Consistency & Raft"].map((suggestion) => (
+            <button
+              key={suggestion}
+              type="button"
+              onClick={() => {
+                setQ(suggestion);
+                router.push(`/search?q=${encodeURIComponent(suggestion)}`);
+                void runSearch(suggestion);
+              }}
+              className="rounded-xl border border-slate-200/80 bg-slate-50/60 px-3 py-1 text-xs font-medium text-slate-700 hover:border-purple-300 hover:bg-purple-50 dark:border-white/5 dark:bg-white/5 dark:text-zinc-300 transition-all cursor-pointer"
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* AI Cross-Document Synthesis Answer Box */}
+      {aiSynthesis && (
+        <div className="rounded-3xl border border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-indigo-500/5 to-transparent p-6 shadow-xl backdrop-blur-xl dark:border-purple-500/20 space-y-3 animate-in fade-in duration-300">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-purple-500/15 pb-3">
+            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-purple-600 dark:text-purple-400">
+              <Sparkles className="h-4 w-4 text-purple-500 animate-pulse" />
+              <span>AI Multi-Document Executive Synthesis</span>
             </div>
-          )}
 
-          {results && (
-            <div className="mt-4 space-y-6">
-              {counts && (
-                <div className="flex flex-wrap items-center gap-2 text-xs">
-                  <span className="font-bold text-slate-700 dark:text-zinc-200">
-                    {counts.total} {counts.total === 1 ? "match" : "matches"} found
-                  </span>
-                  <span className="text-slate-400">·</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {(["all", "docs", "chats", "excerpts"] as Filter[]).map((f) => {
-                      const isActive = filter === f;
-                      return (
-                        <button
-                          key={f}
-                          onClick={() => setFilter(f)}
-                          className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${
-                            isActive
-                              ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-xs shadow-purple-500/25"
-                              : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/5 dark:text-zinc-400 dark:hover:bg-white/10"
-                          }`}
-                        >
-                          {f === "all"
-                            ? "All"
-                            : f === "docs"
-                            ? `Docs (${counts.docs})`
-                            : f === "chats"
-                            ? `Chats (${counts.msgs})`
-                            : `Excerpts (${counts.ex})`}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={copySynthesisMemo}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-purple-500/20 bg-white/80 px-3.5 py-1.5 text-xs font-bold text-purple-700 hover:bg-purple-50 dark:bg-purple-950/40 dark:text-purple-300 transition-all cursor-pointer"
+              >
+                {copiedMemo ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                <span>{copiedMemo ? "Copied" : "Copy Synthesis"}</span>
+              </button>
 
-              {counts?.total === 0 ? (
-                <div className="rounded-2xl border border-dashed border-slate-200 bg-white/50 p-8 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-white/[0.02] dark:text-zinc-400">
-                  <p className="font-medium">No results found for &ldquo;{q}&rdquo;</p>
-                  <p className="mt-1 text-xs text-slate-400 dark:text-zinc-500">Try broader keywords or upload related documents to this workspace.</p>
-                </div>
-              ) : (
-                <>
-                  {(filter === "all" || filter === "docs") && results.documents.length > 0 && (
-                    <section>
-                      <h2 className="mb-2.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
-                        <FileText className="h-3.5 w-3.5" /> Documents ({results.documents.length})
-                      </h2>
-                      <ul className="space-y-2">
-                        {results.documents.map((d) => (
-                          <li key={d.id} className="group rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-xs backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-300 hover:shadow-md dark:border-white/10 dark:bg-[#151520]/90 dark:hover:border-purple-500/30">
-                            <Link href={`/documents/${workspace.id}/${d.id}`} className="flex items-center gap-2.5 text-sm font-semibold text-slate-900 group-hover:text-purple-600 dark:text-white dark:group-hover:text-purple-300 transition-colors">
-                              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400">
-                                <FileText className="h-4 w-4" />
-                              </span>
-                              <span className="truncate">{highlight(d.title, term)}</span>
-                              <span className="ml-auto shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-600 dark:bg-white/10 dark:text-zinc-400">
-                                {d.file_type}
-                              </span>
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </section>
-                  )}
-
-                  {(filter === "all" || filter === "chats") && results.messages.length > 0 && (
-                    <section>
-                      <h2 className="mb-2.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-                        <MessageSquare className="h-3.5 w-3.5" /> AI Conversations ({results.messages.length})
-                      </h2>
-                      <ul className="space-y-2">
-                        {results.messages.map((m) => (
-                          <li key={m.id} className="group rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-xs backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md dark:border-white/10 dark:bg-[#151520]/90 dark:hover:border-indigo-500/30">
-                            <div className="flex items-center justify-between gap-2">
-                              <Link href={`/chat?conv=${m.conversation_id}`} className="text-xs font-bold uppercase tracking-wider text-indigo-600 group-hover:underline dark:text-indigo-400">
-                                {m.conversation_title || "AI Conversation"}
-                              </Link>
-                              <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold uppercase text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-300">{m.role}</span>
-                            </div>
-                            <p className="mt-1.5 line-clamp-2 text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-zinc-300">
-                              {highlight(m.snippet, term)}
-                            </p>
-                          </li>
-                        ))}
-                      </ul>
-                    </section>
-                  )}
-
-                  {(filter === "all" || filter === "excerpts") && results.excerpts.length > 0 && searched && (
-                    <section>
-                      <h2 className="mb-2.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                        <BookOpen className="h-3.5 w-3.5" /> Document Excerpts ({results.excerpts.length})
-                      </h2>
-                      <ul className="space-y-2">
-                        {results.excerpts.map((x) => (
-                          <li key={x.id} className="rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-xs backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md dark:border-white/10 dark:bg-[#151520]/90 dark:hover:border-emerald-500/30">
-                            <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                              {x.document_title || "Document"}
-                            </p>
-                            <p className="mt-1.5 whitespace-pre-wrap text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-zinc-300">
-                              {highlight(x.snippet, term)}
-                            </p>
-                          </li>
-                        ))}
-                      </ul>
-                    </section>
-                  )}
-                </>
-              )}
+              <Link
+                href={`/chat?q=${encodeURIComponent(`Let's explore this search topic further: "${q}". Executive summary: ${aiSynthesis}. What deeper connections or citations can you find?`)}`}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm shadow-purple-500/20 hover:bg-purple-700 active:scale-95 transition-all"
+              >
+                <span>Deep Dive in AI Chat</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
-          )}
-        </>
+          </div>
+
+          <p className="text-xs sm:text-sm font-medium leading-relaxed text-slate-800 dark:text-zinc-200 whitespace-pre-wrap">
+            {aiSynthesis}
+          </p>
+        </div>
       )}
+
+      {/* Filter Tabs */}
+      {searched && (
+        <div className="flex items-center gap-2 border-b border-slate-200/80 pb-2 dark:border-white/10 overflow-x-auto no-scrollbar">
+          {(
+            [
+              { key: "all", label: `All Results (${totalCount})` },
+              { key: "excerpts", label: `Document Excerpts (${results?.excerpts.length || 0})` },
+              { key: "docs", label: `Documents (${results?.documents.length || 0})` },
+              { key: "chats", label: `Office Chats (${results?.messages.length || 0})` },
+            ] as const
+          ).map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setFilter(tab.key)}
+              className={`rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
+                filter === tab.key
+                  ? "bg-purple-600 text-white shadow-md shadow-purple-500/20"
+                  : "text-slate-600 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-white/5"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Results Container */}
+      {busy ? (
+        <div className="flex h-64 flex-col items-center justify-center text-slate-400">
+          <Loader2 className="h-10 w-10 animate-spin text-purple-600 mb-3" />
+          <p className="text-xs font-bold uppercase tracking-wider">Synthesizing workspace documents…</p>
+        </div>
+      ) : error ? (
+        <div className="rounded-3xl border border-red-200 bg-red-50 p-6 text-xs font-bold text-red-600 dark:border-red-900/30 dark:bg-red-950/30">
+          {error}
+        </div>
+      ) : searched && results ? (
+        <div className="space-y-4">
+          {/* Excerpts List */}
+          {(filter === "all" || filter === "excerpts") && results.excerpts.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">
+                Matching Document Excerpts & Citations
+              </h3>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {results.excerpts.map((exc, idx) => (
+                  <div
+                    key={idx}
+                    className="group rounded-2xl border border-slate-200/80 bg-white/95 p-4 shadow-xs backdrop-blur-md hover:border-purple-300 dark:border-white/5 dark:bg-[#15151c]/95 transition-all space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 text-xs font-black text-purple-600 dark:text-purple-400">
+                        <FileText className="h-3.5 w-3.5" />
+                        <span>{exc.document_title}</span>
+                      </span>
+                      <span className="rounded-md bg-purple-50 px-2 py-0.5 text-[10px] font-bold text-purple-700 dark:bg-purple-950/40 dark:text-purple-300">
+                        Relevance Match
+                      </span>
+                    </div>
+                    <p className="text-xs leading-relaxed text-slate-700 dark:text-zinc-300 font-normal">
+                      &ldquo;{highlight(exc.snippet, q)}&rdquo;
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Documents List */}
+          {(filter === "all" || filter === "docs") && results.documents.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">
+                Matching Workspace Documents
+              </h3>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                {results.documents.map((d) => (
+                  <Link
+                    key={d.id}
+                    href={`/documents/${workspace?.id}/${d.id}`}
+                    className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/95 p-4 shadow-xs backdrop-blur-md hover:border-purple-300 dark:border-white/5 dark:bg-[#15151c]/95 transition-all"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/50">
+                      <FileText className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                        {d.title}
+                      </h4>
+                      <span className="text-[10px] font-extrabold uppercase text-slate-400">
+                        {d.file_type}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Messages / Chats List */}
+          {(filter === "all" || filter === "chats") && results.messages.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">
+                Matching Office Chat Messages
+              </h3>
+              <div className="space-y-2.5">
+                {results.messages.map((m) => (
+                  <Link
+                    key={m.id}
+                    href={`/chats/${m.conversation_id}`}
+                    className="flex items-start gap-3 rounded-2xl border border-slate-200/80 bg-white/95 p-4 shadow-xs backdrop-blur-md hover:border-purple-300 dark:border-white/5 dark:bg-[#15151c]/95 transition-all"
+                  >
+                    <MessageSquare className="h-4 w-4 text-purple-600 shrink-0 mt-0.5" />
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-900 dark:text-white">
+                          {m.conversation_title}
+                        </span>
+                        <span className="text-[10px] uppercase font-bold text-slate-400">
+                          by {m.role}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600 dark:text-zinc-400 leading-snug">
+                        {highlight(m.snippet, q)}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {totalCount === 0 && !aiSynthesis && (
+            <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 p-12 text-center text-slate-400 dark:border-white/10">
+              <Search className="h-10 w-10 mb-2 opacity-40" />
+              <p className="text-xs font-bold">No results found for &ldquo;{q}&rdquo;.</p>
+              <p className="text-[11px] text-slate-400 mt-1">Try another keyword or broader topic.</p>
+            </div>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<p className="text-sm text-slate-500">Loading…</p>}>
+    <Suspense fallback={<div className="flex h-64 items-center justify-center text-slate-400">Loading search…</div>}>
       <SearchInner />
     </Suspense>
   );
