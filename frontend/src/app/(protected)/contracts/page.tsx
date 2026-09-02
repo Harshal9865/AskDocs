@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import {
   AlertCircle,
   Calendar,
@@ -362,6 +363,15 @@ export default function ContractsPage() {
                 </div>
 
                 <div className="flex items-center justify-end gap-2 shrink-0 border-t border-slate-100 dark:border-white/5 pt-3 sm:border-0 sm:pt-0">
+                  <Link
+                    href={`/chat?q=${encodeURIComponent(`Analyze the contractual obligation "${item.title}" for party "${item.party_name || "the counterparty"}": ${item.summary || ""}`)}`}
+                    className="inline-flex items-center gap-1 rounded-xl bg-purple-50 px-3 py-2 text-xs font-bold text-purple-700 hover:bg-purple-100 dark:bg-purple-950/40 dark:text-purple-300 dark:hover:bg-purple-900/50 transition-all"
+                    title="Ask AI in Chat"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>Ask AI</span>
+                  </Link>
+
                   {item.status === "active" ? (
                     <button
                       onClick={() => handleStatusChange(item.id, "resolved")}

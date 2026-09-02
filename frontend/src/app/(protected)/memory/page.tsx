@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
 import { MemoryGraphOut, WorkspaceMemory } from "@/lib/types";
@@ -18,6 +19,8 @@ import {
   Tag,
   X,
   Zap,
+  Copy,
+  Check,
 } from "lucide-react";
 
 export default function InstitutionalMemoryPage() {
@@ -179,6 +182,30 @@ export default function InstitutionalMemoryPage() {
           </button>
         </div>
 
+        {/* Suggested Queries Chips */}
+        <div className="flex flex-wrap items-center gap-1.5 pt-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+            Suggested Queries:
+          </span>
+          {[
+            "Key decisions from recent meetings",
+            "What approvals were granted this month?",
+            "Roadmap priorities & timeline commitments",
+            "Contract exceptions & special terms",
+          ].map((prompt) => (
+            <button
+              key={prompt}
+              type="button"
+              onClick={() => {
+                setQuery(prompt);
+              }}
+              className="rounded-lg border border-slate-200/80 bg-slate-50 px-2.5 py-0.5 text-[11px] font-medium text-slate-600 hover:border-purple-300 hover:bg-white hover:text-purple-600 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-300 dark:hover:border-purple-500/30 dark:hover:text-purple-400 transition-all cursor-pointer"
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
+
         {/* AI Decision Answer Banner */}
         {queryAnswer && (
           <div className="rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-indigo-500/5 to-transparent p-5 shadow-lg backdrop-blur-md animate-in fade-in duration-300 space-y-2">
@@ -315,7 +342,7 @@ export default function InstitutionalMemoryPage() {
                 key={mem.id}
                 className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 hover:border-purple-500/40 hover:bg-white hover:shadow-lg hover:shadow-purple-500/5 dark:border-white/5 dark:bg-[#1a1a24]/60 dark:hover:bg-[#1f1f2e] transition-all duration-200 animate-in fade-in slide-in-from-bottom-2 duration-300"
               >
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2.5">
                     <span className="text-xs font-black text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                       {mem.title}
@@ -339,6 +366,30 @@ export default function InstitutionalMemoryPage() {
                       </span>
                     ))}
                   </div>
+                </div>
+
+                {/* 1-Click Action Buttons */}
+                <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void navigator.clipboard.writeText(`${mem.title}\n\n${mem.summary}`);
+                      alert("Copied memory record to clipboard");
+                    }}
+                    className="rounded-xl border border-slate-200/80 bg-white p-2 text-slate-500 hover:bg-purple-50 hover:text-purple-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400 dark:hover:bg-purple-950/40 dark:hover:text-purple-300 transition-all cursor-pointer"
+                    title="Copy record"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                  </button>
+
+                  <Link
+                    href={`/chat?q=${encodeURIComponent(`Provide full context and analyze the decision "${mem.title}": ${mem.summary}`)}`}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-purple-50 px-3 py-1.5 text-xs font-bold text-purple-700 hover:bg-purple-100 dark:bg-purple-950/40 dark:text-purple-300 dark:hover:bg-purple-900/50 transition-all"
+                    title="Ask AI in Chat"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>Ask AI</span>
+                  </Link>
                 </div>
               </div>
             ))}
