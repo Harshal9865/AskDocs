@@ -255,3 +255,25 @@ export interface InvoiceRecord {
   card_last4?: string | null;
   paid_at: string;
 }
+
+export interface DocumentHealthIssue {
+  id: string;
+  workspace_id: string;
+  document_id?: string | null;
+  issue_type: "low_text_quality" | "duplicate_file" | "outdated_document" | "missing_metadata" | "contract_risk" | string;
+  severity: "critical" | "warning" | "info" | string;
+  title: string;
+  description: string;
+  suggested_action?: string | null;
+  status: "active" | "resolved" | "dismissed" | string;
+  created_at: string;
+}
+
+export interface WorkspaceHealthReport {
+  health_score: number;
+  total_documents: number;
+  critical_issues_count: number;
+  warning_issues_count: number;
+  healthy_documents_count: number;
+  issues: DocumentHealthIssue[];
+}

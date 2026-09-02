@@ -3,6 +3,7 @@ import type {
   CheckoutPayload,
   ConflictWarning,
   ContractObligation,
+  DocumentHealthIssue,
   FreshnessWarning,
   Conversation,
   DocumentItem,
@@ -20,6 +21,7 @@ import type {
   User,
   Workspace,
   WorkspaceDigest,
+  WorkspaceHealthReport,
 } from "./types";
 
 export const API_BASE =
@@ -708,6 +710,24 @@ export const api = {
   async deleteWorkspaceDigest(wsId: string, digestId: string): Promise<void> {
     return request<void>(`/workspaces/${wsId}/digests/${digestId}`, {
       method: "DELETE",
+    });
+  },
+
+  // Workspace Document Health & Quality Score
+  async getWorkspaceHealth(wsId: string): Promise<WorkspaceHealthReport> {
+    return request<WorkspaceHealthReport>(`/workspaces/${wsId}/health`);
+  },
+
+  async scanWorkspaceHealth(wsId: string): Promise<WorkspaceHealthReport> {
+    return request<WorkspaceHealthReport>(`/workspaces/${wsId}/health/scan`, {
+      method: "POST",
+    });
+  },
+
+  async updateHealthIssue(wsId: string, issueId: string, status: "resolved" | "active" | "dismissed"): Promise<DocumentHealthIssue> {
+    return request<DocumentHealthIssue>(`/workspaces/${wsId}/health/issues/${issueId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
     });
   },
 };

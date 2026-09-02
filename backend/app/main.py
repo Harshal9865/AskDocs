@@ -73,6 +73,20 @@ async def lifespan(app: FastAPI):
                 created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
             );
             CREATE INDEX IF NOT EXISTS ix_workspace_digests_workspace_id ON workspace_digests (workspace_id);
+            CREATE TABLE IF NOT EXISTS document_health_issues (
+                id VARCHAR PRIMARY KEY,
+                workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+                document_id UUID REFERENCES documents(id) ON DELETE CASCADE,
+                issue_type VARCHAR(50) NOT NULL,
+                severity VARCHAR(20) NOT NULL DEFAULT 'warning',
+                title VARCHAR(300) NOT NULL,
+                description TEXT NOT NULL,
+                suggested_action TEXT,
+                status VARCHAR(20) NOT NULL DEFAULT 'active',
+                created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE INDEX IF NOT EXISTS ix_document_health_issues_workspace_id ON document_health_issues (workspace_id);
+            CREATE INDEX IF NOT EXISTS ix_document_health_issues_document_id ON document_health_issues (document_id);
             """))
             await session.commit()
     except Exception as e:
