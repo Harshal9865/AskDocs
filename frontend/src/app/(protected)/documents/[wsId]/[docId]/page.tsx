@@ -27,7 +27,6 @@ import {
   Zap,
 } from "lucide-react";
 import { api } from "@/lib/api";
-import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
 import { showToast } from "@/components/Toast";
 import type { DocumentItem } from "@/lib/types";
@@ -57,7 +56,6 @@ export default function DocumentDetailPage() {
   const params = useParams<{ wsId: string; docId: string }>();
   const router = useRouter();
   const { workspace, workspaces, select } = useWorkspace();
-  const { user } = useAuth();
   const [doc, setDoc] = useState<DocumentItem | null>(null);
   const [chunks, setChunks] = useState<ChunkItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -148,7 +146,7 @@ export default function DocumentDetailPage() {
     );
   }
 
-  const myRole = workspace?.members?.find((m) => m.user_id === user?.id)?.role ?? "member";
+  const myRole = workspace?.role ?? "member";
   const totalTokens = chunks.reduce((acc, c) => acc + c.token_count, 0);
 
   const statusConfig = {

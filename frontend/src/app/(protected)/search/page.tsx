@@ -63,13 +63,15 @@ function SearchInner() {
     if (Array.isArray(r)) setRecent(r.slice(0, 5));
   }, []);
 
-  function pushRecent(term: string) {
+  const pushRecent = useCallback((term: string) => {
     const t = term.trim();
     if (t.length < 2) return;
-    const next = [t, ...recent.filter((x) => x !== t)].slice(0, 5);
-    setRecent(next);
-    localStorage.setItem("askdocs_recent_search", JSON.stringify(next));
-  }
+    setRecent((prev) => {
+      const next = [t, ...prev.filter((x) => x !== t)].slice(0, 5);
+      localStorage.setItem("askdocs_recent_search", JSON.stringify(next));
+      return next;
+    });
+  }, []);
 
   const runSearch = useCallback(async (query: string) => {
     if (!query.trim() || !workspace) return;
@@ -99,7 +101,7 @@ function SearchInner() {
     } finally {
       setBusy(false);
     }
-  }, [workspace]);
+  }, [workspace, pushRecent]);
 
   useEffect(() => {
     if (initialQ.trim() && workspace) {
