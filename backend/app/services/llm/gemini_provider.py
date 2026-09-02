@@ -196,5 +196,52 @@ class GeminiProvider(LLMProvider):
         except Exception:  # noqa: BLE001
             return None
 
+    async def extract_contract_obligations(self, text: str, title: str) -> list[dict]:
+        """Extract contractual obligations, deadlines, renewal dates, payment terms from document text."""
+        if not text or len(text.strip()) < 50:
+            return []
+
+        prompt = (
+            f"Document Title: {title}\n\n"
+            "Analyze the following document text and extract ALL key contractual obligations, renewal dates, "
+            "payment milestones, termination windows, or compliance deadlines.\n"
+            "Return a JSON array of objects. Each object MUST have:\n"
+            ' - "title": short title of obligation (e.g., "Annual Renewal Notice", "Quarterly SLA Review", "Final License Payment")\n'
+            ' - "party_name": name of the vendor/party or company involved, or null\n'
+            ' - "obligation_type": one of ["renewal", "payment", "expiration", "compliance", "deliverable", "other"]\n'
+            ' - "due_date": ISO date string (YYYY-MM-DD) if a specific date or deadline is mentioned, otherwise null\n'
+            ' - "notice_days": integer notice period required in days (e.g. 30, 60, 90), or 30\n'
+            ' - "amount": cost/fee/amount mentioned if applicable (e.g. "$12,000", "₹50,000/mo"), or null\n'
+            ' - "summary": concise 1-2 sentence explanation of the requirement\n\n'
+            "If the document is NOT a contract or agreement and has NO deadlines/obligations, return an empty array `[]`.\n"
+            "Reply ONLY with the raw JSON array (no markdown code blocks, no commentary).\n\n"
+            f"Document Text Excerpt:\n{text[:12000]}"
+        )
+
+        try:
+            for model_name in self.chat_models:
+                try:
+                    response = await self.client.aio.models.generate_content(
+                        model=model_name,
+                        contents=[prompt],
+                    )
+                    raw = (response.text or "").strip()
+                    if raw.startswith("```"):
+                        raw = raw.strip("`")
+                        if raw.lower().startswith("json"):
+                            raw = raw[4:].strip()
+                    import json as _json
+                    items = _json.loads(raw)
+                    if isinstance(items, list):
+                        return items
+                except Exception as e:
+                    logger.warning("Contract extraction with %s failed: %s", model_name, e)
+                    continue
+            return []
+        except Exception as e:
+            logger.error("Failed to extract contract obligations: %s", e)
+            return []
+
+
 def get_llm() -> LLMProvider:
     return GeminiProvider()

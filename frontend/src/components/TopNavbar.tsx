@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, Compass, Home, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, UsersRound, Pencil, User } from "lucide-react";
+import { ChevronDown, Compass, Home, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, UsersRound, Pencil, User, CalendarClock } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -153,6 +153,19 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           >
             <MessagesSquare className="h-3.5 w-3.5" />
           </Link>
+
+          <Link
+            href="/contracts"
+            title="Contracts"
+            aria-label="Contracts"
+            className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all ${
+              pathname === "/contracts" || pathname.startsWith("/contracts/")
+                ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
+                : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
+            }`}
+          >
+            <CalendarClock className="h-3.5 w-3.5" />
+          </Link>
         </div>
       </div>
 
@@ -163,7 +176,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
           { href: "/chat", label: "AI Chat", Icon: Sparkles },
           { href: "/chats", label: "Office Chats", Icon: MessagesSquare },
-          { href: "/friends", label: "Friends", Icon: UsersRound },
+          { href: "/contracts", label: "Contracts", Icon: CalendarClock },
           { href: "/documents", label: "Documents", Icon: FileText },
         ].map(({ href, label, Icon }) => {
           const active = pathname === href || pathname.startsWith(href + "/");

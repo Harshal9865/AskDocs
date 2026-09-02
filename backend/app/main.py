@@ -45,6 +45,24 @@ async def lifespan(app: FastAPI):
                 created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
             );
             """))
+            await session.execute(text("""
+            CREATE TABLE IF NOT EXISTS contract_obligations (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+                document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+                title VARCHAR(300) NOT NULL,
+                party_name VARCHAR(200),
+                obligation_type VARCHAR(50) NOT NULL DEFAULT 'renewal',
+                due_date TIMESTAMP WITH TIME ZONE,
+                notice_days INTEGER DEFAULT 30,
+                amount VARCHAR(100),
+                status VARCHAR(30) NOT NULL DEFAULT 'active',
+                summary TEXT,
+                created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE INDEX IF NOT EXISTS ix_contract_obligations_workspace_id ON contract_obligations (workspace_id);
+            CREATE INDEX IF NOT EXISTS ix_contract_obligations_document_id ON contract_obligations (document_id);
+            """))
             await session.commit()
     except Exception as e:
         import logging

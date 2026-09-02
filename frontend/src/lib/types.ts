@@ -46,6 +46,21 @@ export interface Workspace {
   role?: string;
 }
 
+export interface ContractObligation {
+  id: string;
+  workspace_id: string;
+  document_id: string;
+  title: string;
+  party_name?: string | null;
+  obligation_type: "renewal" | "payment" | "expiration" | "compliance" | "deliverable" | "other";
+  due_date?: string | null;
+  notice_days?: number | null;
+  amount?: string | null;
+  status: "active" | "resolved" | "expired";
+  summary?: string | null;
+  created_at: string;
+}
+
 export interface JoinRequest {
   id: string;
   workspace_id: string;

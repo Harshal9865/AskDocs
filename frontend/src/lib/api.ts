@@ -2,6 +2,7 @@ import type {
   Citation,
   CheckoutPayload,
   ConflictWarning,
+  ContractObligation,
   FreshnessWarning,
   Conversation,
   DocumentItem,
@@ -662,5 +663,30 @@ export const api = {
 
   async listInvoices(): Promise<InvoiceRecord[]> {
     return request<InvoiceRecord[]>("/billing/invoices");
+  },
+
+  // Contract Tracker
+  async getContractObligations(wsId: string, status?: string): Promise<ContractObligation[]> {
+    const q = status ? `?status=${encodeURIComponent(status)}` : "";
+    return request<ContractObligation[]>(`/workspaces/${wsId}/contracts/obligations${q}`);
+  },
+
+  async scanContractDocument(wsId: string, docId: string): Promise<ContractObligation[]> {
+    return request<ContractObligation[]>(`/workspaces/${wsId}/contracts/scan/${docId}`, {
+      method: "POST",
+    });
+  },
+
+  async updateContractObligationStatus(wsId: string, obligationId: string, status: "active" | "resolved" | "expired"): Promise<ContractObligation> {
+    return request<ContractObligation>(`/workspaces/${wsId}/contracts/obligations/${obligationId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    });
+  },
+
+  async deleteContractObligation(wsId: string, obligationId: string): Promise<void> {
+    return request<void>(`/workspaces/${wsId}/contracts/obligations/${obligationId}`, {
+      method: "DELETE",
+    });
   },
 };
