@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1 import activity, auth, billing, canvas, chat, contracts, digests, documents, friends, health, invitations, presence, teamchat, trash, workspaces
+from app.api.v1 import activity, auth, billing, canvas, chat, contracts, digests, documents, friends, health, invitations, memory, presence, teamchat, trash, workspaces
 
 api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
@@ -18,3 +18,4 @@ api_router.include_router(contracts.router, prefix="/workspaces/{workspace_id}/c
 api_router.include_router(digests.router, prefix="/workspaces/{workspace_id}/digests", tags=["digests"])
 api_router.include_router(health.router, prefix="/workspaces/{workspace_id}/health", tags=["health"])
 api_router.include_router(canvas.router, prefix="/workspaces/{workspace_id}/canvas", tags=["canvas"])
+api_router.include_router(memory.router, prefix="/workspaces/{workspace_id}/memory", tags=["memory"])

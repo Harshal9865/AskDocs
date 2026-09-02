@@ -22,6 +22,9 @@ import type {
   Workspace,
   WorkspaceCanvas,
   CanvasChecklistItem,
+  WorkspaceMemory,
+  MemoryGraphOut,
+  MemoryQueryResponse,
   WorkspaceDigest,
   WorkspaceHealthReport,
 } from "./types";
@@ -765,6 +768,22 @@ export const api = {
   async deleteWorkspaceCanvas(wsId: string, canvasId: string): Promise<void> {
     return request<void>(`/workspaces/${wsId}/canvas/${canvasId}`, {
       method: "DELETE",
+    });
+  },
+
+  // Institutional Memory Preserver & Knowledge Graph
+  async getWorkspaceMemories(wsId: string): Promise<WorkspaceMemory[]> {
+    return request<WorkspaceMemory[]>(`/workspaces/${wsId}/memory`);
+  },
+
+  async getWorkspaceMemoryGraph(wsId: string): Promise<MemoryGraphOut> {
+    return request<MemoryGraphOut>(`/workspaces/${wsId}/memory/graph`);
+  },
+
+  async queryWorkspaceMemory(wsId: string, query: string): Promise<MemoryQueryResponse> {
+    return request<MemoryQueryResponse>(`/workspaces/${wsId}/memory/query`, {
+      method: "POST",
+      body: JSON.stringify({ query }),
     });
   },
 };

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, Compass, Home, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, UsersRound, Pencil, User, CalendarClock, FileSpreadsheet, Activity, LayoutGrid } from "lucide-react";
+import { ChevronDown, Compass, Home, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, UsersRound, Pencil, User, CalendarClock, FileSpreadsheet, Activity, LayoutGrid, Brain } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -179,6 +179,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           { href: "/contracts", label: "Contracts", Icon: CalendarClock },
           { href: "/digest", label: "Digest", Icon: FileSpreadsheet },
           { href: "/canvas", label: "Canvas", Icon: LayoutGrid },
+          { href: "/memory", label: "Memory", Icon: Brain },
           { href: "/health", label: "Health", Icon: Activity },
           { href: "/documents", label: "Documents", Icon: FileText },
         ].map(({ href, label, Icon }) => {

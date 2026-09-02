@@ -356,6 +356,10 @@ async def delete_workspace(workspace_id: uuid.UUID, db: DbSession, membership: A
             {"ws_id": ws_id},
         )
         await db.execute(
+            text("DELETE FROM workspace_memories WHERE workspace_id = :ws_id"),
+            {"ws_id": ws_id},
+        )
+        await db.execute(
             text(
                 "DELETE FROM chunks WHERE document_id IN ("
                 "SELECT id FROM documents WHERE workspace_id = :ws_id"

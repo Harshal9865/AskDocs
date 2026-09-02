@@ -326,3 +326,38 @@ export interface WorkspaceCanvas {
   heat_map: RiskHeatMapItem[];
   created_at: string;
 }
+
+export interface WorkspaceMemory {
+  id: string;
+  workspace_id: string;
+  source_type: "decision" | "contract" | "document" | "chat" | string;
+  title: string;
+  summary: string;
+  entities: string[];
+  tags: string[];
+  created_at: string;
+}
+
+export interface MemoryGraphNode {
+  id: string;
+  label: string;
+  type: "root" | "document" | "contract" | "decision" | "policy" | string;
+  details: string;
+}
+
+export interface MemoryGraphEdge {
+  source: string;
+  target: string;
+  relation: string;
+}
+
+export interface MemoryGraphOut {
+  nodes: MemoryGraphNode[];
+  edges: MemoryGraphEdge[];
+  memories: WorkspaceMemory[];
+}
+
+export interface MemoryQueryResponse {
+  answer: string;
+  relevant_memories: WorkspaceMemory[];
+}

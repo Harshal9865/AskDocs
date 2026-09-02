@@ -1,0 +1,310 @@
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import { useWorkspace } from "@/lib/workspace-context";
+import { api } from "@/lib/api";
+import { MemoryGraphOut, WorkspaceMemory } from "@/lib/types";
+import {
+  Brain,
+  Calendar,
+  CheckCircle2,
+  FileSignature,
+  FileText,
+  Network,
+  RefreshCw,
+  Search,
+  Sparkles,
+  Tag,
+  Zap,
+} from "lucide-react";
+
+export default function InstitutionalMemoryPage() {
+  const { workspace } = useWorkspace();
+  const [graphData, setGraphData] = useState<MemoryGraphOut | null>(null);
+  const [memories, setMemories] = useState<WorkspaceMemory[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [query, setQuery] = useState<string>("");
+  const [querying, setQuerying] = useState<boolean>(false);
+  const [queryAnswer, setQueryAnswer] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<string>("all");
+
+  const loadMemoryData = useCallback(async () => {
+    if (!workspace?.id) return;
+    setLoading(true);
+    try {
+      const [graph, memList] = await Promise.all([
+        api.getWorkspaceMemoryGraph(workspace.id),
+        api.getWorkspaceMemories(workspace.id),
+      ]);
+      setGraphData(graph);
+      setMemories(memList);
+    } catch {
+      /* ignore */
+    } finally {
+      setLoading(false);
+    }
+  }, [workspace?.id]);
+
+  useEffect(() => {
+    loadMemoryData();
+  }, [loadMemoryData]);
+
+  const handleSearchMemory = async () => {
+    if (!workspace?.id || !query.trim() || querying) return;
+    setQuerying(true);
+    try {
+      const res = await api.queryWorkspaceMemory(workspace.id, query.trim());
+      setQueryAnswer(res.answer);
+    } catch {
+      alert("Failed to query workspace memory.");
+    } finally {
+      setQuerying(false);
+    }
+  };
+
+  const filteredMemories = memories.filter((m) => {
+    if (activeFilter === "all") return true;
+    return m.source_type === activeFilter;
+  });
+
+  if (!workspace) {
+    return (
+      <div className="flex h-64 items-center justify-center text-slate-500">
+        Please select a workspace to view Institutional Memory.
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative min-h-full mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8 gemini-gradient-bg animate-in fade-in duration-300">
+      {/* Background Ambient Orbs */}
+      <div className="gemini-orb gemini-orb-1" />
+      <div className="gemini-orb gemini-orb-2" />
+
+      {/* Header Banner */}
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 p-6 sm:p-8 text-white shadow-2xl dark:border-white/10">
+        <div className="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl" />
+        <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2.5">
+            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/20 px-3.5 py-1 text-xs font-bold text-indigo-300 backdrop-blur-md shadow-inner">
+              <Brain className="h-3.5 w-3.5 text-purple-400 animate-pulse" />
+              <span className="tracking-wider">PERMANENT ORGANIZATIONAL BRAIN</span>
+            </div>
+            <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white drop-shadow-md">
+              Institutional Memory & Knowledge Graph
+            </h1>
+            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Never lose context. Index workspace decisions, policy exceptions, and document relationships into an immutable Knowledge Graph.
+            </p>
+          </div>
+
+          <button
+            onClick={loadMemoryData}
+            disabled={loading}
+            className="group relative flex items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-6 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 active:scale-95 disabled:opacity-50 transition-all duration-300 cursor-pointer shrink-0"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : "group-hover:rotate-180"}`} />
+            <span>Sync Mind Map</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Decision Timeline Search Bar */}
+      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-4 sm:p-5 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-4">
+        <div className="flex flex-col sm:flex-row gap-3 items-center">
+          <div className="relative flex-1 w-full">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-zinc-500" />
+            <input
+              type="text"
+              placeholder="Ask Institutional Memory: e.g. What were the key decisions made regarding Client X last month?"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearchMemory()}
+              className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/60 pl-11 pr-4 py-3 text-xs font-bold text-slate-900 outline-none backdrop-blur-md transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white"
+            />
+          </div>
+          <button
+            onClick={handleSearchMemory}
+            disabled={!query.trim() || querying}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-3 text-xs font-bold text-white shadow-lg shadow-purple-500/25 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-50 transition-all cursor-pointer shrink-0"
+          >
+            {querying ? (
+              <>
+                <RefreshCw className="h-4 w-4 animate-spin" /> Querying Memory…
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" /> Query Memory
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* AI Decision Answer Banner */}
+        {queryAnswer && (
+          <div className="rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-indigo-500/5 to-transparent p-5 shadow-lg backdrop-blur-md animate-in fade-in duration-300 space-y-2">
+            <div className="flex items-center gap-2 text-xs font-black text-purple-600 dark:text-purple-300">
+              <Zap className="h-4 w-4 text-purple-500" />
+              <span>INSTITUTIONAL MEMORY TIMELINE ANSWER</span>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-800 dark:text-zinc-200 leading-relaxed whitespace-pre-wrap">
+              {queryAnswer}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Visual Knowledge Mind Map */}
+      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-base font-extrabold text-slate-900 dark:text-white">
+            <Network className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+            <span>Workspace Knowledge Mind Map</span>
+          </div>
+          <span className="text-xs font-bold text-slate-400">
+            {graphData?.nodes?.length || 0} Connected Nodes
+          </span>
+        </div>
+
+        {loading ? (
+          <div className="flex h-48 flex-col items-center justify-center text-slate-400">
+            <RefreshCw className="h-8 w-8 animate-spin text-purple-600 mb-2" />
+            <p className="text-xs font-bold uppercase tracking-wider">Mapping Workspace Knowledge Nodes...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {graphData?.nodes.map((node) => (
+              <div
+                key={node.id}
+                className={`group relative flex flex-col justify-between rounded-2xl border p-4 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${
+                  node.type === "root"
+                    ? "border-purple-500 bg-gradient-to-br from-purple-600 to-indigo-600 text-white shadow-xl shadow-purple-500/20"
+                    : node.type === "document"
+                    ? "border-slate-200/80 bg-slate-50/60 hover:border-indigo-500/40 dark:border-white/10 dark:bg-[#1f1f2e]"
+                    : node.type === "contract"
+                    ? "border-slate-200/80 bg-slate-50/60 hover:border-amber-500/40 dark:border-white/10 dark:bg-[#1f1f2e]"
+                    : "border-slate-200/80 bg-slate-50/60 hover:border-emerald-500/40 dark:border-white/10 dark:bg-[#1f1f2e]"
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className={`flex h-8 w-8 items-center justify-center rounded-xl ${
+                      node.type === "root"
+                        ? "bg-white/20 text-white"
+                        : node.type === "document"
+                        ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+                        : node.type === "contract"
+                        ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                        : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                    }`}>
+                      {node.type === "document" ? (
+                        <FileText className="h-4 w-4" />
+                      ) : node.type === "contract" ? (
+                        <FileSignature className="h-4 w-4" />
+                      ) : node.type === "decision" ? (
+                        <CheckCircle2 className="h-4 w-4" />
+                      ) : (
+                        <Brain className="h-4 w-4" />
+                      )}
+                    </div>
+
+                    <span className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${
+                      node.type === "root" ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700 dark:bg-white/10 dark:text-zinc-300"
+                    }`}>
+                      {node.type}
+                    </span>
+                  </div>
+
+                  <h4 className={`text-xs font-black truncate ${node.type === "root" ? "text-white" : "text-slate-900 dark:text-white"}`}>
+                    {node.label}
+                  </h4>
+                  <p className={`mt-1 text-[11px] leading-relaxed line-clamp-2 ${node.type === "root" ? "text-purple-100" : "text-slate-500 dark:text-zinc-400"}`}>
+                    {node.details}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Memory Records List */}
+      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-4">
+        {/* Category Tabs */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4 dark:border-white/5">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+            {[
+              { id: "all", label: "All Memory Records", count: memories.length },
+              { id: "decision", label: "Decisions & Approvals", count: memories.filter((m) => m.source_type === "decision").length },
+              { id: "contract", label: "Contract Obligations", count: memories.filter((m) => m.source_type === "contract").length },
+              { id: "document", label: "Document Syntheses", count: memories.filter((m) => m.source_type === "document").length },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveFilter(tab.id)}
+                className={`flex items-center gap-2 rounded-2xl px-4 py-2 text-xs font-extrabold transition-all duration-200 cursor-pointer whitespace-nowrap ${
+                  activeFilter === tab.id
+                    ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/25 scale-105"
+                    : "text-slate-600 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-white/5"
+                }`}
+              >
+                <span>{tab.label}</span>
+                {tab.count !== undefined && (
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${activeFilter === tab.id ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700 dark:bg-white/10 dark:text-zinc-300"}`}>
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Memory Items */}
+        {filteredMemories.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-purple-500/30 bg-purple-500/5 p-12 text-center backdrop-blur-sm animate-in fade-in duration-300">
+            <Brain className="h-10 w-10 text-purple-500 mb-3 animate-bounce" />
+            <h3 className="text-base font-black text-slate-900 dark:text-white">No Memory Records Indexed Yet</h3>
+            <p className="mt-1.5 text-xs text-slate-500 dark:text-zinc-400 max-w-md leading-relaxed">
+              As your team uploads documents, executes contract approvals in chat, and generates AI digests, memory records will automatically populate here.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredMemories.map((mem) => (
+              <div
+                key={mem.id}
+                className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 hover:border-purple-500/40 hover:bg-white hover:shadow-lg hover:shadow-purple-500/5 dark:border-white/5 dark:bg-[#1a1a24]/60 dark:hover:bg-[#1f1f2e] transition-all duration-200 animate-in fade-in slide-in-from-bottom-2 duration-300"
+              >
+                <div className="space-y-1.5">
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <span className="text-xs font-black text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                      {mem.title}
+                    </span>
+                    <span className="inline-block rounded-full bg-purple-500/15 px-2.5 py-0.5 text-[10px] font-black uppercase text-purple-600 dark:text-purple-300 border border-purple-500/30">
+                      {mem.source_type}
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-slate-600 dark:text-zinc-300 leading-relaxed">{mem.summary}</p>
+
+                  <div className="flex flex-wrap items-center gap-2 text-[11px] font-medium text-slate-400 pt-1">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-3.5 w-3.5 text-purple-500" />
+                      <span>{new Date(mem.created_at).toLocaleDateString()}</span>
+                    </span>
+                    {mem.entities?.map((ent, idx) => (
+                      <span key={idx} className="flex items-center gap-1 rounded-full bg-slate-200/60 px-2 py-0.5 text-[10px] font-bold text-slate-700 dark:bg-white/10 dark:text-zinc-300">
+                        <Tag className="h-3 w-3 text-purple-500" />
+                        <span>{ent}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
