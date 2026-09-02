@@ -149,7 +149,7 @@ export default function DocumentDetailPage() {
   const myRole = workspace?.role ?? "member";
   const totalTokens = chunks.reduce((acc, c) => acc + c.token_count, 0);
 
-  const statusConfig = {
+  const statusConfig: Record<string, { label: string; bg: string; icon: typeof CheckCircle2; color: string }> = {
     ready: {
       label: "Ready for AI",
       bg: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40",
@@ -162,20 +162,34 @@ export default function DocumentDetailPage() {
       icon: Loader2,
       color: "text-amber-600 dark:text-amber-400",
     },
+    pending: {
+      label: "Pending indexing...",
+      bg: "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200 dark:border-blue-800/40",
+      icon: Loader2,
+      color: "text-blue-600 dark:text-blue-400",
+    },
+    failed: {
+      label: "Processing Error",
+      bg: "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-200 dark:border-red-800/40",
+      icon: AlertCircle,
+      color: "text-red-600 dark:text-red-400",
+    },
     error: {
       label: "Processing Error",
       bg: "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-200 dark:border-red-800/40",
       icon: AlertCircle,
       color: "text-red-600 dark:text-red-400",
     },
-  }[doc.status] ?? {
+  };
+
+  const currentStatus = statusConfig[doc.status] ?? {
     label: doc.status,
     bg: "bg-slate-100 text-slate-600",
     icon: CheckCircle2,
     color: "text-slate-500",
   };
 
-  const StatusIcon = statusConfig.icon;
+  const StatusIcon = currentStatus.icon;
 
   const filteredChunks = chunks
     .filter((c) =>

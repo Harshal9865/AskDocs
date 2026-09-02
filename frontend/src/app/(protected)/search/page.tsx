@@ -200,12 +200,12 @@ function SearchInner() {
           </button>
         </form>
 
-        {/* Quick Sample Queries Chips */}
+        {/* Quick Sample Queries & Recent Searches Chips */}
         <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
           <span className="text-slate-400 font-bold text-[11px] uppercase tracking-wider flex items-center gap-1">
             <Zap className="h-3 w-3 text-amber-500" /> Try:
           </span>
-          {["Liability & Termination Clauses", "Infrastructure Cloud Uptime SLA", "Quarterly Budget Approvals", "Eventual Consistency & Raft"].map((suggestion) => (
+          {(recent.length > 0 ? recent : ["Liability & Termination Clauses", "Infrastructure Cloud Uptime SLA", "Quarterly Budget Approvals", "Eventual Consistency & Raft"]).map((suggestion) => (
             <button
               key={suggestion}
               type="button"
