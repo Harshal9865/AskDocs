@@ -18,8 +18,11 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Model lists — tried in order, first success wins
 # ---------------------------------------------------------------------------
-CHAT_MODELS = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
-EMBED_MODELS = ["text-embedding-004", "gemini-embedding-001"]
+CHAT_MODELS = ["gemini-3.6-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite"]
+EMBED_MODELS = [
+    "text-embedding-004",
+    "gemini-embedding-001",
+]
 
 # ---------------------------------------------------------------------------
 # System instruction — defines AskDocs AI personality & answer format
