@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 import {
   AlertCircle,
   Calendar,
@@ -9,10 +8,7 @@ import {
   CheckCircle2,
   Clock,
   FileSignature,
-  FileText,
-  Filter,
   Loader2,
-  Plus,
   RefreshCw,
   Search,
   Sparkles,
@@ -35,13 +31,13 @@ export default function ContractsPage() {
   const [scanModalOpen, setScanModalOpen] = useState(false);
   const [selectedScanDocId, setSelectedScanDocId] = useState<string>("");
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!workspace) return;
     setLoading(true);
     try {
       const [obList, docList] = await Promise.all([
         api.getContractObligations(workspace.id),
-        api.getWorkspaceDocuments(workspace.id),
+        api.listDocuments(workspace.id),
       ]);
       setObligations(obList);
       setDocs(docList);
@@ -50,11 +46,11 @@ export default function ContractsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [workspace]);
 
   useEffect(() => {
     loadData();
-  }, [workspace]);
+  }, [loadData]);
 
   const handleStatusChange = async (obId: string, newStatus: "active" | "resolved" | "expired") => {
     if (!workspace) return;
