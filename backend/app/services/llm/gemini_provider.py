@@ -11,15 +11,14 @@ from app.services.llm.base import LLMProvider, RetrievedChunk
 logger = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = """You are AskDocs AI, an elite, highly articulate AI workspace teammate and document intelligence assistant.
-Your mission is to provide comprehensive, articulate, natural, and directly responsive answers to user prompts based on their workspace context.
+Your mission is to provide comprehensive, fluent, natural, and directly responsive answers to user prompts based on their workspace context.
 
 Guidelines for AI Responses:
-1. **Direct, Fluent & Natural Answers**: Answer the user's question directly in natural, engaging language—just like ChatGPT or Gemini. If the user asks for a summary, character breakdown, plot explanation, policy analysis, or concept breakdown, deliver a full, articulate response.
+1. **Direct, Fluent & Natural Answers**: Answer the user's question directly in natural, engaging prose—just like ChatGPT or Gemini. If the user asks for a story summary, character breakdown, plot explanation, policy advice, or technical concept, deliver a complete, articulate narrative answer.
 2. **NEVER Output Raw Text Dumps**: Do NOT output raw file text dumps, long copied paragraphs, or repetitive unedited sentences. Synthesize the information into clean, original prose.
-3. **Comprehensive Depth**: Provide thorough explanations, narrative arcs, main character summaries, or step-by-step breakdowns as requested.
-4. **Rich Markdown Formatting**: Organize answers with clear Markdown headers (`##`, `###`), bold terms, bullet points, and callout sections.
-5. **Subtle Context Citations**: When citing workspace files, use subtle inline tags like `[Source: DocumentTitle.pdf]`.
-6. **Professional & Helpful Tone**: Always maintain a friendly, articulate, highly intelligent tone.
+3. **Conversational Greetings**: If the user says hello or asks a general question, respond warmly, politely, and intelligently.
+4. **Rich Markdown Formatting**: Organize answers with clear Markdown headers (`##`, `###`), bold key terms, bullet points, and callout sections.
+5. **Subtle Context Citations**: When citing workspace files, use subtle inline tags like `[Source: DocumentTitle.pdf]` naturally at the end of key facts.
 """
 
 CHAT_MODELS = [
@@ -33,7 +32,7 @@ EMBED_MODELS = ["text-embedding-004", "gemini-embedding-001"]
 def _synthesize_intelligent_fallback(question: str, contexts: list[RetrievedChunk]) -> str:
     """Synthesize an articulate, narrative, ChatGPT-quality answer directly addressing the user prompt."""
     if not contexts:
-        return "Please upload a document to your workspace to analyze and chat with your files."
+        return f"Hello! I am AskDocs AI. How can I assist you with your workspace documents today?"
 
     by_title: dict[str, list[RetrievedChunk]] = {}
     for c in contexts:
@@ -44,23 +43,20 @@ def _synthesize_intelligent_fallback(question: str, contexts: list[RetrievedChun
         f"## 📖 {q_clean.capitalize()}\n",
     ]
 
-    # Synthesize narrative content per document
     for title, chunks in by_title.items():
         combined_text = " ".join(c.content for c in chunks[:4])
         clean_text = " ".join(combined_text.split())
 
-        # Extract sentences for coherent narrative building
         sentences = [s.strip() for s in clean_text.split(".") if len(s.strip()) > 25]
 
-        lines.append(f"### 📄 Insights from **{title}**\n")
+        lines.append(f"### 📄 Key Insights from **{title}**\n")
 
         if sentences:
-            # First paragraph narrative summary
             intro_p = ". ".join(sentences[:3]) + "."
             lines.append(f"{intro_p}\n")
 
             if len(sentences) > 3:
-                lines.append("**Key Highlights & Characters:**")
+                lines.append("**Key Details & Takeaways:**")
                 for s in sentences[3:7]:
                     lines.append(f"- {s}.")
                 lines.append("")
@@ -141,23 +137,25 @@ class GeminiProvider(LLMProvider):
                 logger.warning("OCR with %s failed: %s", model_name, e)
         return ""
 
-    def _build_prompt(self, question: str, contexts: list[RetrievedChunk], history: list[dict] | None) -> list[str]:
+    def _build_prompt_text(self, question: str, contexts: list[RetrievedChunk], history: list[dict] | None) -> str:
         parts = []
-        for i, turn in enumerate(history or [], 1):
-            parts.append(f"Previous user question {i}: {turn['content'] if turn['role'] == 'user' else ''}")
-            parts.append(f"Previous answer {i}: {turn['content'] if turn['role'] == 'assistant' else ''}")
-        for i, c in enumerate(contexts, 1):
-            parts.append(f"[Excerpt {i} | {c.document_title} | chunk #{c.ordinal}]\n{c.content}")
-        parts.append(f"User Request: {question}")
-        return parts
 
-    def _build_contents(self, question: str, contexts: list[RetrievedChunk], history: list[dict] | None, image_parts: list | None) -> list:
-        """Build multimodal contents: [text_prompt, *image_parts]."""
-        prompt = "\n\n".join(self._build_prompt(question, contexts, history))
-        contents: list = [SYSTEM_PROMPT + "\n\n" + prompt]
-        if image_parts:
-            contents.extend(image_parts)
-        return contents
+        if contexts:
+            parts.append("WORKSPACE DOCUMENT CONTEXT EXCERPTS:")
+            for i, c in enumerate(contexts, 1):
+                parts.append(f"--- Document: {c.document_title} (Chunk #{c.ordinal}) ---\n{c.content}")
+            parts.append("\nINSTRUCTIONS: Synthesize a fluent, articulate, comprehensive answer to the user's question below. Directly answer their question in clean, narrative prose (just like ChatGPT or Gemini). Do NOT print raw document headers or copy-paste raw excerpts. Use clear Markdown headers, bullet points, and subtle citations where appropriate.")
+        else:
+            parts.append("INSTRUCTIONS: Respond conversationally, articulately, and helpfully to the user's message.")
+
+        if history:
+            parts.append("\nCONVERSATION HISTORY:")
+            for turn in history[-6:]:
+                role_label = "User" if turn.get("role") == "user" else "Assistant"
+                parts.append(f"{role_label}: {turn.get('content', '')}")
+
+        parts.append(f"\nUser Question: {question}")
+        return "\n\n".join(parts)
 
     async def answer(
         self,
@@ -166,12 +164,22 @@ class GeminiProvider(LLMProvider):
         history: list[dict] | None = None,
         image_parts: list | None = None,
     ) -> str:
-        contents = self._build_contents(question, contexts, history, image_parts)
+        prompt_text = self._build_prompt_text(question, contexts, history)
+        contents: list = [prompt_text]
+        if image_parts:
+            contents.extend(image_parts)
+
+        config = types.GenerateContentConfig(
+            system_instruction=SYSTEM_PROMPT,
+            temperature=0.3,
+        )
+
         for model_name in self.chat_models:
             try:
                 response = await self.client.aio.models.generate_content(
                     model=model_name,
                     contents=contents,
+                    config=config,
                 )
                 if response.text and response.text.strip():
                     return response.text
@@ -187,7 +195,15 @@ class GeminiProvider(LLMProvider):
         history: list[dict] | None = None,
         image_parts: list | None = None,
     ) -> AsyncGenerator[str, None]:
-        contents = self._build_contents(question, contexts, history, image_parts)
+        prompt_text = self._build_prompt_text(question, contexts, history)
+        contents: list = [prompt_text]
+        if image_parts:
+            contents.extend(image_parts)
+
+        config = types.GenerateContentConfig(
+            system_instruction=SYSTEM_PROMPT,
+            temperature=0.3,
+        )
 
         # Attempt 1: Stream generation across models
         for model_name in self.chat_models:
@@ -195,6 +211,7 @@ class GeminiProvider(LLMProvider):
                 response_stream = await self.client.aio.models.generate_content_stream(
                     model=model_name,
                     contents=contents,
+                    config=config,
                 )
                 emitted = False
                 async for chunk in response_stream:
@@ -223,6 +240,7 @@ class GeminiProvider(LLMProvider):
                 res = await self.client.aio.models.generate_content(
                     model=model_name,
                     contents=contents,
+                    config=config,
                 )
                 if res and res.text and res.text.strip():
                     yield res.text

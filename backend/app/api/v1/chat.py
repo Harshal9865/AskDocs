@@ -251,15 +251,11 @@ async def ask_question_sync(
         else []
     )
 
-    if not chunks:
-        answer, citations = REFUSAL, []
-        conflict = None
-    else:
-        history = await conversation_history(db, conv.id)
-        answer = await llm.answer(payload.content, chunks, history)
-        citations = _citations_json(chunks)
-        conflict = await llm.detect_conflict(chunks)
-    freshness = await get_freshness(db, chunks)
+    history = await conversation_history(db, conv.id)
+    answer = await llm.answer(payload.content, chunks, history)
+    citations = _citations_json(chunks) if chunks else []
+    conflict = await llm.detect_conflict(chunks) if chunks else None
+    freshness = await get_freshness(db, chunks) if chunks else None
 
     msg = Message(
         conversation_id=conv.id,
@@ -348,24 +344,18 @@ async def ask_question_stream(
     async def event_stream():
         answer_parts: list[str] = []
         try:
-            if not chunks and not has_attachment_context:
-                yield f"data: {json.dumps({'type': 'answer', 'text': REFUSAL})}\n\n"
-                answer_parts.append(REFUSAL)
+            question_with_ctx = payload.content.strip() + doc_context
+            async for token in llm.stream_answer(question_with_ctx, chunks, history, image_parts):
+                answer_parts.append(token)
+                yield f"data: {json.dumps({'type': 'answer', 'text': token})}\n\n"
+            try:
+                conflict = await llm.detect_conflict(chunks) if chunks else None
+            except Exception:
                 conflict = None
+            try:
+                freshness = await get_freshness(db, chunks) if chunks else None
+            except Exception:
                 freshness = None
-            else:
-                question_with_ctx = payload.content.strip() + doc_context
-                async for token in llm.stream_answer(question_with_ctx, chunks, history, image_parts):
-                    answer_parts.append(token)
-                    yield f"data: {json.dumps({'type': 'answer', 'text': token})}\n\n"
-                try:
-                    conflict = await llm.detect_conflict(chunks) if chunks else None
-                except Exception:
-                    conflict = None
-                try:
-                    freshness = await get_freshness(db, chunks) if chunks else None
-                except Exception:
-                    freshness = None
 
             citations = _citations_json(chunks)
             yield f"data: {json.dumps({'type': 'done', 'citations': citations, 'suggested_colleagues': suggestions, 'conflict': conflict, 'freshness': freshness})}\n\n"
