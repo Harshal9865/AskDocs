@@ -111,15 +111,47 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         </span>
       </button>
 
-      {/* Home icon for small screens on top left side after logo */}
-      <Link
-        href="/"
-        title="Go to Homepage"
-        aria-label="Go to Homepage"
-        className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 sm:hidden transition-colors"
-      >
-        <Home className="h-4.5 w-4.5" />
-      </Link>
+      {/* Quick Nav Icons for small & tablet screens (<lg) */}
+      <div className="flex items-center gap-0.5 sm:gap-1 lg:hidden">
+        <Link
+          href="/dashboard"
+          title="Dashboard"
+          aria-label="Dashboard"
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all ${
+            pathname === "/dashboard" || pathname.startsWith("/dashboard/")
+              ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
+              : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
+          }`}
+        >
+          <LayoutDashboard className="h-4.5 w-4.5" />
+        </Link>
+
+        <Link
+          href="/chat"
+          title="AI Chat"
+          aria-label="AI Chat"
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all ${
+            pathname === "/chat" || pathname.startsWith("/chat/")
+              ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
+              : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
+          }`}
+        >
+          <Sparkles className="h-4.5 w-4.5" />
+        </Link>
+
+        <Link
+          href="/chats"
+          title="Office Chats"
+          aria-label="Office Chats"
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all ${
+            pathname === "/chats" || pathname.startsWith("/chats/")
+              ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
+              : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
+          }`}
+        >
+          <MessagesSquare className="h-4.5 w-4.5" />
+        </Link>
+      </div>
 
       {/* desktop nav — fills the empty middle (collapses to More sheet <lg) */}
       <nav className="hidden items-center gap-1 lg:flex">

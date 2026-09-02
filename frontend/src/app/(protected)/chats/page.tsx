@@ -15,10 +15,12 @@ import {
   BellRing,
   Check,
   CheckCheck,
+  Eraser,
   EyeOff,
   FileUp,
   MessageCirclePlus,
   MessagesSquare,
+  MoreVertical,
   Palette,
   Search,
   Sparkles,
@@ -181,6 +183,10 @@ export default function ChatsPage() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [notifEnabled, setNotifEnabled] = useState(false);
   const [dragOverThread, setDragOverThread] = useState(false);
+  const [deletingMsg, setDeletingMsg] = useState<TeamMessage | null>(null);
+  const [threadMenuOpen, setThreadMenuOpen] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     const savedWp = localStorage.getItem("askdocs_chat_wallpaper");
@@ -411,10 +417,50 @@ export default function ChatsPage() {
     catch (err) { alert((err as Error).message); }
   }
 
-  async function deleteMessage(messageId: string) {
-    if (!activeChat || !confirm("Delete this message for everyone?")) return;
-    try { await api.deleteTeamMessage(activeChat.id, messageId); setMessages((prev) => prev.filter((m) => m.id !== messageId)); await loadChats(); }
-    catch (err) { alert((err as Error).message); }
+  async function clearChatMessages() {
+    if (!activeChat) return;
+    try {
+      await api.clearTeamChat(activeChat.id);
+      setMessages([]);
+      setShowClearConfirm(false);
+      showToast("success", "Chat messages cleared");
+      await loadChats();
+    } catch (err) {
+      showToast("error", (err as Error).message);
+    }
+  }
+
+  async function confirmDeleteActiveChat() {
+    if (!activeChat) return;
+    try {
+      await api.deleteTeamChat(activeChat.id);
+      setShowDeleteConfirm(false);
+      setActiveChat(null);
+      setMessages([]);
+      showToast("success", "Chat deleted");
+      await loadChats();
+    } catch (err) {
+      showToast("error", (err as Error).message);
+    }
+  }
+
+  async function deleteMessageForEveryone(msgId: string) {
+    if (!activeChat) return;
+    try {
+      await api.deleteTeamMessage(activeChat.id, msgId);
+      setMessages((prev) => prev.filter((m) => m.id !== msgId));
+      setDeletingMsg(null);
+      showToast("success", "Message deleted for everyone");
+      await loadChats();
+    } catch (err) {
+      showToast("error", (err as Error).message);
+    }
+  }
+
+  function deleteMessageForMe(msgId: string) {
+    setMessages((prev) => prev.filter((m) => m.id !== msgId));
+    setDeletingMsg(null);
+    showToast("info", "Message deleted for you");
   }
 
   function senderName(senderId?: string | null) {
@@ -869,8 +915,60 @@ export default function ChatsPage() {
                   )}
                 </div>
 
-                <button onClick={() => void hideChat(activeChat.id)} title="Hide chat" className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-white/10 transition-colors"><EyeOff className="h-4 w-4" /></button>
-                <button onClick={() => void deleteChat(activeChat.id)} title="Delete for you" className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 transition-colors"><Trash2 className="h-4 w-4" /></button>
+                 {/* 3-dots WhatsApp Thread Options Menu */}
+                <div className="relative">
+                  <button
+                    onClick={() => setThreadMenuOpen((v) => !v)}
+                    title="More chat options"
+                    aria-label="More chat options"
+                    aria-expanded={threadMenuOpen}
+                    className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </button>
+
+                  {threadMenuOpen && (
+                    <>
+                      <div className="fixed inset-0 z-[999]" onClick={() => setThreadMenuOpen(false)} />
+                      <div className="absolute right-0 top-full z-[1000] mt-2 w-48 rounded-2xl border border-slate-200 bg-white/95 p-1.5 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#1c1c20]/95 ring-1 ring-black/5 dark:ring-white/10 animate-in fade-in zoom-in-95 duration-100">
+                        <button
+                          onClick={() => {
+                            setThreadMenuOpen(false);
+                            setShowClearConfirm(true);
+                          }}
+                          className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                        >
+                          <Eraser className="h-3.5 w-3.5 text-amber-500" />
+                          <span>Clear Chat</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setThreadMenuOpen(false);
+                            setShowDeleteConfirm(true);
+                          }}
+                          className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          <span>Delete Chat</span>
+                        </button>
+
+                        <div className="my-1 border-t border-slate-100 dark:border-white/5" />
+
+                        <button
+                          onClick={() => {
+                            setThreadMenuOpen(false);
+                            void hideChat(activeChat.id);
+                          }}
+                          className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-slate-500 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                        >
+                          <EyeOff className="h-3.5 w-3.5" />
+                          <span>Hide Chat</span>
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -945,11 +1043,11 @@ export default function ChatsPage() {
                     </div>
                     {isMe && (
                       <button 
-                        onClick={() => void deleteMessage(m.id)} 
+                        onClick={() => setDeletingMsg(m)} 
                         title="Delete message"
-                        className="ml-1 opacity-0 group-hover:opacity-100 self-center p-1 text-slate-400 hover:text-red-500 transition-opacity"
+                        className="ml-1 opacity-0 group-hover:opacity-100 self-center p-1.5 text-slate-400 hover:text-red-500 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 transition-all cursor-pointer"
                       >
-                        <Trash2 className="h-3 w-3" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     )}
                   </div>
@@ -1112,6 +1210,122 @@ export default function ChatsPage() {
                 <button onClick={() => setShowNewGroup(false)} className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:text-zinc-300 dark:hover:bg-white/5">Cancel</button>
                 <button onClick={() => void createGroup()} disabled={!groupTitle.trim() || selectedIds.length < 2} className="rounded-lg bg-[#1DB954] px-4 py-2 text-sm font-semibold text-black hover:bg-[#1ed760] disabled:opacity-40">Create group</button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* WhatsApp Message Delete Modal */}
+      {deletingMsg && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4" onClick={() => setDeletingMsg(null)}>
+          <div className="w-full max-w-sm overflow-hidden rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-white/10 dark:bg-[#18181e] animate-in fade-in zoom-in-95 duration-150" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400">
+                <Trash2 className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Delete message?</h3>
+                <p className="text-xs text-slate-400 dark:text-zinc-500">Choose how you want to delete this message.</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {deletingMsg.sender_id === user?.id && (
+                <button
+                  onClick={() => void deleteMessageForEveryone(deletingMsg.id)}
+                  className="w-full rounded-2xl bg-red-600 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-red-700 active:scale-98 transition-all cursor-pointer"
+                >
+                  Delete for everyone
+                </button>
+              )}
+
+              <button
+                onClick={() => deleteMessageForMe(deletingMsg.id)}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10 active:scale-98 transition-all cursor-pointer"
+              >
+                Delete for me
+              </button>
+
+              <button
+                onClick={() => setDeletingMsg(null)}
+                className="w-full rounded-2xl py-2 text-xs font-medium text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* WhatsApp Clear Chat Confirmation Modal */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4" onClick={() => setShowClearConfirm(false)}>
+          <div className="w-full max-w-sm overflow-hidden rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-white/10 dark:bg-[#18181e] animate-in fade-in zoom-in-95 duration-150" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-100 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400">
+                <Eraser className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Clear this chat?</h3>
+                <p className="text-xs text-slate-400 dark:text-zinc-500">Messages will be cleared for this conversation.</p>
+              </div>
+            </div>
+
+            <p className="mb-5 text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+              Are you sure you want to clear all messages in this chat? This action cannot be undone.
+            </p>
+
+            <div className="flex gap-2.5 justify-end">
+              <button
+                onClick={() => setShowClearConfirm(false)}
+                className="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:text-zinc-300 dark:hover:bg-white/5 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => void clearChatMessages()}
+                className="rounded-full bg-amber-600 px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-amber-700 active:scale-95 transition-all cursor-pointer"
+              >
+                Clear Chat
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* WhatsApp Delete Chat Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4" onClick={() => setShowDeleteConfirm(false)}>
+          <div className="w-full max-w-sm overflow-hidden rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-white/10 dark:bg-[#18181e] animate-in fade-in zoom-in-95 duration-150" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400">
+                <Trash2 className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Delete this chat?</h3>
+                <p className="text-xs text-slate-400 dark:text-zinc-500">Remove conversation from your list.</p>
+              </div>
+            </div>
+
+            <p className="mb-5 text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+              {activeChat?.type === "group"
+                ? "You will leave this group chat and it will be removed from your chats feed."
+                : "This conversation will be deleted and removed from your chats feed."}
+            </p>
+
+            <div className="flex gap-2.5 justify-end">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:text-zinc-300 dark:hover:bg-white/5 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => void confirmDeleteActiveChat()}
+                className="rounded-full bg-red-600 px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-red-700 active:scale-95 transition-all cursor-pointer"
+              >
+                Delete Chat
+              </button>
             </div>
           </div>
         </div>

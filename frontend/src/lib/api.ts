@@ -322,7 +322,6 @@ export const api = {
           text_excerpt: uploaded.text_excerpt ?? null,
         });
       } catch {
-        // Upload failed — record filename so the send can still proceed
         results.push({
           id: "",
           filename: file.name,
@@ -334,13 +333,15 @@ export const api = {
     return results;
   },
 
-  // ---- hide / unhide ----
+  // ---- hide / unhide / delete ----
   hideConversation: (chatId: string) =>
     request<{ status: string }>(`/team-chats/${chatId}/hide`, { method: "DELETE" }),
   unhideConversation: (chatId: string) =>
     request<{ status: string }>(`/team-chats/${chatId}/unhide`, { method: "POST" }),
   deleteTeamChat: (chatId: string) =>
     request<{ status: string }>(`/team-chats/${chatId}`, { method: "DELETE" }),
+  clearTeamChat: (chatId: string) =>
+    request<{ status: string }>(`/team-chats/${chatId}/clear`, { method: "POST" }),
   deleteTeamMessage: (chatId: string, messageId: string) =>
     request<{ status: string }>(`/team-chats/${chatId}/messages/${messageId}`, { method: "DELETE" }),
 

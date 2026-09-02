@@ -732,13 +732,28 @@ async def delete_team_message(
     db: DbSession,
     user: CurrentUser,
 ):
-    """Delete own message — individual only."""
+    """Delete a message — sender or workspace admin can delete for everyone."""
     conv = await _get_team_conversation_checked(db, conversation_id, user)
     msg = await db.get(Message, message_id)
     if msg is None or msg.conversation_id != conv.id:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Message not found")
-    if msg.sender_id != user.id:
+    
+    # Check if sender or admin
+    is_sender = msg.sender_id == user.id
+    is_admin = False
+    if not is_sender:
+        mb = await db.execute(
+            select(WorkspaceMember.role).where(
+                WorkspaceMember.workspace_id == conv.workspace_id,
+                WorkspaceMember.user_id == user.id,
+            )
+        )
+        role = mb.scalar_one_or_none()
+        is_admin = (role == "admin" or getattr(role, "value", None) == "admin")
+
+    if not is_sender and not is_admin:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Can only delete your own messages")
+
     # delete attachments first
     atts = await db.execute(
         select(MessageAttachment).where(MessageAttachment.message_id == msg.id)
@@ -748,3 +763,35 @@ async def delete_team_message(
     await db.delete(msg)
     await db.commit()
     return {"status": "deleted"}
+
+
+@router.post("/team-chats/{conversation_id}/clear")
+async def clear_team_chat(
+    conversation_id: uuid.UUID,
+    db: DbSession,
+    user: CurrentUser,
+):
+    """Clear all messages in a conversation (WhatsApp-style Clear Chat)."""
+    conv = await _get_team_conversation_checked(db, conversation_id, user)
+    
+    msg_subq = select(Message.id).where(Message.conversation_id == conv.id)
+    await db.execute(delete(MessageAttachment).where(MessageAttachment.message_id.in_(msg_subq)))
+    await db.execute(delete(Message).where(Message.conversation_id == conv.id))
+    
+    # Reset read state to now
+    now = utcnow()
+    existing_rs = await db.execute(
+        select(ConversationReadState).where(
+            ConversationReadState.conversation_id == conv.id,
+            ConversationReadState.user_id == user.id,
+        )
+    )
+    rs = existing_rs.scalar_one_or_none()
+    if rs:
+        rs.last_read_at = now
+    else:
+        db.add(ConversationReadState(conversation_id=conv.id, user_id=user.id, last_read_at=now))
+
+    await db.commit()
+    return {"status": "cleared"}
+
