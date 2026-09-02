@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -19,8 +20,19 @@ import {
   Upload,
   UsersRound,
   X,
+  Brain,
+  FileSignature,
+  CalendarClock,
+  Activity,
+  FileSpreadsheet,
+  LayoutGrid,
+  Search,
+  Zap,
+  AlertCircle,
+  Clock,
+  ChevronRight
 } from "lucide-react";
-import type { DocumentItem, PlanInfo, TeamChat } from "@/lib/types";
+import type { ContractObligation, DocumentItem, PlanInfo, TeamChat, WorkspaceMemory } from "@/lib/types";
 
 /* ── Helpers ── */
 function timeAgo(dateStr: string) {
@@ -192,8 +204,12 @@ function ActivityItem({ item }: { item: { actor: string; action: string; target:
 export default function DashboardPage() {
   const { user } = useAuth();
   const { workspace, workspaces } = useWorkspace();
+  const router = useRouter();
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [chats, setChats] = useState<TeamChat[]>([]);
+  const [obligations, setObligations] = useState<ContractObligation[]>([]);
+  const [memories, setMemories] = useState<WorkspaceMemory[]>([]);
+  const [quickPrompt, setQuickPrompt] = useState("");
   const [insights, setInsights] = useState<{
     total_questions: number;
     unanswered_count: number;
@@ -211,18 +227,22 @@ export default function DashboardPage() {
     if (!workspace) return;
     setLoading(true);
     try {
-      const [docList, chatList, ins, memList, planInfo] = await Promise.all([
+      const [docList, chatList, ins, memList, planInfo, obList, mems] = await Promise.all([
         api.listDocuments(workspace.id),
         api.listTeamChats(workspace.id),
         api.insights(workspace.id).catch(() => null),
         api.listMembers(workspace.id).catch(() => []),
         api.getPlan().catch(() => null),
+        api.getContractObligations(workspace.id).catch(() => []),
+        api.getWorkspaceMemories(workspace.id).catch(() => []),
       ]);
       setDocs(docList);
       setChats(chatList);
       if (ins) setInsights(ins);
       setMembers(memList);
       if (planInfo) setPlan(planInfo);
+      setObligations(obList);
+      setMemories(mems);
     } catch {
       /* ignore */
     } finally {
@@ -283,6 +303,7 @@ export default function DashboardPage() {
   const onlineCount = members.filter((m) => m.online).length;
   const questionCount = insights?.total_questions ?? 0;
   const unansweredCount = insights?.unanswered_count ?? 0;
+  const activeObligations = obligations.filter((o) => o.status === "active");
   const recentActivity = activity.slice(0, 7);
 
   const firstName = user?.name?.split(" ")[0] || "there";
@@ -291,7 +312,7 @@ export default function DashboardPage() {
 
   return (
     <div className="relative mx-auto max-w-5xl space-y-6">
-      {/* Header Banner */}
+      {/* Header Banner with Interactive Ask AI Bar */}
       <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 via-purple-50/30 to-indigo-50/20 p-5 shadow-xs backdrop-blur-xl dark:border-white/10 dark:from-[#13111f]/95 dark:via-[#19152e]/50 dark:to-[#0f0e1c]/80 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -317,7 +338,13 @@ export default function DashboardPage() {
               href="/chat"
               className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-purple-500/25 transition-all hover:scale-105 active:scale-95"
             >
-              <Sparkles className="h-3.5 w-3.5" /> Ask AI
+              <Sparkles className="h-3.5 w-3.5" /> AI Chat
+            </Link>
+            <Link
+              href="/contracts"
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/80 px-4 py-2 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-purple-300/80 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10 transition-all hover:scale-105"
+            >
+              <FileSignature className="h-3.5 w-3.5 text-indigo-500" /> Contracts
             </Link>
             <Link
               href="/documents"
@@ -325,12 +352,55 @@ export default function DashboardPage() {
             >
               <Upload className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" /> Upload
             </Link>
-            <Link
-              href="/chats"
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/80 px-4 py-2 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-purple-300/80 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10 transition-all hover:scale-105"
+          </div>
+        </div>
+
+        {/* Interactive Ask AI Form inside Hero */}
+        <div className="mt-5 border-t border-purple-100/80 pt-4 dark:border-white/5">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!quickPrompt.trim()) return;
+              router.push(`/chat?q=${encodeURIComponent(quickPrompt.trim())}`);
+            }}
+            className="relative flex items-center"
+          >
+            <Sparkles className="pointer-events-none absolute left-3.5 h-4 w-4 text-purple-600 dark:text-purple-400" />
+            <input
+              type="text"
+              value={quickPrompt}
+              onChange={(e) => setQuickPrompt(e.target.value)}
+              placeholder="Ask AI anything across your workspace documents & contracts…"
+              className="w-full rounded-2xl border border-slate-200/90 bg-white/95 py-2.5 pl-10 pr-24 text-xs sm:text-sm text-slate-800 shadow-xs backdrop-blur-md outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#181628]/95 dark:text-white"
+            />
+            <button
+              type="submit"
+              disabled={!quickPrompt.trim()}
+              className="absolute right-1.5 inline-flex items-center gap-1 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition-all hover:scale-105 active:scale-95 disabled:opacity-40"
             >
-              <MessagesSquare className="h-3.5 w-3.5 text-emerald-500" /> Office Chats
-            </Link>
+              <span>Ask</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </form>
+
+          {/* Quick prompt accelerator chips */}
+          <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Quick prompts:</span>
+            {[
+              "Summarize recent documents",
+              "Upcoming contract deadlines",
+              "Extract compliance risks",
+              "Action items checklist",
+            ].map((chip) => (
+              <button
+                key={chip}
+                type="button"
+                onClick={() => router.push(`/chat?q=${encodeURIComponent(chip)}`)}
+                className="rounded-lg border border-slate-200/80 bg-white/70 px-2 py-0.5 text-[11px] font-medium text-slate-600 transition-all hover:border-purple-300 hover:bg-white hover:text-purple-600 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-300 dark:hover:border-purple-500/30 dark:hover:text-purple-400"
+              >
+                {chip}
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -386,6 +456,34 @@ export default function DashboardPage() {
           )}
         </StatCard>
 
+        <Link href="/contracts" className="block transition-transform hover:scale-[1.02] active:scale-[0.98]">
+          <StatCard
+            label="Active Contracts"
+            value={loading ? "…" : activeObligations.length}
+            icon={FileSignature}
+            color="from-indigo-500 via-purple-500 to-pink-500"
+          >
+            <p className="mt-2 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+              <span>Obligations tracked</span>
+              <ArrowRight className="h-2.5 w-2.5" />
+            </p>
+          </StatCard>
+        </Link>
+
+        <Link href="/memory" className="block transition-transform hover:scale-[1.02] active:scale-[0.98]">
+          <StatCard
+            label="Memory Facts"
+            value={loading ? "…" : memories.length}
+            icon={Brain}
+            color="from-purple-600 via-indigo-600 to-cyan-500"
+          >
+            <p className="mt-2 text-[10px] font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1">
+              <span>Knowledge graph</span>
+              <ArrowRight className="h-2.5 w-2.5" />
+            </p>
+          </StatCard>
+        </Link>
+
         <StatCard
           label="Team Online"
           value={loading ? "…" : `${onlineCount}/${memberCount}`}
@@ -399,21 +497,6 @@ export default function DashboardPage() {
             </p>
           )}
         </StatCard>
-
-        <StatCard
-          label="Workspaces"
-          value={loading ? "…" : workspaces.length}
-          icon={LayoutDashboard}
-          color="from-sky-500 to-cyan-500"
-        />
-
-        <StatCard
-          label="Knowledge Gaps"
-          value={loading ? "…" : unansweredCount}
-          icon={Target}
-          color="from-amber-500 to-orange-500"
-          accent={unansweredCount > 0}
-        />
 
         <Link href="/pricing" className="block transition-transform hover:scale-[1.02] active:scale-[0.98]">
           <StatCard
@@ -454,6 +537,78 @@ export default function DashboardPage() {
               </div>
             )}
           </StatCard>
+        </Link>
+      </div>
+
+      {/* Intelligence & Workflow Highlight Cards */}
+      <div className="grid gap-3 sm:grid-cols-3">
+        {/* Contracts & Deadlines Quick Card */}
+        <Link
+          href="/contracts"
+          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-indigo-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-indigo-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#17142d]/80"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400">
+                <FileSignature className="h-4 w-4" />
+              </span>
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Contract Intelligence</h3>
+            </div>
+            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform">
+              View →
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
+            {activeObligations.length > 0
+              ? `${activeObligations.length} active contract terms and renewal dates monitored.`
+              : "Audit agreements, NDAs, and auto-extract obligations & deadlines."}
+          </p>
+        </Link>
+
+        {/* Institutional Memory Card */}
+        <Link
+          href="/memory"
+          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-purple-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#1a122e]/80"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400">
+                <Brain className="h-4 w-4" />
+              </span>
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Institutional Memory</h3>
+            </div>
+            <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 group-hover:translate-x-0.5 transition-transform">
+              View →
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
+            {memories.length > 0
+              ? `${memories.length} organizational decisions and facts recorded in graph.`
+              : "Ingest meeting transcripts and preserve team decisions automatically."}
+          </p>
+        </Link>
+
+        {/* Document Health & Audit Card */}
+        <Link
+          href="/health"
+          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-cyan-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-cyan-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#0f172a]/80"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600 dark:bg-cyan-950/60 dark:text-cyan-400">
+                <Activity className="h-4 w-4" />
+              </span>
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Document Health</h3>
+            </div>
+            <span className="text-[10px] font-bold text-cyan-600 dark:text-cyan-400 group-hover:translate-x-0.5 transition-transform">
+              View →
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
+            {docCount > 0
+              ? `${docCount} documents audited for freshness, clarity, and policy conflicts.`
+              : "Audit document freshness and detect contradictory policies in real-time."}
+          </p>
         </Link>
       </div>
 

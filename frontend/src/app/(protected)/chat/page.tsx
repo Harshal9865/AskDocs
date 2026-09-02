@@ -579,6 +579,33 @@ export default function ChatPage() {
     setBusy(false);
   }
 
+  // Auto-send query param if routed from Dashboard or external link
+  const initialQueryHandled = useRef(false);
+  useEffect(() => {
+    if (!workspace || initialQueryHandled.current) return;
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q");
+    if (q && q.trim()) {
+      initialQueryHandled.current = true;
+      window.history.replaceState({}, "", window.location.pathname);
+      void (async () => {
+        try {
+          const conv = await api.createConversation(workspace.id, q.slice(0, 40));
+          setConversations((prev) => [conv, ...(Array.isArray(prev) ? prev : [])]);
+          setActiveConv(conv);
+          setMessages([]);
+          setInput(q.trim());
+          setTimeout(() => {
+            void sendWithText(q.trim(), []);
+          }, 150);
+        } catch {
+          setInput(q.trim());
+        }
+      })();
+    }
+  }, [workspace, sendWithText]);
+
   if (!workspace) {
     return <div className="dark:border-slate-700/50 dark:bg-[#1a1a2e] rounded-xl border border-zinc-200 bg-white p-8 text-center text-zinc-500">Create or select a workspace first.</div>;
   }

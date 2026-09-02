@@ -18,6 +18,11 @@ import {
   Trash2,
   Crown,
   UsersRound,
+  Brain,
+  FileSignature,
+  Activity,
+  FileSpreadsheet,
+  LayoutGrid
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -32,11 +37,19 @@ const NAV = [
   { href: "/chats", label: "Office Chats", icon: MessagesSquare },
   { href: "/friends", label: "Friends", icon: UsersRound },
   { href: "/documents", label: "Documents", icon: FileText },
-  { href: "/search", label: "Search", icon: Search },
-  { href: "/discover", label: "Discover", icon: Compass },
+];
+
+const NAV_INTELLIGENCE = [
+  { href: "/contracts", label: "Contracts", icon: FileSignature },
+  { href: "/memory", label: "Memory Graph", icon: Brain },
+  { href: "/health", label: "Doc Health", icon: Activity },
+  { href: "/digest", label: "Weekly Digest", icon: FileSpreadsheet },
+  { href: "/canvas", label: "Canvas", icon: LayoutGrid },
 ];
 
 const NAV_SECONDARY = [
+  { href: "/search", label: "Search", icon: Search },
+  { href: "/discover", label: "Discover", icon: Compass },
   { href: "/pricing", label: "Plans & Pricing", icon: Crown },
   { href: "/insights", label: "Insights", icon: BarChart3 },
   { href: "/activity", label: "Activity log", icon: History },
@@ -409,8 +422,36 @@ export default function Sidebar({
           );
         })}
 
-        <div className="sb-label mb-1.5 mt-5 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
-          More
+        <div className="sb-label mb-1.5 mt-4 px-3 text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
+          Intelligence
+        </div>
+        {NAV_INTELLIGENCE.map((item) => {
+          const active = pathname === item.href;
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={onCloseMobile}
+              title={item.label}
+              aria-label={item.label}
+              className={`group relative mb-1 flex h-8.5 items-center gap-2.5 rounded-xl px-3 text-[13px] font-medium transition-all duration-200 ${isCollapsed ? "justify-center px-0" : ""} ${
+                active 
+                  ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm font-semibold" 
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-white/[0.06]"
+              }`}
+            >
+              {active && (
+                <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-r-full bg-cyan-400" aria-hidden />
+              )}
+              <Icon aria-hidden className={`h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${active ? "text-white" : "text-slate-400 dark:text-zinc-500 group-hover:text-purple-600 dark:group-hover:text-purple-400"}`} />
+              {!isCollapsed && <span className="truncate">{item.label}</span>}
+            </Link>
+          );
+        })}
+
+        <div className="sb-label mb-1.5 mt-4 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+          Workspace
         </div>
         {NAV_SECONDARY.map((item) => {
           const active = pathname === item.href;
