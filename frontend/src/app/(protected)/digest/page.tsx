@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useWorkspace } from "@/context/WorkspaceContext";
+import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
 import { WorkspaceDigest } from "@/lib/types";
 import {
