@@ -1,12 +1,17 @@
 export function AIAvatarIcon({
   className = "h-8 w-8",
+  size,
   streaming = false,
 }: {
   className?: string;
+  size?: number;
   streaming?: boolean;
 }) {
+  const sizeStyle = size ? { width: `${size}px`, height: `${size}px` } : undefined;
+
   return (
     <div
+      style={sizeStyle}
       className={`relative inline-flex items-center justify-center rounded-2xl transition-transform duration-300 select-none ${className}`}
     >
       {/* Outer ambient cosmic glow */}

@@ -1024,7 +1024,7 @@ export default function ChatsPage() {
                       {!isMe && (
                         isBot ? (
                           <div className="mb-2 flex items-center gap-1.5 rounded-full border border-purple-300/60 bg-white/80 px-2.5 py-1 text-[11px] font-extrabold text-purple-700 shadow-xs backdrop-blur-sm dark:border-purple-500/30 dark:bg-purple-950/60 dark:text-purple-300">
-                            <AIAvatarIcon size={16} />
+                            <AIAvatarIcon size={16} className="h-4 w-4" />
                             <span>@AskDocs AI Teammate</span>
                           </div>
                         ) : activeChat.type === "group" ? (
