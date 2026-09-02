@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
+from app.db.session import get_db
 from app.models.contract import ContractObligation
 from app.models.digest import WorkspaceDigest
 from app.models.document import Document
