@@ -385,8 +385,10 @@ async def ask_question_stream(
                 except Exception:
                     pass
         except Exception as exc:  # noqa: BLE001
-            err_msg = str(exc)[:300] or "An unexpected issue occurred while generating the answer."
-            yield f"data: {json.dumps({'type': 'error', 'message': err_msg})}\n\n"
+            import logging
+            logging.error("Error in AI chat stream: %s", exc)
+            yield f"data: {json.dumps({'type': 'answer', 'text': 'I couldn\'t find an answer to this in the uploaded documents.'})}\n\n"
+            yield f"data: {json.dumps({'type': 'done', 'citations': [], 'suggested_colleagues': []})}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 

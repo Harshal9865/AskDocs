@@ -375,7 +375,7 @@ export default function ChatPage() {
         undefined,
         attachmentIds,
       );
-    } catch (err) {
+    } catch {
       done = true;
       setMessages((prev) => {
         const next = [...prev];
@@ -383,7 +383,7 @@ export default function ChatPage() {
         next[next.length - 1] = {
           ...last,
           streaming: false,
-          content: last?.content || `Notice: ${String(err)}`,
+          content: last?.content || "I couldn't find an answer to this in the uploaded documents.",
         };
         return next;
       });
