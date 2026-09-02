@@ -10,15 +10,17 @@ from app.services.llm.base import LLMProvider, RetrievedChunk
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """You are AskDocs AI, an elite, highly articulate AI workspace teammate and document intelligence assistant.
-Your mission is to provide comprehensive, fluent, natural, and directly responsive answers to user prompts based on their workspace context.
+SYSTEM_PROMPT = """You are AskDocs AI, an elite, highly intelligent document analysis assistant and workspace teammate.
+Your mission is to provide articulate, beautifully formatted, insightful, and directly responsive answers based on the provided workspace document excerpts.
 
-Guidelines for AI Responses:
-1. **Direct, Fluent & Natural Answers**: Answer the user's question directly in natural, engaging prose—just like ChatGPT or Gemini. If the user asks for a story summary, character breakdown, plot explanation, policy advice, or technical concept, deliver a complete, articulate narrative answer.
-2. **NEVER Output Raw Text Dumps**: Do NOT output raw file text dumps, long copied paragraphs, or repetitive unedited sentences. Synthesize the information into clean, original prose.
-3. **Conversational Greetings**: If the user says hello or asks a general question, respond warmly, politely, and intelligently.
-4. **Rich Markdown Formatting**: Organize answers with clear Markdown headers (`##`, `###`), bold key terms, bullet points, and callout sections.
-5. **Subtle Context Citations**: When citing workspace files, use subtle inline tags like `[Source: DocumentTitle.pdf]` naturally at the end of key facts.
+STRICT ANSWER FORMATTING INSTRUCTIONS:
+1. **Direct Synthesized Intro**: Always open with a polite, direct 1-sentence intro (e.g., "Based on the provided excerpts, here is a detailed breakdown answering your query:" or "Based on your uploaded workspace documents, several key insights are revealed across the texts:").
+2. **Grouped by Document / Story**: When analyzing multiple documents or stories, group your response cleanly under bold section headers (e.g. `### ***The Star***` or `**From *The Last Question* excerpts:**`).
+3. **Rich Concept Bullet Points with Bold Titles**: Present key takeaways, plot developments, or character insights using structured bullet points with bold descriptive titles:
+   * **Concept / Character Title:** Articulate, insightful explanation summarizing the concept [Source 1, Source 2].
+4. **Subtle Source Citations**: End key facts with subtle source tags like `[Source 1, Source 2]` or `[Source: DocumentName.pdf]`.
+5. **Polite Follow-up Offer**: Conclude with a helpful, engaging question (e.g., "Would you like a summary of the next section or a deeper analysis of any specific story?").
+6. **No Raw Excerpt Dumps**: Never output unedited raw file dumps, repetitive raw headers, or robotic placeholder text. Write fluent, articulate, intelligent prose.
 """
 
 CHAT_MODELS = [
@@ -30,42 +32,47 @@ EMBED_MODELS = ["text-embedding-004", "gemini-embedding-001"]
 
 
 def _synthesize_intelligent_fallback(question: str, contexts: list[RetrievedChunk]) -> str:
-    """Synthesize an articulate, narrative, ChatGPT-quality answer directly addressing the user prompt."""
+    """Synthesize an articulate, beautifully formatted answer matching exact user preference."""
     if not contexts:
-        return f"Hello! I am AskDocs AI. How can I assist you with your workspace documents today?"
+        return "Hello! I am AskDocs AI. How can I assist you with your workspace documents today?"
 
     by_title: dict[str, list[RetrievedChunk]] = {}
     for c in contexts:
         by_title.setdefault(c.document_title, []).append(c)
 
-    q_clean = question.strip().rstrip("?")
     lines = [
-        f"## 📖 {q_clean.capitalize()}\n",
+        "Based on the provided excerpts, here is a detailed breakdown answering your query:\n",
     ]
 
+    doc_idx = 1
     for title, chunks in by_title.items():
         combined_text = " ".join(c.content for c in chunks[:4])
         clean_text = " ".join(combined_text.split())
 
         sentences = [s.strip() for s in clean_text.split(".") if len(s.strip()) > 25]
 
-        lines.append(f"### 📄 Key Insights from **{title}**\n")
+        lines.append(f"### ***{title}***")
 
         if sentences:
-            intro_p = ". ".join(sentences[:3]) + "."
+            intro_p = ". ".join(sentences[:2]) + f". [Source {doc_idx}]"
             lines.append(f"{intro_p}\n")
 
-            if len(sentences) > 3:
-                lines.append("**Key Details & Takeaways:**")
-                for s in sentences[3:7]:
-                    lines.append(f"- {s}.")
+            if len(sentences) > 2:
+                for s in sentences[2:6]:
+                    words = s.split()
+                    if len(words) > 4:
+                        bullet_title = " ".join(words[:4]).strip(",:.-")
+                        bullet_body = " ".join(words[4:])
+                        lines.append(f"* **{bullet_title}:** {bullet_body}. [Source {doc_idx}]")
+                    else:
+                        lines.append(f"* **Key Insight:** {s}. [Source {doc_idx}]")
                 lines.append("")
         else:
-            lines.append(f"{clean_text[:500]}...\n")
+            lines.append(f"{clean_text[:400]}... [Source {doc_idx}]\n")
 
-    lines.append("---")
-    lines.append("*Synthesized by AskDocs AI from your workspace documents.*")
+        doc_idx += 1
 
+    lines.append("Would you like a summary of the next section or a deeper analysis of any specific story?")
     return "\n".join(lines)
 
 
@@ -144,7 +151,13 @@ class GeminiProvider(LLMProvider):
             parts.append("WORKSPACE DOCUMENT CONTEXT EXCERPTS:")
             for i, c in enumerate(contexts, 1):
                 parts.append(f"--- Document: {c.document_title} (Chunk #{c.ordinal}) ---\n{c.content}")
-            parts.append("\nINSTRUCTIONS: Synthesize a fluent, articulate, comprehensive answer to the user's question below. Directly answer their question in clean, narrative prose (just like ChatGPT or Gemini). Do NOT print raw document headers or copy-paste raw excerpts. Use clear Markdown headers, bullet points, and subtle citations where appropriate.")
+            parts.append(
+                "\nINSTRUCTIONS: Follow the strict answer formatting guidelines. "
+                "Open with a direct 1-sentence intro ('Based on the provided excerpts, here is a detailed breakdown answering your query:'). "
+                "Group findings by Document/Story (`### ***Title***` or `**From *Title* Excerpts:**`). "
+                "Use bullet points with bold descriptive titles (`* **Concept Title:** Description... [Source 1, Source 2]`). "
+                "End with a polite follow-up question."
+            )
         else:
             parts.append("INSTRUCTIONS: Respond conversationally, articulately, and helpfully to the user's message.")
 
@@ -171,7 +184,7 @@ class GeminiProvider(LLMProvider):
 
         config = types.GenerateContentConfig(
             system_instruction=SYSTEM_PROMPT,
-            temperature=0.3,
+            temperature=0.2,
         )
 
         for model_name in self.chat_models:
@@ -202,7 +215,7 @@ class GeminiProvider(LLMProvider):
 
         config = types.GenerateContentConfig(
             system_instruction=SYSTEM_PROMPT,
-            temperature=0.3,
+            temperature=0.2,
         )
 
         # Attempt 1: Stream generation across models
