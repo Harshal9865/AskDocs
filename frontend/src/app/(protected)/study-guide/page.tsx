@@ -581,8 +581,6 @@ export default function StudyGuidePage() {
               <div className="space-y-6">
                 {studyDeck.quiz.map((q, qIdx) => {
                   const selected = selectedAnswers[q.id];
-                  const isAnswered = selected !== undefined;
-                  const isCorrect = isAnswered && selected === q.correct_option_index;
 
                   return (
                     <div

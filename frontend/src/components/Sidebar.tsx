@@ -24,8 +24,6 @@ import {
   FileSpreadsheet,
   LayoutGrid,
   Scale,
-  ShieldCheck,
-  Radar,
   Table,
   GraduationCap,
   Headphones,

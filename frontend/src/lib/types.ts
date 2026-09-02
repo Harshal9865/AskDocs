@@ -447,6 +447,19 @@ export interface SpeakerParticipation {
 export interface MeetingTranscript {
   id: string;
   workspace_id: string;
+  title: string;
+  meeting_date: string;
+  duration_minutes: number;
+  speakers: string[];
+  executive_summary: string;
+  key_decisions: string[];
+  action_items: TranscriptActionItem[];
+  contradictions: TranscriptContradiction[];
+  speaker_stats: SpeakerParticipation[];
+  raw_transcript: string;
+  created_at: string;
+}
+
 export interface ExtractedTableData {
   id: string;
   document_id?: string;

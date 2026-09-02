@@ -29,7 +29,7 @@ export default function TranscriptsPage() {
 
   const [transcripts, setTranscripts] = useState<MeetingTranscript[]>([]);
   const [selectedTranscriptId, setSelectedTranscriptId] = useState<string>("");
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TranscriptTab>("decisions");
   const [searchQuery, setSearchQuery] = useState("");
   const [copied, setCopied] = useState(false);
