@@ -222,6 +222,36 @@ async def delete_conversation(
     await db.commit()
 
 
+@router.patch("/conversations/{conversation_id}", response_model=ConversationOut)
+async def rename_conversation(
+    conversation_id: uuid.UUID,
+    payload: ConversationCreate,
+    db: DbSession,
+    user: CurrentUser,
+):
+    """Rename a conversation title. Only the owner or workspace admin can rename."""
+    conv = await _get_conversation_checked(db, conversation_id, user)
+    if conv.user_id != user.id:
+        result = await db.execute(
+            select(WorkspaceMember).where(
+                WorkspaceMember.workspace_id == conv.workspace_id,
+                WorkspaceMember.user_id == user.id,
+            )
+        )
+        membership = result.scalar_one_or_none()
+        if membership is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Conversation not found")
+        role = membership.role.value if hasattr(membership.role, "value") else membership.role
+        if role != "admin":
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Not allowed to rename this conversation")
+    new_title = (payload.title or "").strip()
+    if new_title:
+        conv.title = new_title[:300]
+        await db.commit()
+        await db.refresh(conv)
+    return conv
+
+
 @router.post("/conversations/{conversation_id}/ask", response_model=MessageOut)
 async def ask_question_sync(
     conversation_id: uuid.UUID,

@@ -550,6 +550,8 @@ export const api = {
     request<Message[]>(`/conversations/${convId}/messages`),
   deleteConversation: (convId: string) =>
     request<void>(`/conversations/${convId}`, { method: "DELETE" }),
+  renameConversation: (convId: string, title: string) =>
+    request<Conversation>(`/conversations/${convId}`, { method: "PATCH", ...json({ title }) }),
 
   /** Non-streaming ask. */
   ask: (convId: string, content: string) =>

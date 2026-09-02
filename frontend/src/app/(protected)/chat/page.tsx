@@ -18,6 +18,7 @@ import {
   ExternalLink,
   FileText,
   MessagesSquare,
+  Pencil,
   Plus,
   Search,
   Sparkles,
@@ -169,8 +170,11 @@ export default function ChatPage() {
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
   const [showJump, setShowJump] = useState(false);
   const [pricingOpen, setPricingOpen] = useState(false);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const threadEnd = useRef<HTMLDivElement>(null);
+  const renameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!workspace || !user) { setMyRole(null); return; }
@@ -281,6 +285,52 @@ export default function ChatPage() {
     await loadConversations();
     setActiveConv(conv); setMessages([]); setInput("");
     document.getElementById("chat-input")?.focus();
+  }
+
+  function startRename(conv: Conversation) {
+    setRenamingId(conv.id);
+    setRenameValue(conv.title === "New conversation" ? "" : conv.title);
+    setTimeout(() => renameInputRef.current?.select(), 50);
+  }
+
+  async function submitRename(conv: Conversation) {
+    const trimmed = renameValue.trim();
+    if (trimmed && trimmed !== conv.title) {
+      try {
+        await api.renameConversation(conv.id, trimmed);
+        setConversations((prev) =>
+          prev.map((c) => (c.id === conv.id ? { ...c, title: trimmed } : c))
+        );
+        if (activeConv?.id === conv.id) setActiveConv((a) => a ? { ...a, title: trimmed } : a);
+      } catch { /* ignore */ }
+    }
+    setRenamingId(null);
+    setRenameValue("");
+  }
+
+  function getDateGroup(dateStr: string): string {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays <= 7) return "Previous 7 Days";
+    if (diffDays <= 30) return "Previous 30 Days";
+    return date.toLocaleString("default", { month: "long", year: "numeric" });
+  }
+
+  function getRelativeTime(dateStr: string): string {
+    const date = new Date(dateStr);
+    const diffMs = Date.now() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return "just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHrs = Math.floor(diffMins / 60);
+    if (diffHrs < 24) return `${diffHrs}h ago`;
+    const diffDays = Math.floor(diffHrs / 24);
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
   }
 
   async function sendWithText(question: string, attachments: { file: File; previewUrl?: string }[]) {
@@ -455,72 +505,148 @@ export default function ChatPage() {
             </div>
           )}
 
-          {conversations.length === 0 ? (
-            <div className="flex flex-1 flex-col items-center justify-center py-16 text-center">
-              <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500/10 via-indigo-500/10 to-blue-500/10 border border-purple-200/60 dark:border-purple-500/20">
-                <MessagesSquare className="h-7 w-7 text-purple-600 dark:text-purple-400" />
+          {(() => {
+            const filtered = conversations.filter(
+              (c) => !convSearch.trim() || c.title.toLowerCase().includes(convSearch.toLowerCase())
+            );
+            if (filtered.length === 0) {
+              return (
+                <div className="flex flex-1 flex-col items-center justify-center py-16 text-center">
+                  <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500/10 via-indigo-500/10 to-blue-500/10 border border-purple-200/60 dark:border-purple-500/20">
+                    <MessagesSquare className="h-7 w-7 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <p className="text-sm font-semibold text-slate-700 dark:text-zinc-200">
+                    {convSearch.trim() ? "No chats match your search" : "No conversations yet"}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-400 dark:text-zinc-500">
+                    {convSearch.trim() ? "Try a different keyword" : "Tap + New to ask about your documents"}
+                  </p>
+                </div>
+              );
+            }
+
+            // Build date groups
+            const groups: Record<string, typeof filtered> = {};
+            const GROUP_ORDER = ["Today", "Yesterday", "Previous 7 Days", "Previous 30 Days", "Older"];
+            for (const c of filtered) {
+              const g = getDateGroup(c.created_at);
+              const key = GROUP_ORDER.includes(g) ? g : "Older";
+              if (!groups[key]) groups[key] = [];
+              groups[key].push(c);
+            }
+
+            return (
+              <div className="space-y-0.5">
+                {GROUP_ORDER.filter((g) => (groups[g] ?? []).length > 0).map((group) => (
+                  <div key={group}>
+                    {/* Date group label */}
+                    <p className="sticky top-0 z-10 px-2 pb-1 pt-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+                      {group}
+                    </p>
+                    <ul className="space-y-0.5">
+                      {(groups[group] ?? []).map((c) => {
+                        const isActive = activeConv?.id === c.id;
+                        const isRenaming = renamingId === c.id;
+                        return (
+                          <li key={c.id} className="group relative flex items-center">
+                            {isRenaming ? (
+                              /* ── Inline rename input ── */
+                              <div className="flex w-full items-center gap-1.5 rounded-xl border border-purple-400 bg-white px-2 py-1.5 shadow-sm dark:border-purple-500/60 dark:bg-[#1a1a2e]">
+                                <AIAvatarIcon className="h-5 w-5 shrink-0" />
+                                <input
+                                  ref={renameInputRef}
+                                  type="text"
+                                  value={renameValue}
+                                  onChange={(e) => setRenameValue(e.target.value)}
+                                  onBlur={() => void submitRename(c)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") { e.preventDefault(); void submitRename(c); }
+                                    else if (e.key === "Escape") { setRenamingId(null); setRenameValue(""); }
+                                  }}
+                                  className="flex-1 bg-transparent text-xs font-medium text-slate-800 outline-none dark:text-white"
+                                  placeholder="Rename conversation…"
+                                  autoFocus
+                                />
+                                <button
+                                  onMouseDown={(e) => { e.preventDefault(); void submitRename(c); }}
+                                  className="rounded p-0.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30"
+                                  title="Save"
+                                >
+                                  <Check className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  onMouseDown={(e) => { e.preventDefault(); setRenamingId(null); setRenameValue(""); }}
+                                  className="rounded p-0.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10"
+                                  title="Cancel"
+                                >
+                                  <X className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() => void openConversation(c)}
+                                  onDoubleClick={() => startRename(c)}
+                                  className={`relative flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left transition-all duration-150 ${
+                                    isActive
+                                      ? "bg-gradient-to-r from-purple-500/15 via-indigo-500/10 to-blue-500/10 border border-purple-300/80 shadow-sm ring-1 ring-purple-500/20 dark:border-purple-500/30 dark:bg-purple-950/40"
+                                      : "border border-transparent hover:border-slate-200/70 hover:bg-slate-50/80 dark:hover:border-white/10 dark:hover:bg-white/[0.04]"
+                                  }`}
+                                  title={c.title}
+                                >
+                                  {/* Active pip */}
+                                  {isActive && (
+                                    <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-purple-500 via-indigo-500 to-blue-500" aria-hidden />
+                                  )}
+                                  {/* Avatar */}
+                                  <div className="shrink-0 transition-transform duration-200 group-hover:scale-110">
+                                    <AIAvatarIcon className="h-5 w-5" streaming={isActive && busy} />
+                                  </div>
+                                  {/* Title + timestamp */}
+                                  <div className="flex min-w-0 flex-1 flex-col">
+                                    <span
+                                      className={`truncate text-xs font-medium leading-tight ${
+                                        isActive ? "font-semibold text-purple-950 dark:text-white" : "text-slate-700 dark:text-zinc-300"
+                                      }`}
+                                    >
+                                      {c.title}
+                                    </span>
+                                    <span className="text-[10px] text-slate-400 dark:text-zinc-500">
+                                      {getRelativeTime(c.created_at)}
+                                    </span>
+                                  </div>
+                                </button>
+
+                                {/* Hover actions: rename + delete */}
+                                {canDelete(c) && (
+                                  <div className="absolute right-1.5 flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); startRename(c); }}
+                                      title="Rename"
+                                      className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-white/10 dark:hover:text-zinc-200"
+                                    >
+                                      <Pencil className="h-3 w-3" />
+                                    </button>
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); void deleteConversation(c); }}
+                                      title="Delete"
+                                      className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                )}
+                              </>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                ))}
               </div>
-              <p className="text-sm font-semibold text-slate-700 dark:text-zinc-200">No conversations yet</p>
-              <p className="mt-1 text-xs text-slate-400 dark:text-zinc-500">Tap + New to ask about your documents</p>
-            </div>
-          ) : (
-            <ul className="space-y-1.5">
-              {conversations
-                .filter((c) => !convSearch.trim() || c.title.toLowerCase().includes(convSearch.toLowerCase()))
-                .map((c) => {
-                  const isActive = activeConv?.id === c.id;
-                  return (
-                    <li key={c.id} className="group relative flex items-center">
-                      <button
-                        onClick={() => void openConversation(c)}
-                        className={`relative flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left transition-all duration-200 ${
-                          isActive
-                            ? "bg-gradient-to-r from-purple-500/15 via-indigo-500/10 to-blue-500/10 border border-purple-300/80 shadow-xs ring-1 ring-purple-500/20 dark:border-purple-500/30 dark:bg-purple-950/40"
-                            : "border border-transparent hover:border-slate-200/80 hover:bg-slate-50/80 dark:hover:border-white/10 dark:hover:bg-white/[0.04] hover:translate-x-0.5"
-                        }`}
-                        title={c.title}
-                      >
-                        {/* Left Active Glow Pip */}
-                        {isActive && (
-                          <span
-                            className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-purple-500 via-indigo-500 to-blue-500"
-                            aria-hidden
-                          />
-                        )}
-
-                        {/* AIAvatarIcon Logo (Image 1) */}
-                        <div className="shrink-0 transition-transform duration-200 group-hover:scale-110">
-                          <AIAvatarIcon className="h-6 w-6" streaming={isActive && busy} />
-                        </div>
-
-                        <span
-                          className={`min-w-0 flex-1 truncate text-xs font-medium ${
-                            isActive
-                              ? "font-bold text-purple-950 dark:text-white"
-                              : "text-slate-700 dark:text-zinc-300"
-                          }`}
-                        >
-                          {c.title}
-                        </span>
-                      </button>
-
-                      {canDelete(c) && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            void deleteConversation(c);
-                          }}
-                          title="Delete conversation"
-                          className="absolute right-1.5 flex h-6 w-6 items-center justify-center rounded-md text-slate-400 opacity-0 transition-all hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-400 group-hover:opacity-100"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      )}
-                    </li>
-                  );
-                })}
-            </ul>
-          )}
+            );
+          })()}
         </div>
       </div>
 
