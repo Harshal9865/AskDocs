@@ -429,7 +429,7 @@ export default function TrashPage() {
                 <li
                   key={d.id}
                   onClick={() => isAdmin && toggleSelectDoc(d.id)}
-                  className={`group relative flex flex-wrap items-center justify-between gap-3 rounded-2xl border p-4 shadow-2xs backdrop-blur-md transition-all duration-200 ${
+                  className={`group relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border p-3.5 sm:p-4 shadow-2xs backdrop-blur-md transition-all duration-200 ${
                     isAdmin ? "cursor-pointer" : ""
                   } ${
                     isSelected
@@ -437,14 +437,14 @@ export default function TrashPage() {
                       : "border-slate-200/80 bg-white/90 hover:-translate-y-0.5 hover:border-purple-300/80 hover:shadow-md hover:shadow-purple-500/5 dark:border-white/10 dark:bg-[#13111f]/90 dark:hover:border-purple-500/30"
                   }`}
                 >
-                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                  <div className="flex items-center gap-3 min-w-0 w-full sm:w-auto sm:flex-1">
                     {isAdmin && (
                       <div
                         onClick={(e) => {
                           e.stopPropagation();
                           toggleSelectDoc(d.id);
                         }}
-                        className="p-0.5 text-slate-400 hover:text-purple-600 dark:hover:text-purple-400"
+                        className="shrink-0 p-0.5 text-slate-400 hover:text-purple-600 dark:hover:text-purple-400"
                       >
                         {isSelected ? (
                           <CheckSquare className="h-4.5 w-4.5 text-purple-600 dark:text-purple-400" />
@@ -460,19 +460,19 @@ export default function TrashPage() {
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="truncate text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                        <span className="truncate text-xs sm:text-sm font-bold text-slate-900 dark:text-white" title={d.title}>
                           {d.title}
                         </span>
-                        <span className={`inline-block rounded-md border px-1.5 py-0.5 text-[9px] font-extrabold uppercase ${badge.bg}`}>
+                        <span className={`inline-block shrink-0 rounded-md border px-1.5 py-0.5 text-[9px] font-extrabold uppercase ${badge.bg}`}>
                           {badge.label}
                         </span>
                       </div>
-                      <div className="mt-0.5 flex items-center gap-3 text-[11px] text-slate-400 dark:text-zinc-500">
-                        <span className="flex items-center gap-1">
+                      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-slate-400 dark:text-zinc-500">
+                        <span className="flex items-center gap-1 shrink-0">
                           <Clock className="h-3 w-3" /> Deleted {timeAgo(d.deleted_at)}
                         </span>
-                        <span>•</span>
-                        <span>Auto-purges in 30 days</span>
+                        <span className="hidden sm:inline text-slate-300 dark:text-zinc-700">•</span>
+                        <span className="shrink-0">Auto-purges in 30 days</span>
                       </div>
                     </div>
                   </div>
@@ -480,12 +480,12 @@ export default function TrashPage() {
                   {isAdmin && (
                     <div
                       onClick={(e) => e.stopPropagation()}
-                      className="flex items-center gap-2"
+                      className="flex items-center justify-end gap-2 w-full sm:w-auto pt-2.5 border-t border-slate-100 dark:border-white/5 sm:border-0 sm:pt-0 shrink-0"
                     >
                       <button
                         onClick={() => void handleBatchRestore([d.id])}
                         disabled={batchBusy}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/80 px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10 transition-all disabled:opacity-50"
+                        className="inline-flex flex-1 sm:flex-none justify-center items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10 transition-all disabled:opacity-50 cursor-pointer shadow-2xs"
                         title="Restore document"
                       >
                         <RotateCcw className="h-3.5 w-3.5 text-emerald-500" /> Restore
@@ -493,7 +493,7 @@ export default function TrashPage() {
                       <button
                         onClick={() => promptPurgeSingle(d)}
                         disabled={batchBusy}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-red-700 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+                        className="inline-flex flex-1 sm:flex-none justify-center items-center gap-1.5 rounded-full bg-red-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-red-700 hover:scale-102 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
                         title="Permanently delete"
                       >
                         <Trash2 className="h-3.5 w-3.5" /> Purge
