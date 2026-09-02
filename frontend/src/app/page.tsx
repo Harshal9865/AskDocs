@@ -36,12 +36,8 @@ import {
   Pencil,
   ChevronDown,
   LayoutDashboard,
-  Pin,
-  Layers,
-  Bot,
   Brain,
-  FileSignature,
-  CalendarClock
+  FileSignature
 } from "lucide-react";
 
 function AuroraHeroMock() {

@@ -8,7 +8,7 @@ import { useWorkspace } from "@/lib/workspace-context";
 import ChatComposer from "@/components/ChatComposer";
 import { AIAvatarIcon } from "@/components/AIAvatarIcon";
 import PricingModal from "@/components/PricingModal";
-import type { Citation, Conversation, ConversationPage, Message } from "@/lib/types";
+import type { Citation, Conversation, Message } from "@/lib/types";
 import {
   ArrowDownCircle,
   ArrowLeft,
@@ -591,7 +591,7 @@ export default function ChatPage() {
       window.history.replaceState({}, "", window.location.pathname);
       void (async () => {
         try {
-          const conv = await api.createConversation(workspace.id, q.slice(0, 40));
+          const conv = await api.createConversation(workspace.id);
           setConversations((prev) => [conv, ...(Array.isArray(prev) ? prev : [])]);
           setActiveConv(conv);
           setMessages([]);
@@ -604,7 +604,8 @@ export default function ChatPage() {
         }
       })();
     }
-  }, [workspace, sendWithText]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspace]);
 
   if (!workspace) {
     return <div className="dark:border-slate-700/50 dark:bg-[#1a1a2e] rounded-xl border border-zinc-200 bg-white p-8 text-center text-zinc-500">Create or select a workspace first.</div>;

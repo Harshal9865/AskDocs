@@ -8,6 +8,7 @@ import { useWorkspace } from "@/lib/workspace-context";
 import ChatComposer, { type AttachedFile } from "@/components/ChatComposer";
 import { useUserAvatar } from "@/lib/use-user-avatar";
 import Avatar from "@/components/Avatar";
+import { AIAvatarIcon } from "@/components/AIAvatarIcon";
 import {
   ArrowDownCircle,
   ArrowLeft,
@@ -1010,13 +1011,20 @@ export default function ChatsPage() {
 
               {displayedMessages.map((m) => {
                 const isMe = m.sender_id === user?.id;
+                const isBot = !m.sender_id;
                 return (
                   <div key={m.id} className={`flex ${isMe ? "justify-end" : "justify-start"} group`}>
-                    <div className={`relative max-w-[82%] sm:max-w-[70%] rounded-2xl px-3.5 py-2 text-sm shadow-sm ${isMe ? "bg-purple-600 text-white rounded-br-sm" : "bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white rounded-bl-sm"}`}>
+                    <div className={`relative max-w-[85%] sm:max-w-[75%] rounded-2xl px-3.5 py-2.5 text-sm shadow-sm transition-all ${
+                      isMe 
+                        ? "bg-purple-600 text-white rounded-br-sm shadow-purple-500/10" 
+                        : isBot
+                        ? "border border-purple-300/60 bg-gradient-to-br from-purple-50/90 via-indigo-50/60 to-white text-slate-900 shadow-md shadow-purple-500/5 dark:border-purple-500/30 dark:from-[#1b1736] dark:via-[#15122e] dark:to-[#0f0e24] dark:text-zinc-100 rounded-bl-sm"
+                        : "bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white rounded-bl-sm"
+                    }`}>
                       {!isMe && (
-                        !m.sender_id ? (
-                          <div className="mb-1.5 flex items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-500/10 to-purple-500/10 px-2 py-0.5 text-[11px] font-extrabold text-purple-700 dark:text-purple-300">
-                            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-[9px] text-white">🤖</span>
+                        isBot ? (
+                          <div className="mb-2 flex items-center gap-1.5 rounded-full border border-purple-300/60 bg-white/80 px-2.5 py-1 text-[11px] font-extrabold text-purple-700 shadow-xs backdrop-blur-sm dark:border-purple-500/30 dark:bg-purple-950/60 dark:text-purple-300">
+                            <AIAvatarIcon size={16} />
                             <span>@AskDocs AI Teammate</span>
                           </div>
                         ) : activeChat.type === "group" ? (
@@ -1029,7 +1037,7 @@ export default function ChatsPage() {
                           </Link>
                         ) : null
                       )}
-                      <p className="whitespace-pre-wrap break-words">{m.content}</p>
+                      <p className="whitespace-pre-wrap break-words leading-relaxed">{m.content}</p>
 
                       {/* Autonomous Interactive Approval Card */}
                       {m.approval_card && (
@@ -1141,6 +1149,32 @@ export default function ChatsPage() {
                 <ArrowDownCircle className="h-5 w-5" />
               </button>
             )}
+
+            {/* Quick @AskDocs Mention Bar */}
+            <div className="relative z-10 flex items-center justify-between border-t border-slate-100 bg-slate-50/90 px-3 py-1.5 dark:border-white/5 dark:bg-[#12111d]/90 backdrop-blur-sm">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+                  AI Teammate:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setComposerText((prev) => {
+                      const trimmed = prev.trim();
+                      if (trimmed.startsWith("@AskDocs")) return prev;
+                      return trimmed ? `@AskDocs ${trimmed}` : "@AskDocs ";
+                    });
+                  }}
+                  className="inline-flex items-center gap-1 rounded-full border border-purple-200/80 bg-white px-2.5 py-0.5 text-[11px] font-bold text-purple-700 shadow-2xs hover:bg-purple-50 hover:border-purple-300 dark:border-purple-500/30 dark:bg-purple-950/40 dark:text-purple-300 dark:hover:bg-purple-900/50 transition-all active:scale-95"
+                >
+                  <Sparkles className="h-3 w-3 text-purple-600 dark:text-purple-400" />
+                  <span>Tag @AskDocs</span>
+                </button>
+              </div>
+              <span className="hidden sm:inline text-[10px] text-slate-400 dark:text-zinc-500">
+                Mention @AskDocs to cite workspace docs in chat
+              </span>
+            </div>
 
             {/* Composer */}
             <div className="relative z-10 border-t border-slate-100 bg-white/80 p-2 dark:border-white/5 dark:bg-[#181818]/80 backdrop-blur sm:p-3">

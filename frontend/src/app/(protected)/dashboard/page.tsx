@@ -22,15 +22,7 @@ import {
   X,
   Brain,
   FileSignature,
-  CalendarClock,
   Activity,
-  FileSpreadsheet,
-  LayoutGrid,
-  Search,
-  Zap,
-  AlertCircle,
-  Clock,
-  ChevronRight
 } from "lucide-react";
 import type { ContractObligation, DocumentItem, PlanInfo, TeamChat, WorkspaceMemory } from "@/lib/types";
 
@@ -203,7 +195,7 @@ function ActivityItem({ item }: { item: { actor: string; action: string; target:
 /* ── Main Dashboard ── */
 export default function DashboardPage() {
   const { user } = useAuth();
-  const { workspace, workspaces } = useWorkspace();
+  const { workspace } = useWorkspace();
   const router = useRouter();
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [chats, setChats] = useState<TeamChat[]>([]);
@@ -302,7 +294,6 @@ export default function DashboardPage() {
   const memberCount = members.length;
   const onlineCount = members.filter((m) => m.online).length;
   const questionCount = insights?.total_questions ?? 0;
-  const unansweredCount = insights?.unanswered_count ?? 0;
   const activeObligations = obligations.filter((o) => o.status === "active");
   const recentActivity = activity.slice(0, 7);
 
