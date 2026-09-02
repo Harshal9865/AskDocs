@@ -3,52 +3,50 @@
 import { useEffect, useState, useCallback } from "react";
 import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
-import { DocumentHealthIssue, WorkspaceHealthReport } from "@/lib/types";
+import { WorkspaceHealthReport } from "@/lib/types";
 import {
   Activity,
   AlertTriangle,
   CheckCircle2,
   Clock,
   Copy,
-  FileSearch,
   FileText,
   RefreshCw,
   ShieldAlert,
-  Sparkles,
   Zap,
 } from "lucide-react";
 
 export default function DocumentHealthDashboardPage() {
-  const { currentWorkspace } = useWorkspace();
+  const { workspace } = useWorkspace();
   const [report, setReport] = useState<WorkspaceHealthReport | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [scanning, setScanning] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("all");
 
   const loadHealthData = useCallback(async () => {
-    if (!currentWorkspace?.id) return;
+    if (!workspace?.id) return;
     setLoading(true);
     try {
-      const data = await api.getWorkspaceHealth(currentWorkspace.id);
+      const data = await api.getWorkspaceHealth(workspace.id);
       setReport(data);
-    } catch (err) {
-      console.warn("Failed to load health report:", err);
+    } catch {
+      /* ignore */
     } finally {
       setLoading(false);
     }
-  }, [currentWorkspace?.id]);
+  }, [workspace?.id]);
 
   useEffect(() => {
     loadHealthData();
   }, [loadHealthData]);
 
   const handleScan = async () => {
-    if (!currentWorkspace?.id || scanning) return;
+    if (!workspace?.id || scanning) return;
     setScanning(true);
     try {
-      const updated = await api.scanWorkspaceHealth(currentWorkspace.id);
+      const updated = await api.scanWorkspaceHealth(workspace.id);
       setReport(updated);
-    } catch (err) {
+    } catch {
       alert("Health scan failed. Please check your workspace documents.");
     } finally {
       setScanning(false);
@@ -56,11 +54,11 @@ export default function DocumentHealthDashboardPage() {
   };
 
   const handleResolve = async (issueId: string, status: "resolved" | "dismissed") => {
-    if (!currentWorkspace?.id) return;
+    if (!workspace?.id) return;
     try {
-      await api.updateHealthIssue(currentWorkspace.id, issueId, status);
+      await api.updateHealthIssue(workspace.id, issueId, status);
       await loadHealthData();
-    } catch (err) {
+    } catch {
       alert("Failed to update health issue status.");
     }
   };
@@ -100,7 +98,7 @@ export default function DocumentHealthDashboardPage() {
 
           <button
             onClick={handleScan}
-            disabled={scanning || !currentWorkspace}
+            disabled={scanning || !workspace}
             className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-5 py-3 text-xs font-bold text-white shadow-lg shadow-purple-500/25 hover:from-purple-500 hover:to-indigo-500 active:scale-95 disabled:opacity-50 transition-all cursor-pointer shrink-0"
           >
             <RefreshCw className={`h-4 w-4 ${scanning ? "animate-spin" : ""}`} />
