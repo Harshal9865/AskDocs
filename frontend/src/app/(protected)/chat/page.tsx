@@ -312,13 +312,13 @@ export default function ChatPage() {
             next[next.length - 1] = {
               ...last,
               streaming: false,
-              content: last.content || "I experienced a temporary connection delay. Please try asking your question again.",
+              content: last.content || "I couldn't find an answer to this in the uploaded documents.",
             };
           }
           return next;
         });
       }
-    }, 20000);
+    }, 90000);
 
     try {
       await api.askStream(

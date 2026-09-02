@@ -47,7 +47,7 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str | None = None
 
     GEMINI_API_KEY: str | None = None
-    GEMINI_CHAT_MODEL: str = "gemini-2.0-flash"
+    GEMINI_CHAT_MODEL: str = "gemini-1.5-flash"
     GEMINI_EMBED_MODEL: str = "text-embedding-004"
 
     STORAGE_DIR: str = "storage"
