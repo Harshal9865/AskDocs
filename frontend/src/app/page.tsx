@@ -39,7 +39,9 @@ import {
   Pin,
   Layers,
   Bot,
-  Brain
+  Brain,
+  FileSignature,
+  CalendarClock
 } from "lucide-react";
 
 function AuroraHeroMock() {
@@ -196,22 +198,22 @@ const FEATURES = [
 
 const NEW_CAPABILITIES = [
   {
-    badge: "Next-Gen AI Engine",
-    title: "Gemini 2.5/3.6 Multi-Modal Reasoning",
-    desc: "Powered by Google's frontier Gemini models. Fast responses with real-time SSE token streaming, high-speed semantic extraction across massive PDF/DOCX corpora, and instant title generation.",
-    icon: Sparkles,
+    badge: "Institutional Memory",
+    title: "Self-Evolving Knowledge & Memory Graph",
+    desc: "Ingest meeting transcripts and project decisions into a living workspace memory graph. Query institutional knowledge with auto-extracted entities and temporal relevance tracking.",
+    icon: Brain,
     color: "from-purple-500 via-indigo-500 to-cyan-400",
     glow: "glow-violet",
-    tags: ["Real-time Streaming", "Auto-Generated Titles", "Zero Latency"],
+    tags: ["Knowledge Graph", "Transcript Ingestion", "Temporal Relevance"],
   },
   {
-    badge: "Smart Workspace",
-    title: "ChatGPT & Gemini-Style AI Chat Hub",
-    desc: "Organize unlimited team conversations effortlessly with chronological date groups (Today, Yesterday, Previous 7 Days), infinite scroll, pin favorites to top, inline renaming, and bulk delete.",
-    icon: MessagesSquare,
+    badge: "Contract Intelligence",
+    title: "Automated Contract Audits & Deadlines",
+    desc: "Scan agreements and legal documents to automatically extract financial liabilities, expiration dates, renewal terms, and critical obligations into a live compliance tracker.",
+    icon: FileSignature,
     color: "from-indigo-500 via-purple-500 to-pink-500",
     glow: "glow-indigo",
-    tags: ["Pin Chats", "Date Grouping", "Infinite Scroll", "Bulk Actions"],
+    tags: ["Deadline Extraction", "Liability Tracking", "Renewal Alerts"],
   },
   {
     badge: "Instant Acceleration",
@@ -223,7 +225,7 @@ const NEW_CAPABILITIES = [
     tags: ["Instant Summaries", "Deadline Extraction", "Action Checklists"],
   },
   {
-    badge: "Institutional Memory",
+    badge: "Discrepancy Engine",
     title: "Cross-Document Conflict Detection",
     desc: "AskDocs actively inspects contradictory clauses, policies, or stale metrics across your entire document repository, citing specific page references before decisions are made.",
     icon: Target,
