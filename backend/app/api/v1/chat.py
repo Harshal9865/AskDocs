@@ -12,6 +12,7 @@ from app.models.workspace import Role, WorkspaceMember
 from app.schemas.chat import (
     ConversationCreate,
     ConversationOut,
+    ConversationPage,
     MessageCreate,
     MessageOut,
 )
@@ -45,6 +46,7 @@ async def _resolve_attachments(db, attachment_ids: list[str], user_id) -> tuple[
     doc_blocks: list[str] = []
     atts: list[MessageAttachment] = []
     video_names: list[str] = []
+
 
     for aid in attachment_ids[:8]:
         try:
@@ -146,13 +148,20 @@ async def create_conversation(
 
 @router.get(
     "/workspaces/{workspace_id}/conversations",
-    response_model=list[ConversationOut],
+    response_model=ConversationPage,
 )
 async def list_conversations(
-    workspace_id: uuid.UUID, db: DbSession, membership: Membership, user: CurrentUser
+    workspace_id: uuid.UUID,
+    db: DbSession,
+    membership: Membership,
+    user: CurrentUser,
+    limit: int = 20,
+    cursor: str | None = None,
 ):
-    """All AI conversations in the workspace for admins/members.
-    Viewers only see their own."""
+    """Paginated AI conversations. Returns items + next_cursor for infinite scroll.
+    cursor = ISO timestamp of the last seen created_at (exclusive upper bound)."""
+    from datetime import datetime, timezone
+
     query = select(Conversation).where(
         Conversation.workspace_id == membership.workspace_id,
         Conversation.type == "docs_qa",
@@ -161,9 +170,24 @@ async def list_conversations(
     role = await _workspace_role(db, membership.workspace_id, user.id)
     if role == "viewer":
         query = query.where(Conversation.user_id == user.id)
-    query = query.order_by(Conversation.created_at.desc())
+
+    if cursor:
+        try:
+            cursor_dt = datetime.fromisoformat(cursor.replace("Z", "+00:00"))
+            query = query.where(Conversation.created_at < cursor_dt)
+        except ValueError:
+            pass  # ignore malformed cursor
+
+    # Fetch limit+1 to detect if there is a next page
+    query = query.order_by(Conversation.is_pinned.desc(), Conversation.created_at.desc()).limit(limit + 1)
     result = await db.execute(query)
-    return list(result.scalars().all())
+    rows = list(result.scalars().all())
+
+    has_more = len(rows) > limit
+    items = rows[:limit]
+    next_cursor = items[-1].created_at.isoformat() if has_more and items else None
+
+    return ConversationPage(items=items, next_cursor=next_cursor)
 
 
 @router.get("/conversations/{conversation_id}/messages", response_model=list[MessageOut])
@@ -252,6 +276,35 @@ async def rename_conversation(
     return conv
 
 
+@router.post("/conversations/{conversation_id}/pin", response_model=ConversationOut)
+async def pin_conversation(
+    conversation_id: uuid.UUID,
+    db: DbSession,
+    user: CurrentUser,
+):
+    """Pin a conversation to keep it at the top."""
+    conv = await _get_conversation_checked(db, conversation_id, user)
+    conv.is_pinned = True
+    await db.commit()
+    await db.refresh(conv)
+    return conv
+
+
+@router.delete("/conversations/{conversation_id}/pin", response_model=ConversationOut)
+async def unpin_conversation(
+    conversation_id: uuid.UUID,
+    db: DbSession,
+    user: CurrentUser,
+):
+    """Unpin a conversation."""
+    conv = await _get_conversation_checked(db, conversation_id, user)
+    conv.is_pinned = False
+    await db.commit()
+    await db.refresh(conv)
+    return conv
+
+
+
 @router.post("/conversations/{conversation_id}/ask", response_model=MessageOut)
 async def ask_question_sync(
     conversation_id: uuid.UUID,
@@ -337,9 +390,26 @@ async def ask_question_stream(
     await db.flush()
     for att in atts:
         att.message_id = user_msg.id
+
+    # Count existing messages BEFORE this one to detect "first message"
+    from sqlalchemy import func as sqlfunc
+    count_result = await db.execute(
+        select(sqlfunc.count()).select_from(Message).where(
+            Message.conversation_id == conv.id,
+            Message.role == "user",
+        )
+    )
+    is_first_message = (count_result.scalar() or 0) <= 1
+
     if conv.title == "New conversation":
+        # Placeholder immediately — will be overwritten by AI title after stream
         conv.title = (user_content or "Attachment question")[:80]
     await db.commit()
+
+    # Capture values needed inside event_stream closure
+    _conv_id = conv.id
+    _workspace_id = conv.workspace_id
+    _should_generate_title = is_first_message and (user_content or "").strip()
 
     llm = get_llm()
     # Embed the question (or attachment excerpt if question is empty)
@@ -402,6 +472,20 @@ async def ask_question_stream(
                         session.add(saved)
                         await session.commit()
                         yield f"data: {json.dumps({'type': 'saved', 'message_id': str(saved.id)})}\n\n"
+
+                    # Auto-generate a smart title on first message
+                    if _should_generate_title:
+                        try:
+                            new_title = await llm.generate_title(str(_should_generate_title))
+                            async with AsyncSessionLocal() as title_session:
+                                title_conv = await title_session.get(Conversation, _conv_id)
+                                if title_conv and len(title_conv.title) <= 80:
+                                    title_conv.title = new_title
+                                    await title_session.commit()
+                                    yield f"data: {json.dumps({'type': 'title_updated', 'title': new_title})}\n\n"
+                        except Exception as te:
+                            import logging as _log
+                            _log.warning("Auto-title generation failed: %s", te)
                 except Exception:
                     pass
         except Exception as exc:  # noqa: BLE001

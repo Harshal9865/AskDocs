@@ -3,6 +3,7 @@ import type {
   CheckoutPayload,
   ConflictWarning,
   ContractObligation,
+  ConversationPage,
   DocumentHealthIssue,
   FreshnessWarning,
   Conversation,
@@ -544,14 +545,21 @@ export const api = {
       body: "{}",
       headers: { "Content-Type": "application/json" },
     }),
-  listConversations: (wsId: string) =>
-    request<Conversation[]>(`/workspaces/${wsId}/conversations`),
+  listConversations: (wsId: string, cursor?: string) => {
+    const params = new URLSearchParams({ limit: "20" });
+    if (cursor) params.set("cursor", cursor);
+    return request<ConversationPage>(`/workspaces/${wsId}/conversations?${params.toString()}`);
+  },
   listMessages: (convId: string) =>
     request<Message[]>(`/conversations/${convId}/messages`),
   deleteConversation: (convId: string) =>
     request<void>(`/conversations/${convId}`, { method: "DELETE" }),
   renameConversation: (convId: string, title: string) =>
     request<Conversation>(`/conversations/${convId}`, { method: "PATCH", ...json({ title }) }),
+  pinConversation: (convId: string) =>
+    request<Conversation>(`/conversations/${convId}/pin`, { method: "POST" }),
+  unpinConversation: (convId: string) =>
+    request<Conversation>(`/conversations/${convId}/pin`, { method: "DELETE" }),
 
   /** Non-streaming ask. */
   ask: (convId: string, content: string) =>
@@ -575,6 +583,7 @@ export const api = {
     onError?: (message: string) => void,
     signal?: AbortSignal,
     attachmentIds?: string[],
+    onTitleUpdated?: (title: string) => void,
   ) {
     try {
       if (tokens && !tokens.access && tokens.refresh) {
@@ -622,6 +631,7 @@ export const api = {
             const event = JSON.parse(trimmed.slice(6));
             if (event.type === "answer") onToken(event.text);
             else if (event.type === "saved" && onSaved) onSaved(event.message_id);
+            else if (event.type === "title_updated" && onTitleUpdated) onTitleUpdated(event.title);
             else if (event.type === "done")
               onDone(
                 event.citations ?? [],

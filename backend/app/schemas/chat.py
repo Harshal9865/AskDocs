@@ -16,6 +16,13 @@ class ConversationOut(BaseModel):
     user_id: uuid.UUID
     title: str
     created_at: datetime
+    is_pinned: bool = False
+
+
+class ConversationPage(BaseModel):
+    """Paginated response for conversation listing."""
+    items: list[ConversationOut]
+    next_cursor: str | None = None
 
 
 class MessageCreate(BaseModel):

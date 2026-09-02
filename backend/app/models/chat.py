@@ -1,4 +1,4 @@
-﻿import uuid
+import uuid
 from datetime import datetime
 
 from sqlalchemy import DateTime, Enum, ForeignKey, String, Text, UniqueConstraint
@@ -20,6 +20,7 @@ class Conversation(BaseModel):
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     title: Mapped[str] = mapped_column(String(300), default="New conversation")
     type: Mapped[str] = mapped_column(ConversationTypeEnum, default="docs_qa")
+    is_pinned: Mapped[bool] = mapped_column(default=False)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
 

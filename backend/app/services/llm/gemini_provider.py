@@ -193,8 +193,31 @@ class GeminiProvider(LLMProvider):
         return ""
 
     # ------------------------------------------------------------------
-    # Non-streaming answer
+    # Auto-title generation
     # ------------------------------------------------------------------
+    async def generate_title(self, first_message: str) -> str:
+        """Generate a short 4-6 word conversation title from the user's first message."""
+        prompt = (
+            f"Generate a concise 4-6 word title for a conversation that starts with this message. "
+            f"Return ONLY the title, no quotes, no punctuation at the end:\n\n{first_message[:300]}"
+        )
+        for model_name in self.chat_models:
+            try:
+                response = await self.client.aio.models.generate_content(
+                    model=model_name,
+                    contents=[prompt],
+                )
+                if response.text and response.text.strip():
+                    title = response.text.strip().strip('"').strip("'")[:80]
+                    logger.info("generate_title() model=%s -> %r", model_name, title)
+                    return title
+            except Exception as e:
+                logger.warning("generate_title() model=%s failed: %s", model_name, e)
+        # Fallback: smart truncation of user message
+        words = first_message.split()
+        return " ".join(words[:6]) if words else "New conversation"
+
+
     async def answer(
         self,
         question: str,

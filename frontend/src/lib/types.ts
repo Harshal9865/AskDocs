@@ -132,6 +132,12 @@ export interface Conversation {
   title: string;
   type?: string;
   created_at: string;
+  is_pinned?: boolean;
+}
+
+export interface ConversationPage {
+  items: Conversation[];
+  next_cursor: string | null;
 }
 
 export interface Participant {

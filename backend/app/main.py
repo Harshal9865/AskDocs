@@ -28,6 +28,7 @@ async def lifespan(app: FastAPI):
             await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_renews_at TIMESTAMP WITH TIME ZONE DEFAULT NULL;"))
             await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS card_brand VARCHAR(50) DEFAULT NULL;"))
             await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS card_last4 VARCHAR(10) DEFAULT NULL;"))
+            await session.execute(text("ALTER TABLE conversations ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN DEFAULT FALSE;"))
             await session.execute(text("""
             CREATE TABLE IF NOT EXISTS invoices (
                 id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
