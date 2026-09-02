@@ -195,18 +195,29 @@ Format as a natural spoken narrative with clear chapter takeaways.`;
       <div className="gemini-orb gemini-orb-2" />
 
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 p-6 sm:p-8 text-white shadow-2xl dark:border-white/10 animate-gradient-shift">
-        <div className="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl animate-float" />
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-[#160d36] to-[#221045] p-6 sm:p-9 text-white shadow-2xl backdrop-blur-2xl animate-gradient-shift">
+        <div className="absolute right-0 top-0 -mr-20 -mt-20 h-72 w-72 rounded-full bg-violet-500/15 blur-3xl animate-float pointer-events-none" />
+        <div className="absolute left-1/3 bottom-0 -mb-20 h-56 w-56 rounded-full bg-cyan-500/10 blur-3xl animate-float pointer-events-none" />
+        
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-2.5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/20 px-3.5 py-1 text-xs font-bold text-indigo-300 backdrop-blur-md shadow-inner">
-              <Headphones className="h-3.5 w-3.5 text-purple-400 animate-pulse" />
-              <span className="tracking-wider">DOCUMENT AUDIO BRIEF & PODCAST PLAYER</span>
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3.5 py-1 text-[11px] font-semibold tracking-wider text-violet-300 backdrop-blur-md shadow-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-500"></span>
+              </span>
+              <Headphones className="h-3.5 w-3.5 text-cyan-400" />
+              <span className="uppercase font-mono tracking-widest text-[10px]">AI Spoken Audio Briefing</span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white drop-shadow-md">
-              Listen to Any PDF in 3 Minutes
+            
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+              Listen to Any PDF in{" "}
+              <span className="bg-gradient-to-r from-cyan-300 via-teal-200 to-indigo-300 bg-clip-text text-transparent">
+                3 Minutes
+              </span>
             </h1>
-            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 leading-relaxed">
+            
+            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
               Transform 40-page reports, research papers, and legal agreements into engaging spoken audio briefings. Listen on the go with real-time waveform visualizers.
             </p>
           </div>
@@ -215,7 +226,7 @@ Format as a natural spoken narrative with clear chapter takeaways.`;
             <button
               onClick={copyScript}
               disabled={!currentBrief}
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3.5 text-xs font-black uppercase tracking-wider text-white backdrop-blur-md hover:bg-white/20 active:scale-95 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-md hover:bg-white/20 active:scale-95 transition-all cursor-pointer"
             >
               {copied ? <Check className="h-4 w-4 text-emerald-300" /> : <Copy className="h-4 w-4" />}
               <span>{copied ? "Copied" : "Copy Audio Script"}</span>

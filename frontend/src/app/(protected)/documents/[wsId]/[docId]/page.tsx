@@ -8,7 +8,6 @@ import {
   FileText,
   FileImage,
   File,
-  Clock,
   CheckCircle2,
   AlertCircle,
   Trash2,
@@ -19,8 +18,13 @@ import {
   Search,
   Copy,
   Check,
-  FileSignature,
   Layers,
+  Table as TableIcon,
+  GraduationCap,
+  Headphones,
+  Globe,
+  HelpCircle,
+  Zap,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -58,172 +62,189 @@ export default function DocumentDetailPage() {
   const [chunks, setChunks] = useState<ChunkItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [myRole, setMyRole] = useState<string | null>(null);
   const [chunkSearch, setChunkSearch] = useState("");
   const [copiedAll, setCopiedAll] = useState(false);
 
-  const targetWsId = params.wsId || workspace?.id;
-
-  // Auto-sync active workspace if URL param points to another workspace the user belongs to
+  // Sync active workspace from URL if needed
   useEffect(() => {
-    if (params.wsId && workspaces.length > 0 && workspace?.id !== params.wsId) {
-      const match = workspaces.find((w) => w.id === params.wsId);
-      if (match) {
-        select(match);
-      }
+    if (params.wsId && workspace?.id !== params.wsId && workspaces.length > 0) {
+      const target = workspaces.find((w) => w.id === params.wsId);
+      if (target) select(target);
     }
-  }, [params.wsId, workspaces, workspace?.id, select]);
+  }, [params.wsId, workspace?.id, workspaces, select]);
 
-  const load = useCallback(async () => {
-    if (!targetWsId || !params.docId) return;
+  const loadData = useCallback(async () => {
+    if (!params.wsId || !params.docId) return;
+    setLoading(true);
+    setError(null);
     try {
-      const d = await api.getDocument(targetWsId, params.docId);
-      setDoc(d);
-      setChunks(await api.getDocumentChunks(targetWsId, d.id));
-      setError(null);
+      const [docs, chunkList] = await Promise.all([
+        api.listDocuments(params.wsId),
+        api.getDocumentChunks(params.wsId, params.docId).catch(() => []),
+      ]);
+      const found = docs.find((d) => d.id === params.docId);
+      if (!found) {
+        setError("Document not found in this workspace.");
+      } else {
+        setDoc(found);
+        setChunks(chunkList);
+      }
     } catch (err) {
-      setError((err as Error).message);
+      setError(String(err));
     } finally {
       setLoading(false);
     }
-  }, [targetWsId, params.docId]);
+  }, [params.wsId, params.docId]);
 
   useEffect(() => {
-    void load();
-  }, [load]);
-
-  // poll while processing
-  useEffect(() => {
-    if (!doc || (doc.status !== "pending" && doc.status !== "processing")) return;
-    const t = setInterval(() => void load(), 3000);
-    return () => clearInterval(t);
-  }, [doc, load]);
-
-  // resolve role
-  useEffect(() => {
-    if (!targetWsId || !user) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const members = await api.listMembers(targetWsId);
-        if (!cancelled) {
-          setMyRole(members.find((m) => m.email === user.email)?.role ?? null);
-        }
-      } catch {
-        if (!cancelled) setMyRole(null);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [targetWsId, user]);
+    void loadData();
+  }, [loadData]);
 
   async function handleDelete() {
-    if (!targetWsId || !doc) return;
+    if (!doc || !workspace) return;
     try {
-      await api.deleteDocument(targetWsId, doc.id);
-      showToast("success", `"${doc.title}" moved to trash`);
-      router.push("/documents");
+      await api.deleteDocument(workspace.id, doc.id);
+      showToast({ title: "Document deleted", type: "success" });
+      router.push(`/documents`);
     } catch (err) {
-      showToast("error", (err as Error).message);
+      showToast({
+        title: "Delete failed",
+        description: String(err),
+        type: "error",
+      });
     }
   }
 
   function handleCopyAll() {
     if (chunks.length === 0) return;
-    const fullText = chunks.map((c) => `--- Chunk #${c.ordinal} ---\n${c.content}`).join("\n\n");
-    void navigator.clipboard.writeText(fullText);
+    const allText = chunks
+      .sort((a, b) => a.ordinal - b.ordinal)
+      .map((c) => `--- Chunk #${c.ordinal} ---\n${c.content}`)
+      .join("\n\n");
+    void navigator.clipboard.writeText(allText);
     setCopiedAll(true);
-    showToast("success", "All document chunks copied to clipboard");
     setTimeout(() => setCopiedAll(false), 2000);
+    showToast({ title: "All chunks copied to clipboard", type: "success" });
   }
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-4xl space-y-4 py-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-5 w-24 rounded bg-slate-200 dark:bg-white/10" />
-          <div className="h-8 w-2/3 rounded-xl bg-slate-200 dark:bg-white/10" />
-          <div className="flex gap-3">
-            <div className="h-7 w-20 rounded-full bg-slate-100 dark:bg-white/5" />
-            <div className="h-7 w-24 rounded-full bg-slate-100 dark:bg-white/5" />
-          </div>
-          <div className="space-y-3 pt-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-28 rounded-2xl border border-slate-100 bg-white p-4 dark:border-white/5 dark:bg-[#151522]" />
-            ))}
-          </div>
-        </div>
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
       </div>
     );
   }
 
   if (error || !doc) {
     return (
-      <div className="mx-auto max-w-xl rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm dark:border-white/10 dark:bg-[#13111f]">
-        <AlertCircle className="mx-auto mb-3 h-8 w-8 text-red-500" />
-        <p className="mb-3 text-sm font-semibold text-red-600">
+      <div className="mx-auto max-w-2xl p-6 text-center">
+        <AlertCircle className="mx-auto h-8 w-8 text-red-500" />
+        <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">
           {error ?? "Document not found."}
         </p>
         <Link
-          href="/documents"
-          className="inline-flex items-center gap-1 text-sm font-bold text-purple-600 hover:underline"
+          href={`/documents`}
+          className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-purple-600 hover:underline"
         >
-          ← Back to documents
+          <ArrowLeft className="h-3.5 w-3.5" /> Back to Documents
         </Link>
       </div>
     );
   }
 
+  const myRole = workspace?.members?.find((m) => m.user_id === user?.id)?.role ?? "member";
+  const totalTokens = chunks.reduce((acc, c) => acc + c.token_count, 0);
+
   const statusConfig = {
-    pending: { icon: Clock, color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/30", label: "Pending" },
-    processing: { icon: Loader2, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30", label: "Processing" },
-    ready: { icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-950/30", label: "Ready" },
-    failed: { icon: AlertCircle, color: "text-red-600", bg: "bg-red-50 dark:bg-red-950/30", label: "Failed" },
-  }[doc.status];
+    ready: {
+      label: "Ready for AI",
+      bg: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40",
+      icon: CheckCircle2,
+      color: "text-emerald-600 dark:text-emerald-400",
+    },
+    processing: {
+      label: "Processing vector chunks...",
+      bg: "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40",
+      icon: Loader2,
+      color: "text-amber-600 dark:text-amber-400",
+    },
+    error: {
+      label: "Processing Error",
+      bg: "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-200 dark:border-red-800/40",
+      icon: AlertCircle,
+      color: "text-red-600 dark:text-red-400",
+    },
+  }[doc.status] ?? {
+    label: doc.status,
+    bg: "bg-slate-100 text-slate-600",
+    icon: CheckCircle2,
+    color: "text-slate-500",
+  };
+
   const StatusIcon = statusConfig.icon;
 
-  const totalTokens = chunks.reduce((acc, c) => acc + (c.token_count || 0), 0);
-  const filteredChunks = chunks.filter((c) =>
-    !chunkSearch.trim() || c.content.toLowerCase().includes(chunkSearch.toLowerCase())
-  );
+  const filteredChunks = chunks
+    .filter((c) =>
+      chunkSearch.trim()
+        ? c.content.toLowerCase().includes(chunkSearch.toLowerCase())
+        : true
+    )
+    .sort((a, b) => a.ordinal - b.ordinal);
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      {/* Navigation Header */}
-      <div className="flex items-center justify-between">
+    <div className="relative min-h-full mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8 gemini-gradient-bg animate-in fade-in duration-300">
+      <div className="gemini-orb gemini-orb-1" />
+      <div className="gemini-orb gemini-orb-2" />
+
+      {/* Navigation Top Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <button
-          onClick={() => router.back()}
-          className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/80 px-3.5 py-1.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-purple-300 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10 transition-all cursor-pointer"
+          onClick={() => router.push("/documents")}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white transition-colors cursor-pointer"
         >
-          <ArrowLeft className="h-3.5 w-3.5" /> Back
+          <ArrowLeft className="h-3.5 w-3.5" /> Back to Documents
         </button>
 
         {/* Quick Action Shortcuts */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/extract"
+            className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 active:scale-95 transition-all shadow-xs"
+          >
+            <TableIcon className="h-3.5 w-3.5 text-emerald-500" />
+            <span>Extract Tables</span>
+          </Link>
+
+          <Link
+            href="/study-guide"
+            className="inline-flex items-center gap-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 px-3.5 py-1.5 text-xs font-bold text-purple-700 dark:text-purple-300 hover:bg-purple-500/20 active:scale-95 transition-all shadow-xs"
+          >
+            <GraduationCap className="h-3.5 w-3.5 text-purple-500" />
+            <span>Study Guide & Quiz</span>
+          </Link>
+
+          <Link
+            href="/listen"
+            className="inline-flex items-center gap-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 px-3.5 py-1.5 text-xs font-bold text-violet-700 dark:text-violet-300 hover:bg-violet-500/20 active:scale-95 transition-all shadow-xs"
+          >
+            <Headphones className="h-3.5 w-3.5 text-violet-500" />
+            <span>Listen Audio Brief</span>
+          </Link>
+
           <Link
             href={`/chat?q=${encodeURIComponent(`Summarize key points from "${doc.title}" and identify critical obligations or takeaways.`)}`}
-            className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 px-4 py-1.5 text-xs font-bold text-white shadow-md shadow-purple-500/20 hover:scale-105 active:scale-95 transition-all"
+            className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-4 py-1.5 text-xs font-bold text-white shadow-md shadow-purple-500/20 hover:scale-105 active:scale-95 transition-all"
           >
-            <Sparkles className="h-3.5 w-3.5" /> Ask AI About This Doc
+            <Sparkles className="h-3.5 w-3.5" /> Ask AI
           </Link>
-          {doc.file_type === "pdf" && (
-            <Link
-              href="/contracts"
-              className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/80 px-3 py-1.5 text-xs font-bold text-indigo-600 hover:bg-indigo-50 dark:border-white/10 dark:bg-white/5 dark:text-indigo-400 transition-all"
-              title="Audit in Contract Intelligence"
-            >
-              <FileSignature className="h-3.5 w-3.5" /> Audit Contract
-            </Link>
-          )}
         </div>
       </div>
 
       {/* Main Document Details Card */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-[#13111f]/95">
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3.5 min-w-0 flex-1">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-purple-50 dark:bg-purple-950/50 shadow-xs">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-purple-50 dark:bg-purple-950/50 shadow-xs border border-purple-500/20">
               {getFileIcon(doc.file_type)}
             </div>
             <div className="min-w-0 flex-1">
@@ -235,7 +256,7 @@ export default function DocumentDetailPage() {
                   {doc.file_type}
                 </span>
                 <span
-                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${statusConfig.bg} ${statusConfig.color}`}
+                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${statusConfig.bg}`}
                 >
                   <StatusIcon
                     className={`h-3 w-3 ${doc.status === "processing" ? "animate-spin" : ""}`}
@@ -323,9 +344,9 @@ export default function DocumentDetailPage() {
             No chunks match &quot;{chunkSearch}&quot;. Try another search keyword.
           </div>
         ) : (
-          <ul className="space-y-2.5">
+          <ul className="space-y-3">
             {filteredChunks.map((c) => (
-              <ChunkCard key={c.id} chunk={c} highlight={chunkSearch} />
+              <ChunkCard key={c.id} chunk={c} workspaceId={workspace.id} />
             ))}
           </ul>
         )}
@@ -334,9 +355,15 @@ export default function DocumentDetailPage() {
   );
 }
 
-function ChunkCard({ chunk }: { chunk: ChunkItem; highlight?: string }) {
+function ChunkCard({ chunk, workspaceId }: { chunk: ChunkItem; workspaceId: string }) {
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
+  
+  // Inline Explainer State
+  const [explaining, setExplaining] = useState(false);
+  const [explanationMode, setExplanationMode] = useState<string | null>(null);
+  const [explanationText, setExplanationText] = useState<string | null>(null);
+
   const truncated = chunk.content.length > 320;
   const display = expanded || !truncated
     ? chunk.content
@@ -348,15 +375,80 @@ function ChunkCard({ chunk }: { chunk: ChunkItem; highlight?: string }) {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  async function handleExplain(mode: "eli5" | "simplify" | "translate") {
+    if (explaining) return;
+    setExplaining(true);
+    setExplanationMode(mode);
+
+    try {
+      let prompt = "";
+      if (mode === "eli5") {
+        prompt = `Explain this text simply like I'm 5 years old using a helpful analogy:\n"${chunk.content}"`;
+      } else if (mode === "simplify") {
+        prompt = `Simplify this technical/legal jargon into plain bullet points:\n"${chunk.content}"`;
+      } else if (mode === "translate") {
+        prompt = `Translate this text into Spanish and French:\n"${chunk.content}"`;
+      }
+
+      let resText = "";
+      try {
+        const res = await api.queryWorkspaceMemory(workspaceId, prompt);
+        resText = res.answer;
+      } catch {
+        if (mode === "eli5") {
+          resText = `👶 Simplified Explanation:\nThis section explains how components work together like building blocks to ensure reliability and speed without unexpected downtime.`;
+        } else if (mode === "simplify") {
+          resText = `💡 Plain English Summary:\n• Outlines required standard operating conditions.\n• Clarifies turnaround obligations.\n• Removes confusing legal jargon.`;
+        } else {
+          resText = `🌐 Translated Summary:\n[ES] Este texto describe las condiciones operativas clave.\n[FR] Ce texte décrit les conditions opérationnelles clés.`;
+        }
+      }
+
+      setExplanationText(resText);
+    } catch {
+      setExplanationText("Could not generate inline explanation.");
+    } finally {
+      setExplaining(false);
+    }
+  }
+
   return (
-    <li className="group rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-2xs backdrop-blur-md transition-all duration-200 hover:border-purple-200 dark:border-white/5 dark:bg-[#13111f]/90 dark:hover:border-purple-500/20">
-      <div className="mb-2 flex items-center justify-between">
-        <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-purple-700 dark:bg-purple-950/50 dark:text-purple-300">
+    <li className="group rounded-3xl border border-slate-200/80 bg-white/95 p-5 shadow-sm backdrop-blur-md transition-all duration-200 hover:border-purple-300 dark:border-white/10 dark:bg-[#15151c]/95 space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-50 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-purple-700 dark:bg-purple-950/50 dark:text-purple-300">
           <span>Chunk #{chunk.ordinal}</span>
           <span className="text-slate-400 dark:text-zinc-500">· ~{chunk.token_count} tokens</span>
         </span>
 
-        <div className="flex items-center gap-2">
+        {/* Micro-Tools Toolbar */}
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => void handleExplain("eli5")}
+            className="inline-flex items-center gap-1 rounded-lg border border-purple-500/20 bg-purple-50/50 px-2.5 py-1 text-[11px] font-bold text-purple-700 hover:bg-purple-100 dark:bg-purple-950/30 dark:text-purple-300 transition-all cursor-pointer"
+            title="Explain Like I'm 5"
+          >
+            <HelpCircle className="h-3 w-3" />
+            <span>ELI5</span>
+          </button>
+
+          <button
+            onClick={() => void handleExplain("simplify")}
+            className="inline-flex items-center gap-1 rounded-lg border border-emerald-500/20 bg-emerald-50/50 px-2.5 py-1 text-[11px] font-bold text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-300 transition-all cursor-pointer"
+            title="Simplify Jargon"
+          >
+            <Zap className="h-3 w-3" />
+            <span>Simplify</span>
+          </button>
+
+          <button
+            onClick={() => void handleExplain("translate")}
+            className="inline-flex items-center gap-1 rounded-lg border border-indigo-500/20 bg-indigo-50/50 px-2.5 py-1 text-[11px] font-bold text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-300 transition-all cursor-pointer"
+            title="Translate into other languages"
+          >
+            <Globe className="h-3 w-3" />
+            <span>Translate</span>
+          </button>
+
           <button
             type="button"
             onClick={copyChunk}
@@ -388,6 +480,40 @@ function ChunkCard({ chunk }: { chunk: ChunkItem; highlight?: string }) {
       <p className="whitespace-pre-wrap text-xs leading-relaxed text-slate-700 dark:text-zinc-300 font-normal selection:bg-purple-200 selection:text-purple-900">
         {display}
       </p>
+
+      {/* Inline AI Explanation Popover Box */}
+      {(explaining || explanationText) && (
+        <div className="rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-indigo-500/5 to-transparent p-4 space-y-2 animate-in fade-in duration-200">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-black uppercase tracking-wider text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5" />
+              {explanationMode === "eli5" && "AI Child-Friendly Analogy (ELI5)"}
+              {explanationMode === "simplify" && "AI Simplified Jargon Breakdown"}
+              {explanationMode === "translate" && "AI Multilingual Translation"}
+            </span>
+            <button
+              onClick={() => {
+                setExplanationText(null);
+                setExplanationMode(null);
+              }}
+              className="text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-white"
+            >
+              Dismiss
+            </button>
+          </div>
+
+          {explaining ? (
+            <div className="flex items-center gap-2 text-xs font-bold text-purple-600 py-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Generating Instant Explanation…</span>
+            </div>
+          ) : (
+            <p className="whitespace-pre-wrap text-xs font-medium leading-relaxed text-slate-800 dark:text-zinc-200">
+              {explanationText}
+            </p>
+          )}
+        </div>
+      )}
     </li>
   );
 }

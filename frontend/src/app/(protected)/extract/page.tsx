@@ -213,18 +213,29 @@ Provide headers and structured rows.`;
       <div className="gemini-orb gemini-orb-2" />
 
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 p-6 sm:p-8 text-white shadow-2xl dark:border-white/10 animate-gradient-shift">
-        <div className="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl animate-float" />
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-[#120f2e] to-[#1a123a] p-6 sm:p-9 text-white shadow-2xl backdrop-blur-2xl animate-gradient-shift">
+        <div className="absolute right-0 top-0 -mr-20 -mt-20 h-72 w-72 rounded-full bg-indigo-500/15 blur-3xl animate-float pointer-events-none" />
+        <div className="absolute left-1/3 bottom-0 -mb-20 h-56 w-56 rounded-full bg-purple-500/10 blur-3xl animate-float pointer-events-none" />
+        
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-2.5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/20 px-3.5 py-1 text-xs font-bold text-indigo-300 backdrop-blur-md shadow-inner">
-              <TableIcon className="h-3.5 w-3.5 text-emerald-400 animate-pulse" />
-              <span className="tracking-wider">AI TABLE & DATA EXTRACTOR</span>
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1 text-[11px] font-semibold tracking-wider text-emerald-300 backdrop-blur-md shadow-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+              </span>
+              <TableIcon className="h-3.5 w-3.5 text-emerald-400" />
+              <span className="uppercase font-mono tracking-widest text-[10px]">AI Structured Table Extractor</span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white drop-shadow-md">
-              Extract PDF Tables to Excel & CSV
+            
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+              Extract PDF Tables to{" "}
+              <span className="bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300 bg-clip-text text-transparent">
+                Excel & CSV
+              </span>
             </h1>
-            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 leading-relaxed">
+            
+            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
               Transform unstructured PDF invoices, bank statements, receipts, and tabular reports into clean, editable spreadsheet grids with 1-click Excel, CSV, and JSON export.
             </p>
           </div>
@@ -232,7 +243,7 @@ Provide headers and structured rows.`;
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <button
               onClick={exportCSV}
-              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-5 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-emerald-500/25 hover:shadow-emerald-500/45 active:scale-95 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 px-5 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
             >
               <ArrowDownToLine className="h-4 w-4" />
               <span>Export CSV</span>
@@ -240,7 +251,7 @@ Provide headers and structured rows.`;
 
             <button
               onClick={copyTSV}
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3.5 text-xs font-black uppercase tracking-wider text-white backdrop-blur-md hover:bg-white/20 active:scale-95 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-md hover:bg-white/20 active:scale-95 transition-all cursor-pointer"
               title="Copy table formatted for Excel & Google Sheets paste"
             >
               {copied ? <Check className="h-4 w-4 text-emerald-300" /> : <Copy className="h-4 w-4" />}

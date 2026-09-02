@@ -259,24 +259,36 @@ Analyze risk shifts, liabilities, indemnities, and termination terms.`;
       <div className="gemini-orb gemini-orb-2" />
 
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 p-6 sm:p-8 text-white shadow-2xl dark:border-white/10 animate-gradient-shift">
-        <div className="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl animate-float" />
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-[#150f33] to-[#24103f] p-6 sm:p-9 text-white shadow-2xl backdrop-blur-2xl animate-gradient-shift">
+        <div className="absolute right-0 top-0 -mr-20 -mt-20 h-72 w-72 rounded-full bg-rose-500/15 blur-3xl animate-float pointer-events-none" />
+        <div className="absolute left-1/3 bottom-0 -mb-20 h-56 w-56 rounded-full bg-purple-500/10 blur-3xl animate-float pointer-events-none" />
+        
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-2.5">
+          <div className="space-y-3">
             <Link
               href="/contracts"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-300 hover:text-white transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-300 hover:text-white transition-colors"
             >
               <ArrowLeft className="h-3.5 w-3.5" /> Back to Contract Intelligence
             </Link>
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/20 px-3.5 py-1 text-xs font-bold text-indigo-300 backdrop-blur-md shadow-inner">
-              <Scale className="h-3.5 w-3.5 text-purple-400 animate-pulse" />
-              <span className="tracking-wider">AI CONTRACT REDLINE & DIFF STUDIO</span>
+            
+            <div className="inline-flex items-center gap-2 rounded-full border border-rose-500/30 bg-rose-500/10 px-3.5 py-1 text-[11px] font-semibold tracking-wider text-rose-300 backdrop-blur-md shadow-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500"></span>
+              </span>
+              <Scale className="h-3.5 w-3.5 text-rose-400" />
+              <span className="uppercase font-mono tracking-widest text-[10px]">AI Contract Redline & Diff</span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white drop-shadow-md">
-              Side-by-Side Document Redline & Risk Diff
+            
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+              Side-by-Side Document{" "}
+              <span className="bg-gradient-to-r from-rose-300 via-pink-200 to-amber-200 bg-clip-text text-transparent">
+                Redline & Diff Studio
+              </span>
             </h1>
-            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 leading-relaxed">
+            
+            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
               Compare contract drafts, revised vendor agreements, or regulatory proposals. Automatically surface hidden liabilities, indemnity shifts, and favorable terms.
             </p>
           </div>
