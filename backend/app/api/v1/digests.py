@@ -39,7 +39,7 @@ async def list_workspace_digests(
     """List all AI weekly digests for a workspace."""
     result = await db.execute(
         select(WorkspaceDigest)
-        .where(WorkspaceDigest.workspace_id == str(workspace_id))
+        .where(WorkspaceDigest.workspace_id == workspace_id)
         .order_by(WorkspaceDigest.created_at.desc())
     )
     digests = result.scalars().all()
@@ -132,7 +132,7 @@ Reply ONLY with valid JSON in this exact structure:
         takeaways = [f"Analyzed {len(docs)} documents in workspace", f"Tracked {len(obligations)} contract obligations"]
 
     digest = WorkspaceDigest(
-        workspace_id=str(workspace_id),
+        workspace_id=workspace_id,
         title=digest_title,
         summary_markdown=summary_md,
         key_takeaways=takeaways,
@@ -156,7 +156,7 @@ async def delete_workspace_digest(
     result = await db.execute(
         select(WorkspaceDigest).where(
             WorkspaceDigest.id == digest_id,
-            WorkspaceDigest.workspace_id == str(workspace_id),
+            WorkspaceDigest.workspace_id == workspace_id,
         )
     )
     digest = result.scalar_one_or_none()
