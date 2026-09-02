@@ -1,26 +1,25 @@
 import logging
 import uuid
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, status
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.session import get_db
+from app.core.deps import CurrentUser, DbSession, MemberMembership
 from app.models.contract import ContractObligation
 from app.models.digest import WorkspaceDigest
 from app.models.document import Document
-from app.models.workspace import WorkspaceMember
-from app.services.auth import get_current_user
-from app.services.llm.factory import get_llm
+from app.services.llm.gemini_provider import get_llm
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
 class WorkspaceDigestOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     workspace_id: str
     title: str
@@ -30,38 +29,17 @@ class WorkspaceDigestOut(BaseModel):
     contract_alerts_count: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-
-
-async def _verify_workspace_access(db: AsyncSession, workspace_id: str, user_id: str):
-    ws_uuid = uuid.UUID(workspace_id)
-    user_uuid = uuid.UUID(user_id)
-    result = await db.execute(
-        select(WorkspaceMember).where(
-            WorkspaceMember.workspace_id == ws_uuid,
-            WorkspaceMember.user_id == user_uuid,
-        )
-    )
-    if not result.scalar_one_or_none():
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied to this workspace",
-        )
-
 
 @router.get("", response_model=List[WorkspaceDigestOut])
 async def list_workspace_digests(
-    workspace_id: str,
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    workspace_id: uuid.UUID,
+    db: DbSession,
+    membership: MemberMembership,
 ):
     """List all AI weekly digests for a workspace."""
-    await _verify_workspace_access(db, workspace_id, current_user.id)
-    ws_uuid = uuid.UUID(workspace_id)
     result = await db.execute(
         select(WorkspaceDigest)
-        .where(WorkspaceDigest.workspace_id == str(ws_uuid))
+        .where(WorkspaceDigest.workspace_id == str(workspace_id))
         .order_by(WorkspaceDigest.created_at.desc())
     )
     digests = result.scalars().all()
@@ -70,18 +48,15 @@ async def list_workspace_digests(
 
 @router.post("/generate", response_model=WorkspaceDigestOut)
 async def generate_workspace_digest(
-    workspace_id: str,
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    workspace_id: uuid.UUID,
+    db: DbSession,
+    membership: MemberMembership,
 ):
     """Synthesize an AI Executive Weekly Digest of all documents and obligations in the workspace."""
-    await _verify_workspace_access(db, workspace_id, current_user.id)
-    ws_uuid = uuid.UUID(workspace_id)
-
     # Fetch recent active documents
     doc_res = await db.execute(
         select(Document)
-        .where(Document.workspace_id == ws_uuid, Document.deleted_at.is_(None))
+        .where(Document.workspace_id == workspace_id, Document.deleted_at.is_(None))
         .order_by(Document.created_at.desc())
         .limit(10)
     )
@@ -90,7 +65,7 @@ async def generate_workspace_digest(
     # Fetch active contract obligations
     ob_res = await db.execute(
         select(ContractObligation)
-        .where(ContractObligation.workspace_id == ws_uuid)
+        .where(ContractObligation.workspace_id == workspace_id)
         .order_by(ContractObligation.due_date.asc())
     )
     obligations = ob_res.scalars().all()
@@ -157,7 +132,7 @@ Reply ONLY with valid JSON in this exact structure:
         takeaways = [f"Analyzed {len(docs)} documents in workspace", f"Tracked {len(obligations)} contract obligations"]
 
     digest = WorkspaceDigest(
-        workspace_id=str(ws_uuid),
+        workspace_id=str(workspace_id),
         title=digest_title,
         summary_markdown=summary_md,
         key_takeaways=takeaways,
@@ -172,18 +147,16 @@ Reply ONLY with valid JSON in this exact structure:
 
 @router.delete("/{digest_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_workspace_digest(
-    workspace_id: str,
+    workspace_id: uuid.UUID,
     digest_id: str,
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    db: DbSession,
+    membership: MemberMembership,
 ):
     """Delete a workspace digest entry."""
-    await _verify_workspace_access(db, workspace_id, current_user.id)
-    ws_uuid = uuid.UUID(workspace_id)
     result = await db.execute(
         select(WorkspaceDigest).where(
             WorkspaceDigest.id == digest_id,
-            WorkspaceDigest.workspace_id == str(ws_uuid),
+            WorkspaceDigest.workspace_id == str(workspace_id),
         )
     )
     digest = result.scalar_one_or_none()
