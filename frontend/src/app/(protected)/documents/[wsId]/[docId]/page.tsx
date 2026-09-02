@@ -354,7 +354,7 @@ export default function DocumentDetailPage() {
         ) : (
           <ul className="space-y-3">
             {filteredChunks.map((c) => (
-              <ChunkCard key={c.id} chunk={c} workspaceId={workspace.id} />
+              <ChunkCard key={c.id} chunk={c} workspaceId={workspace?.id || params.wsId} />
             ))}
           </ul>
         )}
