@@ -264,12 +264,12 @@ export default function DocumentDetailPage() {
                   {doc.file_type}
                 </span>
                 <span
-                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${statusConfig.bg}`}
+                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${currentStatus.bg}`}
                 >
                   <StatusIcon
                     className={`h-3 w-3 ${doc.status === "processing" ? "animate-spin" : ""}`}
                   />
-                  {statusConfig.label}
+                  {currentStatus.label}
                 </span>
                 <span className="text-xs text-slate-400 dark:text-zinc-500 font-medium">
                   {fmtSize(doc.size_bytes)}
