@@ -420,3 +420,43 @@ export interface PolicyGapItem {
   detected_at: string;
 }
 
+export interface TranscriptActionItem {
+  id: string;
+  task: string;
+  assignee: string;
+  due_date?: string | null;
+  completed: boolean;
+}
+
+export interface TranscriptContradiction {
+  id: string;
+  spoken_claim: string;
+  source_document_title: string;
+  written_rule: string;
+  severity: "critical" | "warning" | "info";
+  analysis: string;
+}
+
+export interface SpeakerParticipation {
+  speaker: string;
+  word_count: number;
+  share_percent: number;
+  sentiment: "positive" | "neutral" | "concerned";
+}
+
+export interface MeetingTranscript {
+  id: string;
+  workspace_id: string;
+  title: string;
+  meeting_date: string;
+  duration_minutes: number;
+  speakers: string[];
+  executive_summary: string;
+  key_decisions: string[];
+  action_items: TranscriptActionItem[];
+  contradictions: TranscriptContradiction[];
+  speaker_stats: SpeakerParticipation[];
+  raw_transcript: string;
+  created_at: string;
+}
+

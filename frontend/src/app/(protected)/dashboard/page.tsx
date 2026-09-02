@@ -26,6 +26,7 @@ import {
   Scale,
   ShieldCheck,
   Radar,
+  AudioLines,
 } from "lucide-react";
 import type { ContractObligation, DocumentItem, PlanInfo, TeamChat, WorkspaceMemory } from "@/lib/types";
 
@@ -577,6 +578,27 @@ export default function DashboardPage() {
           </div>
           <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
             Compare 2 contract versions side-by-side with automated liability & risk detection.
+          </p>
+        </Link>
+
+        {/* Meeting Intelligence Card */}
+        <Link
+          href="/transcripts"
+          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-violet-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-violet-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#1c132d]/80"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-violet-50 text-violet-600 dark:bg-violet-950/60 dark:text-violet-400">
+                <AudioLines className="h-4 w-4" />
+              </span>
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Meeting Transcript AI</h3>
+            </div>
+            <span className="text-[10px] font-bold text-violet-600 dark:text-violet-400 group-hover:translate-x-0.5 transition-transform">
+              Listen →
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
+            Extract verified decisions, action items, and policy contradictions from call recordings.
           </p>
         </Link>
 
