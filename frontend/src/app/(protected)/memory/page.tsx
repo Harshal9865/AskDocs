@@ -20,7 +20,6 @@ import {
   X,
   Zap,
   Copy,
-  Check,
 } from "lucide-react";
 
 export default function InstitutionalMemoryPage() {

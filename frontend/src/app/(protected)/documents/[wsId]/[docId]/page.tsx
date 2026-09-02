@@ -334,7 +334,7 @@ export default function DocumentDetailPage() {
   );
 }
 
-function ChunkCard({ chunk, highlight }: { chunk: ChunkItem; highlight?: string }) {
+function ChunkCard({ chunk }: { chunk: ChunkItem; highlight?: string }) {
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
   const truncated = chunk.content.length > 320;

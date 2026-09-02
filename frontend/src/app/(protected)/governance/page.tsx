@@ -10,8 +10,6 @@ import {
   FileCheck,
   FileSignature,
   FileText,
-  Filter,
-  Layers,
   MessagesSquare,
   RefreshCw,
   Search,
@@ -23,7 +21,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
-import type { DecisionAuditRecord, TeamMessage, WorkspaceMemory } from "@/lib/types";
+import type { DecisionAuditRecord, WorkspaceMemory } from "@/lib/types";
 
 export default function DecisionGovernancePage() {
   const { workspace } = useWorkspace();
@@ -38,11 +36,8 @@ export default function DecisionGovernancePage() {
     if (!workspace) return;
     setLoading(true);
     try {
-      // Gather decisions from workspace memories and team chat approvals
-      const [memories, chats] = await Promise.all([
-        api.getWorkspaceMemories(workspace.id).catch(() => [] as WorkspaceMemory[]),
-        api.listTeamChats(workspace.id).catch(() => []),
-      ]);
+      // Gather decisions from workspace memories
+      const memories = await api.getWorkspaceMemories(workspace.id).catch(() => [] as WorkspaceMemory[]);
 
       // Synthesize verified governance records from memory and chat approvals
       const generatedRecords: DecisionAuditRecord[] = [];

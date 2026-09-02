@@ -17,7 +17,6 @@ import {
   TrendingUp,
   Award,
   Clock,
-  Layers,
   Copy,
   Check,
 } from "lucide-react";

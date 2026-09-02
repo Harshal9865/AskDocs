@@ -4,11 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
-  ArrowRight,
   CheckCircle2,
-  FileCheck,
   FileText,
-  Loader2,
   MessagesSquare,
   Radar,
   RefreshCw,
@@ -17,7 +14,6 @@ import {
   Sparkles,
   Zap,
 } from "lucide-react";
-import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
 import type { PolicyGapItem } from "@/lib/types";
 
@@ -100,7 +96,7 @@ export default function PolicyRealityGapPage() {
     }
   };
 
-  const handleStatusChange = (gapId: string, status: "reconciled" | "dismissed") => {
+  const handleStatusChange = (gapId: string, status: "open" | "reconciled" | "dismissed") => {
     setGaps((prev) => prev.map((g) => (g.id === gapId ? { ...g, status } : g)));
   };
 
