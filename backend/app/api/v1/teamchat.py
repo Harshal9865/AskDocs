@@ -47,16 +47,13 @@ class GroupChatCreate(BaseModel):
 
 
 class TeamMessageCreate(BaseModel):
-    content: str
+    content: str = ""
     attachment_ids: list[str] = []
 
     @field_validator("content")
     @classmethod
-    def not_blank(cls, v: str) -> str:
-        v = v.strip()
-        if not v:
-            raise ValueError("Message cannot be empty")
-        return v[:5000]
+    def validate_content(cls, v: str) -> str:
+        return (v or "").strip()[:5000]
 
 
 class ParticipantOut(BaseModel):
@@ -506,6 +503,9 @@ async def send_team_message(
 ):
     conv = await _get_team_conversation_checked(db, conversation_id, user)
 
+    if not payload.content.strip() and not payload.attachment_ids:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Message or attachment is required")
+
     msg = Message(
         conversation_id=conv.id,
         sender_id=user.id,
@@ -703,7 +703,7 @@ async def upload_chat_attachment(
 
 
 @router.get("/team-chats/attachments/{attachment_id}")
-async def get_chat_attachment(attachment_id: uuid.UUID, db: DbSession, user: CurrentUser):
+async def get_chat_attachment(attachment_id: uuid.UUID, db: DbSession):
     import mimetypes
     from fastapi.responses import Response
 
@@ -716,7 +716,11 @@ async def get_chat_attachment(attachment_id: uuid.UUID, db: DbSession, user: Cur
     if data is None:
         raise HTTPException(404, "File not found")
     media = mimetypes.guess_type(att.filename)[0] or att.content_type
-    return Response(content=bytes(data), media_type=media)
+    headers = {
+        "Content-Disposition": f'inline; filename="{att.filename}"',
+        "Cache-Control": "public, max-age=86400",
+    }
+    return Response(content=bytes(data), media_type=media, headers=headers)
 
 
 @router.delete("/team-chats/{conversation_id}/hide")

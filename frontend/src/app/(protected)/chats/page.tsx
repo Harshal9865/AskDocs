@@ -138,29 +138,65 @@ function ReadTicks({ readBy, myId, participantCount }: { readBy: string[]; myId:
   return <CheckCheck className="h-3 w-3 text-slate-400 dark:text-zinc-500" />;
 }
 
+function formatBytes(bytes: number): string {
+  if (!bytes || bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+}
+
 function AttachmentThumbnail({ att, onOpenImage }: { att: ChatAttachment; onOpenImage?: (att: ChatAttachment) => void }) {
-  const isImage = att.content_type.startsWith("image/");
-  const isVideo = att.content_type.startsWith("video/");
-  const isPdf = att.filename.toLowerCase().endsWith(".pdf") || att.content_type === "application/pdf";
-  const isSheet = att.filename.toLowerCase().endsWith(".csv") || att.filename.toLowerCase().endsWith(".xlsx");
+  const isImage =
+    att.content_type?.startsWith("image/") ||
+    /\.(jpg|jpeg|png|webp|gif|svg|bmp|ico)$/i.test(att.filename);
+  const isVideo =
+    att.content_type?.startsWith("video/") ||
+    /\.(mp4|webm|mov|mkv|avi)$/i.test(att.filename);
+  const isPdf =
+    att.filename.toLowerCase().endsWith(".pdf") || att.content_type === "application/pdf";
+  const isSheet =
+    /\.(csv|xlsx|xls|tsv)$/i.test(att.filename) ||
+    att.content_type?.includes("spreadsheet") ||
+    att.content_type?.includes("excel") ||
+    att.content_type === "text/csv";
+  const isDoc =
+    /\.(docx|doc|txt|md|rtf)$/i.test(att.filename) ||
+    att.content_type?.includes("word") ||
+    att.content_type === "text/plain";
+
+  const fileUrl = `${API_BASE}${att.url}`;
 
   if (isImage) {
     return (
       <div
         onClick={() => onOpenImage?.(att)}
-        className="group/img relative mt-1.5 cursor-pointer overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 shadow-sm max-w-[280px]"
+        className="group/img relative mt-1 overflow-hidden rounded-2xl border border-black/10 bg-slate-900 shadow-md transition-all hover:shadow-xl dark:border-white/10 max-w-[320px] cursor-pointer"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={`${API_BASE}${att.url}`}
+          src={fileUrl}
           alt={att.filename}
-          className="max-h-56 w-full object-cover transition-transform duration-200 group-hover/img:scale-105"
+          loading="lazy"
+          className="max-h-72 w-full object-cover transition-transform duration-300 group-hover/img:scale-102"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity flex items-end justify-between p-2.5 text-white">
-          <span className="text-[11px] font-medium truncate max-w-[180px]">{att.filename}</span>
-          <span className="rounded-full bg-white/20 p-1 backdrop-blur-xs">
-            <Download className="h-3.5 w-3.5" />
-          </span>
+        {/* WhatsApp hover overlay with direct download & zoom */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity flex items-end justify-between p-3 text-white">
+          <div className="min-w-0 flex-1 pr-2">
+            <span className="block text-xs font-bold truncate">{att.filename}</span>
+            <span className="text-[10px] text-zinc-300">{formatBytes(att.size_bytes)}</span>
+          </div>
+          <a
+            href={fileUrl}
+            download={att.filename}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            title="Download image"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/25 backdrop-blur-md text-white hover:bg-white hover:text-slate-900 transition-all shadow-sm"
+          >
+            <Download className="h-4 w-4" />
+          </a>
         </div>
       </div>
     );
@@ -168,37 +204,53 @@ function AttachmentThumbnail({ att, onOpenImage }: { att: ChatAttachment; onOpen
 
   if (isVideo) {
     return (
-      <div className="mt-1.5 max-w-[280px] overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 shadow-sm">
-        <video src={`${API_BASE}${att.url}`} controls preload="metadata" className="max-h-52 w-full rounded-2xl" />
+      <div className="mt-1 max-w-[320px] overflow-hidden rounded-2xl border border-black/10 bg-black shadow-md dark:border-white/10">
+        <video src={fileUrl} controls preload="metadata" className="max-h-64 w-full rounded-2xl" />
       </div>
     );
   }
 
+  // WhatsApp-Style Document / PDF / Spreadsheet Card
   return (
     <a
-      href={`${API_BASE}${att.url}`}
+      href={fileUrl}
       target="_blank"
       rel="noopener noreferrer"
       download={att.filename}
-      className="mt-1.5 flex items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white/90 p-3 shadow-xs hover:border-purple-300 hover:shadow-md dark:border-white/10 dark:bg-[#181628]/90 transition-all max-w-[280px] group/file"
+      className="mt-1 flex items-center justify-between gap-3 rounded-2xl border border-slate-200/90 bg-white/95 p-3 shadow-xs hover:border-purple-400 hover:shadow-md dark:border-white/10 dark:bg-[#1a1728]/95 transition-all max-w-[320px] group/file"
     >
-      <div className="flex items-center gap-2.5 overflow-hidden">
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-bold shadow-xs ${
-          isPdf ? "bg-red-500/10 text-red-600 dark:text-red-400" : isSheet ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-purple-500/10 text-purple-600 dark:text-purple-400"
+      <div className="flex items-center gap-3 overflow-hidden">
+        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-xs ${
+          isPdf
+            ? "bg-red-500/15 text-red-600 dark:bg-red-500/20 dark:text-red-400"
+            : isSheet
+            ? "bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
+            : isDoc
+            ? "bg-blue-500/15 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400"
+            : "bg-purple-500/15 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400"
         }`}>
-          {isPdf ? <FileText className="h-5 w-5" /> : isSheet ? <FileSpreadsheet className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
+          {isPdf ? (
+            <div className="flex flex-col items-center">
+              <FileText className="h-5 w-5" />
+              <span className="text-[8px] font-black uppercase tracking-tighter">PDF</span>
+            </div>
+          ) : isSheet ? (
+            <FileSpreadsheet className="h-5 w-5" />
+          ) : (
+            <FileText className="h-5 w-5" />
+          )}
         </div>
         <div className="min-w-0">
-          <span className="block truncate text-xs font-bold text-slate-800 dark:text-zinc-100 group-hover/file:text-purple-600 dark:group-hover/file:text-purple-300">
+          <span className="block truncate text-xs font-bold text-slate-900 dark:text-zinc-100 group-hover/file:text-purple-600 dark:group-hover/file:text-purple-300">
             {att.filename}
           </span>
-          <span className="text-[10px] font-semibold text-slate-400 dark:text-zinc-400">
-            {isPdf ? "PDF Document" : isSheet ? "Spreadsheet Data" : "Document"} • Download
+          <span className="text-[11px] font-semibold text-slate-400 dark:text-zinc-400">
+            {formatBytes(att.size_bytes)} • {isPdf ? "PDF Document" : isSheet ? "Spreadsheet" : "Document"}
           </span>
         </div>
       </div>
-      <div className="rounded-full bg-slate-100 p-1.5 text-slate-500 group-hover/file:bg-purple-600 group-hover/file:text-white dark:bg-white/10 dark:text-zinc-300 dark:group-hover/file:bg-purple-600 transition-colors">
-        <Download className="h-3.5 w-3.5" />
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 group-hover/file:bg-purple-600 group-hover/file:text-white dark:bg-white/10 dark:text-zinc-300 dark:group-hover/file:bg-purple-600 transition-colors shadow-2xs">
+        <Download className="h-4 w-4" />
       </div>
     </a>
   );
@@ -1207,7 +1259,9 @@ export default function ChatsPage() {
                         </div>
                       )}
 
-                      <p className="whitespace-pre-wrap break-words leading-relaxed">{bodyContent}</p>
+                      {bodyContent.trim().length > 0 && (
+                        <p className="whitespace-pre-wrap break-words leading-relaxed">{bodyContent}</p>
+                      )}
 
                       {/* Autonomous Interactive Approval Card */}
                       {m.approval_card && (
