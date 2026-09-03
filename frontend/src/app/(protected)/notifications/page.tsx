@@ -15,6 +15,11 @@ import {
   XCircle,
   ArrowRight,
   RefreshCw,
+  Sliders,
+  Shield,
+  ShieldCheck,
+  Check,
+  Settings,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -22,6 +27,7 @@ import { useAuth } from "@/lib/auth-context";
 import type { Invitation, JoinRequest, Member, TeamChat } from "@/lib/types";
 import { playMessageChime } from "@/lib/utils";
 import Avatar from "@/components/Avatar";
+import { showToast } from "@/components/Toast";
 
 export default function NotificationsPage() {
   const { workspace, refresh } = useWorkspace();
@@ -35,10 +41,50 @@ export default function NotificationsPage() {
   const [unreadChats, setUnreadChats] = useState<TeamChat[]>([]);
   const [previews, setPreviews] = useState<Record<string, { workspace_name: string; inviter_email: string; role: string }>>({});
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"all" | "chats" | "friends" | "invites">("all");
+  const [tab, setTab] = useState<"all" | "chats" | "friends" | "invites" | "preferences">("all");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+
+  // Granular notification toggles
+  const [prefDMs, setPrefDMs] = useState(true);
+  const [prefGroups, setPrefGroups] = useState(true);
+  const [prefFriends, setPrefFriends] = useState(true);
+  const [prefAI, setPrefAI] = useState(true);
+  const [prefApprovals, setPrefApprovals] = useState(true);
+
+  // Load sound & granular settings
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("askdocs_notif_sound");
+      if (saved !== null) setSoundEnabled(saved === "true");
+
+      const savedDMs = localStorage.getItem("askdocs_pref_dms");
+      if (savedDMs !== null) setPrefDMs(savedDMs === "true");
+
+      const savedGroups = localStorage.getItem("askdocs_pref_groups");
+      if (savedGroups !== null) setPrefGroups(savedGroups === "true");
+
+      const savedFriends = localStorage.getItem("askdocs_pref_friends");
+      if (savedFriends !== null) setPrefFriends(savedFriends === "true");
+
+      const savedAI = localStorage.getItem("askdocs_pref_ai");
+      if (savedAI !== null) setPrefAI(savedAI === "true");
+
+      const savedAppr = localStorage.getItem("askdocs_pref_approvals");
+      if (savedAppr !== null) setPrefApprovals(savedAppr === "true");
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const updatePref = (key: string, val: boolean, setter: (v: boolean) => void) => {
+    setter(val);
+    try {
+      localStorage.setItem(key, String(val));
+      showToast("success", "Preferences saved");
+    } catch {}
+  };
 
   // Load sound setting
   useEffect(() => {
@@ -243,6 +289,18 @@ export default function NotificationsPage() {
         >
           <Building className="h-3.5 w-3.5" />
           <span>Invitations & Joins ({invites.length + joinReqs.length})</span>
+        </button>
+
+        <button
+          onClick={() => setTab("preferences")}
+          className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+            tab === "preferences"
+              ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/20"
+              : "text-slate-600 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-white/5"
+          }`}
+        >
+          <Sliders className="h-3.5 w-3.5" />
+          <span>Preferences & Sound Rules</span>
         </button>
       </div>
 
@@ -460,8 +518,135 @@ export default function NotificationsPage() {
           </div>
         )}
 
+        {/* Preferences & Granular Alert Rules Panel */}
+        {tab === "preferences" && (
+          <div className="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 dark:border-white/10 dark:bg-[#12111d] shadow-sm space-y-6 animate-in fade-in duration-150">
+            <div>
+              <h2 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <Sliders className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                <span>Granular Notification Channels & Alert Rules</span>
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
+                Customize where and when you receive sound chimes and alert badges across your workspace.
+              </p>
+            </div>
+
+            <div className="divide-y divide-slate-100 dark:divide-white/5">
+              {/* 1. Direct Messages */}
+              <div className="flex items-center justify-between py-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 font-bold shrink-0">
+                    <MessagesSquare className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <span className="block text-sm font-bold text-slate-900 dark:text-white">Direct Messages (DMs)</span>
+                    <span className="text-xs text-slate-500 dark:text-zinc-400">Play chime and notify when a colleague sends you a direct message</span>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={prefDMs}
+                    onChange={(e) => updatePref("askdocs_pref_dms", e.target.checked, setPrefDMs)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-purple-600"></div>
+                </label>
+              </div>
+
+              {/* 2. Group Chats & Team Spaces */}
+              <div className="flex items-center justify-between py-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 font-bold shrink-0">
+                    <Building className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <span className="block text-sm font-bold text-slate-900 dark:text-white">Group Chats & Office Spaces</span>
+                    <span className="text-xs text-slate-500 dark:text-zinc-400">Alerts for team channels and study group messages</span>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={prefGroups}
+                    onChange={(e) => updatePref("askdocs_pref_groups", e.target.checked, setPrefGroups)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-purple-600"></div>
+                </label>
+              </div>
+
+              {/* 3. Friend Requests */}
+              <div className="flex items-center justify-between py-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-300 font-bold shrink-0">
+                    <UserPlus className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <span className="block text-sm font-bold text-slate-900 dark:text-white">Friend & Network Requests</span>
+                    <span className="text-xs text-slate-500 dark:text-zinc-400">Real-time alerts when someone adds you or accepts your request</span>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={prefFriends}
+                    onChange={(e) => updatePref("askdocs_pref_friends", e.target.checked, setPrefFriends)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-purple-600"></div>
+                </label>
+              </div>
+
+              {/* 4. AI Copilot & Document Readiness */}
+              <div className="flex items-center justify-between py-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-100 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-300 font-bold shrink-0">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <span className="block text-sm font-bold text-slate-900 dark:text-white">AI Assistant & Document Indexing</span>
+                    <span className="text-xs text-slate-500 dark:text-zinc-400">Notify when background vector chunking and PDF OCR completes</span>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={prefAI}
+                    onChange={(e) => updatePref("askdocs_pref_ai", e.target.checked, setPrefAI)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-purple-600"></div>
+                </label>
+              </div>
+
+              {/* 5. Policy & Expenditure Approvals */}
+              <div className="flex items-center justify-between py-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-300 font-bold shrink-0">
+                    <ShieldCheck className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <span className="block text-sm font-bold text-slate-900 dark:text-white">Corporate Approvals & SOP Alerts</span>
+                    <span className="text-xs text-slate-500 dark:text-zinc-400">Notify on critical expenditure requests and NDA approvals</span>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={prefApprovals}
+                    onChange={(e) => updatePref("askdocs_pref_approvals", e.target.checked, setPrefApprovals)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-purple-600"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Empty State */}
-        {totalUnreadCount === 0 && !loading && (
+        {tab !== "preferences" && totalUnreadCount === 0 && !loading && (
           <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white/50 p-12 text-center dark:border-white/10 dark:bg-white/[0.01]">
             <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-purple-500/15 via-indigo-500/15 to-pink-500/15 text-purple-600 dark:text-purple-400 shadow-inner">
               <Sparkles className="h-7 w-7" />

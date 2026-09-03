@@ -691,7 +691,7 @@ export default function ChatsPage() {
                 <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">
                   {modeConfig.chatLabel}
                 </h2>
-                <span className="rounded-full bg-purple-500/15 px-2 py-0.5 text-[10px] font-mono font-bold text-purple-600 dark:text-purple-300">
+                <span className="inline-flex items-center gap-1 shrink-0 whitespace-nowrap rounded-full bg-purple-500/15 px-2.5 py-0.5 text-[10px] font-mono font-bold text-purple-600 dark:text-purple-300 border border-purple-500/20">
                   {modeConfig.badge}
                 </span>
               </div>
@@ -1181,8 +1181,8 @@ export default function ChatsPage() {
 
                 return (
                   <div key={m.id} className={`group/msg relative flex flex-col ${isMe ? "items-end" : "items-start"} my-1.5`}>
-                    {/* Floating WhatsApp Action & Reaction Bar on Hover */}
-                    <div className={`opacity-0 group-hover/msg:opacity-100 transition-opacity absolute -top-8 z-20 flex items-center gap-1 rounded-full border border-slate-200/90 bg-white/95 px-2 py-1 shadow-md backdrop-blur-md dark:border-white/10 dark:bg-[#1f1d2e]/95 ${
+                    {/* Floating WhatsApp Action & Reaction Bar on Hover (Strictly hover-only) */}
+                    <div className={`pointer-events-none group-hover/msg:pointer-events-auto opacity-0 group-hover/msg:opacity-100 scale-95 group-hover/msg:scale-100 transition-all duration-150 ease-out absolute -top-8.5 z-20 flex items-center gap-1 rounded-full border border-slate-200/90 bg-white/95 px-2 py-1 shadow-lg backdrop-blur-md dark:border-white/10 dark:bg-[#1f1d2e]/95 ${
                       isMe ? "right-2" : "left-2"
                     }`}>
                       {["👍", "❤️", "😂", "😮", "😢", "🙏"].map((emo) => {
@@ -1192,7 +1192,7 @@ export default function ChatsPage() {
                             key={emo}
                             type="button"
                             onClick={() => toggleReaction(m.id, emo)}
-                            className={`rounded-full p-1 text-xs hover:scale-125 transition-transform cursor-pointer ${
+                            className={`rounded-full p-1 text-xs hover:scale-130 active:scale-90 transition-transform cursor-pointer ${
                               isReacted ? "bg-purple-100 dark:bg-purple-900/40 scale-110" : ""
                             }`}
                             title={`React with ${emo}`}

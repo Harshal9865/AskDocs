@@ -11,6 +11,7 @@ import {
   Volume2,
   VolumeX,
   ArrowRight,
+  Sliders,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -473,16 +474,27 @@ export default function NotificationBell() {
                 </div>
 
                 {/* VIEW ALL NOTIFICATIONS FOOTER CTA */}
-                <div className="mt-2 border-t border-slate-100 dark:border-white/5 pt-2">
+                <div className="mt-2 border-t border-slate-100 dark:border-white/5 pt-2 flex items-center justify-between gap-1">
                   <button
                     onClick={() => {
                       setOpen(false);
                       router.push("/notifications");
                     }}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl py-2 text-xs font-bold text-purple-600 hover:bg-purple-50/60 dark:text-purple-400 dark:hover:bg-purple-950/30 transition-all cursor-pointer"
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2 px-2 text-xs font-bold text-purple-600 hover:bg-purple-50/60 dark:text-purple-400 dark:hover:bg-purple-950/30 transition-all cursor-pointer"
                   >
-                    <span>View all notifications {totalNotifs > 3 ? `(${totalNotifs})` : ""}</span>
+                    <span>View all {totalNotifs > 3 ? `(${totalNotifs})` : ""}</span>
                     <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      setOpen(false);
+                      router.push("/notifications");
+                    }}
+                    title="Configure sound rules and channel preferences"
+                    className="flex items-center justify-center gap-1 rounded-xl py-2 px-2.5 text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-white/5 transition-all cursor-pointer"
+                  >
+                    <Sliders className="h-3.5 w-3.5" />
+                    <span>Rules</span>
                   </button>
                 </div>
               </div>

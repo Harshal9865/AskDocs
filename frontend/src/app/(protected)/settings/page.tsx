@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, Check, ImagePlus, RotateCcw, Pencil, Trash2, Sparkles, CreditCard } from "lucide-react";
+import { Camera, Check, ImagePlus, RotateCcw, Pencil, Trash2, Sparkles, CreditCard, Bell, Sliders } from "lucide-react";
 import EditProfileModal from "@/components/EditProfileModal";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -290,6 +290,26 @@ export default function SettingsPage() {
             className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10 transition-all hover:scale-105"
           >
             View Public Profile →
+          </a>
+        </div>
+      </Section>
+
+      {/* ---------- Notifications & Alert Rules ---------- */}
+      <Section title="Notifications & Alert Channels">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+              <Bell className="h-4 w-4 text-purple-600 dark:text-purple-400" /> Granular Channel Preferences
+            </p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-zinc-400">
+              Control audio chimes and badge alerts for direct messages, office group chats, friend requests, and AI completions.
+            </p>
+          </div>
+          <a
+            href="/notifications"
+            className="inline-flex items-center gap-2 rounded-full bg-purple-50 px-4 py-2 text-xs font-bold text-purple-700 hover:bg-purple-100 dark:bg-purple-950/50 dark:text-purple-300 dark:hover:bg-purple-900/50 transition-all hover:scale-105 shrink-0"
+          >
+            <Sliders className="h-3.5 w-3.5" /> Configure Rules →
           </a>
         </div>
       </Section>
