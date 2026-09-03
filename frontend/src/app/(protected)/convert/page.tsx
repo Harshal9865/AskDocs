@@ -217,6 +217,47 @@ export default function DocumentConverterStudioPage() {
       // 3. Format Transformation
       if (targetFormat === "markdown") {
         output = `# Sanitized Document Export\n\n${output.split("\n\n").map((p) => `${p}`).join("\n\n")}`;
+      } else if (targetFormat === "latex") {
+        output = `\\documentclass{article}\n\\usepackage[utf8]{inputenc}\n\\usepackage{amsmath}\n\\usepackage{geometry}\n\\geometry{margin=1in}\n\n\\title{Sanitized Document Export}\n\\date{\\today}\n\n\\begin{document}\n\\maketitle\n\n${output
+          .split("\n\n")
+          .map((p) => `${p.replace(/([_%$&])/g, "\\$1")}\n`)
+          .join("\n")}\n\\end{document}`;
+      } else if (targetFormat === "json") {
+        const paragraphs = output.split("\n\n").filter(Boolean);
+        output = JSON.stringify(
+          {
+            workspace_id: workspace?.id,
+            exported_at: new Date().toISOString(),
+            format: "json",
+            profile: redactionProfile,
+            pii_redacted: redactPii,
+            redaction_count: count,
+            paragraphs: paragraphs.map((text, idx) => ({ id: idx + 1, content: text })),
+          },
+          null,
+          2
+        );
+      } else if (targetFormat === "csv") {
+        const paragraphs = output.split("\n\n").filter(Boolean);
+        const rows = paragraphs.map((p, idx) => `"${idx + 1}","${p.replace(/"/g, '""')}"`);
+        output = `"Paragraph_Index","Cleaned_Content"\n${rows.join("\n")}`;
+      }
+
+      setConvertedText(output);
+      setRedactionCount(count);
+      setProcessing(false);
+      showToast("success", `Converted to ${targetFormat.toUpperCase()} with ${count} items redacted!`);
+    }, 400);
+  };
+
+  const handleCopy = () => {
+    if (!convertedText) return;
+    void navigator.clipboard.writeText(convertedText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    showToast("success", "Sanitized document copied to clipboard");
+  };
+
   const handleExportPdf = () => {
     if (!convertedText) {
       showToast("error", "Please convert or sanitize text first.");
@@ -519,7 +560,7 @@ export default function DocumentConverterStudioPage() {
                 className="inline-flex items-center gap-1 rounded-xl bg-purple-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm shadow-purple-500/20 hover:bg-purple-700 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
               >
                 <Download className="h-3.5 w-3.5" />
-                <span>Download .{targetFormat}</span>
+                <span>Download .{targetFormat === "latex" ? "tex" : targetFormat}</span>
               </button>
             </div>
           </div>
