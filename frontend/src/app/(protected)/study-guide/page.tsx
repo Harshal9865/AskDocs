@@ -5,22 +5,27 @@ import {
   BookOpen,
   Building2,
   Check,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Copy,
   Download,
   FileQuestion,
   FileSpreadsheet,
+  Filter,
   GraduationCap,
   Lightbulb,
   Printer,
   RefreshCw,
   RotateCw,
   Scale,
+  Search,
   Sparkles,
   Stethoscope,
   Trophy,
+  UploadCloud,
   Wallet,
+  X,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -32,6 +37,7 @@ import type { DocumentItem, StudyGuideDeck } from "@/lib/types";
 type StudyTab = "cheatsheet" | "flashcards" | "quiz" | "terms";
 type StudyPersona = "student" | "medical" | "corporate" | "legal" | "finance";
 type DifficultyLevel = "easy" | "medium" | "hard" | "adaptive";
+type DocFilterType = "all" | "pdf" | "docx" | "txt";
 
 interface StudyPersonaConfig {
   id: StudyPersona;
@@ -101,6 +107,8 @@ interface GeneratedStudyJson {
 export default function StudyGuidePage() {
   const { workspace } = useWorkspace();
   const resultsRef = useRef<HTMLDivElement>(null);
+  const docFileInputRef = useRef<HTMLInputElement>(null);
+  const sampleFileInputRef = useRef<HTMLInputElement>(null);
 
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [selectedDocIds, setSelectedDocIds] = useState<string[]>([]);
@@ -110,6 +118,12 @@ export default function StudyGuidePage() {
   const [difficulty, setDifficulty] = useState<DifficultyLevel>("medium");
   const [sampleQuestions, setSampleQuestions] = useState<string>("");
   const [showSampleInput, setShowSampleInput] = useState<boolean>(false);
+
+  // Search & Filter State for multi-file handling
+  const [docSearchQuery, setDocSearchQuery] = useState<string>("");
+  const [docFilterType, setDocFilterType] = useState<DocFilterType>("all");
+  const [uploadingDoc, setUploadingDoc] = useState<boolean>(false);
+  const [uploadingSampleFile, setUploadingSampleFile] = useState<boolean>(false);
 
   const [generating, setGenerating] = useState(false);
   const [studyDeck, setStudyDeck] = useState<StudyGuideDeck | null>(null);
@@ -142,6 +156,76 @@ export default function StudyGuidePage() {
       prev.includes(docId) ? prev.filter((id) => id !== docId) : [...prev, docId]
     );
   };
+
+  // Filtered documents list based on search and type filter
+  const filteredDocs = docs.filter((d) => {
+    const matchesSearch =
+      !docSearchQuery.trim() ||
+      d.title.toLowerCase().includes(docSearchQuery.toLowerCase());
+
+    const ext = d.title.toLowerCase();
+    const matchesType =
+      docFilterType === "all" ||
+      (docFilterType === "pdf" && (d.file_type === "pdf" || ext.endsWith(".pdf"))) ||
+      (docFilterType === "docx" && (d.file_type === "docx" || ext.endsWith(".docx") || ext.endsWith(".doc"))) ||
+      (docFilterType === "txt" && (d.file_type === "txt" || ext.endsWith(".txt") || ext.endsWith(".md")));
+
+    return matchesSearch && matchesType;
+  });
+
+  const handleSelectAllFiltered = () => {
+    const idsToAdd = filteredDocs.slice(0, 5).map((d) => d.id);
+    setSelectedDocIds(idsToAdd);
+    showToast("success", `Selected ${idsToAdd.length} documents for synthesis.`);
+  };
+
+  const handleClearSelection = () => {
+    setSelectedDocIds([]);
+  };
+
+  const handleDirectDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !workspace?.id) return;
+    setUploadingDoc(true);
+    try {
+      const uploaded = await api.uploadDocument(workspace.id, file);
+      setDocs((prev) => [uploaded, ...prev]);
+      setSelectedDocIds((prev) => (prev.length < 5 ? [...prev, uploaded.id] : prev));
+      showToast("success", `Uploaded & selected "${uploaded.title}"!`);
+    } catch {
+      showToast("error", "Failed to upload document. Please try again.");
+    } finally {
+      setUploadingDoc(false);
+      if (docFileInputRef.current) docFileInputRef.current.value = "";
+    }
+  };
+
+  const handleSampleQuestionsFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingSampleFile(true);
+    try {
+      if (file.type.includes("text") || file.name.endsWith(".txt") || file.name.endsWith(".md")) {
+        const text = await file.text();
+        setSampleQuestions(text.slice(0, 3000));
+        setShowSampleInput(true);
+        showToast("success", `Loaded sample questions from ${file.name}!`);
+      } else if (workspace?.id) {
+        const uploaded = await api.uploadDocument(workspace.id, file);
+        const chunks = await api.getDocumentChunks(workspace.id, uploaded.id).catch(() => []);
+        const sampleText = chunks.map((c) => c.content).join("\n\n").slice(0, 3000);
+        setSampleQuestions(sampleText || `Extracted benchmark questions from ${uploaded.title}`);
+        setShowSampleInput(true);
+        showToast("success", `Loaded question benchmark from ${uploaded.title}!`);
+      }
+    } catch {
+      showToast("error", "Failed to process sample questions file.");
+    } finally {
+      setUploadingSampleFile(false);
+      if (sampleFileInputRef.current) sampleFileInputRef.current.value = "";
+    }
+  };
+
 
   const handleGenerateStudyGuide = async () => {
     if (!workspace || selectedDocIds.length === 0 || generating) return;
@@ -546,45 +630,191 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
 
       {/* Synthesis Config & Multi-Document Selector Card */}
       <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-6">
-        {/* Document Multi-Select Chips */}
-        <div className="space-y-2">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <label className="text-xs font-black uppercase tracking-wider text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
-              <BookOpen className="h-4 w-4" /> 1. Select Workspace Documents to Synthesize (Up to 5)
-            </label>
-            <span className="text-[11px] font-bold text-slate-400">
-              Selected ({selectedDocIds.length} docs):{" "}
-              {docs.filter((d) => selectedDocIds.includes(d.id)).map((d) => d.title).join(", ") || "None"}
-            </span>
+        {/* Document Multi-Select Chips with Live Search & Upload */}
+        <div className="space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <div className="space-y-0.5">
+              <label className="text-xs font-black uppercase tracking-wider text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
+                <BookOpen className="h-4 w-4" /> 1. Select Workspace Documents to Synthesize (Up to 5)
+              </label>
+              <div className="text-[11px] font-bold text-slate-500 dark:text-zinc-400">
+                Selected ({selectedDocIds.length} / 5):{" "}
+                <span className="text-purple-600 dark:text-purple-400">
+                  {docs.filter((d) => selectedDocIds.includes(d.id)).map((d) => d.title).join(", ") || "None selected"}
+                </span>
+              </div>
+            </div>
+
+            {/* Direct Document Upload to Workspace */}
+            <div className="flex items-center gap-2">
+              <input
+                type="file"
+                ref={docFileInputRef}
+                onChange={handleDirectDocUpload}
+                accept=".pdf,.docx,.doc,.txt,.md,.csv"
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => docFileInputRef.current?.click()}
+                disabled={uploadingDoc}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-purple-500/30 bg-purple-500/10 px-3.5 py-1.5 text-xs font-bold text-purple-700 dark:text-purple-300 hover:bg-purple-500/20 active:scale-95 transition-all cursor-pointer"
+                title="Upload a new document directly into workspace"
+              >
+                {uploadingDoc ? (
+                  <>
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                    <span>Uploading...</span>
+                  </>
+                ) : (
+                  <>
+                    <UploadCloud className="h-3.5 w-3.5 text-purple-500" />
+                    <span>+ Upload Document</span>
+                  </>
+                )}
+              </button>
+
+              {selectedDocIds.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClearSelection}
+                  className="rounded-xl border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400 cursor-pointer"
+                >
+                  Clear All
+                </button>
+              )}
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 pt-1 max-h-36 overflow-y-auto pr-1">
-            {docs.map((d) => {
+          {/* Search Bar & Filter Tabs */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+              <input
+                type="text"
+                value={docSearchQuery}
+                onChange={(e) => setDocSearchQuery(e.target.value)}
+                placeholder="🔍 Search documents by file name or keyword..."
+                className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/80 pl-9 pr-8 py-2 text-xs font-medium text-slate-900 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white"
+              />
+              {docSearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setDocSearchQuery("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+
+            {/* Type Filters */}
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+              {(
+                [
+                  { id: "all", label: `All (${docs.length})` },
+                  { id: "pdf", label: `PDFs (${docs.filter((d) => d.file_type === "pdf" || d.title.toLowerCase().endsWith(".pdf")).length})` },
+                  { id: "docx", label: `Word (${docs.filter((d) => d.file_type === "docx" || d.title.toLowerCase().endsWith(".docx")).length})` },
+                  { id: "txt", label: `Text (${docs.filter((d) => d.file_type === "txt" || d.title.toLowerCase().endsWith(".txt") || d.title.toLowerCase().endsWith(".md")).length})` },
+                ] as const
+              ).map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => setDocFilterType(f.id)}
+                  className={`rounded-xl px-3 py-1.5 text-[11px] font-bold transition-all whitespace-nowrap cursor-pointer ${
+                    docFilterType === f.id
+                      ? "bg-purple-600 text-white shadow-sm"
+                      : "border border-slate-200/80 bg-slate-50 text-slate-600 hover:bg-slate-100 dark:border-white/5 dark:bg-[#1f1f2e] dark:text-zinc-400"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+
+              {filteredDocs.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleSelectAllFiltered}
+                  className="rounded-xl border border-purple-500/20 bg-purple-500/10 px-3 py-1.5 text-[11px] font-bold text-purple-700 dark:text-purple-300 hover:bg-purple-500/20 whitespace-nowrap cursor-pointer"
+                >
+                  Select Top 5
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Document Chips Grid */}
+          <div className="flex flex-wrap gap-2 pt-1 max-h-48 overflow-y-auto pr-1">
+            {filteredDocs.map((d) => {
               const isSelected = selectedDocIds.includes(d.id);
+              const isPdf = d.file_type === "pdf" || d.title.toLowerCase().endsWith(".pdf");
+              const isDocx = d.file_type === "docx" || d.title.toLowerCase().endsWith(".docx");
+
               return (
                 <button
                   key={d.id}
                   type="button"
                   onClick={() => toggleDocSelection(d.id)}
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                  className={`inline-flex items-center gap-2 rounded-2xl px-3.5 py-2 text-xs font-bold transition-all cursor-pointer ${
                     isSelected
-                      ? "border border-purple-500 bg-purple-500/15 text-purple-700 dark:text-purple-300 shadow-sm"
-                      : "border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400"
+                      ? "border border-purple-500 bg-purple-500/15 text-purple-700 dark:text-purple-300 shadow-md shadow-purple-500/10 scale-102"
+                      : "border border-slate-200/80 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-purple-300 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-zinc-300"
                   }`}
                 >
-                  <span>{isSelected ? "✓" : "+"}</span>
-                  <span className="truncate max-w-[200px]">{d.title}</span>
+                  <span className={`text-[10px] font-black rounded-md px-1.5 py-0.5 ${
+                    isPdf ? "bg-rose-500/15 text-rose-600 dark:text-rose-400" : isDocx ? "bg-blue-500/15 text-blue-600 dark:text-blue-400" : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                  }`}>
+                    {isPdf ? "PDF" : isDocx ? "DOCX" : "TXT"}
+                  </span>
+                  <span className="truncate max-w-[220px]">{d.title}</span>
+                  <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-black ${
+                    isSelected ? "bg-purple-600 text-white" : "bg-slate-200 text-slate-500 dark:bg-white/10 dark:text-zinc-400"
+                  }`}>
+                    {isSelected ? "✓" : "+"}
+                  </span>
                 </button>
               );
             })}
+
+            {filteredDocs.length === 0 && (
+              <div className="py-6 text-center w-full space-y-2">
+                <p className="text-xs text-slate-500 dark:text-zinc-400">
+                  No documents found matching &ldquo;{docSearchQuery}&rdquo;.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDocSearchQuery("");
+                    setDocFilterType("all");
+                  }}
+                  className="text-xs font-bold text-purple-600 dark:text-purple-400 hover:underline cursor-pointer"
+                >
+                  Reset search & filters
+                </button>
+              </div>
+            )}
+
             {docs.length === 0 && (
-              <p className="text-xs text-amber-500">Please upload documents to your workspace to generate study guides.</p>
+              <div className="py-8 text-center w-full space-y-3">
+                <p className="text-xs font-bold text-amber-500">
+                  No documents uploaded in this workspace yet.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => docFileInputRef.current?.click()}
+                  className="inline-flex items-center gap-1.5 rounded-2xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-md cursor-pointer"
+                >
+                  <UploadCloud className="h-4 w-4" />
+                  <span>Upload First Document</span>
+                </button>
+              </div>
             )}
           </div>
         </div>
 
         {/* Persona Selectors */}
-        <div className="space-y-2.5">
+        <div className="space-y-2.5 pt-2 border-t border-slate-100 dark:border-white/5">
           <label className="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
             <GraduationCap className="h-3.5 w-3.5 text-purple-500" /> 2. Target Audience & Learning Style
           </label>
@@ -689,28 +919,63 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
           </div>
         </div>
 
-        {/* Sample Past Question Style Input */}
-        <div className="space-y-2 pt-1 border-t border-slate-100 dark:border-white/5">
-          <div className="flex items-center justify-between">
+        {/* Sample Past Question Style Input & File Ingestion */}
+        <div className="space-y-2.5 pt-1 border-t border-slate-100 dark:border-white/5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <button
               type="button"
               onClick={() => setShowSampleInput(!showSampleInput)}
               className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-600 dark:text-purple-400 hover:underline cursor-pointer"
             >
               <FileQuestion className="h-3.5 w-3.5" />
-              <span>{showSampleInput ? "− Hide Sample Questions / Style Benchmark" : "+ Paste Sample Past Exam Questions (Style Mimicry)"}</span>
+              <span>{showSampleInput ? "− Hide Benchmark Question Mimicry" : "+ Add Sample Past Exam Questions / Benchmark Paper (Style Mimicry)"}</span>
             </button>
-            <span className="text-[11px] text-slate-400">AI will analyze and mimic the exact question syntax and depth</span>
+            <span className="text-[11px] text-slate-400">AI will inspect and mimic the exact question syntax, depth & formatting</span>
           </div>
 
           {showSampleInput && (
-            <textarea
-              rows={3}
-              placeholder="Paste 1-3 sample exam questions or a past quiz here. The AI will inspect your professor or company's style, difficulty, and question formats to generate brand new questions matching that exact benchmark..."
-              value={sampleQuestions}
-              onChange={(e) => setSampleQuestions(e.target.value)}
-              className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3.5 text-xs font-medium text-slate-900 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white"
-            />
+            <div className="space-y-2 animate-in fade-in duration-200">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-zinc-400">
+                  Paste sample questions below OR upload a past question paper:
+                </span>
+                <div>
+                  <input
+                    type="file"
+                    ref={sampleFileInputRef}
+                    onChange={handleSampleQuestionsFileUpload}
+                    accept=".pdf,.docx,.doc,.txt,.md"
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => sampleFileInputRef.current?.click()}
+                    disabled={uploadingSampleFile}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-purple-500/30 bg-purple-500/10 px-3 py-1 text-xs font-bold text-purple-700 dark:text-purple-300 hover:bg-purple-500/20 transition-all cursor-pointer"
+                  >
+                    {uploadingSampleFile ? (
+                      <>
+                        <RefreshCw className="h-3 w-3 animate-spin" />
+                        <span>Analyzing Paper...</span>
+                      </>
+                    ) : (
+                      <>
+                        <UploadCloud className="h-3 w-3 text-purple-500" />
+                        <span>Upload Past Exam File (.pdf/.docx/.txt)</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <textarea
+                rows={3}
+                placeholder="Paste 1-3 sample exam questions or a past quiz here. The AI will inspect your professor or company's style, difficulty, and question formats to generate brand new questions matching that exact benchmark..."
+                value={sampleQuestions}
+                onChange={(e) => setSampleQuestions(e.target.value)}
+                className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3.5 text-xs font-medium text-slate-900 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white"
+              />
+            </div>
           )}
         </div>
 

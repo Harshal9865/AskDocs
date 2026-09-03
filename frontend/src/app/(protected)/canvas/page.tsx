@@ -24,6 +24,8 @@ import {
   Zap,
   Copy,
   Check,
+  Search,
+  UploadCloud,
 } from "lucide-react";
 
 export default function WorkspaceCanvasPage() {
@@ -37,6 +39,8 @@ export default function WorkspaceCanvasPage() {
   const [selectedDocIds, setSelectedDocIds] = useState<string[]>([]);
   const [customTitle, setCustomTitle] = useState<string>("");
   const [copiedMatrix, setCopiedMatrix] = useState<boolean>(false);
+  const [modalSearchQuery, setModalSearchQuery] = useState<string>("");
+  const [uploadingDoc, setUploadingDoc] = useState<boolean>(false);
 
   const loadData = useCallback(async () => {
     if (!workspace?.id) return;
@@ -715,38 +719,91 @@ Return ONLY valid JSON matching this schema:
             </div>
 
             {/* Document Selection List */}
-            <div className="space-y-2">
-              <label className="text-xs font-extrabold text-slate-700 dark:text-zinc-300">Select Workspace Documents:</label>
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-extrabold text-slate-700 dark:text-zinc-300">
+                  Select Workspace Documents ({selectedDocIds.length} chosen):
+                </label>
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="file"
+                    id="canvas-doc-upload"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file || !workspace?.id) return;
+                      setUploadingDoc(true);
+                      try {
+                        const uploaded = await api.uploadDocument(workspace.id, file);
+                        setDocs((prev) => [uploaded, ...prev]);
+                        setSelectedDocIds((prev) => [...prev, uploaded.id]);
+                        showToast("success", `Uploaded & selected "${uploaded.title}"!`);
+                      } catch {
+                        showToast("error", "Failed to upload document.");
+                      } finally {
+                        setUploadingDoc(false);
+                      }
+                    }}
+                    accept=".pdf,.docx,.doc,.txt,.md"
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById("canvas-doc-upload")?.click()}
+                    disabled={uploadingDoc}
+                    className="inline-flex items-center gap-1 rounded-xl border border-purple-500/30 bg-purple-500/10 px-2.5 py-1 text-[11px] font-bold text-purple-700 dark:text-purple-300 hover:bg-purple-500/20 cursor-pointer"
+                  >
+                    <UploadCloud className="h-3 w-3 text-purple-500" />
+                    <span>{uploadingDoc ? "Uploading..." : "+ Upload"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Search input in modal */}
+              {docs.length > 3 && (
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                  <input
+                    type="text"
+                    value={modalSearchQuery}
+                    onChange={(e) => setModalSearchQuery(e.target.value)}
+                    placeholder="Search documents by name..."
+                    className="w-full rounded-xl border border-slate-200/80 bg-slate-50/80 pl-8 pr-3 py-1.5 text-xs font-medium text-slate-800 outline-none focus:border-purple-500 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white"
+                  />
+                </div>
+              )}
+
               {docs.length === 0 ? (
                 <p className="py-4 text-center text-xs text-slate-500 dark:text-zinc-400">
                   No documents in workspace yet. Please upload files first.
                 </p>
               ) : (
                 <div className="max-h-48 overflow-y-auto space-y-2 no-scrollbar pr-1">
-                  {docs.map((d) => {
-                    const isSelected = selectedDocIds.includes(d.id);
-                    return (
-                      <div
-                        key={d.id}
-                        onClick={() => handleToggleDocSelect(d.id)}
-                        className={`flex cursor-pointer items-center justify-between rounded-2xl border p-3 transition-all ${
-                          isSelected
-                            ? "border-purple-500 bg-purple-500/10 text-purple-600 dark:text-purple-300 font-bold"
-                            : "border-slate-200/80 bg-slate-50/60 text-slate-800 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-zinc-200"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <FileText className="h-4 w-4 shrink-0" />
-                          <span className="text-xs">{d.title}</span>
+                  {docs
+                    .filter((d) => !modalSearchQuery.trim() || d.title.toLowerCase().includes(modalSearchQuery.toLowerCase()))
+                    .map((d) => {
+                      const isSelected = selectedDocIds.includes(d.id);
+                      return (
+                        <div
+                          key={d.id}
+                          onClick={() => handleToggleDocSelect(d.id)}
+                          className={`flex cursor-pointer items-center justify-between rounded-2xl border p-2.5 transition-all ${
+                            isSelected
+                              ? "border-purple-500 bg-purple-500/10 text-purple-600 dark:text-purple-300 font-bold"
+                              : "border-slate-200/80 bg-slate-50/60 text-slate-800 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-zinc-200"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <FileText className="h-4 w-4 shrink-0 text-purple-500" />
+                            <span className="text-xs truncate">{d.title}</span>
+                          </div>
+                          <span className={`text-[10px] font-extrabold uppercase rounded-full px-2 py-0.5 shrink-0 ${
+                            isSelected ? "bg-purple-600 text-white" : "bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-zinc-400"
+                          }`}>
+                            {isSelected ? "Selected" : "Select"}
+                          </span>
                         </div>
-                        <span className={`text-[10px] font-extrabold uppercase rounded-full px-2 py-0.5 ${
-                          isSelected ? "bg-purple-600 text-white" : "bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-zinc-400"
-                        }`}>
-                          {isSelected ? "Selected" : "Select"}
-                        </span>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
                 </div>
               )}
             </div>
