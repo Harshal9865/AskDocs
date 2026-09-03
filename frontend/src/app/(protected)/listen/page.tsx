@@ -111,6 +111,7 @@ export default function AudioBriefPlayerPage() {
   const [isMuted, setIsMuted] = useState(false);
   const [activeTurnIdx, setActiveTurnIdx] = useState<number>(0);
   const [copied, setCopied] = useState(false);
+  const [showQuickGuide, setShowQuickGuide] = useState(false);
 
   const resultsRef = useRef<HTMLDivElement>(null);
   const speechUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
