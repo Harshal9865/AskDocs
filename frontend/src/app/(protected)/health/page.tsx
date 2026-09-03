@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useWorkspace } from "@/lib/workspace-context";
+import { useAudienceMode } from "@/lib/audience-mode-context";
 import { api } from "@/lib/api";
 import { WorkspaceHealthReport } from "@/lib/types";
 import { showToast } from "@/components/Toast";
@@ -18,10 +19,16 @@ import {
   ShieldAlert,
   Sparkles,
   Zap,
+  GraduationCap,
+  Scale,
+  Stethoscope,
+  Wallet,
+  Building2,
 } from "lucide-react";
 
 export default function DocumentHealthDashboardPage() {
   const { workspace } = useWorkspace();
+  const { mode, modeConfig } = useAudienceMode();
   const [report, setReport] = useState<WorkspaceHealthReport | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [scanning, setScanning] = useState<boolean>(false);
@@ -50,15 +57,15 @@ export default function DocumentHealthDashboardPage() {
       return;
     }
     exportToPdf({
-      title: "Workspace Document Health & Compliance Audit",
-      subtitle: `Automated Repository Integrity Scan • ${workspace?.name || "Workspace"}`,
-      badge: `Health Score: ${report.health_score}/100 • ${report.issues?.length || 0} Identified Issues`,
+      title: `${modeConfig.name} Document Health & Compliance Audit`,
+      subtitle: `Automated Integrity & Domain Standards Scan • ${workspace?.name || "Workspace"}`,
+      badge: `Health Score: ${report.health_score}/100 • ${report.issues?.length || 0} Identified Items`,
       workspaceName: workspace?.name,
       sections: [
         {
-          heading: "Executive Integrity Summary",
+          heading: "Executive Integrity & Domain Audit Summary",
           type: "callout",
-          content: `Overall Workspace Health Score: <strong>${report.health_score}/100</strong>. Audited ${report.total_documents} total documents. Detected ${report.critical_issues_count} critical issues and ${report.warning_issues_count} warnings. Healthy document count: ${report.healthy_documents_count}.`,
+          content: `Audited <strong>${report.total_documents}</strong> total documents under <strong>${modeConfig.name}</strong> standards. Overall Health Score: <strong>${report.health_score}/100</strong>. Detected ${report.critical_issues_count} high-priority issues and ${report.warning_issues_count} advisories. Healthy files: ${report.healthy_documents_count}.`,
         },
         {
           heading: "Key Audit Findings & Discrepancies",
@@ -131,13 +138,13 @@ export default function DocumentHealthDashboardPage() {
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/20 px-3.5 py-1 text-xs font-bold text-indigo-300 backdrop-blur-md shadow-inner">
               <Sparkles className="h-3.5 w-3.5 text-purple-400 animate-pulse" />
-              <span className="tracking-wider">AUTOMATED QUALITY AUDITOR</span>
+              <span className="tracking-wider uppercase font-mono">{modeConfig.name} STANDARDS AUDITOR</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-md">
               Document Health & Integrity
             </h1>
             <p className="max-w-2xl text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Automated deep audit scanning text extraction clarity, duplicate files, stale documents, and operational integrity with 1-click PDF compliance reports.
+              Automated deep audit scanning citation accuracy, duplicate files, regulatory standards, and operational integrity with 1-click PDF compliance reports.
             </p>
           </div>
 

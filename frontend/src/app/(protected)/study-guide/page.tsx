@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
+import { useAudienceMode } from "@/lib/audience-mode-context";
 import { showToast } from "@/components/Toast";
 import { exportToPdf, downloadBlob } from "@/lib/pdf-export";
 import type { DocumentItem, StudyGuideDeck } from "@/lib/types";
@@ -106,6 +107,7 @@ interface GeneratedStudyJson {
 
 export default function StudyGuidePage() {
   const { workspace } = useWorkspace();
+  const { mode } = useAudienceMode();
   const resultsRef = useRef<HTMLDivElement>(null);
   const docFileInputRef = useRef<HTMLInputElement>(null);
   const sampleFileInputRef = useRef<HTMLInputElement>(null);
@@ -119,6 +121,15 @@ export default function StudyGuidePage() {
   const [sampleQuestions, setSampleQuestions] = useState<string>("");
   const [showSampleInput, setShowSampleInput] = useState<boolean>(false);
   const [showQuickGuide, setShowQuickGuide] = useState<boolean>(false);
+
+  // Auto-sync persona with active operational mode
+  useEffect(() => {
+    if (mode === "clinical") setPersona("medical");
+    else if (mode === "legal") setPersona("legal");
+    else if (mode === "finance") setPersona("finance");
+    else if (mode === "office") setPersona("corporate");
+    else setPersona("student");
+  }, [mode]);
 
   // Search & Filter State for multi-file handling
   const [docSearchQuery, setDocSearchQuery] = useState<string>("");

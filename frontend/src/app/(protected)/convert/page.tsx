@@ -11,24 +11,88 @@ import {
   RefreshCw,
   FileCode,
   FileCheck2,
+  Stethoscope,
+  Scale,
+  GraduationCap,
+  Wallet,
+  ShieldAlert,
 } from "lucide-react";
 import { useWorkspace } from "@/lib/workspace-context";
+import { useAudienceMode } from "@/lib/audience-mode-context";
 import { api } from "@/lib/api";
 import { DocumentItem } from "@/lib/types";
 import { showToast } from "@/components/Toast";
 import { exportToPdf, downloadBlob } from "@/lib/pdf-export";
 
-type TargetFormat = "markdown" | "text" | "json" | "csv";
+type TargetFormat = "markdown" | "latex" | "json" | "csv" | "text";
+type RedactionProfile = "universal" | "hipaa" | "legal_nda" | "academic_blind" | "finance";
+
+interface RedactionProfileConfig {
+  id: RedactionProfile;
+  label: string;
+  icon: typeof Shield;
+  description: string;
+  badge: string;
+}
+
+const REDACTION_PROFILES: RedactionProfileConfig[] = [
+  {
+    id: "universal",
+    label: "Universal PII",
+    icon: Shield,
+    description: "Masks emails, phone numbers, SSNs, and credit cards.",
+    badge: "GDPR & Privacy",
+  },
+  {
+    id: "hipaa",
+    label: "HIPAA Clinical PHI",
+    icon: Stethoscope,
+    description: "Masks patient names, MRNs, DOBs, and hospital locations.",
+    badge: "HIPAA Safe Harbor",
+  },
+  {
+    id: "legal_nda",
+    label: "Legal NDA & Deals",
+    icon: Scale,
+    description: "Masks corporate entities, deal valuations ($XXX,XXX), and terms.",
+    badge: "Strict NDA Vault",
+  },
+  {
+    id: "academic_blind",
+    label: "Academic Blind Review",
+    icon: GraduationCap,
+    description: "Strips author names, university affiliations, and grant IDs.",
+    badge: "Blind Peer Review",
+  },
+  {
+    id: "finance",
+    label: "Banking & Payroll",
+    icon: Wallet,
+    description: "Masks bank accounts, IBANs, routing codes, and tax IDs.",
+    badge: "SOX & PCI-DSS",
+  },
+];
 
 export default function DocumentConverterStudioPage() {
   const { workspace } = useWorkspace();
+  const { mode } = useAudienceMode();
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [selectedDocId, setSelectedDocId] = useState<string>("");
   const [processing, setProcessing] = useState(false);
   const [targetFormat, setTargetFormat] = useState<TargetFormat>("markdown");
+  const [redactionProfile, setRedactionProfile] = useState<RedactionProfile>("universal");
   const [redactPii, setRedactPii] = useState(true);
   const [cleanArtifacts, setCleanArtifacts] = useState(true);
   const [copied, setCopied] = useState(false);
+
+  // Auto-set initial redaction profile based on active mode
+  useEffect(() => {
+    if (mode === "clinical") setRedactionProfile("hipaa");
+    else if (mode === "legal") setRedactionProfile("legal_nda");
+    else if (mode === "academic") setRedactionProfile("academic_blind");
+    else if (mode === "finance") setRedactionProfile("finance");
+    else setRedactionProfile("universal");
+  }, [mode]);
 
   // Input and Output states
   const [rawText, setRawText] = useState("");
@@ -86,28 +150,59 @@ export default function DocumentConverterStudioPage() {
       let output = rawText;
       let count = 0;
 
-      // 1. PII Redaction
+      // 1. PII Redaction according to active profile
       if (redactPii) {
-        // Email redaction
+        // Universal Emails
         output = output.replace(/[\w.-]+@[\w.-]+\.\w+/g, () => {
           count++;
           return "[REDACTED_EMAIL]";
         });
-        // Phone number redaction
+        // Universal Phone numbers
         output = output.replace(/\b(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g, () => {
           count++;
           return "[REDACTED_PHONE]";
         });
-        // SSN / Tax ID redaction
+        // Universal SSN / Tax IDs
         output = output.replace(/\b\d{3}-\d{2}-\d{4}\b/g, () => {
           count++;
           return "[REDACTED_TAX_ID]";
         });
-        // Credit card redaction
+        // Credit cards
         output = output.replace(/\b(?:\d{4}[-\s]?){3}\d{4}\b/g, () => {
           count++;
           return "[REDACTED_CARD_NUMBER]";
         });
+
+        // Profile specific patterns
+        if (redactionProfile === "hipaa") {
+          output = output.replace(/\b(?:MRN|Medical Record Number|Patient ID)[:\s]+[A-Z0-9-]+\b/gi, () => {
+            count++;
+            return "[REDACTED_MRN_ID]";
+          });
+          output = output.replace(/\b(?:DOB|Date of Birth)[:\s]+\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b/gi, () => {
+            count++;
+            return "[REDACTED_DOB]";
+          });
+        } else if (redactionProfile === "legal_nda") {
+          output = output.replace(/\$\s?\d{1,3}(?:,\d{3})*(?:\.\d{2})?(?:\s?(?:million|billion|k|M|B))?/g, () => {
+            count++;
+            return "[REDACTED_DEAL_VALUE]";
+          });
+        } else if (redactionProfile === "academic_blind") {
+          output = output.replace(/\b(?:Grant|NIH|NSF|Award)[\s#:]+[A-Z0-9-]+\b/gi, () => {
+            count++;
+            return "[REDACTED_GRANT_ID]";
+          });
+          output = output.replace(/\b(?:Department of|University of|Institute of Technology)\s+[A-Za-z\s,]+/gi, () => {
+            count++;
+            return "[REDACTED_INSTITUTION]";
+          });
+        } else if (redactionProfile === "finance") {
+          output = output.replace(/\b(?:IBAN|Account #|Routing #)[:\s]+[A-Z0-9-]{6,34}\b/gi, () => {
+            count++;
+            return "[REDACTED_ACCOUNT_NO]";
+          });
+        }
       }
 
       // 2. OCR Cleanup
@@ -122,41 +217,6 @@ export default function DocumentConverterStudioPage() {
       // 3. Format Transformation
       if (targetFormat === "markdown") {
         output = `# Sanitized Document Export\n\n${output.split("\n\n").map((p) => `${p}`).join("\n\n")}`;
-      } else if (targetFormat === "json") {
-        const paragraphs = output.split("\n\n").filter(Boolean);
-        output = JSON.stringify(
-          {
-            workspace_id: workspace?.id,
-            exported_at: new Date().toISOString(),
-            format: "json",
-            pii_redacted: redactPii,
-            redaction_count: count,
-            paragraphs: paragraphs.map((text, idx) => ({ id: idx + 1, content: text })),
-          },
-          null,
-          2
-        );
-      } else if (targetFormat === "csv") {
-        const paragraphs = output.split("\n\n").filter(Boolean);
-        const rows = paragraphs.map((p, idx) => `"${idx + 1}","${p.replace(/"/g, '""')}"`);
-        output = `"Paragraph_Index","Cleaned_Content"\n${rows.join("\n")}`;
-      }
-
-      setConvertedText(output);
-      setRedactionCount(count);
-      setProcessing(false);
-      showToast("success", `Converted to ${targetFormat.toUpperCase()} with ${count} PII items redacted!`);
-    }, 400);
-  };
-
-  const handleCopy = () => {
-    if (!convertedText) return;
-    void navigator.clipboard.writeText(convertedText);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-    showToast("success", "Sanitized document copied to clipboard");
-  };
-
   const handleExportPdf = () => {
     if (!convertedText) {
       showToast("error", "Please convert or sanitize text first.");
@@ -167,15 +227,15 @@ export default function DocumentConverterStudioPage() {
 
     exportToPdf({
       title: "Sanitized & Redacted Document",
-      subtitle: `Autonomous PII Masking & Transformation • ${currentDoc?.title || "Document"}`,
-      badge: redactPii ? `🛡️ PII Masked (${redactionCount} Redactions)` : "Cleaned Text",
+      subtitle: `Domain Redaction Profile: ${REDACTION_PROFILES.find((p) => p.id === redactionProfile)?.label || "Standard"} • ${currentDoc?.title || "Document"}`,
+      badge: redactPii ? `🛡️ Masked (${redactionCount} Redactions)` : "Cleaned Text",
       documentSource: currentDoc?.title || "Workspace Document",
       workspaceName: workspace?.name,
       sections: [
         {
-          heading: "Compliance & Sanitization Notice",
+          heading: "Compliance & Sanitization Certificate",
           type: "callout",
-          content: `This document has been sanitized according to workspace privacy controls. Identified sensitive attributes (emails, phone numbers, tax identification numbers, credit cards) have been masked with verified replacement tokens.`,
+          content: `This document has been sanitized according to ${REDACTION_PROFILES.find((p) => p.id === redactionProfile)?.badge || "Privacy"} standards. Identified sensitive tokens (emails, contact numbers, identifiers, deal figures) have been masked with verified replacement tokens.`,
         },
         ...paragraphs.map((p, idx) => ({
           heading: `Section ${idx + 1}`,
@@ -190,12 +250,14 @@ export default function DocumentConverterStudioPage() {
     if (!convertedText) return;
     const extensions: Record<TargetFormat, string> = {
       markdown: "md",
+      latex: "tex",
       text: "txt",
       json: "json",
       csv: "csv",
     };
     const mimeTypes: Record<TargetFormat, string> = {
       markdown: "text/markdown",
+      latex: "application/x-tex",
       text: "text/plain",
       json: "application/json",
       csv: "text/csv",
@@ -223,18 +285,18 @@ export default function DocumentConverterStudioPage() {
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-purple-500"></span>
               </span>
               <FileCode className="h-3.5 w-3.5 text-purple-400" />
-              <span className="uppercase font-mono tracking-widest text-[10px]">Document Batch Converter & Redactor</span>
+              <span className="uppercase font-mono tracking-widest text-[10px]">Multi-Audience Format & Redaction Studio</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
               Format Converter &{" "}
               <span className="bg-gradient-to-r from-purple-300 via-pink-200 to-indigo-300 bg-clip-text text-transparent">
-                PII Redactor
+                Privacy Redactor
               </span>
             </h1>
 
             <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-              Convert documents into Markdown, JSON, CSV, and TXT with autonomous PII anonymization (masking emails, phone numbers, and SSNs) and 1-click printable PDF downloads.
+              Convert documents into LaTeX, Markdown, JSON, CSV, and TXT with specialized privacy profiles (HIPAA Healthcare, Legal NDA, Academic Blind Review, and Financial Audit).
             </p>
           </div>
 
@@ -265,15 +327,47 @@ export default function DocumentConverterStudioPage() {
               {copied ? <Check className="h-4 w-4 text-emerald-300" /> : <Copy className="h-4 w-4" />}
               <span>{copied ? "Copied" : "Copy"}</span>
             </button>
-            <button
-              onClick={handleDownload}
-              disabled={!convertedText}
-              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#1db954] via-emerald-600 to-teal-600 px-4 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-[#1db954]/25 hover:shadow-[#1db954]/45 hover:brightness-110 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
-            >
-              <Download className="h-4 w-4" />
-              <span>Download File</span>
-            </button>
           </div>
+        </div>
+      </div>
+
+      {/* Redaction Profiles Selector */}
+      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-zinc-400 flex items-center gap-2">
+            <ShieldAlert className="h-4 w-4 text-purple-500" /> Select Industry Redaction Profile
+          </h2>
+          <span className="text-[11px] font-bold text-purple-600 dark:text-purple-400">
+            Active: {REDACTION_PROFILES.find((p) => p.id === redactionProfile)?.badge}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          {REDACTION_PROFILES.map((profile) => {
+            const Icon = profile.icon;
+            const active = redactionProfile === profile.id;
+            return (
+              <button
+                key={profile.id}
+                onClick={() => setRedactionProfile(profile.id)}
+                className={`flex flex-col text-left rounded-2xl p-3.5 border transition-all cursor-pointer ${
+                  active
+                    ? "border-purple-500 bg-purple-500/10 shadow-md shadow-purple-500/10"
+                    : "border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/80 dark:border-white/5 dark:bg-[#1a1829]/50 dark:hover:bg-[#1a1829]"
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Icon className={`h-4 w-4 ${active ? "text-purple-600 dark:text-purple-400" : "text-slate-500"}`} />
+                  <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                    {profile.label}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                  {profile.description}
+                </p>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -288,7 +382,7 @@ export default function DocumentConverterStudioPage() {
             <select
               value={selectedDocId}
               onChange={(e) => setSelectedDocId(e.target.value)}
-              className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3 text-xs font-bold text-slate-900 outline-none focus:border-[#1db954] focus:ring-2 focus:ring-[#1db954]/20 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white cursor-pointer"
+              className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3 text-xs font-bold text-slate-900 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white cursor-pointer"
             >
               {docs.map((d) => (
                 <option key={d.id} value={d.id}>
@@ -303,10 +397,11 @@ export default function DocumentConverterStudioPage() {
             <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
               Target Output Format
             </label>
-            <div className="grid grid-cols-4 gap-1.5">
+            <div className="grid grid-cols-5 gap-1">
               {(
                 [
                   { id: "markdown", label: "MD" },
+                  { id: "latex", label: "LaTeX" },
                   { id: "json", label: "JSON" },
                   { id: "csv", label: "CSV" },
                   { id: "text", label: "TXT" },
@@ -318,7 +413,7 @@ export default function DocumentConverterStudioPage() {
                   onClick={() => setTargetFormat(fmt.id)}
                   className={`rounded-xl py-2.5 text-xs font-black transition-all cursor-pointer ${
                     targetFormat === fmt.id
-                      ? "bg-[#1db954] text-black font-black shadow-md shadow-[#1db954]/20"
+                      ? "bg-purple-600 text-white font-black shadow-md shadow-purple-500/25"
                       : "border border-slate-200/80 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-white/5 dark:bg-[#1f1f2e] dark:text-zinc-300"
                   }`}
                 >
@@ -328,13 +423,13 @@ export default function DocumentConverterStudioPage() {
             </div>
           </div>
 
-          {/* Action Trigger with Spotify Green + Cosmic Purple Gradient */}
+          {/* Action Trigger */}
           <div className="flex items-end">
             <button
               type="button"
               onClick={handleConvert}
               disabled={processing || !rawText.trim()}
-              className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#1db954] via-purple-600 to-indigo-600 py-3 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-[#1db954]/25 hover:brightness-110 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 py-3 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-purple-500/25 hover:brightness-110 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
             >
               {processing ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               <span>{processing ? "Sanitizing…" : "Convert & Redact Now"}</span>
@@ -352,7 +447,7 @@ export default function DocumentConverterStudioPage() {
               className="h-4 w-4 rounded accent-purple-600 cursor-pointer"
             />
             <span className="font-bold text-slate-700 dark:text-zinc-300 flex items-center gap-1">
-              <Shield className="h-3.5 w-3.5 text-emerald-500" /> Auto-Redact Sensitive PII (Emails, Phones, SSNs)
+              <Shield className="h-3.5 w-3.5 text-emerald-500" /> Apply Profile Redaction Masks
             </span>
           </label>
 

@@ -144,9 +144,11 @@ export default function PricingPage() {
                 "3,000 AI Questions per month",
                 "Up to 15 Workspaces",
                 "Max 50 MB file size",
+                "Study Studio & Timed Exam Simulator",
+                "2-Host Audio Podcast & Spoken Briefs",
+                "Format & Redact (HIPAA, Legal NDA, Blind Review)",
+                "Contracts Tracker & Redline Diff",
                 "Priority Gemini 2.5 Flash Speed",
-                "Speech Audio Voice Answers",
-                "Document Conflict & Freshness Alert",
                 "Premium ⭐ Profile Badge",
               ].map((feat, i) => (
                 <div key={i} className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-zinc-200 font-medium">
@@ -247,6 +249,36 @@ export default function PricingPage() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Student & Educator Academic Discount Banner */}
+      <div className="rounded-3xl border border-purple-500/30 bg-gradient-to-r from-purple-600/10 via-indigo-600/10 to-teal-500/10 p-6 sm:p-7 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-purple-600 text-white shadow-md shadow-purple-500/25">
+            <span className="text-xl">🎓</span>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-black text-slate-900 dark:text-white">
+                Student & Educator Discount
+              </h3>
+              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-black text-emerald-600 dark:text-emerald-300">
+                50% OFF
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5 leading-relaxed">
+              Verify your university email (<code className="text-purple-600 dark:text-purple-400 font-bold">.edu</code> / <code className="text-purple-600 dark:text-purple-400 font-bold">.ac.uk</code>) in Account Settings to unlock half-price access on all Professional plans.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setCheckoutTarget("premium")}
+          className="shrink-0 rounded-2xl bg-slate-900 px-5 py-2.5 text-xs font-bold text-white transition-all hover:bg-slate-800 dark:bg-white dark:text-black dark:hover:bg-slate-100 cursor-pointer"
+        >
+          Claim 50% Student Discount
+        </button>
       </div>
 
       {/* FAQ Section */}

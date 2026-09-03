@@ -153,6 +153,34 @@ export default function DiscoverPage() {
         </button>
       </form>
 
+      {/* Category Filter Chips */}
+      <div className="mb-4 flex flex-wrap gap-1.5">
+        {[
+          { label: "All Hubs", query: "" },
+          { label: "🎓 Academic & Syllabi", query: "study" },
+          { label: "⚖️ Legal & NDA", query: "legal" },
+          { label: "🏢 Corporate SOPs", query: "sop" },
+          { label: "🩺 Clinical Rounds", query: "medical" },
+          { label: "💰 Finance & Startups", query: "finance" },
+        ].map((cat) => (
+          <button
+            key={cat.label}
+            type="button"
+            onClick={() => {
+              setQ(cat.query);
+              void load(cat.query || undefined, true);
+            }}
+            className={`rounded-full px-3 py-1 text-xs font-bold transition-all cursor-pointer ${
+              q === cat.query
+                ? "bg-purple-600 text-white shadow-xs"
+                : "border border-slate-200/80 bg-white/80 text-slate-600 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10"
+            }`}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
+
       {msg && (
         <p className="mb-3 rounded-xl border border-amber-200 bg-amber-50/80 px-3.5 py-2 text-sm font-medium text-amber-800 dark:border-amber-900/30 dark:bg-amber-950/30 dark:text-amber-200">
           {msg}

@@ -25,6 +25,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useWorkspace } from "@/lib/workspace-context";
+import { useAudienceMode } from "@/lib/audience-mode-context";
 import { showToast } from "@/components/Toast";
 
 type IntegrationTab =
@@ -39,6 +40,7 @@ type CodeLang = "curl" | "python" | "node";
 
 export default function IntegrationsPage() {
   const { workspace } = useWorkspace();
+  const { mode, modeConfig } = useAudienceMode();
   const [activeTab, setActiveTab] = useState<IntegrationTab>("gdrive");
   const [codeLang, setCodeLang] = useState<CodeLang>("curl");
 

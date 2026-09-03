@@ -23,9 +23,11 @@ import {
   VolumeX,
   Zap,
   Lightbulb,
+  Wallet,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
+import { useAudienceMode } from "@/lib/audience-mode-context";
 import { showToast } from "@/components/Toast";
 import { exportToPdf, downloadBlob } from "@/lib/pdf-export";
 import type { AudioBriefItem, AudioDialogueTurn, DocumentItem } from "@/lib/types";
@@ -61,7 +63,7 @@ const AUDIO_PERSONAS: AudioPersonaPreset[] = [
   {
     id: "professor_lecture",
     label: "Professor Explainer & Analogies",
-    description: "Educational and structured walkthrough breaking down core definitions and principles.",
+    description: "Educational and structured walkthrough breaking down core definitions, theories, and principles.",
     icon: BookOpen,
     speakerFormat: "lecture",
     promptInstruction:
@@ -85,6 +87,15 @@ const AUDIO_PERSONAS: AudioPersonaPreset[] = [
     promptInstruction:
       "Format as a legal counsel risk assessment. Focus on clause interpretation, breach vulnerabilities, compliance standards, and risk mitigation.",
   },
+  {
+    id: "earnings_call",
+    label: "Finance & Earnings Analysis",
+    description: "Revenue metrics, cash burn, quarterly margin variance, and financial performance.",
+    icon: Wallet,
+    speakerFormat: "finance",
+    promptInstruction:
+      "Format as a sharp Wall Street financial earnings breakdown. Detail top-line revenue, net margins, liquidity, risk disclosures, and forward guidance.",
+  },
 ];
 
 interface AudioBriefJsonResponse {
@@ -98,12 +109,23 @@ interface AudioBriefJsonResponse {
 
 export default function AudioBriefPlayerPage() {
   const { workspace } = useWorkspace();
+  const { mode } = useAudienceMode();
 
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [selectedDocId, setSelectedDocId] = useState<string>("");
   const [persona, setPersona] = useState<string>("two_host_podcast");
   const [generating, setGenerating] = useState(false);
   const [currentBrief, setCurrentBrief] = useState<AudioBriefItem | null>(null);
+
+  // Auto-sync persona with active operational mode
+  useEffect(() => {
+    if (mode === "academic") setPersona("professor_lecture");
+    else if (mode === "legal") setPersona("legal_compliance");
+    else if (mode === "clinical") setPersona("clinical_rounds");
+    else if (mode === "finance") setPersona("earnings_call");
+    else if (mode === "office") setPersona("executive_brief");
+    else setPersona("two_host_podcast");
+  }, [mode]);
 
   // Playback state
   const [isPlaying, setIsPlaying] = useState(false);
@@ -594,7 +616,7 @@ You MUST return ONLY a valid JSON object strictly matching this schema with no m
           <label className="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
             <Mic className="h-3.5 w-3.5 text-purple-500" /> 2. Choose Broadcast Format & Audience Persona
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
             {AUDIO_PERSONAS.map((p) => {
               const Icon = p.icon;
               const isSelected = persona === p.id;
