@@ -125,6 +125,8 @@ async def lifespan(app: FastAPI):
     yield
 
 
+from app.core.firewall import EnterpriseFirewallMiddleware
+
 app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG, lifespan=lifespan)
 
 allow_all = "*" in settings.CORS_ORIGINS
@@ -134,6 +136,9 @@ if allow_all:
     _origins = ["*"]
 else:
     _origins = list(settings.CORS_ORIGINS)
+
+# Enterprise Application Firewall (WAF) Layer - deep payload inspection & rate limiting
+app.add_middleware(EnterpriseFirewallMiddleware)
 
 app.add_middleware(
     CORSMiddleware,

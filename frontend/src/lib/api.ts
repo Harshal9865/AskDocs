@@ -380,7 +380,8 @@ export const api = {
   searchUsers: (q: string) =>
     request<Member[]>(`/friends/search?q=${encodeURIComponent(q)}`),
 
-  // ---- profile / settings ----
+  // ---- profile / settings / security ----
+  getSecurityStatus: () => request<Record<string, unknown>>("/security/status"),
   getUserProfile: (userId: string) => request<User>(`/auth/users/${userId}`),
   updateMe: (
     payload:

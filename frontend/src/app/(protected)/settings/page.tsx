@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, Check, ImagePlus, RotateCcw, Pencil, Trash2, Sparkles, CreditCard, Bell, Sliders } from "lucide-react";
+import { Camera, Check, ImagePlus, RotateCcw, Pencil, Trash2, Sparkles, CreditCard, Bell, Sliders, ShieldCheck, Lock, CheckCircle2, Server } from "lucide-react";
 import EditProfileModal from "@/components/EditProfileModal";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -366,6 +366,45 @@ export default function SettingsPage() {
             {pwBusy ? "Updating…" : "Change Password"}
           </button>
         </form>
+
+        {/* Enterprise Application Firewall (WAF) & Data Privacy Shield */}
+        <div className="mt-6 border-t border-slate-100 dark:border-white/5 pt-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
+              <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <span>Enterprise Firewall & Data Isolation</span>
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Active Protection</span>
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div className="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3 dark:border-white/5 dark:bg-white/[0.02]">
+              <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5 mb-1">
+                <Lock className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" /> Multi-Tenant Boundary
+              </span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-relaxed">
+                Row-level database isolation guarantees proprietary workspace documents and vectors are completely isolated.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3 dark:border-white/5 dark:bg-white/[0.02]">
+              <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5 mb-1">
+                <Server className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" /> Deep WAF Inspection
+              </span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-relaxed">
+                Real-time scanning blocks SQL injection, XSS payloads, directory traversal, and brute-force burst attacks.
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-purple-200/60 bg-purple-50/40 p-3 text-[11px] font-medium text-purple-900 dark:border-purple-500/20 dark:bg-purple-950/20 dark:text-purple-200 flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0" />
+            <span>Zero Model Training: Your private corporate documents are never used to train or fine-tune public AI models.</span>
+          </div>
+        </div>
       </Section>
 
 

@@ -1,8 +1,9 @@
 from fastapi import APIRouter
 
-from app.api.v1 import activity, auth, billing, canvas, chat, contracts, digests, documents, friends, health, invitations, memory, presence, teamchat, trash, workspaces
+from app.api.v1 import activity, auth, billing, canvas, chat, contracts, digests, documents, friends, health, invitations, memory, presence, security, teamchat, trash, workspaces
 
 api_router = APIRouter()
+api_router.include_router(security.router)
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 api_router.include_router(billing.router, prefix="/billing", tags=["billing"])
 api_router.include_router(workspaces.router, prefix="/workspaces", tags=["workspaces"])
