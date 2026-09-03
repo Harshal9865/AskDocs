@@ -112,7 +112,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
               </>
             )}
           </span>
-          <span className="hidden sm:inline dark:text-white text-[15px] font-bold tracking-tight text-slate-900">
+          <span className="hidden md:inline dark:text-white text-[15px] font-bold tracking-tight text-slate-900">
             AskDocs
           </span>
         </button>
@@ -271,14 +271,14 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         )}
       </nav>
 
-      {/* Search — hidden on phones, icon navigates to /search to save space */}
+      {/* Search — hidden on phones & compact tablets, icon navigates to /search to save space */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
           if (q.trim().length >= 2)
             router.push(`/search?q=${encodeURIComponent(q.trim())}`);
         }}
-        className="relative ml-auto mr-1 hidden sm:flex sm:mr-2 sm:w-56 md:w-64 lg:w-72 xl:w-80"
+        className="relative ml-auto mr-1 hidden md:flex md:mr-2 md:w-48 lg:w-64 xl:w-72"
       >
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         <input
@@ -295,7 +295,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           onClick={() => router.push("/search")}
           aria-label="Search"
           title="Search"
-          className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 sm:hidden transition-colors"
+          className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 md:hidden transition-colors"
         >
           <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         </button>
@@ -315,7 +315,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           type="button"
           aria-label="Switch Operational Mode"
           title={`Active Operational Mode: ${modeConfig.name}. Click to change mode.`}
-          className={`flex items-center justify-center gap-1.5 rounded-full px-2 sm:px-3 py-1 text-xs font-black tracking-wider transition-all cursor-pointer border shadow-sm ${
+          className={`flex items-center justify-center gap-1.5 rounded-full px-2 md:px-3 py-1 text-xs font-black tracking-wider transition-all cursor-pointer border shadow-sm ${
             mode === "office"
               ? "border-[#d97706]/70 bg-[#d97706]/15 text-[#fbbf24] shadow-amber-500/10 hover:bg-[#d97706]/25 hover:border-[#fbbf24]"
               : mode === "academic"
@@ -332,32 +332,32 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           {mode === "office" ? (
             <>
               <ShieldCheck className="h-3.5 w-3.5 text-[#fbbf24] animate-pulse" />
-              <span className="hidden sm:inline font-mono uppercase text-[11px] font-bold">ENTERPRISE NDA</span>
+              <span className="hidden md:inline font-mono uppercase text-[11px] font-bold">ENTERPRISE NDA</span>
             </>
           ) : mode === "academic" ? (
             <>
               <GraduationCap className="h-3.5 w-3.5 text-purple-400" />
-              <span className="hidden sm:inline font-mono uppercase text-[11px] font-bold">STUDY MODE</span>
+              <span className="hidden md:inline font-mono uppercase text-[11px] font-bold">STUDY MODE</span>
             </>
           ) : mode === "legal" ? (
             <>
               <ShieldCheck className="h-3.5 w-3.5 text-rose-400" />
-              <span className="hidden sm:inline font-mono uppercase text-[11px] font-bold">LEGAL VAULT</span>
+              <span className="hidden md:inline font-mono uppercase text-[11px] font-bold">LEGAL VAULT</span>
             </>
           ) : mode === "finance" ? (
             <>
               <span className="text-[11px]">💰</span>
-              <span className="hidden sm:inline font-mono uppercase text-[11px] font-bold">FINANCE DESK</span>
+              <span className="hidden md:inline font-mono uppercase text-[11px] font-bold">FINANCE DESK</span>
             </>
           ) : mode === "clinical" ? (
             <>
               <span className="text-[11px]">🩺</span>
-              <span className="hidden sm:inline font-mono uppercase text-[11px] font-bold">CLINICAL LAB</span>
+              <span className="hidden md:inline font-mono uppercase text-[11px] font-bold">CLINICAL LAB</span>
             </>
           ) : (
             <>
               <span className="text-[11px]">💼</span>
-              <span className="hidden sm:inline font-mono uppercase text-[11px] font-bold">SOLO STUDIO</span>
+              <span className="hidden md:inline font-mono uppercase text-[11px] font-bold">SOLO STUDIO</span>
             </>
           )}
         </button>
