@@ -183,10 +183,22 @@ export default function ChatPage() {
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
+  const [workspaceDocs, setWorkspaceDocs] = useState<{ id: string; title: string; file_type?: string }[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const threadEnd = useRef<HTMLDivElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
   const observerTarget = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!workspace?.id) { setWorkspaceDocs([]); return; }
+    let cancelled = false;
+    api.listDocuments(workspace.id)
+      .then((docs) => {
+        if (!cancelled && Array.isArray(docs)) setWorkspaceDocs(docs);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [workspace?.id]);
 
   useEffect(() => {
     if (!workspace || !user) { setMyRole(null); return; }
@@ -1000,6 +1012,12 @@ export default function ChatPage() {
             <div className="truncate text-sm font-semibold text-slate-900 dark:text-white">{activeConv ? activeConv.title : "AI Assistant"}</div>
             <div className="truncate text-[11px] text-[#1DB954]">AI · answers from your documents</div>
           </div>
+          {workspaceDocs.length > 0 && (
+            <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-[11px] font-bold text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300 shrink-0">
+              <BookOpen className="h-3.5 w-3.5 text-emerald-500" />
+              <span>{workspaceDocs.length} {workspaceDocs.length === 1 ? "Doc" : "Docs"} In Memory</span>
+            </div>
+          )}
         </div>
 
         {/* Messages scroll area */}
@@ -1026,8 +1044,37 @@ export default function ChatPage() {
                 Ask questions, synthesize findings, or extract obligations across your uploaded documents.
               </p>
 
+              {/* Uploaded Documents Quick Chips */}
+              {workspaceDocs.length > 0 && (
+                <div className="mt-4 max-w-lg w-full text-left">
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 flex items-center gap-1.5 mb-2">
+                    <BookOpen className="h-3 w-3 text-purple-500" />
+                    <span>Uploaded Workspace Documents ({workspaceDocs.length})</span>
+                  </span>
+                  <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
+                    {workspaceDocs.slice(0, 6).map((doc) => (
+                      <button
+                        key={doc.id}
+                        type="button"
+                        onClick={() => void sendWithText(`Please summarize and extract the key takeaways from "${doc.title}".`, [])}
+                        className="btn-pop inline-flex items-center gap-1.5 rounded-xl border border-purple-200/80 bg-purple-50/70 px-2.5 py-1 text-xs font-medium text-purple-800 hover:bg-purple-100 dark:border-purple-500/20 dark:bg-purple-950/40 dark:text-purple-300 transition-all cursor-pointer truncate max-w-[240px]"
+                        title={`Ask about ${doc.title}`}
+                      >
+                        <FileText className="h-3 w-3 shrink-0 text-purple-600 dark:text-purple-400" />
+                        <span className="truncate">{doc.title}</span>
+                      </button>
+                    ))}
+                    {workspaceDocs.length > 6 && (
+                      <span className="inline-flex items-center text-[10px] font-bold text-slate-400 self-center pl-1">
+                        +{workspaceDocs.length - 6} more
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Quick Prompt Suggestions */}
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-lg w-full text-left">
+              <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-lg w-full text-left">
                 {[
                   {
                     title: "Summarize Documents",
@@ -1054,7 +1101,7 @@ export default function ChatPage() {
                     key={idx}
                     type="button"
                     onClick={() => void sendWithText(item.query, [])}
-                    className="group flex flex-col rounded-2xl border border-slate-200/80 bg-white/70 p-3.5 shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-300 hover:bg-white hover:shadow-md dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-purple-500/40 dark:hover:bg-white/[0.07]"
+                    className="btn-pop group flex flex-col rounded-2xl border border-slate-200/80 bg-white/70 p-3.5 shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-300 hover:bg-white hover:shadow-md dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-purple-500/40 dark:hover:bg-white/[0.07] cursor-pointer"
                   >
                     <span className="text-xs font-bold text-slate-800 dark:text-zinc-200 group-hover:text-purple-600 dark:group-hover:text-purple-400 flex items-center gap-1.5">
                       <Sparkles className="h-3.5 w-3.5 text-purple-500 shrink-0" />
