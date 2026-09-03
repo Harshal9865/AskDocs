@@ -21,6 +21,7 @@ import {
   Sparkles,
   Trash2,
   X,
+  Zap,
   Copy,
   Check,
 } from "lucide-react";
