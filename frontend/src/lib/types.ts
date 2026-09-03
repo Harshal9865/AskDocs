@@ -503,15 +503,22 @@ export interface StudyGuideDeck {
   created_at: string;
 }
 
+export interface AudioDialogueTurn {
+  speaker: string;
+  text: string;
+}
+
 export interface AudioBriefItem {
   id: string;
   document_id?: string;
   title: string;
-  speaker_format: "solo_brief" | "dialogue_podcast";
+  speaker_format: "solo_brief" | "dialogue_podcast" | "executive" | "clinical" | "lecture" | "legal" | string;
   script_content: string;
+  dialogue_turns?: AudioDialogueTurn[];
   duration_estimate_seconds: number;
   chapter_timestamps: { title: string; timestamp: string }[];
   key_takeaways: string[];
   created_at: string;
 }
+
 
