@@ -104,8 +104,9 @@ export default function PricingModal({
 
                 <div className="space-y-2.5 pt-4 border-t border-slate-200/60 dark:border-white/10">
                   {[
+                    "50 AI Reasoning Queries / month",
+                    "Smart Token Caching & Context Compressor",
                     "100 Documents upload limit",
-                    "200 AI Questions per month",
                     "Up to 3 Workspaces",
                     "Max 15 MB file size",
                     "Standard Chunk RAG Search",
@@ -165,14 +166,14 @@ export default function PricingModal({
 
                 <div className="space-y-2.5 pt-4 border-t border-slate-200/60 dark:border-white/10">
                   {[
+                    "1,500 Fast AI Reasoning Queries / month",
+                    "Context Deduplication (Saves ~40% tokens)",
                     "1,000 Documents upload limit",
-                    "3,000 AI Questions per month",
                     "Up to 15 Workspaces",
                     "Max 50 MB file size",
                     "Priority Gemini 2.5 Flash Speed",
                     "Speech Audio Voice Answers",
                     "Document Conflict & Freshness Alert",
-                    "Premium ⭐ Profile Badge",
                   ].map((feat, i) => (
                     <div key={i} className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-zinc-200 font-medium">
                       <Check className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400 shrink-0" />
@@ -238,14 +239,14 @@ export default function PricingModal({
 
                 <div className="space-y-2.5 pt-4 border-t border-slate-200/60 dark:border-white/10">
                   {[
+                    "10,000 Deep Synthesis & Multi-Doc Queries / mo",
+                    "Dedicated Token Bucket & High-Yield Cache Shield",
                     "UNLIMITED Documents & Workspaces",
-                    "UNLIMITED AI Questions / Month",
                     "Max 200 MB file upload size",
                     "Gemini 2.5 Pro Ultra Reasoning Mode",
                     "Multi-Workspace Deep Knowledge RAG",
                     "Executive PDF Dossier Exports",
                     "Golden Radiant Avatar Ring & Badge 👑",
-                    "24/7 VIP Dedicated Queue",
                   ].map((feat, i) => (
                     <div key={i} className="flex items-center gap-2.5 text-xs text-slate-800 dark:text-zinc-100 font-semibold">
                       <Zap className="h-3.5 w-3.5 text-amber-500 shrink-0" />
