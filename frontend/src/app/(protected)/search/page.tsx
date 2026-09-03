@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
-import { useAudienceMode } from "@/lib/audience-mode-context";
 import {
   Search,
   FileText,
@@ -18,11 +17,6 @@ import {
   Copy,
   Check,
   ArrowRight,
-  GraduationCap,
-  Scale,
-  Stethoscope,
-  Wallet,
-  Building2,
 } from "lucide-react";
 
 interface Results {
@@ -52,7 +46,6 @@ function SearchInner() {
   const params = useSearchParams();
   const router = useRouter();
   const { workspace } = useWorkspace();
-  const { mode, modeConfig } = useAudienceMode();
   const initialQ = params.get("q") ?? "";
   const [q, setQ] = useState(initialQ);
   const [results, setResults] = useState<Results | null>(null);

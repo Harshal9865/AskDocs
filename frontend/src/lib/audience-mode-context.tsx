@@ -197,6 +197,7 @@ interface AudienceModeContextState {
   mode: AudienceMode;
   setMode: (mode: AudienceMode) => void;
   config: AudienceModeConfig;
+  modeConfig: AudienceModeConfig;
   allModes: AudienceModeConfig[];
 }
 
@@ -204,6 +205,7 @@ const AudienceModeContext = createContext<AudienceModeContextState>({
   mode: "academic",
   setMode: () => {},
   config: AUDIENCE_MODES.academic,
+  modeConfig: AUDIENCE_MODES.academic,
   allModes: Object.values(AUDIENCE_MODES),
 });
 
@@ -247,6 +249,7 @@ export function AudienceModeProvider({ children }: { children: ReactNode }) {
         mode,
         setMode,
         config,
+        modeConfig: config,
         allModes: Object.values(AUDIENCE_MODES),
       }}
     >

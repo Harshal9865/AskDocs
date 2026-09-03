@@ -19,16 +19,11 @@ import {
   ShieldAlert,
   Sparkles,
   Zap,
-  GraduationCap,
-  Scale,
-  Stethoscope,
-  Wallet,
-  Building2,
 } from "lucide-react";
 
 export default function DocumentHealthDashboardPage() {
   const { workspace } = useWorkspace();
-  const { mode, modeConfig } = useAudienceMode();
+  const { modeConfig } = useAudienceMode();
   const [report, setReport] = useState<WorkspaceHealthReport | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [scanning, setScanning] = useState<boolean>(false);

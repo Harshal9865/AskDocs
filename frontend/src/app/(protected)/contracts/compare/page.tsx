@@ -39,7 +39,7 @@ interface ClauseDecisionState {
 
 export default function ContractComparePage() {
   const { workspace } = useWorkspace();
-  const { mode, modeConfig } = useAudienceMode();
+  const { modeConfig } = useAudienceMode();
   const searchParams = useSearchParams();
 
   const [docs, setDocs] = useState<DocumentItem[]>([]);

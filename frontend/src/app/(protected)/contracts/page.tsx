@@ -19,12 +19,10 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
-import { useAudienceMode } from "@/lib/audience-mode-context";
 import type { ContractObligation, DocumentItem } from "@/lib/types";
 
 export default function ContractsPage() {
   const { workspace } = useWorkspace();
-  const { mode, modeConfig } = useAudienceMode();
   const [obligations, setObligations] = useState<ContractObligation[]>([]);
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [loading, setLoading] = useState(true);
