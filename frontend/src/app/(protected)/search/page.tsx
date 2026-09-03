@@ -86,7 +86,7 @@ function SearchInner() {
 
     try {
       const [res, aiRes] = await Promise.all([
-        api.search(workspace.id, query.trim()),
+        api.search(workspace.id, query.trim()).catch(() => ({ documents: [], messages: [], excerpts: [] })),
         api.queryWorkspaceMemory(workspace.id, `Synthesize a concise, direct answer to this workspace search query based on all documents: "${query}"`).catch(() => null),
       ]);
 
@@ -96,7 +96,7 @@ function SearchInner() {
       }
     } catch (err: unknown) {
       if ((err as Error)?.name !== "AbortError") {
-        setError(String(err));
+        setError("Unable to complete search. Showing available results.");
       }
     } finally {
       setBusy(false);

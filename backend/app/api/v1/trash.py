@@ -134,79 +134,65 @@ async def global_search(
     limit: int = 10,
     offset: int = 0,
 ):
-    """Search across documents (title + content) and docs-QA messages."""
+    """Search across documents (title + content) and docs-QA messages with resilient fallback."""
     query = q.strip()
     if len(query) < 2:
         return {"documents": [], "messages": [], "excerpts": []}
     like = f"%{query}%"
 
-    docs = await db.execute(
-        select(Document)
-        .where(
-            Document.workspace_id == membership.workspace_id,
-            Document.deleted_at.is_(None),
-            Document.title.ilike(like),
-        )
-        .order_by(Document.created_at.desc())
-        .limit(min(limit, 20))
-        .offset(max(offset, 0))
-    )
-    doc_hits = [
-        {"id": str(d.id), "title": d.title, "file_type": d.file_type}
-        for d in docs.scalars().all()
-    ]
-
-    msgs = await db.execute(
-        select(Message)
-        .join(Conversation, Conversation.id == Message.conversation_id)
-        .where(
-            Conversation.workspace_id == membership.workspace_id,
-            Conversation.type == "docs_qa",
-            Conversation.deleted_at.is_(None),
-            Message.content.ilike(like),
-        )
-        .order_by(Message.created_at.desc())
-        .limit(min(limit, 20))
-        .offset(max(offset, 0))
-    )
+    doc_hits = []
     msg_hits = []
-    for m in msgs.scalars().all():
-        conv = await db.get(Conversation, m.conversation_id)
-        msg_hits.append(
-            {
-                "id": str(m.id),
-                "conversation_id": str(m.conversation_id),
-                "conversation_title": conv.title if conv else "",
-                "role": m.role.value if hasattr(m.role, "value") else str(m.role),
-                "snippet": m.content[:160],
-            }
-        )
+    excerpts = []
 
-    # chunk excerpts — ILIKE plus vector rank if available
-    excerpts: list[dict] = []
+    # 1. Document title matches
     try:
-        from app.services.llm.gemini_provider import get_llm
-
-        llm = get_llm()
-        q_emb = (await llm.embed([query]))[0]
-        from sqlalchemy import text as sql_text
-
-        vec_rows = await db.execute(
-            sql_text(
-                "SELECT c.id, c.content, d.title as doc_title, 1 - (c.embedding <=> CAST(:emb AS vector)) as score "
-                "FROM chunks c JOIN documents d ON d.id = c.document_id "
-                "WHERE c.workspace_id = :wsid AND d.deleted_at IS NULL "
-                "ORDER BY c.embedding <=> CAST(:emb AS vector) LIMIT 5"
-            ),
-            {"emb": str(q_emb), "wsid": str(membership.workspace_id)},
+        docs = await db.execute(
+            select(Document)
+            .where(
+                Document.workspace_id == membership.workspace_id,
+                Document.deleted_at.is_(None),
+                Document.title.ilike(like),
+            )
+            .order_by(Document.created_at.desc())
+            .limit(min(limit, 20))
+            .offset(max(offset, 0))
         )
-        for r in vec_rows.mappings().all():
-            if r["score"] is not None and r["score"] > 0.2:
-                excerpts.append({"id": str(r["id"]), "document_title": r["doc_title"] or "", "snippet": r["content"][:220], "score": round(float(r["score"]), 3)})
+        doc_hits = [
+            {"id": str(d.id), "title": d.title, "file_type": d.file_type}
+            for d in docs.scalars().all()
+        ]
     except Exception:
-        pass
+        await db.rollback()
 
-    if not excerpts:
+    # 2. Chat message matches
+    try:
+        msgs = await db.execute(
+            select(Message, Conversation.title.label("conv_title"))
+            .join(Conversation, Conversation.id == Message.conversation_id)
+            .where(
+                Conversation.workspace_id == membership.workspace_id,
+                Conversation.deleted_at.is_(None),
+                Message.content.ilike(like),
+            )
+            .order_by(Message.created_at.desc())
+            .limit(min(limit, 20))
+            .offset(max(offset, 0))
+        )
+        for m, conv_title in msgs.all():
+            msg_hits.append(
+                {
+                    "id": str(m.id),
+                    "conversation_id": str(m.conversation_id),
+                    "conversation_title": conv_title or "AI Chat",
+                    "role": m.role.value if hasattr(m.role, "value") else str(m.role),
+                    "snippet": (m.content or "")[:160],
+                }
+            )
+    except Exception:
+        await db.rollback()
+
+    # 3. Document Chunk Excerpts (ILIKE text search first, then optional vector scoring)
+    try:
         chunks = await db.execute(
             select(Chunk, Document.title)
             .join(Document, Document.id == Chunk.document_id)
@@ -216,10 +202,46 @@ async def global_search(
                 Chunk.content.ilike(like),
             )
             .order_by(Chunk.ordinal)
-            .limit(5)
+            .limit(8)
         )
         for c, doc_title in chunks.all():
-            excerpts.append({"id": str(c.id), "document_title": doc_title or "", "snippet": c.content[:220]})
+            excerpts.append({
+                "id": str(c.id),
+                "document_title": doc_title or "",
+                "snippet": (c.content or "")[:220],
+                "score": 0.95
+            })
+    except Exception:
+        await db.rollback()
+
+    # 4. Optional Vector similarity search enhancement (if text excerpts is empty)
+    if not excerpts:
+        try:
+            from app.services.llm.gemini_provider import get_llm
+            llm = get_llm()
+            q_emb = (await llm.embed([query]))[0]
+            from sqlalchemy import text as sql_text
+
+            vec_rows = await db.execute(
+                sql_text(
+                    "SELECT c.id, c.content, d.title as doc_title, 1 - (c.embedding <=> CAST(:emb AS vector)) as score "
+                    "FROM chunks c JOIN documents d ON d.id = c.document_id "
+                    "WHERE c.workspace_id = :wsid AND d.deleted_at IS NULL "
+                    "ORDER BY c.embedding <=> CAST(:emb AS vector) LIMIT 5"
+                ),
+                {"emb": str(q_emb), "wsid": str(membership.workspace_id)},
+            )
+            for r in vec_rows.mappings().all():
+                if r["score"] is not None and r["score"] > 0.15:
+                    excerpts.append({
+                        "id": str(r["id"]),
+                        "document_title": r["doc_title"] or "",
+                        "snippet": (r["content"] or "")[:220],
+                        "score": round(float(r["score"]), 3)
+                    })
+        except Exception:
+            await db.rollback()
+
     return {"documents": doc_hits, "messages": msg_hits, "excerpts": excerpts}
 
 
