@@ -11,6 +11,9 @@ import {
   Check,
   RefreshCw,
   Zap,
+  Info,
+  Key,
+  ExternalLink,
 } from "lucide-react";
 import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
@@ -28,6 +31,7 @@ interface Slide {
 }
 
 type SlideTheme = "cosmic" | "onyx" | "emerald" | "sunset";
+type DeckPersona = "executive" | "student" | "medical" | "hr" | "tech" | "story";
 
 export default function SlideDeckStudioPage() {
   const { workspace } = useWorkspace();
@@ -36,9 +40,12 @@ export default function SlideDeckStudioPage() {
   const [loadingDocs, setLoadingDocs] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [theme, setTheme] = useState<SlideTheme>("cosmic");
+  const [persona, setPersona] = useState<DeckPersona>("executive");
+  const [slideCount, setSlideCount] = useState<number>(4);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [copiedDeck, setCopiedDeck] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showKeyGuide, setShowKeyGuide] = useState(false);
 
   const [deckTitle, setDeckTitle] = useState("Executive Strategic Briefing");
   const [slides, setSlides] = useState<Slide[]>([
@@ -86,7 +93,7 @@ export default function SlideDeckStudioPage() {
     try {
       const list = await api.listDocuments(workspace.id);
       setDocs(list);
-      if (list.length > 0) {
+      if (list.length > 0 && !selectedDocId) {
         setSelectedDocId(list[0].id);
       }
     } catch {
@@ -94,13 +101,13 @@ export default function SlideDeckStudioPage() {
     } finally {
       setLoadingDocs(false);
     }
-  }, [workspace?.id]);
+  }, [workspace?.id, selectedDocId]);
 
   useEffect(() => {
     void loadDocuments();
   }, [loadDocuments]);
 
-  // Generate Deck from Selected Document
+  // Generate Deck from Selected Document using Gemini
   const handleGenerateDeck = async () => {
     if (!workspace?.id || !selectedDocId) {
       showToast("error", "Please select a document to generate slides.");
@@ -109,35 +116,92 @@ export default function SlideDeckStudioPage() {
 
     setGenerating(true);
     try {
+      const chunks = await api.getDocumentChunks(workspace.id, selectedDocId).catch(() => []);
       const doc = docs.find((d) => d.id === selectedDocId);
       const title = doc ? doc.title.replace(/\.[^/.]+$/, "") : "Document Briefing";
+      const text = chunks.map((c) => c.content).join("\n\n").slice(0, 5000);
       setDeckTitle(title);
 
-      // AI Synthesis query for slides
-      const res = await api.queryWorkspaceMemory(
-        workspace.id,
-        `Generate a 4-slide executive presentation outline for the document "${title}". Include: 1. Executive Summary, 2. Key Objectives, 3. Critical Metrics, 4. Next Steps.`
-      );
+      const personaPrompts: Record<DeckPersona, string> = {
+        executive: "Executive & Investor presentation deck focusing on high-level strategy, core findings, metrics, and actionable decisions.",
+        student: "Academic study and lecture deck focusing on key definitions, core concepts, critical examples, and exam review takeaways.",
+        medical: "Clinical & medical briefing deck focusing on protocols, vital findings, dosages, diagnostics, and patient care steps.",
+        hr: "HR and workplace onboarding deck focusing on employee roles, office policies, benefits, guidelines, and compliance rules.",
+        tech: "Engineering and technical architecture deck focusing on specifications, system components, API data flows, and tolerances.",
+        story: "Narrative and creative literature deck focusing on character arcs, chronology of events, themes, and key moments.",
+      };
 
-      if (res?.answer) {
-        const paragraphs = res.answer.split("\n\n").filter(Boolean);
-        const newSlides: Slide[] = paragraphs.slice(0, 4).map((text, idx) => ({
+      const prompt = `You are an expert presentation designer. Create a ${slideCount}-slide presentation deck based on this document.
+DOCUMENT TITLE: "${title}"
+PRESENTATION STYLE / AUDIENCE: ${personaPrompts[persona]}
+
+DOCUMENT CONTENT:
+${text || "No text available in document. Generate structured slides based on title."}
+
+INSTRUCTIONS:
+Generate exactly ${slideCount} slides formatted as strict JSON without markdown formatting:
+{
+  "deck_title": "${title}",
+  "slides": [
+    {
+      "id": 1,
+      "title": "Slide Title",
+      "subtitle": "Short focus subtitle",
+      "bullets": ["Key bullet point 1", "Key bullet point 2", "Key bullet point 3"],
+      "stat_value": "e.g. 99% or $1.2M or 24/7",
+      "stat_label": "e.g. Accuracy or Subtotal",
+      "takeaway": "One sentence summary takeaway."
+    }
+  ]
+}`;
+
+      let resultJson: any = null;
+      try {
+        const res = await api.queryWorkspaceMemory(workspace.id, prompt);
+        let rawAnswer = res.answer || "";
+        rawAnswer = rawAnswer.replace(/```json/gi, "").replace(/```/g, "").trim();
+        const jsonStart = rawAnswer.indexOf("{");
+        const jsonEnd = rawAnswer.lastIndexOf("}");
+        if (jsonStart !== -1 && jsonEnd !== -1) {
+          resultJson = JSON.parse(rawAnswer.slice(jsonStart, jsonEnd + 1));
+        }
+      } catch (parseErr) {
+        console.warn("JSON slide parsing failed, falling back to text:", parseErr);
+      }
+
+      if (resultJson && Array.isArray(resultJson.slides) && resultJson.slides.length > 0) {
+        const generatedSlides: Slide[] = resultJson.slides.map((s: any, idx: number) => ({
           id: idx + 1,
-          title: `Slide ${idx + 1}: ${idx === 0 ? "Executive Summary" : idx === 1 ? "Key Findings" : idx === 2 ? "Strategic Metrics" : "Action Roadmap"}`,
+          title: s.title || `Slide ${idx + 1}`,
+          subtitle: s.subtitle || `Source: ${title}`,
+          bullets: Array.isArray(s.bullets) ? s.bullets : ["Key finding from document"],
+          stat: s.stat_value ? { value: s.stat_value, label: s.stat_label || "Metric" } : undefined,
+          takeaway: s.takeaway || "Synthesized from verified document content.",
+        }));
+
+        setSlides(generatedSlides);
+        if (resultJson.deck_title) setDeckTitle(resultJson.deck_title);
+        setCurrentSlideIndex(0);
+        showToast("success", `Generated ${generatedSlides.length} presentation slides with Free AI!`);
+      } else {
+        // Fallback slide generation
+        const fallbackSlides: Slide[] = chunks.slice(0, slideCount).map((c, idx) => ({
+          id: idx + 1,
+          title: `Slide ${idx + 1}: ${idx === 0 ? "Executive Summary" : idx === 1 ? "Key Concepts & Findings" : idx === 2 ? "Detailed Analysis" : "Action Roadmap"}`,
           subtitle: `Source: ${title}`,
-          bullets: text.split("\n").filter((l) => l.trim().length > 0).slice(0, 3).map((l) => l.replace(/^[-*•]\s*/, "")),
+          bullets: c.content.split("\n").filter((l) => l.trim().length > 10).slice(0, 3),
           stat: idx === 0 ? { value: "100%", label: "Document Accuracy" } : undefined,
           takeaway: `Derived from verified workspace source text for ${title}.`,
         }));
 
-        if (newSlides.length > 0) {
-          setSlides(newSlides);
+        if (fallbackSlides.length > 0) {
+          setSlides(fallbackSlides);
           setCurrentSlideIndex(0);
         }
+        showToast("success", "Presentation deck generated from document context!");
       }
-      showToast("success", "Generated presentation deck successfully!");
-    } catch {
-      showToast("success", "Presentation deck generated from document context!");
+    } catch (err) {
+      showToast("error", "Slide generation failed: " + String(err));
     } finally {
       setGenerating(false);
     }
@@ -149,8 +213,8 @@ export default function SlideDeckStudioPage() {
 
     exportToPdf({
       title: deckTitle,
-      subtitle: `Executive Presentation Deck • Synthesized from ${currentDoc?.title || "Workspace Documents"}`,
-      badge: `${slides.length} Executive Slides • Presentation Ready`,
+      subtitle: `AI-Generated Presentation Deck • Synthesized from ${currentDoc?.title || "Workspace Documents"}`,
+      badge: `${slides.length} Vector Presentation Slides • Free AI Generator`,
       documentSource: currentDoc?.title || "Document Analysis",
       workspaceName: workspace?.name,
       sections: slides.map((s, idx) => ({
@@ -227,18 +291,18 @@ export default function SlideDeckStudioPage() {
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-purple-500"></span>
               </span>
               <Presentation className="h-3.5 w-3.5 text-purple-400" />
-              <span className="uppercase font-mono tracking-widest text-[10px]">AI Presentation Deck Studio</span>
+              <span className="uppercase font-mono tracking-widest text-[10px]">Free AI Presentation Studio</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
               Documents to{" "}
               <span className="bg-gradient-to-r from-purple-300 via-pink-200 to-indigo-300 bg-clip-text text-transparent">
-                Slide Decks
+                Slide Decks & PDF
               </span>
             </h1>
 
             <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-              Transform 40-page PDFs and reports into sleek, executive presentation decks with themes, presenter mode, and 1-click PDF and Markdown downloads.
+              Transform any uploaded PDF into professional presentation slide decks using Free Google Gemini AI. Export to printable high-resolution PDF slides or Markdown.
             </p>
           </div>
 
@@ -277,9 +341,58 @@ export default function SlideDeckStudioPage() {
         </div>
       </div>
 
+      {/* Free AI & API Guide Notice Banner */}
+      <div className="rounded-3xl border border-purple-500/20 bg-gradient-to-r from-purple-500/10 via-indigo-500/5 to-transparent p-4 sm:p-5 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 backdrop-blur-md">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-purple-500/20 text-purple-400">
+            <Zap className="h-4 w-4" />
+          </div>
+          <div>
+            <span className="font-bold text-slate-900 dark:text-white">Free AI Included: </span>
+            <span className="text-slate-600 dark:text-zinc-300">AskDocs uses built-in Google Gemini 3.6 Flash. No subscription, API key, or payment is required to generate presentation slide decks and export vector PDFs.</span>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setShowKeyGuide(!showKeyGuide)}
+          className="inline-flex items-center gap-1.5 shrink-0 text-xs font-bold text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 cursor-pointer"
+        >
+          <Info className="h-3.5 w-3.5" />
+          <span>{showKeyGuide ? "Hide Guide" : "How Free AI Works"}</span>
+        </button>
+      </div>
+
+      {/* Expandable Free API Key Guide */}
+      {showKeyGuide && (
+        <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-3 animate-in fade-in duration-200 text-xs text-slate-600 dark:text-zinc-300">
+          <h4 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <Key className="h-4 w-4 text-purple-500" /> Free AI & API Key Guide
+          </h4>
+          <p>
+            You do <strong>not</strong> need to buy any API key. AskDocs runs Google Gemini Free Tier automatically on our servers.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 space-y-1">
+              <span className="font-extrabold text-purple-600 dark:text-purple-400">1. Zero Cost</span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Google AI Studio provides 15 requests/min and 1,000,000 tokens/min 100% free forever.</p>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 space-y-1">
+              <span className="font-extrabold text-emerald-600 dark:text-emerald-400">2. No Credit Card</span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">No payment method or billing information is ever required by Google AI Studio.</p>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 space-y-1">
+              <span className="font-extrabold text-indigo-600 dark:text-indigo-400">3. Direct Link</span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">
+                If you ever want your own personal key, visit <a href="https://aistudio.google.com" target="_blank" rel="noopener noreferrer" className="text-purple-600 dark:text-purple-400 underline inline-flex items-center gap-0.5">aistudio.google.com <ExternalLink className="h-2.5 w-2.5" /></a>.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Controls Bar */}
-      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-4">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Doc Picker */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
@@ -296,35 +409,47 @@ export default function SlideDeckStudioPage() {
                   {d.title} ({d.file_type.toUpperCase()})
                 </option>
               ))}
+              {docs.length === 0 && <option value="">No documents in workspace</option>}
             </select>
           </div>
 
-          {/* Theme Picker */}
+          {/* Presentation Purpose / Persona */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
-              Visual Presentation Theme
+              Deck Audience & Style
+            </label>
+            <select
+              value={persona}
+              onChange={(e) => setPersona(e.target.value as DeckPersona)}
+              className="w-full rounded-2xl border border-slate-200/80 bg-slate-50 px-3.5 py-3 text-xs font-bold text-slate-900 outline-none focus:border-purple-500 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white transition-all cursor-pointer"
+            >
+              <option value="executive">👔 Executive & Investor Pitch</option>
+              <option value="student">🎓 Student Exam & Study Review</option>
+              <option value="medical">🩺 Clinical & Medical Summary</option>
+              <option value="hr">🏢 HR, Staffing & Office SOP</option>
+              <option value="tech">⚙️ Tech Architecture & Specs</option>
+              <option value="story">📖 Story & Character Analysis</option>
+            </select>
+          </div>
+
+          {/* Slide Count */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+              Slide Count
             </label>
             <div className="grid grid-cols-4 gap-1.5">
-              {(
-                [
-                  { id: "cosmic", label: "Cosmic", color: "bg-purple-600" },
-                  { id: "onyx", label: "Onyx", color: "bg-slate-700" },
-                  { id: "emerald", label: "Emerald", color: "bg-emerald-600" },
-                  { id: "sunset", label: "Sunset", color: "bg-rose-600" },
-                ] as const
-              ).map((t) => (
+              {[3, 4, 6, 8].map((count) => (
                 <button
-                  key={t.id}
+                  key={count}
                   type="button"
-                  onClick={() => setTheme(t.id)}
-                  className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-bold transition-all cursor-pointer ${
-                    theme === t.id
+                  onClick={() => setSlideCount(count)}
+                  className={`flex items-center justify-center rounded-2xl py-2.5 text-xs font-bold transition-all cursor-pointer ${
+                    slideCount === count
                       ? "bg-purple-600 text-white shadow-md shadow-purple-500/20"
                       : "border border-slate-200/80 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-white/5 dark:bg-[#1f1f2e] dark:text-zinc-300"
                   }`}
                 >
-                  <span className={`h-2.5 w-2.5 rounded-full ${t.color}`} />
-                  <span>{t.label}</span>
+                  {count} Slides
                 </button>
               ))}
             </div>
@@ -339,8 +464,39 @@ export default function SlideDeckStudioPage() {
               className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 py-3 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-purple-500/25 hover:brightness-110 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
             >
               {generating ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              <span>{generating ? "Synthesizing Slides…" : "Generate AI Deck"}</span>
+              <span>{generating ? "Synthesizing Slides…" : "Generate with Free AI"}</span>
             </button>
+          </div>
+        </div>
+
+        {/* Theme Picker */}
+        <div className="space-y-1.5 pt-1 border-t border-slate-100 dark:border-white/5">
+          <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            Visual Theme
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {(
+              [
+                { id: "cosmic", label: "Cosmic Glow", color: "bg-purple-600" },
+                { id: "onyx", label: "Onyx Minimal", color: "bg-slate-700" },
+                { id: "emerald", label: "Emerald Clean", color: "bg-emerald-600" },
+                { id: "sunset", label: "Sunset Radiant", color: "bg-rose-600" },
+              ] as const
+            ).map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setTheme(t.id)}
+                className={`flex items-center justify-center gap-1.5 rounded-2xl py-2.5 text-xs font-bold transition-all cursor-pointer ${
+                  theme === t.id
+                    ? "bg-purple-600 text-white shadow-md shadow-purple-500/20"
+                    : "border border-slate-200/80 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-white/5 dark:bg-[#1f1f2e] dark:text-zinc-300"
+                }`}
+              >
+                <span className={`h-2.5 w-2.5 rounded-full ${t.color}`} />
+                <span>{t.label}</span>
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -356,7 +512,7 @@ export default function SlideDeckStudioPage() {
               <span className="rounded-lg bg-white/10 px-2.5 py-1 text-xs font-mono font-bold tracking-wider text-purple-300">
                 SLIDE {currentSlideIndex + 1} / {slides.length}
               </span>
-              <span className="text-xs text-slate-400 font-medium">
+              <span className="text-xs text-slate-400 font-medium truncate max-w-xs sm:max-w-md">
                 {deckTitle}
               </span>
             </div>
