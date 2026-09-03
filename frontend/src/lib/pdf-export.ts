@@ -360,9 +360,16 @@ export function exportToPdf(options: PdfExportOptions): void {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          border-bottom: 2.5px solid #6366f1;
+          border-bottom: 2px solid #e2e8f0;
           padding-bottom: 14px;
-          margin-bottom: 20px;
+          margin-bottom: 18px;
+        }
+        .aurora-top-bar {
+          height: 4px;
+          width: 100%;
+          background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 30%, #ec4899 65%, #06b6d4 100%);
+          border-radius: 9999px;
+          margin-bottom: 16px;
         }
         .brand {
           font-size: 17px;
@@ -373,6 +380,11 @@ export function exportToPdf(options: PdfExportOptions): void {
           align-items: center;
           gap: 6px;
         }
+        .brand-gemini {
+          background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 45%, #db2777 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
         .meta-info {
           font-size: 10px;
           color: #64748b;
@@ -381,8 +393,8 @@ export function exportToPdf(options: PdfExportOptions): void {
         }
         .badge {
           display: inline-block;
-          background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 100%);
-          color: #4338ca;
+          background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 50%, #fdf2f8 100%);
+          color: #6d28d9;
           font-size: 9px;
           font-weight: 900;
           padding: 3px 10px;
@@ -390,7 +402,7 @@ export function exportToPdf(options: PdfExportOptions): void {
           text-transform: uppercase;
           letter-spacing: 0.05em;
           margin-bottom: 8px;
-          border: 1px solid #c7d2fe;
+          border: 1px solid #ddd6fe;
         }
         .report-title {
           font-size: 23px;
@@ -439,9 +451,14 @@ export function exportToPdf(options: PdfExportOptions): void {
       </style>
     </head>
     <body>
+      <div class="aurora-top-bar"></div>
+
       <div class="header-bar">
         <div>
-          <div class="brand">✦ AskDocs Enterprise Intelligence</div>
+          <div class="brand">
+            <span style="color: #8b5cf6;">✦</span>
+            <span class="brand-gemini">AskDocs Intelligence</span>
+          </div>
           ${
             options.workspaceName
               ? `<div style="font-size: 11px; color: #475569; font-weight: 700; margin-top: 3px;">Workspace: ${options.workspaceName}</div>`
@@ -451,7 +468,7 @@ export function exportToPdf(options: PdfExportOptions): void {
         <div class="meta-info">
           <div><strong>Generated:</strong> ${currentDate}</div>
           ${options.documentSource ? `<div><strong>Source Docs:</strong> ${options.documentSource}</div>` : ""}
-          <div style="color: #6366f1; font-weight: 700; margin-top: 2px;">Document Verification ID: ${Math.random().toString(36).substring(2, 10).toUpperCase()}</div>
+          <div style="color: #7c3aed; font-weight: 700; margin-top: 2px;">Verification ID: ${Math.random().toString(36).substring(2, 10).toUpperCase()}</div>
         </div>
       </div>
 
