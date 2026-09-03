@@ -29,6 +29,7 @@ import {
   Headphones,
   Plug2,
   FileCode,
+  Presentation,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -48,6 +49,7 @@ const NAV = [
 const NAV_INTELLIGENCE = [
   { href: "/extract", label: "Data Extractor", icon: Table },
   { href: "/convert", label: "Format & Redact", icon: FileCode },
+  { href: "/slides", label: "Slide Decks", icon: Presentation },
   { href: "/study-guide", label: "Study Studio", icon: GraduationCap },
   { href: "/listen", label: "Audio Briefs", icon: Headphones },
   { href: "/contracts", label: "Contracts", icon: FileSignature },
