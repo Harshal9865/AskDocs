@@ -8,6 +8,7 @@ import { useWorkspace } from "@/lib/workspace-context";
 import ChatComposer from "@/components/ChatComposer";
 import { AIAvatarIcon } from "@/components/AIAvatarIcon";
 import PricingModal from "@/components/PricingModal";
+import { showToast } from "@/components/Toast";
 import type { Citation, Conversation, Message } from "@/lib/types";
 import {
   ArrowDownCircle,
@@ -462,6 +463,21 @@ export default function ChatPage() {
         const uploaded = await api.uploadChatAttachments(activeConv.id, attachments.map((a) => a.file));
         attachmentIds = uploaded.filter((u) => u.id).map((u) => u.id);
         attachmentText = uploaded.filter((u) => u.text_excerpt).map((u) => `[File: ${u.filename}]\n${u.text_excerpt}`).join("\n\n");
+
+        // Sync with workspace documents in background
+        if (workspace?.id) {
+          void Promise.all(
+            attachments.map(async (a) => {
+              try {
+                await api.uploadDocument(workspace.id, a.file);
+              } catch {
+                /* ignore duplicate or limit */
+              }
+            })
+          ).then(() => {
+            showToast("success", `Synced ${attachments.length} file${attachments.length > 1 ? "s" : ""} to workspace Documents`);
+          });
+        }
       } catch { /* silently continue */ }
     }
 

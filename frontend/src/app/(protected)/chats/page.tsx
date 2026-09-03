@@ -17,9 +17,12 @@ import {
   BellRing,
   Check,
   CheckCheck,
+  CornerUpLeft,
+  Download,
   Eraser,
   EyeOff,
-  FileUp,
+  FileSpreadsheet,
+  FileText,
   MessageCirclePlus,
   MessagesSquare,
   MoreVertical,
@@ -30,6 +33,7 @@ import {
   UsersRound,
   Volume2,
   VolumeX,
+  X,
 } from "lucide-react";
 import type { Member, TeamChat, TeamMessage, ChatAttachment } from "@/lib/types";
 import { playMessageChime, requestDesktopNotification, showDesktopPush } from "@/lib/utils";
@@ -133,19 +137,68 @@ function ReadTicks({ readBy, myId, participantCount }: { readBy: string[]; myId:
   return <CheckCheck className="h-3 w-3 text-slate-400 dark:text-zinc-500" />;
 }
 
-function AttachmentThumbnail({ att }: { att: ChatAttachment }) {
+function AttachmentThumbnail({ att, onOpenImage }: { att: ChatAttachment; onOpenImage?: (att: ChatAttachment) => void }) {
   const isImage = att.content_type.startsWith("image/");
   const isVideo = att.content_type.startsWith("video/");
+  const isPdf = att.filename.toLowerCase().endsWith(".pdf") || att.content_type === "application/pdf";
+  const isSheet = att.filename.toLowerCase().endsWith(".csv") || att.filename.toLowerCase().endsWith(".xlsx");
+
+  if (isImage) {
+    return (
+      <div
+        onClick={() => onOpenImage?.(att)}
+        className="group/img relative mt-1.5 cursor-pointer overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 shadow-sm max-w-[280px]"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`${API_BASE}${att.url}`}
+          alt={att.filename}
+          className="max-h-56 w-full object-cover transition-transform duration-200 group-hover/img:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity flex items-end justify-between p-2.5 text-white">
+          <span className="text-[11px] font-medium truncate max-w-[180px]">{att.filename}</span>
+          <span className="rounded-full bg-white/20 p-1 backdrop-blur-xs">
+            <Download className="h-3.5 w-3.5" />
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (isVideo) {
+    return (
+      <div className="mt-1.5 max-w-[280px] overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 shadow-sm">
+        <video src={`${API_BASE}${att.url}`} controls preload="metadata" className="max-h-52 w-full rounded-2xl" />
+      </div>
+    );
+  }
+
   return (
-    <a href={`${API_BASE}${att.url}`} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block">
-      {isImage ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={`${API_BASE}${att.url}`} alt={att.filename} className="max-h-40 max-w-[240px] rounded-lg object-cover" />
-      ) : isVideo ? (
-        <video src={`${API_BASE}${att.url}`} controls preload="metadata" className="max-h-48 max-w-[260px] rounded-lg" />
-      ) : (
-        <span className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300">{att.filename}</span>
-      )}
+    <a
+      href={`${API_BASE}${att.url}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      download={att.filename}
+      className="mt-1.5 flex items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white/90 p-3 shadow-xs hover:border-purple-300 hover:shadow-md dark:border-white/10 dark:bg-[#181628]/90 transition-all max-w-[280px] group/file"
+    >
+      <div className="flex items-center gap-2.5 overflow-hidden">
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-bold shadow-xs ${
+          isPdf ? "bg-red-500/10 text-red-600 dark:text-red-400" : isSheet ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-purple-500/10 text-purple-600 dark:text-purple-400"
+        }`}>
+          {isPdf ? <FileText className="h-5 w-5" /> : isSheet ? <FileSpreadsheet className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
+        </div>
+        <div className="min-w-0">
+          <span className="block truncate text-xs font-bold text-slate-800 dark:text-zinc-100 group-hover/file:text-purple-600 dark:group-hover/file:text-purple-300">
+            {att.filename}
+          </span>
+          <span className="text-[10px] font-semibold text-slate-400 dark:text-zinc-400">
+            {isPdf ? "PDF Document" : isSheet ? "Spreadsheet Data" : "Document"} • Download
+          </span>
+        </div>
+      </div>
+      <div className="rounded-full bg-slate-100 p-1.5 text-slate-500 group-hover/file:bg-purple-600 group-hover/file:text-white dark:bg-white/10 dark:text-zinc-300 dark:group-hover/file:bg-purple-600 transition-colors">
+        <Download className="h-3.5 w-3.5" />
+      </div>
     </a>
   );
 }
@@ -167,6 +220,9 @@ export default function ChatsPage() {
   const [messages, setMessages] = useState<TeamMessage[]>([]);
   const [composerText, setComposerText] = useState("");
   const [sending, setSending] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<{ id: string; sender_name: string; snippet: string } | null>(null);
+  const [reactions, setReactions] = useState<Record<string, Record<string, string[]>>>({});
+  const [lightboxImg, setLightboxImg] = useState<{ url: string; filename: string } | null>(null);
   const [showNewGroup, setShowNewGroup] = useState(false);
   const [showNewChat, setShowNewChat] = useState(false);
   const [newChatQuery, setNewChatQuery] = useState("");
@@ -190,6 +246,33 @@ export default function ChatsPage() {
   const [threadMenuOpen, setThreadMenuOpen] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Load reactions on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("askdocs_chat_reactions");
+      if (stored) setReactions(JSON.parse(stored));
+    } catch {}
+  }, []);
+
+  const toggleReaction = (msgId: string, emoji: string) => {
+    if (!user?.id) return;
+    setReactions((prev) => {
+      const msgReactions = { ...(prev[msgId] || {}) };
+      const currentUsers = msgReactions[emoji] || [];
+      if (currentUsers.includes(user.id)) {
+        msgReactions[emoji] = currentUsers.filter((id) => id !== user.id);
+        if (msgReactions[emoji].length === 0) delete msgReactions[emoji];
+      } else {
+        msgReactions[emoji] = [...currentUsers, user.id];
+      }
+      const next = { ...prev, [msgId]: msgReactions };
+      try {
+        localStorage.setItem("askdocs_chat_reactions", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
 
   useEffect(() => {
     const savedWp = localStorage.getItem("askdocs_chat_wallpaper");
@@ -470,10 +553,15 @@ export default function ChatsPage() {
     if (!activeChat || sending) return;
     const currentChatId = activeChat.id;
     setSending(true);
+    let finalMessage = text;
+    if (replyingTo) {
+      finalMessage = `> [Replying to ${replyingTo.sender_name}]: ${replyingTo.snippet}\n\n${text}`;
+      setReplyingTo(null);
+    }
     try {
       const ids: string[] = []; const failed: string[] = [];
       for (const a of attachments) { try { ids.push((await api.uploadChatAttachment(a.file)).id); } catch { failed.push(a.file.name); } }
-      const newMsg = await api.sendTeamMessage(currentChatId, text, ids);
+      const newMsg = await api.sendTeamMessage(currentChatId, finalMessage, ids);
       setComposerText("");
       if (failed.length > 0) alert(`Couldn't upload: ${failed.join(", ")}`);
       
@@ -483,7 +571,7 @@ export default function ChatsPage() {
       setChats((prev) => {
         const target = prev.find((c) => c.id === currentChatId);
         if (!target) return prev;
-        const updatedTarget = { ...target, last_message_at: nowIso, last_message_preview: text };
+        const updatedTarget = { ...target, last_message_at: nowIso, last_message_preview: finalMessage };
         const others = prev.filter((c) => c.id !== currentChatId);
         return [updatedTarget, ...others];
       });
@@ -1021,8 +1109,62 @@ export default function ChatsPage() {
               {displayedMessages.map((m) => {
                 const isMe = m.sender_id === user?.id;
                 const isBot = !m.sender_id;
+                const msgReactions = reactions[m.id] || {};
+                const hasReactions = Object.keys(msgReactions).length > 0;
+
+                // Check for quoted reply format: > [Replying to Name]: Snippet\n\nActual message
+                let quoteInfo: { author: string; snippet: string } | null = null;
+                let bodyContent = m.content;
+                if (m.content.startsWith("> [Replying to ")) {
+                  const endIdx = m.content.indexOf("]: ");
+                  const doubleBreak = m.content.indexOf("\n\n");
+                  if (endIdx !== -1 && doubleBreak !== -1 && doubleBreak > endIdx) {
+                    const author = m.content.substring(15, endIdx);
+                    const snippet = m.content.substring(endIdx + 3, doubleBreak);
+                    quoteInfo = { author, snippet };
+                    bodyContent = m.content.substring(doubleBreak + 2);
+                  }
+                }
+
                 return (
-                  <div key={m.id} className={`flex ${isMe ? "justify-end" : "justify-start"} group`}>
+                  <div key={m.id} className={`group/msg relative flex flex-col ${isMe ? "items-end" : "items-start"} my-1.5`}>
+                    {/* Floating WhatsApp Action & Reaction Bar on Hover */}
+                    <div className={`opacity-0 group-hover/msg:opacity-100 transition-opacity absolute -top-8 z-20 flex items-center gap-1 rounded-full border border-slate-200/90 bg-white/95 px-2 py-1 shadow-md backdrop-blur-md dark:border-white/10 dark:bg-[#1f1d2e]/95 ${
+                      isMe ? "right-2" : "left-2"
+                    }`}>
+                      {["👍", "❤️", "😂", "😮", "😢", "🙏"].map((emo) => {
+                        const isReacted = (msgReactions[emo] || []).includes(user?.id || "");
+                        return (
+                          <button
+                            key={emo}
+                            type="button"
+                            onClick={() => toggleReaction(m.id, emo)}
+                            className={`rounded-full p-1 text-xs hover:scale-125 transition-transform cursor-pointer ${
+                              isReacted ? "bg-purple-100 dark:bg-purple-900/40 scale-110" : ""
+                            }`}
+                            title={`React with ${emo}`}
+                          >
+                            {emo}
+                          </button>
+                        );
+                      })}
+                      <div className="h-3 w-px bg-slate-200 dark:bg-white/10 mx-0.5" />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setReplyingTo({
+                            id: m.id,
+                            sender_name: isBot ? "AskDocs AI" : senderName(m.sender_id),
+                            snippet: bodyContent.slice(0, 80),
+                          })
+                        }
+                        title="Reply to message"
+                        className="rounded-full p-1 text-slate-500 hover:text-purple-600 dark:text-zinc-400 dark:hover:text-purple-300 transition-colors cursor-pointer"
+                      >
+                        <CornerUpLeft className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+
                     <div className={`relative max-w-[85%] sm:max-w-[75%] rounded-2xl px-3.5 py-2.5 text-sm shadow-sm transition-all ${
                       isMe 
                         ? "bg-purple-600 text-white rounded-br-sm shadow-purple-500/10" 
@@ -1030,6 +1172,7 @@ export default function ChatsPage() {
                         ? "border border-purple-300/60 bg-gradient-to-br from-purple-50/90 via-indigo-50/60 to-white text-slate-900 shadow-md shadow-purple-500/5 dark:border-purple-500/30 dark:from-[#1b1736] dark:via-[#15122e] dark:to-[#0f0e24] dark:text-zinc-100 rounded-bl-sm"
                         : "bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white rounded-bl-sm"
                     }`}>
+                      {/* Sender name for group chats */}
                       {!isMe && (
                         isBot ? (
                           <div className="mb-2 flex items-center gap-1.5 rounded-full border border-purple-300/60 bg-white/80 px-2.5 py-1 text-[11px] font-extrabold text-purple-700 shadow-xs backdrop-blur-sm dark:border-purple-500/30 dark:bg-purple-950/60 dark:text-purple-300">
@@ -1046,7 +1189,24 @@ export default function ChatsPage() {
                           </Link>
                         ) : null
                       )}
-                      <p className="whitespace-pre-wrap break-words leading-relaxed">{m.content}</p>
+
+                      {/* Quoted Reply Preview inside bubble */}
+                      {quoteInfo && (
+                        <div className={`mb-2 rounded-xl p-2 text-xs border-l-4 ${
+                          isMe
+                            ? "border-white bg-white/15 text-purple-100"
+                            : "border-purple-600 bg-purple-500/10 text-slate-700 dark:text-zinc-300"
+                        }`}>
+                          <span className="block font-bold text-[11px] text-purple-300 dark:text-purple-400">
+                            {quoteInfo.author}
+                          </span>
+                          <span className="block truncate text-[11px] opacity-90">
+                            {quoteInfo.snippet}
+                          </span>
+                        </div>
+                      )}
+
+                      <p className="whitespace-pre-wrap break-words leading-relaxed">{bodyContent}</p>
 
                       {/* Autonomous Interactive Approval Card */}
                       {m.approval_card && (
@@ -1124,7 +1284,11 @@ export default function ChatsPage() {
                       {m.attachments && m.attachments.length > 0 && (
                         <div className="mt-2 space-y-1">
                           {m.attachments.map((att) => (
-                            <AttachmentThumbnail key={att.id} att={att} />
+                            <AttachmentThumbnail
+                              key={att.id}
+                              att={att}
+                              onOpenImage={(a) => setLightboxImg({ url: `${API_BASE}${a.url}`, filename: a.filename })}
+                            />
                           ))}
                         </div>
                       )}
@@ -1133,13 +1297,38 @@ export default function ChatsPage() {
                         {isMe && <ReadTicks readBy={m.read_by} myId={user?.id ?? ""} participantCount={activeChat.participants.length} />}
                       </div>
                     </div>
+
+                    {/* WhatsApp-Style Reaction Badges below bubble */}
+                    {hasReactions && (
+                      <div className={`mt-1 flex flex-wrap gap-1 ${isMe ? "justify-end mr-1" : "justify-start ml-1"}`}>
+                        {Object.entries(msgReactions).map(([emo, uids]) => {
+                          const isMine = uids.includes(user?.id || "");
+                          return (
+                            <button
+                              key={emo}
+                              type="button"
+                              onClick={() => toggleReaction(m.id, emo)}
+                              className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-bold shadow-2xs transition-transform active:scale-90 cursor-pointer ${
+                                isMine
+                                  ? "border-purple-300 bg-purple-50 text-purple-700 dark:border-purple-500/40 dark:bg-purple-950/60 dark:text-purple-300"
+                                  : "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-[#1a1728] dark:text-zinc-300"
+                              }`}
+                            >
+                              <span>{emo}</span>
+                              <span className="text-[10px] opacity-80">{uids.length}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
                     {isMe && (
                       <button 
                         onClick={() => setDeletingMsg(m)} 
                         title="Delete message"
-                        className="ml-1 opacity-0 group-hover:opacity-100 self-center p-1.5 text-slate-400 hover:text-red-500 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 transition-all cursor-pointer"
+                        className="opacity-0 group-hover/msg:opacity-100 self-end p-1 text-slate-400 hover:text-red-500 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 transition-all cursor-pointer mt-0.5"
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="h-3 w-3" />
                       </button>
                     )}
                   </div>
@@ -1194,6 +1383,8 @@ export default function ChatsPage() {
                 disabled={sending}
                 showAttach
                 showEmoji
+                replyingTo={replyingTo}
+                onCancelReply={() => setReplyingTo(null)}
                 placeholder={`Message ${chatTitle(activeChat, user?.email)}…`}
               />
             </div>
@@ -1481,6 +1672,47 @@ export default function ChatsPage() {
               >
                 Delete Chat
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* WhatsApp Full-Screen Image Lightbox Modal */}
+      {lightboxImg && (
+        <div
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-150"
+          onClick={() => setLightboxImg(null)}
+        >
+          <div className="absolute top-4 right-4 flex items-center gap-3 z-10" onClick={(e) => e.stopPropagation()}>
+            <a
+              href={lightboxImg.url}
+              download={lightboxImg.filename}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 rounded-full bg-white/20 px-3.5 py-1.5 text-xs font-bold text-white backdrop-blur-md hover:bg-white/30 transition-all cursor-pointer"
+            >
+              <Download className="h-4 w-4" />
+              <span>Download</span>
+            </a>
+            <button
+              type="button"
+              onClick={() => setLightboxImg(null)}
+              className="rounded-full bg-white/20 p-2 text-white hover:bg-white/30 transition-all cursor-pointer"
+              aria-label="Close lightbox"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="relative max-h-[85vh] max-w-4xl overflow-hidden rounded-2xl" onClick={(e) => e.stopPropagation()}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={lightboxImg.url}
+              alt={lightboxImg.filename}
+              className="max-h-[85vh] max-w-full rounded-2xl object-contain shadow-2xl"
+            />
+            <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 text-center text-xs font-bold text-white">
+              {lightboxImg.filename}
             </div>
           </div>
         </div>

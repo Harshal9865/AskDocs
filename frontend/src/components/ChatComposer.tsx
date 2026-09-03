@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, FileText, ImageIcon, Mic, MicOff, Paperclip, Plus, Smile, X } from "lucide-react";
+import { ArrowUp, FileText, ImageIcon, Mic, MicOff, Paperclip, Plus, Smile, X, FileSpreadsheet, Camera, PenTool, FileCheck2 } from "lucide-react";
 
 export interface AttachedFile {
   file: File;
@@ -50,6 +50,8 @@ export default function ChatComposer({
   showVoice = true,
   inputId,
   variant = "default",
+  replyingTo = null,
+  onCancelReply,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -63,10 +65,14 @@ export default function ChatComposer({
   showVoice?: boolean;
   inputId?: string;
   variant?: "default" | "aurora" | "green";
+  replyingTo?: { id: string; sender_name: string; snippet: string } | null;
+  onCancelReply?: () => void;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const docRef = useRef<HTMLInputElement>(null);
+  const sheetRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const emojiRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<ISpeechRecognitionInstance | null>(null);
@@ -268,6 +274,32 @@ export default function ChatComposer({
             : "contents"
         }
       >
+      {/* Quoted Message Reply Bar (WhatsApp style) */}
+      {replyingTo && (
+        <div className="relative flex items-center justify-between border-b border-slate-100 bg-purple-50/70 px-3.5 py-2 dark:border-white/5 dark:bg-purple-950/30 text-xs rounded-t-2xl animate-in slide-in-from-bottom-2 duration-150">
+          <div className="flex items-center gap-2.5 overflow-hidden">
+            <span className="h-7 w-1 shrink-0 rounded-full bg-gradient-to-b from-purple-600 to-indigo-600" />
+            <div className="truncate">
+              <div className="font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1">
+                <span>Replying to</span>
+                <span className="text-slate-900 dark:text-white font-extrabold">{replyingTo.sender_name}</span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400 truncate max-w-sm sm:max-w-md mt-0.5">
+                {replyingTo.snippet}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onCancelReply}
+            className="rounded-full p-1 text-slate-400 hover:bg-purple-100 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-white transition-colors cursor-pointer"
+            aria-label="Cancel reply"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* attachment previews */}
       {attachments.length > 0 && (
         <div className="flex flex-wrap gap-2 px-3 pt-3">
@@ -313,49 +345,91 @@ export default function ChatComposer({
               aria-label="Add attachment"
               aria-expanded={menuOpen}
               aria-haspopup="menu"
-              title="Add photos & files"
-              className="dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-indigo-600 disabled:opacity-40 dark:data-[open=true]:bg-white/10"
+              title="Attach files (PDFs, Images, Notes, Spreadsheets)"
+              className="dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-purple-600 disabled:opacity-40 dark:data-[open=true]:bg-white/10 cursor-pointer"
               data-open={menuOpen}
             >
-              <Plus className={`h-5 w-5 transition-transform ${menuOpen ? "rotate-45" : ""}`} />
+              <Plus className={`h-5 w-5 transition-transform duration-200 ${menuOpen ? "rotate-45" : ""}`} />
             </button>
 
             {menuOpen && (
               <div
                 role="menu"
-                className="dark:border-white/10 dark:bg-[#282828] absolute bottom-full left-0 z-50 mb-2 w-64 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl"
+                className="dark:border-white/10 dark:bg-[#1a1728] absolute bottom-full left-0 z-50 mb-2 w-72 rounded-2xl border border-slate-200/90 bg-white p-2 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
               >
-                <div className="dark:text-zinc-400 px-3 pb-1 pt-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                  Add to chat
+                <div className="px-3 pb-1 pt-1 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+                  Attach Media & Documents
                 </div>
-                <button
-                  role="menuitem"
-                  onClick={() => imageRef.current?.click()}
-                  className="dark:hover:bg-white/10 dark:text-white flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-slate-700 transition-colors hover:bg-slate-100"
-                >
-                  <span className="dark:bg-white/10 flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:text-[#1DB954]">
-                    <ImageIcon className="h-4 w-4" />
-                  </span>
-                  <span className="flex-1">
-                    <span className="block text-sm font-medium">Photos & images</span>
-                    <span className="block text-xs text-slate-500 dark:text-zinc-400">JPG, PNG, GIF, WebP</span>
-                  </span>
-                </button>
-                <button
-                  role="menuitem"
-                  onClick={() => fileRef.current?.click()}
-                  className="dark:hover:bg-white/10 dark:text-white flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-slate-700 transition-colors hover:bg-slate-100"
-                >
-                  <span className="dark:bg-white/10 flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:text-zinc-300">
-                    <FileText className="h-4 w-4" />
-                  </span>
-                  <span className="flex-1">
-                    <span className="block text-sm font-medium">Files, docs & video</span>
-                    <span className="block text-xs text-slate-500 dark:text-zinc-400">PDF, TXT, CSV, DOC, MP4</span>
-                  </span>
-                </button>
-                <div className="dark:border-white/10 mt-1 border-t border-slate-100 px-3 py-1.5 text-[11px] text-slate-400 dark:text-zinc-500">
-                  Tip: you can also drag & drop files here
+
+                <div className="space-y-1">
+                  {/* 1. Document / PDF */}
+                  <button
+                    role="menuitem"
+                    type="button"
+                    onClick={() => docRef.current?.click()}
+                    className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-all hover:bg-purple-50 dark:hover:bg-white/5 cursor-pointer"
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-600 dark:text-red-400">
+                      <FileText className="h-4 w-4" />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <span className="block text-xs font-bold text-slate-900 dark:text-white">Documents & PDFs</span>
+                      <span className="block text-[10px] text-slate-400 dark:text-zinc-400 truncate">PDF, DOCX, TXT, Markdown</span>
+                    </div>
+                  </button>
+
+                  {/* 2. Photos & Images */}
+                  <button
+                    role="menuitem"
+                    type="button"
+                    onClick={() => imageRef.current?.click()}
+                    className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-all hover:bg-purple-50 dark:hover:bg-white/5 cursor-pointer"
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                      <ImageIcon className="h-4 w-4" />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <span className="block text-xs font-bold text-slate-900 dark:text-white">Photos & Images</span>
+                      <span className="block text-[10px] text-slate-400 dark:text-zinc-400 truncate">PNG, JPG, JPEG, WebP, GIF</span>
+                    </div>
+                  </button>
+
+                  {/* 3. Spreadsheets & Data */}
+                  <button
+                    role="menuitem"
+                    type="button"
+                    onClick={() => sheetRef.current?.click()}
+                    className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-all hover:bg-purple-50 dark:hover:bg-white/5 cursor-pointer"
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                      <FileSpreadsheet className="h-4 w-4" />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <span className="block text-xs font-bold text-slate-900 dark:text-white">Spreadsheets & Data</span>
+                      <span className="block text-[10px] text-slate-400 dark:text-zinc-400 truncate">CSV, Excel worksheets</span>
+                    </div>
+                  </button>
+
+                  {/* 4. Handwritten Notes & Diagrams */}
+                  <button
+                    role="menuitem"
+                    type="button"
+                    onClick={() => cameraRef.current?.click()}
+                    className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-all hover:bg-purple-50 dark:hover:bg-white/5 cursor-pointer"
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                      <PenTool className="h-4 w-4" />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <span className="block text-xs font-bold text-slate-900 dark:text-white">Handwritten & Diagrams</span>
+                      <span className="block text-[10px] text-slate-400 dark:text-zinc-400 truncate">Chalkboard, whiteboards, notes</span>
+                    </div>
+                  </button>
+                </div>
+
+                <div className="mt-1.5 border-t border-slate-100 dark:border-white/5 px-2.5 py-1 text-[10px] text-slate-400 dark:text-zinc-500 flex items-center justify-between">
+                  <span>✨ Auto-transcribed by AI</span>
+                  <span>Drag & drop files</span>
                 </div>
               </div>
             )}
@@ -372,10 +446,32 @@ export default function ChatComposer({
               }}
             />
             <input
-              ref={fileRef}
+              ref={docRef}
               type="file"
               multiple
-              accept=".pdf,.txt,.csv,.md,.doc,.docx,image/*,video/mp4,video/webm,video/quicktime"
+              accept=".pdf,.doc,.docx,.txt,.md"
+              hidden
+              onChange={(e) => {
+                handleFiles(e.target.files);
+                e.target.value = "";
+              }}
+            />
+            <input
+              ref={sheetRef}
+              type="file"
+              multiple
+              accept=".csv,.xlsx,.xls,.tsv"
+              hidden
+              onChange={(e) => {
+                handleFiles(e.target.files);
+                e.target.value = "";
+              }}
+            />
+            <input
+              ref={cameraRef}
+              type="file"
+              multiple
+              accept="image/*"
               hidden
               onChange={(e) => {
                 handleFiles(e.target.files);
