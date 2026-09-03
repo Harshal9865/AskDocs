@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, Home, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, Pencil, User, ShieldCheck, GraduationCap, FileSpreadsheet, CalendarClock, Brain } from "lucide-react";
+import { ChevronDown, Globe, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, Pencil, User, ShieldCheck, GraduationCap, FileSpreadsheet, CalendarClock, Brain } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -300,15 +300,6 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         </button>
 
-        <Link
-          href="/"
-          title="Go to Homepage"
-          aria-label="Go to Homepage"
-          className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 transition-colors"
-        >
-          <Home className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-        </Link>
-
         {/* Audience Mode Switcher Pill Button (Matching Image 1, 2, 4) */}
         <button
           onClick={() => setModeModalOpen(true)}
@@ -441,6 +432,14 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
                     onClick={() => {
                       setMenuOpen(false);
                       router.push("/settings/workspace");
+                    }}
+                  />
+                  <MenuItem
+                    icon={<Globe className="h-4 w-4" />}
+                    label="Public homepage"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      router.push("/");
                     }}
                   />
                 </div>
