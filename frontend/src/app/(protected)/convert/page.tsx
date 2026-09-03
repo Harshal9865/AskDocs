@@ -60,9 +60,9 @@ export default function DocumentConverterStudioPage() {
     async function fetchDocChunks() {
       if (!workspace?.id || !selectedDocId) return;
       try {
-        const details = await api.getDocument(workspace.id, selectedDocId);
-        if (details.chunks && details.chunks.length > 0) {
-          const combined = details.chunks
+        const chunks = await api.getDocumentChunks(workspace.id, selectedDocId);
+        if (chunks && chunks.length > 0) {
+          const combined = chunks
             .sort((a, b) => a.ordinal - b.ordinal)
             .map((c) => c.content)
             .join("\n\n");
