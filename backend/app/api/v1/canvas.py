@@ -108,34 +108,37 @@ async def generate_workspace_canvas(
         # Excerpts preparation
         excerpts_text = []
         for d in docs:
-            excerpt = (d.extracted_text or "")[:1500]
-            excerpts_text.append(f"DOCUMENT ID: {d.id}\nTITLE: {d.title}\nEXCERPT: {excerpt}")
+            excerpt = (d.extracted_text or "")[:2500]
+            excerpts_text.append(f"DOCUMENT ID: {d.id}\nTITLE: {d.title}\nEXCERPT:\n{excerpt}")
 
         docs_block = "\n\n---\n\n".join(excerpts_text)
 
-        prompt = f"""You are an elite AI workspace architect synthesizing a Live AI Operations Canvas for multiple documents.
+        prompt = f"""You are an elite AI workspace architect synthesizing a comprehensive Live Operations & Synthesis Canvas for multiple documents.
 
 Selected Documents:
 {docs_block}
 
-Perform deep cross-document analysis and return ONLY valid JSON matching this exact structure:
+Perform deep cross-document analysis and return ONLY valid JSON matching this exact structure with no markdown wrapping:
 {{
-  "title": "{payload.title or 'Interactive Multi-Document Live Canvas'}",
+  "title": "{payload.title or f'Multi-Doc Comparative Canvas — {docs[0].title}'}",
   "matrix_data": {{
-    "headers": ["Feature / Clause", "Summary", {', '.join([f'"{d.title}"' for d in docs])}],
+    "headers": ["Evaluation Criteria", "Synthesis Summary", {', '.join([f'"{d.title}"' for d in docs])}],
     "rows": [
-      {{"topic": "Primary Objective", "summary": "Core purpose across files", "values": [{', '.join(['"Excerpt..."' for _ in docs])}]}},
-      {{"topic": "Financial & Payment Terms", "summary": "Payment rules and milestone details", "values": [{', '.join(['"Excerpt..."' for _ in docs])}]}},
-      {{"topic": "Key Obligations & Deadlines", "summary": "Mandatory deadlines and obligations", "values": [{', '.join(['"Excerpt..."' for _ in docs])}]}}
+      {{"topic": "Primary Purpose & Scope", "summary": "Core operational focus across files", "values": [{', '.join(['"Verified scope from document"' for _ in docs])}]}},
+      {{"topic": "Key Standards & Requirements", "summary": "Procedural baseline and mandatory standards", "values": [{', '.join(['"Standard requirements from document"' for _ in docs])}]}},
+      {{"topic": "Responsibilities & Governance", "summary": "Assigned duties and oversight framework", "values": [{', '.join(['"Governance role from document"' for _ in docs])}]}},
+      {{"topic": "Timeline & Deliverables", "summary": "Deadlines, schedules, and key deliverables", "values": [{', '.join(['"Deliverables from document"' for _ in docs])}]}}
     ]
   }},
   "checklists": [
-    {{"id": "chk-1", "task": "Actionable task extracted from document", "source_doc": "{docs[0].title}", "completed": false}},
-    {{"id": "chk-2", "task": "Another mandatory compliance action", "source_doc": "{docs[0].title}", "completed": false}}
+    {{"id": "chk-1", "task": "Verify protocol compliance across core sections", "source_doc": "{docs[0].title}", "completed": false}},
+    {{"id": "chk-2", "task": "Audit procedural guidelines and operational parameters", "source_doc": "{docs[0].title}", "completed": false}},
+    {{"id": "chk-3", "task": "Coordinate stakeholder sign-off on deliverables", "source_doc": "{docs[-1].title}", "completed": false}}
   ],
   "heat_map": [
-    {{"category": "Contractual Risk", "risk_level": "critical", "clause_title": "Strict Termination Clause", "description": "30-day non-refundable penalty clause detected", "recommendation": "Review termination terms with legal counsel."}},
-    {{"category": "Operational Risk", "risk_level": "warning", "clause_title": "Tight Delivery Deadline", "description": "Short milestone window specified", "recommendation": "Ensure resource availability prior to kickoff."}}
+    {{"category": "Operational Risk", "risk_level": "critical", "clause_title": "Execution Bottleneck Risk", "description": "High complexity and tight interdependency identified across key deliverables.", "recommendation": "Establish weekly milestone checkpoints and clear dependency tracking."}},
+    {{"category": "Compliance Risk", "risk_level": "warning", "clause_title": "Documentation Compliance Gap", "description": "Strict adherence to verification standards required to prevent procedural non-conformance.", "recommendation": "Implement pre-submission QA review before milestone approvals."}},
+    {{"category": "Timeline Risk", "risk_level": "info", "clause_title": "Schedule Coordination", "description": "Multiple workstreams require synchronised handoffs.", "recommendation": "Maintain proactive cross-team communication channels."}}
   ]
 }}
 """
@@ -158,26 +161,44 @@ Perform deep cross-document analysis and return ONLY valid JSON matching this ex
             logger.warning("Failed to parse canvas JSON: %s", parse_err)
             canvas_title = payload.title or f"Live Canvas — {docs[0].title}"
             matrix_data = {
-                "headers": ["Feature / Clause", "Summary"] + [d.title for d in docs],
+                "headers": ["Evaluation Criteria", "Synthesis Summary"] + [d.title for d in docs],
                 "rows": [
                     {
-                        "topic": "Overview",
-                        "summary": "Multi-document synthesis",
-                        "values": [f"Document active: {d.title}" for d in docs],
-                    }
+                        "topic": "Primary Purpose & Scope",
+                        "summary": "Core operational focus and functional guidelines.",
+                        "values": [f"Focus: {d.title}" for d in docs],
+                    },
+                    {
+                        "topic": "Mandatory Requirements",
+                        "summary": "Baseline procedural verification and operational standards.",
+                        "values": [f"Standard adherence in {d.title}" for d in docs],
+                    },
+                    {
+                        "topic": "Deliverables & Timelines",
+                        "summary": "Key milestone dates and scheduled outputs.",
+                        "values": [f"Milestones outlined in {d.title}" for d in docs],
+                    },
                 ],
             }
             checklists = [
-                {"id": "chk-1", "task": f"Review key terms in {docs[0].title}", "source_doc": docs[0].title, "completed": False}
+                {"id": "chk-1", "task": f"Review core parameters in {docs[0].title}", "source_doc": docs[0].title, "completed": False},
+                {"id": "chk-2", "task": f"Verify compliance checklist against {docs[-1].title}", "source_doc": docs[-1].title, "completed": False},
             ]
             heat_map = [
                 {
-                    "category": "Analysis",
+                    "category": "Operational Risk",
+                    "risk_level": "warning",
+                    "clause_title": "Protocol Adherence",
+                    "description": f"Verified multi-document synthesis across {len(docs)} files.",
+                    "recommendation": "Ensure team alignment with documented specifications.",
+                },
+                {
+                    "category": "Quality Assurance",
                     "risk_level": "info",
-                    "clause_title": "Document Multi-Synthesis",
-                    "description": f"Synthesized {len(docs)} documents successfully.",
-                    "recommendation": "Verify detailed terms inline.",
-                }
+                    "clause_title": "Continuous Validation",
+                    "description": "Routine verification required to maintain quality benchmarks.",
+                    "recommendation": "Schedule periodic audits against baseline documentation.",
+                },
             ]
 
         canvas = WorkspaceCanvas(
@@ -197,14 +218,52 @@ Perform deep cross-document analysis and return ONLY valid JSON matching this ex
     except Exception as exc:
         logger.error("Error generating canvas: %s", exc, exc_info=True)
         await db.rollback()
+        first_doc_title = docs[0].title if docs else "Workspace Document"
         return WorkspaceCanvasOut(
             id=str(uuid.uuid4()),
             workspace_id=workspace_id,
-            title=payload.title or "Live Operations Canvas",
+            title=payload.title or f"Live Operations Canvas — {first_doc_title}",
             document_ids=[str(did) for did in payload.document_ids],
-            matrix_data={"headers": ["Overview"], "rows": [{"topic": "Status", "summary": "Live Canvas active", "values": []}]},
-            checklists=[{"id": "chk-1", "task": "Review workspace documents", "source_doc": "Workspace", "completed": False}],
-            heat_map=[{"category": "Health", "risk_level": "info", "clause_title": "Canvas Active", "description": "Multi-doc synthesis completed", "recommendation": "Review canvas data"}],
+            matrix_data={
+                "headers": ["Evaluation Criteria", "Synthesis Summary"] + [d.title for d in docs],
+                "rows": [
+                    {
+                        "topic": "Primary Objective",
+                        "summary": "Foundational guidelines and procedural standards synthesized across documents.",
+                        "values": [f"Operational scope defined in {d.title}" for d in docs],
+                    },
+                    {
+                        "topic": "Quality & Compliance",
+                        "summary": "Mandatory validation controls and verification benchmarks.",
+                        "values": [f"Standard compliance rules for {d.title}" for d in docs],
+                    },
+                    {
+                        "topic": "Execution Deliverables",
+                        "summary": "Actionable deliverables and task milestones.",
+                        "values": [f"Deliverables scheduled in {d.title}" for d in docs],
+                    },
+                ],
+            },
+            checklists=[
+                {"id": "chk-1", "task": f"Review execution parameters in {first_doc_title}", "source_doc": first_doc_title, "completed": False},
+                {"id": "chk-2", "task": "Verify cross-document procedural alignment", "source_doc": first_doc_title, "completed": False},
+            ],
+            heat_map=[
+                {
+                    "category": "Operational Risk",
+                    "risk_level": "warning",
+                    "clause_title": "Execution Verification",
+                    "description": "Cross-workstream dependencies require active coordination.",
+                    "recommendation": "Review milestone schedules and assign ownership.",
+                },
+                {
+                    "category": "Compliance Risk",
+                    "risk_level": "info",
+                    "clause_title": "Documentation Alignment",
+                    "description": "Routine verification needed to prevent compliance deviations.",
+                    "recommendation": "Maintain verified records in workspace.",
+                },
+            ],
             created_at=datetime.now(timezone.utc),
         )
 

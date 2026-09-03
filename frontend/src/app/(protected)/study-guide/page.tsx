@@ -1,9 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useRef } from "react";
-import Link from "next/link";
 import {
-  Award,
   BookOpen,
   Building2,
   Check,
@@ -13,7 +11,6 @@ import {
   Download,
   FileQuestion,
   FileSpreadsheet,
-  FileText,
   GraduationCap,
   Lightbulb,
   Printer,
@@ -23,15 +20,14 @@ import {
   Sparkles,
   Stethoscope,
   Trophy,
-  Users,
   Wallet,
-  Zap,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
 import { showToast } from "@/components/Toast";
 import { exportToPdf, downloadBlob } from "@/lib/pdf-export";
 import type { DocumentItem, StudyGuideDeck } from "@/lib/types";
+
 
 type StudyTab = "cheatsheet" | "flashcards" | "quiz" | "terms";
 type StudyPersona = "student" | "medical" | "corporate" | "legal" | "finance";
@@ -822,7 +818,7 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
                 >
                   <div className="flex items-center justify-between border-b border-white/10 pb-3">
                     <span className="rounded-lg bg-white/10 px-2.5 py-1 text-[11px] font-mono font-bold text-purple-300">
-                      {currentFlashcard.category.toUpperCase()}
+                      {(currentFlashcard.category || "General").toUpperCase()}
                     </span>
                     <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
                       <RotateCw className="h-3 w-3" /> Click anywhere to flip
@@ -977,7 +973,6 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
                 <div className="space-y-4">
                   {studyDeck.quiz.map((q, qIdx) => {
                     const selected = selectedAnswers[q.id];
-                    const isAnswered = selected !== undefined;
                     const isCorrect = selected === q.correct_option_index;
 
                     return (
