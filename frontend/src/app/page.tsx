@@ -37,7 +37,6 @@ import {
   ChevronDown,
   LayoutDashboard,
   Brain,
-  FileSignature,
   Table,
   GraduationCap,
   Headphones,

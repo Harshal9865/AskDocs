@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
-import { DocumentItem, WorkspaceCanvas } from "@/lib/types";
+import { DocumentItem, WorkspaceCanvas, MatrixRow } from "@/lib/types";
 import {
   CheckCircle2,
   FileText,
