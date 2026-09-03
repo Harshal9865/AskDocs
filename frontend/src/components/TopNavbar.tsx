@@ -117,8 +117,8 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           </span>
         </button>
 
-        {/* Quick Nav Icons: 2 on mobile (<sm), 4 on tablet (sm..lg) */}
-        <div className="flex items-center gap-0.5 lg:hidden">
+        {/* Compulsory 4 Navigation Icons for Small/Tablet Screens (<lg) */}
+        <div className="flex items-center gap-0.5 sm:gap-1 lg:hidden">
           <Link
             href="/dashboard"
             title="Dashboard"
@@ -145,12 +145,11 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
             <Sparkles className="h-3.5 w-3.5" />
           </Link>
 
-          {/* Shown on sm..lg screens */}
           <Link
             href="/chats"
             title={modeConfig.chatLabel}
             aria-label={modeConfig.chatLabel}
-            className={`hidden sm:flex h-7 w-7 items-center justify-center rounded-lg transition-all ${
+            className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all ${
               pathname === "/chats" || pathname.startsWith("/chats/")
                 ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
                 : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
@@ -163,7 +162,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
             href="/documents"
             title="Documents"
             aria-label="Documents"
-            className={`hidden sm:flex h-7 w-7 items-center justify-center rounded-lg transition-all ${
+            className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all ${
               pathname === "/documents" || pathname.startsWith("/documents/")
                 ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
                 : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
@@ -177,15 +176,15 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         <div className="relative lg:hidden">
           <button
             onClick={() => setMoreOpen((o) => !o)}
-            aria-label="Navigation Menu"
+            aria-label="More Features"
             aria-expanded={moreOpen}
-            className={`flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-xl transition-all ${
+            className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all ${
               moreOpen
                 ? "bg-slate-900 text-white dark:bg-white dark:text-black shadow-xs font-bold"
                 : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
             }`}
           >
-            <MoreHorizontal className="h-4 w-4 sm:h-5 sm:w-5" />
+            <MoreHorizontal className="h-4 w-4" />
           </button>
           {moreOpen && (
             <>
@@ -279,7 +278,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           if (q.trim().length >= 2)
             router.push(`/search?q=${encodeURIComponent(q.trim())}`);
         }}
-        className="relative ml-auto mr-1 hidden sm:flex sm:mr-3 sm:w-64 lg:w-72 xl:w-80"
+        className="relative ml-auto mr-1 hidden sm:flex sm:mr-2 sm:w-56 md:w-64 lg:w-72 xl:w-80"
       >
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         <input
@@ -290,7 +289,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         />
       </form>
 
-      {/* right side controls */}
+      {/* right side controls — always visible across all screens */}
       <div className="flex items-center gap-0.5 sm:gap-1.5 ml-auto sm:ml-0 shrink-0">
         <button
           onClick={() => router.push("/search")}
@@ -305,9 +304,9 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           href="/"
           title="Go to Homepage"
           aria-label="Go to Homepage"
-          className="hidden sm:flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 transition-colors"
+          className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 transition-colors"
         >
-          <Home className="h-4 w-4" />
+          <Home className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         </Link>
 
         {/* Audience Mode Switcher Pill Button (Matching Image 1, 2, 4) */}
