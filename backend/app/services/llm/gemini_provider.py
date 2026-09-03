@@ -25,8 +25,9 @@ CHAT_MODELS = [
     "gemini-3.6-pro",
 ]
 EMBED_MODELS = [
-    "text-embedding-004",
     "gemini-embedding-001",
+    "text-embedding-004",
+    "embedding-001",
 ]
 
 # ---------------------------------------------------------------------------
@@ -252,7 +253,7 @@ class GeminiProvider(LLMProvider):
                 except Exception as e:
                     err_str = str(e)
                     logger.warning("answer() model=%s attempt=%d FAILED: %s", model_name, attempt + 1, err_str)
-                    if ("503" in err_str or "UNAVAILABLE" in err_str or "demand" in err_str) and attempt == 0:
+                    if ("503" in err_str or "UNAVAILABLE" in err_str or "demand" in err_str) and not ("429" in err_str or "RESOURCE_EXHAUSTED" in err_str) and attempt == 0:
                         await asyncio.sleep(0.6)
                         continue
                     break
@@ -302,7 +303,7 @@ class GeminiProvider(LLMProvider):
                 except Exception as e:
                     err_str = str(e)
                     logger.warning("stream_answer() streaming model=%s attempt=%d FAILED: %s", model_name, attempt + 1, err_str)
-                    if ("503" in err_str or "UNAVAILABLE" in err_str or "demand" in err_str) and attempt == 0:
+                    if ("503" in err_str or "UNAVAILABLE" in err_str or "demand" in err_str) and not ("429" in err_str or "RESOURCE_EXHAUSTED" in err_str) and attempt == 0:
                         await asyncio.sleep(0.6)
                         continue
                     break

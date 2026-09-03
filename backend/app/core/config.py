@@ -48,7 +48,7 @@ class Settings(BaseSettings):
 
     GEMINI_API_KEY: str | None = None
     GEMINI_CHAT_MODEL: str = "gemini-3.6-flash"
-    GEMINI_EMBED_MODEL: str = "text-embedding-004"
+    GEMINI_EMBED_MODEL: str = "gemini-embedding-001"
 
     STORAGE_DIR: str = "storage"
     STORAGE_BACKEND: str = "local"  # "local" (dev) or "db" (hosted, e.g. Render)
