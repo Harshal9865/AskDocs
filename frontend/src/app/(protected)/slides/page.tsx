@@ -155,7 +155,22 @@ Generate exactly ${slideCount} slides formatted as strict JSON without markdown 
   ]
 }`;
 
-      let resultJson: any = null;
+interface SlideJsonItem {
+  id?: number;
+  title?: string;
+  subtitle?: string;
+  bullets?: string[];
+  stat_value?: string;
+  stat_label?: string;
+  takeaway?: string;
+}
+
+interface SlideDeckJsonResponse {
+  deck_title?: string;
+  slides?: SlideJsonItem[];
+}
+
+      let resultJson: SlideDeckJsonResponse | null = null;
       try {
         const res = await api.queryWorkspaceMemory(workspace.id, prompt);
         let rawAnswer = res.answer || "";
@@ -163,14 +178,14 @@ Generate exactly ${slideCount} slides formatted as strict JSON without markdown 
         const jsonStart = rawAnswer.indexOf("{");
         const jsonEnd = rawAnswer.lastIndexOf("}");
         if (jsonStart !== -1 && jsonEnd !== -1) {
-          resultJson = JSON.parse(rawAnswer.slice(jsonStart, jsonEnd + 1));
+          resultJson = JSON.parse(rawAnswer.slice(jsonStart, jsonEnd + 1)) as SlideDeckJsonResponse;
         }
       } catch (parseErr) {
         console.warn("JSON slide parsing failed, falling back to text:", parseErr);
       }
 
       if (resultJson && Array.isArray(resultJson.slides) && resultJson.slides.length > 0) {
-        const generatedSlides: Slide[] = resultJson.slides.map((s: any, idx: number) => ({
+        const generatedSlides: Slide[] = resultJson.slides.map((s: SlideJsonItem, idx: number) => ({
           id: idx + 1,
           title: s.title || `Slide ${idx + 1}`,
           subtitle: s.subtitle || `Source: ${title}`,

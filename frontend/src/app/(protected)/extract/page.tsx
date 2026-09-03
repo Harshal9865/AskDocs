@@ -155,7 +155,14 @@ INSTRUCTIONS:
   ]
 }`;
 
-      let resultJson: any = null;
+interface ExtractedJsonResponse {
+  table_name?: string;
+  columns?: string[];
+  rows?: Record<string, string | number>[];
+  summary_insights?: string[];
+}
+
+      let resultJson: ExtractedJsonResponse | null = null;
       try {
         const res = await api.queryWorkspaceMemory(workspace.id, prompt);
         let rawAnswer = res.answer || "";
@@ -163,7 +170,7 @@ INSTRUCTIONS:
         const jsonStart = rawAnswer.indexOf("{");
         const jsonEnd = rawAnswer.lastIndexOf("}");
         if (jsonStart !== -1 && jsonEnd !== -1) {
-          resultJson = JSON.parse(rawAnswer.slice(jsonStart, jsonEnd + 1));
+          resultJson = JSON.parse(rawAnswer.slice(jsonStart, jsonEnd + 1)) as ExtractedJsonResponse;
         }
       } catch (parseErr) {
         console.warn("Direct JSON parsing failed, using fallback structuring:", parseErr);
