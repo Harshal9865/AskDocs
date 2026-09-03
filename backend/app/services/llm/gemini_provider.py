@@ -3,6 +3,7 @@ Gemini AI provider — uses google-genai >= 1.0 SDK.
 This is the single source of truth for all LLM calls in AskDocs.
 """
 
+import asyncio
 import json
 import logging
 from typing import AsyncGenerator
@@ -19,13 +20,9 @@ logger = logging.getLogger(__name__)
 # Model lists — tried in order, first success wins
 # ---------------------------------------------------------------------------
 CHAT_MODELS = [
-    "gemini-1.5-flash",
-    "gemini-1.5-flash-8b",
-    "gemini-2.0-flash",
-    "gemini-1.5-pro",
     "gemini-3.6-flash",
     "gemini-3.5-flash-lite",
-    "gemini-2.5-flash",
+    "gemini-3.6-pro",
 ]
 EMBED_MODELS = [
     "text-embedding-004",
@@ -237,21 +234,28 @@ class GeminiProvider(LLMProvider):
         config = types.GenerateContentConfig(system_instruction=SYSTEM_INSTRUCTION)
 
         for model_name in self.chat_models:
-            try:
-                contents: list = [prompt]
-                if image_parts:
-                    contents.extend(image_parts)
-                response = await self.client.aio.models.generate_content(
-                    model=model_name,
-                    contents=contents,
-                    config=config,
-                )
-                if response.text and response.text.strip():
-                    logger.info("answer() model=%s SUCCESS (len=%d)", model_name, len(response.text))
-                    return response.text
-                logger.warning("answer() model=%s returned empty text", model_name)
-            except Exception as e:
-                logger.warning("answer() model=%s FAILED: %s", model_name, e)
+            for attempt in range(2):
+                try:
+                    contents: list = [prompt]
+                    if image_parts:
+                        contents.extend(image_parts)
+                    response = await self.client.aio.models.generate_content(
+                        model=model_name,
+                        contents=contents,
+                        config=config,
+                    )
+                    if response.text and response.text.strip():
+                        logger.info("answer() model=%s SUCCESS (len=%d)", model_name, len(response.text))
+                        return response.text
+                    logger.warning("answer() model=%s returned empty text", model_name)
+                    break
+                except Exception as e:
+                    err_str = str(e)
+                    logger.warning("answer() model=%s attempt=%d FAILED: %s", model_name, attempt + 1, err_str)
+                    if ("503" in err_str or "UNAVAILABLE" in err_str or "demand" in err_str) and attempt == 0:
+                        await asyncio.sleep(0.6)
+                        continue
+                    break
 
         logger.error("answer() — all models failed — using emergency fallback")
         return _emergency_fallback(question, contexts)
@@ -271,30 +275,37 @@ class GeminiProvider(LLMProvider):
 
         # ---- Pass 1: streaming ----------------------------------------
         for model_name in self.chat_models:
-            try:
-                contents: list = [prompt]
-                if image_parts:
-                    contents.extend(image_parts)
-                stream = await self.client.aio.models.generate_content_stream(
-                    model=model_name,
-                    contents=contents,
-                    config=config,
-                )
-                emitted = False
-                async for chunk in stream:
-                    try:
-                        text = chunk.text
-                        if text:
-                            emitted = True
-                            yield text
-                    except Exception:
-                        pass
-                if emitted:
-                    logger.info("stream_answer() model=%s STREAMING OK", model_name)
-                    return
-                logger.warning("stream_answer() model=%s streamed but emitted nothing", model_name)
-            except Exception as e:
-                logger.warning("stream_answer() streaming model=%s FAILED: %s", model_name, e)
+            for attempt in range(2):
+                try:
+                    contents: list = [prompt]
+                    if image_parts:
+                        contents.extend(image_parts)
+                    stream = await self.client.aio.models.generate_content_stream(
+                        model=model_name,
+                        contents=contents,
+                        config=config,
+                    )
+                    emitted = False
+                    async for chunk in stream:
+                        try:
+                            text = chunk.text
+                            if text:
+                                emitted = True
+                                yield text
+                        except Exception:
+                            pass
+                    if emitted:
+                        logger.info("stream_answer() model=%s STREAMING OK", model_name)
+                        return
+                    logger.warning("stream_answer() model=%s streamed but emitted nothing", model_name)
+                    break
+                except Exception as e:
+                    err_str = str(e)
+                    logger.warning("stream_answer() streaming model=%s attempt=%d FAILED: %s", model_name, attempt + 1, err_str)
+                    if ("503" in err_str or "UNAVAILABLE" in err_str or "demand" in err_str) and attempt == 0:
+                        await asyncio.sleep(0.6)
+                        continue
+                    break
 
         # ---- Pass 2: non-streaming fallback ---------------------------
         for model_name in self.chat_models:
