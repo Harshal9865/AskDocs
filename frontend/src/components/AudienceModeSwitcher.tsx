@@ -11,7 +11,6 @@ import {
   Briefcase,
   Check,
   X,
-  Sparkles,
   ShieldCheck,
   ChevronRight,
   Layers,
