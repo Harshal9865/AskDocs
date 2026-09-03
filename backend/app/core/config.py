@@ -47,8 +47,8 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str | None = None
 
     GEMINI_API_KEY: str | None = None
-    GEMINI_CHAT_MODEL: str = "gemini-2.5-flash"
-    GEMINI_EMBED_MODEL: str = "gemini-embedding-001"
+    GEMINI_CHAT_MODEL: str = "gemini-1.5-flash"
+    GEMINI_EMBED_MODEL: str = "text-embedding-004"
 
     STORAGE_DIR: str = "storage"
     STORAGE_BACKEND: str = "local"  # "local" (dev) or "db" (hosted, e.g. Render)
