@@ -5,6 +5,7 @@ import Link from "next/link";
 import { api, API_BASE } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
+import { useAudienceMode } from "@/lib/audience-mode-context";
 import ChatComposer, { type AttachedFile } from "@/components/ChatComposer";
 import { useUserAvatar } from "@/lib/use-user-avatar";
 import Avatar from "@/components/Avatar";
@@ -159,6 +160,7 @@ function fmtTime(iso: string | null): string {
 export default function ChatsPage() {
   const { workspace } = useWorkspace();
   const { user } = useAuth();
+  const { config: modeConfig } = useAudienceMode();
   const [chats, setChats] = useState<TeamChat[]>([]);
   const [colleagues, setColleagues] = useState<Member[]>([]);
   const [activeChat, setActiveChat] = useState<TeamChat | null>(null);
@@ -544,7 +546,14 @@ export default function ChatsPage() {
           {/* Top Sticky Bar */}
           <div className="sticky top-0 z-10 border-b border-slate-100 bg-white/95 px-2 pb-3.5 pt-2 backdrop-blur dark:border-white/5 dark:bg-[#0b0f14]/95">
             <div className="mb-3 flex items-center justify-between gap-1">
-              <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">Chats</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">
+                  {modeConfig.chatLabel}
+                </h2>
+                <span className="rounded-full bg-purple-500/15 px-2 py-0.5 text-[10px] font-mono font-bold text-purple-600 dark:text-purple-300">
+                  {modeConfig.badge}
+                </span>
+              </div>
               <div className="flex shrink-0 items-center gap-2">
                 <button 
                   onClick={() => setShowNewChat(true)} 
@@ -556,7 +565,7 @@ export default function ChatsPage() {
                 </button>
                 <button 
                   onClick={() => setShowNewGroup(true)} 
-                  title="New Group Chat" 
+                  title={`New ${modeConfig.groupTypeLabel}`} 
                   aria-label="New group" 
                   className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1DB954] hover:bg-[#1ed760] text-white transition-all shadow-md shadow-emerald-500/25 hover:scale-105 active:scale-95"
                 >
@@ -571,7 +580,7 @@ export default function ChatsPage() {
               <input 
                 value={query} 
                 onChange={(e) => setQuery(e.target.value)} 
-                placeholder="Search chats or teammates…" 
+                placeholder={modeConfig.chatPlaceholder} 
                 className="w-full rounded-full border border-slate-200/80 bg-slate-50/90 py-2 pl-9 pr-4 text-xs outline-none placeholder:text-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#16161e] dark:text-white dark:placeholder:text-zinc-500 transition-all" 
               />
             </div>
@@ -1292,10 +1301,47 @@ export default function ChatsPage() {
       {/* New group modal */}
       {showNewGroup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" onClick={() => setShowNewGroup(false)}>
-          <div className="max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-5 shadow-xl sm:p-6 dark:bg-[#181818]" onClick={(e) => e.stopPropagation()}>
-            <h2 className="mb-4 text-lg font-bold text-slate-900 dark:text-white">New Group Chat</h2>
-            <label className="mb-1 block text-sm font-medium text-slate-900 dark:text-white" htmlFor="group-title">Group name</label>
-            <input id="group-title" value={groupTitle} onChange={(e) => setGroupTitle(e.target.value)} placeholder="e.g. CS201 Study Group, Sprint Launch, Research Lab" className="mb-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#1DB954] focus:ring-2 focus:ring-[#1DB954]/20 dark:border-white/10 dark:bg-[#242424] dark:text-white" />
+          <div className="max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl sm:p-7 dark:bg-[#18181e] border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-150" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <span>{modeConfig.groupTypeLabel}</span>
+              </h2>
+              <span className="rounded-full bg-purple-500/15 px-2.5 py-0.5 text-[10px] font-mono font-bold text-purple-600 dark:text-purple-300">
+                {modeConfig.badge}
+              </span>
+            </div>
+
+            <p className="mb-3 text-xs text-slate-500 dark:text-zinc-400">
+              Create a dedicated workspace group with realtime presence, reactions, and document attachments.
+            </p>
+
+            {/* Quick Suggestions Chips */}
+            <div className="mb-4">
+              <span className="mb-1.5 block text-[11px] font-semibold text-slate-400 dark:text-zinc-500">Suggested Names:</span>
+              <div className="flex flex-wrap gap-1.5">
+                {modeConfig.groupPlaceholders.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onClick={() => setGroupTitle(suggestion)}
+                    className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-medium text-slate-700 hover:border-purple-500 hover:bg-purple-50 hover:text-purple-700 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:border-purple-500/50 dark:hover:bg-purple-950/30 transition-all cursor-pointer"
+                  >
+                    + {suggestion}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <label className="mb-1 block text-sm font-medium text-slate-900 dark:text-white" htmlFor="group-title">
+              {modeConfig.groupTypeLabel} Name
+            </label>
+            <input
+              id="group-title"
+              value={groupTitle}
+              onChange={(e) => setGroupTitle(e.target.value)}
+              placeholder={`e.g. ${modeConfig.groupPlaceholders[0]}`}
+              className="mb-4 w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#24242c] dark:text-white"
+            />
             <label className="mb-1 block text-sm font-medium text-slate-900 dark:text-white">Select members (min 2)</label>
             {colleagues.length === 0 ? <p className="mb-4 text-sm text-slate-500 dark:text-zinc-400">No colleagues to add yet.</p> : (
               <ul className="mb-4 max-h-48 space-y-1 overflow-y-auto">

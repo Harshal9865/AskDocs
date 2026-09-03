@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { WorkspaceProvider } from "@/lib/workspace-context";
+import { AudienceModeProvider } from "@/lib/audience-mode-context";
 import Sidebar from "@/components/Sidebar";
 import TopNavbar from "@/components/TopNavbar";
 import CommandPalette from "@/components/CommandPalette";
@@ -47,29 +48,31 @@ export default function ProtectedLayout({
 
   return (
     <WorkspaceProvider>
-      <div className="flex h-[100dvh] flex-col overflow-hidden">
-        <TopNavbar onMenu={() => setDrawerOpen(true)} />
-        <Toaster />
-        <div className={`dark:bg-[#121212] flex flex-1 min-h-0 transition-colors ${isChatPage ? "overflow-hidden" : ""}`}>
-          <Sidebar
-            mobileOpen={drawerOpen}
-            onCloseMobile={() => setDrawerOpen(false)}
-            width={width}
-            setWidth={setWidth}
-          />
-          <main
-            className={`dark:bg-[#121212] min-w-0 flex-1 min-h-0 transition-colors ${
-              isChatPage
-                ? "flex flex-col overflow-hidden p-4 md:p-6"
-                : "overflow-y-auto p-4 md:p-6"
-            }`}
-          >
-            <WelcomeModal />
-            <CommandPalette />
-            {children}
-          </main>
+      <AudienceModeProvider>
+        <div className="flex h-[100dvh] flex-col overflow-hidden">
+          <TopNavbar onMenu={() => setDrawerOpen(true)} />
+          <Toaster />
+          <div className={`dark:bg-[#121212] flex flex-1 min-h-0 transition-colors ${isChatPage ? "overflow-hidden" : ""}`}>
+            <Sidebar
+              mobileOpen={drawerOpen}
+              onCloseMobile={() => setDrawerOpen(false)}
+              width={width}
+              setWidth={setWidth}
+            />
+            <main
+              className={`dark:bg-[#121212] min-w-0 flex-1 min-h-0 transition-colors ${
+                isChatPage
+                  ? "flex flex-col overflow-hidden p-4 md:p-6"
+                  : "overflow-y-auto p-4 md:p-6"
+              }`}
+            >
+              <WelcomeModal />
+              <CommandPalette />
+              {children}
+            </main>
+          </div>
         </div>
-      </div>
+      </AudienceModeProvider>
     </WorkspaceProvider>
   );
 }

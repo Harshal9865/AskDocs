@@ -34,6 +34,8 @@ import {
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
+import { useAudienceMode } from "@/lib/audience-mode-context";
+import AudienceModeSwitcherModal from "@/components/AudienceModeSwitcher";
 import Colleagues from "@/components/Colleagues";
 import FriendsQuickAccess from "@/components/FriendsQuickAccess";
 import PlanBadge from "@/components/PlanBadge";
@@ -92,6 +94,8 @@ export default function Sidebar({
   const { workspace, workspaces, select, refresh } = useWorkspace();
   const router = useRouter();
   const pathname = usePathname();
+  const { config: modeConfig } = useAudienceMode();
+  const [showModeModal, setShowModeModal] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
   const [busy, setBusy] = useState(false);
@@ -102,6 +106,20 @@ export default function Sidebar({
   const [collapsed, setCollapsed] = useState(false);
   // on mobile drawer open, always show labels regardless of desktop collapsed
   const isCollapsed = collapsed && !mobileOpen;
+
+  // Dynamic NAV items with mode's chat nomenclature
+  const dynamicNav = NAV.map((item) =>
+    item.href === "/chats" ? { ...item, label: modeConfig.chatLabel } : item
+  );
+
+  // Prioritize Intelligence studio items based on active mode
+  const prioritizedIntelligence = [...NAV_INTELLIGENCE].sort((a, b) => {
+    const idxA = modeConfig.priorityStudios.indexOf(a.href);
+    const idxB = modeConfig.priorityStudios.indexOf(b.href);
+    const orderA = idxA === -1 ? 99 : idxA;
+    const orderB = idxB === -1 ? 99 : idxB;
+    return orderA - orderB;
+  });
 
   useEffect(() => {
     setCollapsed(localStorage.getItem("askdocs_sb_collapsed") === "1");
@@ -396,10 +414,29 @@ export default function Sidebar({
             </button>
           </form>
         )}
+        {/* Active Audience Mode Button Indicator */}
+        {!isCollapsed && (
+          <div className="px-2 pb-2">
+            <button
+              onClick={() => setShowModeModal(true)}
+              className="flex w-full items-center justify-between rounded-xl border border-purple-500/20 bg-gradient-to-r from-purple-500/10 via-indigo-500/5 to-transparent px-2.5 py-1.5 text-left text-xs transition-all hover:border-purple-500/40 hover:bg-purple-500/15 cursor-pointer group"
+              title="Click to switch workspace operational mode"
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="truncate font-bold text-slate-800 dark:text-zinc-200 text-[11px]">
+                  {modeConfig.badge}
+                </span>
+              </div>
+              <span className="rounded-md bg-purple-500/15 px-1.5 py-0.5 text-[9px] font-mono font-bold text-purple-600 dark:text-purple-300 shrink-0 group-hover:bg-purple-500 group-hover:text-white transition-all">
+                Switch ⚙️
+              </span>
+            </button>
+          </div>
+        )}
         </div>
 
       <nav className="scrollbar-thin min-h-0 flex-1 overflow-y-auto p-2">
-        {NAV.map((item) => {
+        {dynamicNav.map((item) => {
           const active = pathname === item.href || (item.href === "/friends" && pathname.startsWith("/friends")) || (item.href === "/documents" && pathname.startsWith("/documents"));
           const Icon = item.icon;
           const showCount = (item.href === "/friends" && friendReqCount > 0) || (item.href === "/documents" && docCount !== null && docCount > 0) || (item.href === "/chats" && unreadChatCount > 0);
@@ -439,7 +476,7 @@ export default function Sidebar({
         <div className="sb-label mb-1.5 mt-4 px-3 text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
           Intelligence
         </div>
-        {NAV_INTELLIGENCE.map((item) => {
+        {prioritizedIntelligence.map((item) => {
           const active = pathname === item.href || (item.href === "/contracts/compare" && pathname.startsWith("/contracts/compare"));
           const Icon = item.icon;
           return (
@@ -549,6 +586,12 @@ export default function Sidebar({
         aria-label="Resize sidebar"
         title="Drag to resize sidebar"
         className="absolute inset-y-0 right-0 z-10 hidden w-1.5 cursor-col-resize bg-transparent transition-colors hover:bg-indigo-200 md:block"
+      />
+
+      {/* Audience Mode Switcher Modal */}
+      <AudienceModeSwitcherModal
+        isOpen={showModeModal}
+        onClose={() => setShowModeModal(false)}
       />
     </aside>
     </>

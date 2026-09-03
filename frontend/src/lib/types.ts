@@ -34,6 +34,23 @@ export interface TokenPair {
   token_type: string;
 }
 
+export type AudienceMode = "academic" | "office" | "legal" | "finance" | "clinical" | "personal";
+
+export interface AudienceModeConfig {
+  id: AudienceMode;
+  name: string;
+  badge: string;
+  tagline: string;
+  chatLabel: string;
+  chatPlaceholder: string;
+  groupTypeLabel: string;
+  groupPlaceholders: string[];
+  themeColor: string;
+  priorityStudios: string[]; // List of studio hrefs in order of priority
+  securityNote?: string;
+  defaultPiiRedaction: boolean;
+}
+
 export interface Workspace {
   id: string;
   name: string;
@@ -44,6 +61,7 @@ export interface Workspace {
   is_public?: boolean;
   member_count?: number | null;
   role?: string;
+  audience_mode?: AudienceMode;
 }
 
 export interface ContractObligation {
