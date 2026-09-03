@@ -42,7 +42,6 @@ export default function WorkspaceCanvasPage() {
   const [copiedMatrix, setCopiedMatrix] = useState<boolean>(false);
   const [modalSearchQuery, setModalSearchQuery] = useState<string>("");
   const [uploadingDoc, setUploadingDoc] = useState<boolean>(false);
-  const [docSearchQuery, setDocSearchQuery] = useState<string>("");
   const [showQuickGuide, setShowQuickGuide] = useState<boolean>(false);
 
   const loadData = useCallback(async () => {

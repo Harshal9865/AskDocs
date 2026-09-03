@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  BookOpen,
   Building2,
   Check,
   CheckCircle2,
@@ -19,8 +18,6 @@ import {
   RefreshCw,
   Scale,
   Send,
-  ShieldAlert,
-  Sparkles,
   Stethoscope,
   Terminal,
   Wallet,

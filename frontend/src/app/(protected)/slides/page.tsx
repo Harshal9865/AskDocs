@@ -17,7 +17,6 @@ import {
   UploadCloud,
   Search,
   Globe,
-  Share2,
 } from "lucide-react";
 import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
@@ -56,7 +55,6 @@ export default function SlideDeckStudioPage() {
   const [copiedGamma, setCopiedGamma] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showKeyGuide, setShowKeyGuide] = useState(false);
-  const [showGammaModal, setShowGammaModal] = useState(false);
 
   const [deckTitle, setDeckTitle] = useState("Executive Strategic Briefing");
   const [slides, setSlides] = useState<Slide[]>([
