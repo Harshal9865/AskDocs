@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, Compass, Home, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, UsersRound, Pencil, User, CalendarClock, FileSpreadsheet, Brain, ShieldCheck, GraduationCap } from "lucide-react";
+import { ChevronDown, Compass, Home, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, UsersRound, Pencil, User, ShieldCheck, GraduationCap } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -159,30 +159,26 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           </Link>
 
           <Link
-            href="/digest"
-            title="Digest"
-            aria-label="Digest"
+            href="/documents"
+            title="Documents"
+            aria-label="Documents"
             className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all ${
-              pathname === "/digest" || pathname.startsWith("/digest/")
+              pathname === "/documents" || pathname.startsWith("/documents/")
                 ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
                 : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
             }`}
           >
-            <FileSpreadsheet className="h-3.5 w-3.5" />
+            <FileText className="h-3.5 w-3.5" />
           </Link>
         </div>
       </div>
 
-      {/* desktop nav — fills the empty middle (collapses to More sheet <lg) */}
-      <nav className="hidden items-center gap-1 lg:flex">
+      {/* desktop nav — clean, compact primary hubs */}
+      <nav className="hidden items-center gap-1.5 lg:flex">
         {[
-          { href: "/", label: "Home", Icon: Compass },
           { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
           { href: "/chat", label: "AI Chat", Icon: Sparkles },
           { href: "/chats", label: modeConfig.chatLabel, Icon: MessagesSquare },
-          { href: "/contracts", label: "Contracts", Icon: CalendarClock },
-          { href: "/digest", label: "Digest", Icon: FileSpreadsheet },
-          { href: "/memory", label: "Memory", Icon: Brain },
           { href: "/documents", label: "Documents", Icon: FileText },
         ].map(({ href, label, Icon }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
@@ -192,7 +188,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
               href={href}
               className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
                 active
-                  ? "bg-slate-900 text-white dark:bg-white dark:text-black"
+                  ? "bg-slate-900 text-white dark:bg-white dark:text-black font-semibold shadow-xs"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white"
               }`}
             >
@@ -232,11 +228,9 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
             <div className="fixed inset-0 z-40" onClick={() => setMoreOpen(false)} />
             <div className="dark:border-white/10 dark:bg-[#242424] absolute left-0 z-50 mt-2 w-48 rounded-xl border border-slate-200 bg-white p-1 shadow-xl">
               {[
-                { href: "/", label: "Home", Icon: Compass },
                 { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
                 { href: "/chat", label: "AI Chat", Icon: Sparkles },
-                { href: "/chats", label: "Office Chats", Icon: MessagesSquare },
-                { href: "/friends", label: "Friends", Icon: UsersRound },
+                { href: "/chats", label: modeConfig.chatLabel, Icon: MessagesSquare },
                 { href: "/documents", label: "Documents", Icon: FileText },
               ].map(({ href, label, Icon }) => {
                 const active = pathname === href || pathname.startsWith(href + "/");
