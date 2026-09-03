@@ -256,7 +256,6 @@ export default function ProfilePage() {
     );
   }
 
-  return (
   const copyProfileLink = () => {
     if (typeof window !== "undefined") {
       navigator.clipboard.writeText(window.location.href);
