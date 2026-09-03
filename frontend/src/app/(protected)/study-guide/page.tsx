@@ -852,7 +852,7 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
                     </button>
 
                     <span className="text-[11px] text-slate-400">
-                      Difficulty: {currentFlashcard.difficulty.toUpperCase()}
+                      Difficulty: {(currentFlashcard.difficulty || "medium").toUpperCase()}
                     </span>
                   </div>
                 </div>
