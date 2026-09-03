@@ -380,6 +380,32 @@ You MUST return ONLY a valid JSON object strictly matching this schema with no m
       badge: "🎧 Spoken Audio Broadcast Transcript • AskDocs Audio Studio",
       documentSource: doc?.title || "Workspace Document",
       workspaceName: workspace?.name,
+      summaryCards: [
+        {
+          label: "Broadcast Format",
+          value: currentBrief.speaker_format === "dialogue_podcast" ? "2-Host Podcast" : "Audio Brief",
+          subtext: "Spoken narration",
+          color: "#6366f1",
+        },
+        {
+          label: "Est. Duration",
+          value: `${Math.max(1, Math.round(currentBrief.duration_estimate_seconds / 60))} Mins`,
+          subtext: "Total broadcast time",
+          color: "#0ea5e9",
+        },
+        {
+          label: "Key Takeaways",
+          value: currentBrief.key_takeaways.length,
+          subtext: "Core strategic points",
+          color: "#10b981",
+        },
+        {
+          label: "Dialogue Turns",
+          value: currentBrief.dialogue_turns?.length || 1,
+          subtext: "Spoken exchanges",
+          color: "#8b5cf6",
+        },
+      ],
       sections: [
         {
           heading: "1. Executive Strategic Takeaways",

@@ -353,6 +353,32 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
       badge: "🎓 High-Yield Study Packet • AskDocs Study Studio",
       documentSource: studyDeck.document_titles.join(", "),
       workspaceName: workspace?.name,
+      summaryCards: [
+        {
+          label: "Synthesized Files",
+          value: studyDeck.document_titles.length,
+          subtext: "Source documents",
+          color: "#8b5cf6",
+        },
+        {
+          label: "Exam Questions",
+          value: studyDeck.quiz.length,
+          subtext: "Timed practice items",
+          color: "#6366f1",
+        },
+        {
+          label: "Flashcards",
+          value: studyDeck.flashcards.length,
+          subtext: "Active recall cards",
+          color: "#ec4899",
+        },
+        {
+          label: "Key Terms",
+          value: studyDeck.key_concepts.length,
+          subtext: "Core vocabulary",
+          color: "#10b981",
+        },
+      ],
       sections: [
         {
           heading: "1. Executive Core Principles & Cheat Sheet",

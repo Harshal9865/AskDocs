@@ -269,6 +269,32 @@ interface ExtractedJsonResponse {
       badge: `Confidence ${extractedData.confidence_score}% • ${editableRows.length} Verified Records`,
       documentSource: extractedData.document_title,
       workspaceName: workspace?.name,
+      summaryCards: [
+        {
+          label: "Total Records",
+          value: editableRows.length,
+          subtext: "Extracted data rows",
+          color: "#10b981",
+        },
+        {
+          label: "Data Columns",
+          value: extractedData.columns.length,
+          subtext: "Structured fields",
+          color: "#6366f1",
+        },
+        {
+          label: "Confidence Score",
+          value: `${extractedData.confidence_score}%`,
+          subtext: "AI precision index",
+          color: "#8b5cf6",
+        },
+        {
+          label: "Numeric Fields",
+          value: `${numericColumns.length} Columns`,
+          subtext: "Auto-computed totals",
+          color: "#0ea5e9",
+        },
+      ],
       sections: [
         {
           heading: "Executive Insights & Observations",

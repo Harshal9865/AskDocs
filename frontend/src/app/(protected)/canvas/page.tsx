@@ -265,33 +265,50 @@ Return ONLY valid JSON matching this schema:
       ...(r.values || []),
     ]);
 
+    const completedTasks = (activeCanvas.checklists || []).filter((c) => c.completed).length;
+    const totalTasks = (activeCanvas.checklists || []).length;
+    const criticalRisks = (activeCanvas.heat_map || []).filter(
+      (r) => r.risk_level.toLowerCase() === "critical" || r.risk_level.toLowerCase() === "high"
+    ).length;
+
     exportToPdf({
       title: activeCanvas.title,
-      subtitle: `Multi-Document Comparative Matrix & Synthesis • ${workspace?.name || "Workspace"}`,
-      badge: `${activeCanvas.document_ids?.length || 0} Synthesized Documents • Live Canvas`,
+      subtitle: `Multi-Document Comparative Synthesis & Risk Heat Map • ${workspace?.name || "Workspace"}`,
+      badge: `${activeCanvas.document_ids?.length || 0} Synthesized Documents • Live Operations Canvas`,
+      documentSource: docs.filter((d) => activeCanvas.document_ids.includes(d.id)).map((d) => d.title).join(", ") || `${activeCanvas.document_ids.length} Workspace Files`,
       workspaceName: workspace?.name,
-      sections: [
+      summaryCards: [
         {
-          heading: "Action Items & Implementation Tasks",
-          type: "bullets",
-          bullets: (activeCanvas.checklists || []).map(
-            (c) =>
-              `[${c.completed ? "COMPLETED" : "PENDING"}] <strong>${c.task}</strong> (Source: ${c.source_doc})`
-          ),
+          label: "Synthesized Files",
+          value: activeCanvas.document_ids?.length || 1,
+          subtext: "Cross-analyzed documents",
+          color: "#6366f1",
         },
         {
-          heading: "Compliance & Risk Assessment Heat Map",
-          type: "bullets",
-          bullets: (activeCanvas.heat_map || []).map(
-            (r) =>
-              `<strong>${r.clause_title} (${r.risk_level.toUpperCase()} Risk - ${r.category}):</strong> ${r.description} — <em>Recommendation:</em> ${r.recommendation}`
-          ),
+          label: "Matrix Topics",
+          value: activeCanvas.matrix_data?.rows?.length || 3,
+          subtext: "Evaluation dimensions",
+          color: "#8b5cf6",
+        },
+        {
+          label: "Action Items",
+          value: `${completedTasks}/${totalTasks}`,
+          subtext: "Checklist progress",
+          color: "#10b981",
+        },
+        {
+          label: "Critical Risks",
+          value: criticalRisks,
+          subtext: criticalRisks > 0 ? "Requires review" : "All clear",
+          color: criticalRisks > 0 ? "#ef4444" : "#0ea5e9",
         },
       ],
       table: {
         headers,
         rows,
       },
+      heatMap: activeCanvas.heat_map || [],
+      checklists: activeCanvas.checklists || [],
     });
     showToast("success", "Preparing Executive Canvas PDF for print/download...");
   };

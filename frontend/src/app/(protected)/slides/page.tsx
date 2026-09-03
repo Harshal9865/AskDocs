@@ -232,6 +232,32 @@ interface SlideDeckJsonResponse {
       badge: `${slides.length} Vector Presentation Slides • Free AI Generator`,
       documentSource: currentDoc?.title || "Document Analysis",
       workspaceName: workspace?.name,
+      summaryCards: [
+        {
+          label: "Total Slides",
+          value: slides.length,
+          subtext: "Presentation cards",
+          color: "#6366f1",
+        },
+        {
+          label: "Presentation Theme",
+          value: theme.toUpperCase(),
+          subtext: "Visual aesthetic",
+          color: "#8b5cf6",
+        },
+        {
+          label: "Audience Target",
+          value: persona.toUpperCase(),
+          subtext: "Persona calibrated",
+          color: "#ec4899",
+        },
+        {
+          label: "Document Source",
+          value: currentDoc?.file_type?.toUpperCase() || "PDF",
+          subtext: "Verified context",
+          color: "#10b981",
+        },
+      ],
       sections: slides.map((s, idx) => ({
         heading: `Slide ${idx + 1}: ${s.title}`,
         type: "bullets",
