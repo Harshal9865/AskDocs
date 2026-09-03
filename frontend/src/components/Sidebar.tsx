@@ -414,25 +414,6 @@ export default function Sidebar({
             </button>
           </form>
         )}
-        {/* Active Audience Mode Button Indicator */}
-        {!isCollapsed && (
-          <div className="px-2 pb-2">
-            <button
-              onClick={() => setShowModeModal(true)}
-              className="flex w-full items-center justify-between rounded-xl border border-purple-500/20 bg-gradient-to-r from-purple-500/10 via-indigo-500/5 to-transparent px-2.5 py-1.5 text-left text-xs transition-all hover:border-purple-500/40 hover:bg-purple-500/15 cursor-pointer group"
-              title="Click to switch workspace operational mode"
-            >
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="truncate font-bold text-slate-800 dark:text-zinc-200 text-[11px]">
-                  {modeConfig.badge}
-                </span>
-              </div>
-              <span className="rounded-md bg-purple-500/15 px-1.5 py-0.5 text-[9px] font-mono font-bold text-purple-600 dark:text-purple-300 shrink-0 group-hover:bg-purple-500 group-hover:text-white transition-all">
-                Switch ⚙️
-              </span>
-            </button>
-          </div>
-        )}
         </div>
 
       <nav className="scrollbar-thin min-h-0 flex-1 overflow-y-auto p-2">

@@ -3,47 +3,31 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, Compass, Home, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, UsersRound, Pencil, User, CalendarClock, FileSpreadsheet, Activity, LayoutGrid, Brain, ShieldCheck, GraduationCap } from "lucide-react";
+import { Compass, Home, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, UsersRound, CalendarClock, FileSpreadsheet, Brain, ShieldCheck, GraduationCap } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
+import { useAudienceMode } from "@/lib/audience-mode-context";
+import AudienceModeSwitcherModal from "@/components/AudienceModeSwitcher";
 import NotificationBell from "@/components/NotificationBell";
 import Avatar from "@/components/Avatar";
 import ThemeToggle, { useTheme } from "@/components/ThemeToggle";
 import EditProfileModal from "@/components/EditProfileModal";
-import { showToast } from "@/components/Toast";
 
 export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout, avatarSrc } = useAuth();
   const { workspace } = useWorkspace();
+  const { mode, config: modeConfig } = useAudienceMode();
   const [q, setQ] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [brandSrc, setBrandSrc] = useState<string | null>(null);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
-  const [audienceMode, setAudienceMode] = useState<"academic" | "enterprise">("academic");
+  const [modeModalOpen, setModeModalOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { dark, toggle } = useTheme();
-
-  useEffect(() => {
-    const saved = localStorage.getItem("askdocs_audience_mode");
-    if (saved === "enterprise" || saved === "academic") {
-      setAudienceMode(saved);
-    }
-  }, []);
-
-  const toggleAudienceMode = () => {
-    const next = audienceMode === "academic" ? "enterprise" : "academic";
-    setAudienceMode(next);
-    localStorage.setItem("askdocs_audience_mode", next);
-    if (next === "enterprise") {
-      showToast("success", "🏢 Enterprise Mode Active: Strict NDA data isolation, non-disclosure watermarks, and compliance audit tracking enabled.");
-    } else {
-      showToast("success", "🎓 Academic Mode Active: Flashcards, timed exam quizzes, study guide notes, and study studio enabled.");
-    }
-  };
 
   // resolve uploaded brand logo for the active workspace
   useEffect(() => {
@@ -163,8 +147,8 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
 
           <Link
             href="/chats"
-            title="Office Chats"
-            aria-label="Office Chats"
+            title={modeConfig.chatLabel}
+            aria-label={modeConfig.chatLabel}
             className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all ${
               pathname === "/chats" || pathname.startsWith("/chats/")
                 ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
@@ -195,12 +179,10 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           { href: "/", label: "Home", Icon: Compass },
           { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
           { href: "/chat", label: "AI Chat", Icon: Sparkles },
-          { href: "/chats", label: "Office Chats", Icon: MessagesSquare },
+          { href: "/chats", label: modeConfig.chatLabel, Icon: MessagesSquare },
           { href: "/contracts", label: "Contracts", Icon: CalendarClock },
           { href: "/digest", label: "Digest", Icon: FileSpreadsheet },
-          { href: "/canvas", label: "Canvas", Icon: LayoutGrid },
           { href: "/memory", label: "Memory", Icon: Brain },
-          { href: "/health", label: "Health", Icon: Activity },
           { href: "/documents", label: "Documents", Icon: FileText },
         ].map(({ href, label, Icon }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
@@ -325,31 +307,55 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           <Home className="h-4 w-4" />
         </Link>
 
-        {/* Audience & Confidentiality Mode Switcher */}
+        {/* Audience Mode Switcher Pill Button (Matching Image 2) */}
         <button
-          onClick={toggleAudienceMode}
+          onClick={() => setModeModalOpen(true)}
           type="button"
-          aria-label="Toggle Audience Mode"
-          title={
-            audienceMode === "enterprise"
-              ? "Enterprise Confidential Mode Active: Strict NDA data isolation enabled. Click to switch to Academic Mode."
-              : "Academic & Student Mode Active: Study studio, flashcards, and exam tools enabled. Click to switch to Enterprise Mode."
-          }
-          className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold transition-all cursor-pointer border ${
-            audienceMode === "enterprise"
-              ? "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300 shadow-xs"
-              : "border-purple-500/30 bg-purple-500/10 text-purple-700 dark:text-purple-300 shadow-xs"
+          aria-label="Switch Operational Mode"
+          title={`Active Operational Mode: ${modeConfig.name}. Click to change mode.`}
+          className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black tracking-wider transition-all cursor-pointer border shadow-sm ${
+            mode === "office"
+              ? "border-[#d97706]/70 bg-[#d97706]/15 text-[#fbbf24] shadow-amber-500/10 hover:bg-[#d97706]/25 hover:border-[#fbbf24]"
+              : mode === "academic"
+              ? "border-purple-500/50 bg-purple-500/15 text-purple-300 shadow-purple-500/10 hover:bg-purple-500/25 hover:border-purple-400"
+              : mode === "legal"
+              ? "border-rose-500/50 bg-rose-500/15 text-rose-300 shadow-rose-500/10 hover:bg-rose-500/25 hover:border-rose-400"
+              : mode === "finance"
+              ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-300 shadow-emerald-500/10 hover:bg-emerald-500/25 hover:border-emerald-400"
+              : mode === "clinical"
+              ? "border-cyan-500/50 bg-cyan-500/15 text-cyan-300 shadow-cyan-500/10 hover:bg-cyan-500/25 hover:border-cyan-400"
+              : "border-slate-400/40 bg-slate-500/10 text-slate-300 hover:bg-slate-500/20"
           }`}
         >
-          {audienceMode === "enterprise" ? (
+          {mode === "office" ? (
             <>
-              <ShieldCheck className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
-              <span className="hidden md:inline font-mono uppercase text-[10px] tracking-wider">Enterprise NDA</span>
+              <ShieldCheck className="h-3.5 w-3.5 text-[#fbbf24] animate-pulse" />
+              <span className="font-mono uppercase text-[11px] font-bold">ENTERPRISE NDA</span>
+            </>
+          ) : mode === "academic" ? (
+            <>
+              <GraduationCap className="h-3.5 w-3.5 text-purple-400" />
+              <span className="font-mono uppercase text-[11px] font-bold">STUDY MODE</span>
+            </>
+          ) : mode === "legal" ? (
+            <>
+              <ShieldCheck className="h-3.5 w-3.5 text-rose-400" />
+              <span className="font-mono uppercase text-[11px] font-bold">LEGAL VAULT</span>
+            </>
+          ) : mode === "finance" ? (
+            <>
+              <span className="text-[11px]">💰</span>
+              <span className="font-mono uppercase text-[11px] font-bold">FINANCE DESK</span>
+            </>
+          ) : mode === "clinical" ? (
+            <>
+              <span className="text-[11px]">🩺</span>
+              <span className="font-mono uppercase text-[11px] font-bold">CLINICAL LAB</span>
             </>
           ) : (
             <>
-              <GraduationCap className="h-3.5 w-3.5 text-purple-500" />
-              <span className="hidden md:inline font-mono uppercase text-[10px] tracking-wider">Academic Mode</span>
+              <span className="text-[11px]">💼</span>
+              <span className="font-mono uppercase text-[11px] font-bold">SOLO STUDIO</span>
             </>
           )}
         </button>
@@ -454,6 +460,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
       </div>
     </header>
     <EditProfileModal open={editProfileOpen} onOpenChange={setEditProfileOpen} />
+    <AudienceModeSwitcherModal isOpen={modeModalOpen} onClose={() => setModeModalOpen(false)} />
     </>
   );
 }
