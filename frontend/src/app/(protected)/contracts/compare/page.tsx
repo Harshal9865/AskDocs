@@ -23,7 +23,7 @@ import {
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
 import { showToast } from "@/components/Toast";
-import { exportToPdf, downloadBlob } from "@/lib/pdf-export";
+import { exportToPdf } from "@/lib/pdf-export";
 import type { ContractDiffResult, DiffClause, DocumentItem } from "@/lib/types";
 
 type ViewMode = "split" | "unified" | "playbook";

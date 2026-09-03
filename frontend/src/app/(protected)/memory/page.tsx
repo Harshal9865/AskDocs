@@ -6,7 +6,7 @@ import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
 import { MemoryGraphOut, WorkspaceMemory } from "@/lib/types";
 import { showToast } from "@/components/Toast";
-import { exportToPdf, downloadBlob } from "@/lib/pdf-export";
+import { exportToPdf } from "@/lib/pdf-export";
 import {
   Brain,
   Calendar,
@@ -170,6 +170,14 @@ export default function InstitutionalMemoryPage() {
             >
               <Brain className="h-4 w-4" />
               <span>Download PDF Log</span>
+            </button>
+
+            <button
+              onClick={() => setTranscriptModalOpen(true)}
+              className="group relative flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+            >
+              <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
+              <span>Add Transcript</span>
             </button>
 
             <button

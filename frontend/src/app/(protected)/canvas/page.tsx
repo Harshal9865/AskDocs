@@ -6,7 +6,7 @@ import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
 import { DocumentItem, WorkspaceCanvas, MatrixRow } from "@/lib/types";
 import { showToast } from "@/components/Toast";
-import { exportToPdf, downloadBlob } from "@/lib/pdf-export";
+import { exportToPdf } from "@/lib/pdf-export";
 import {
   CheckCircle2,
   FileText,
@@ -127,29 +127,34 @@ export default function WorkspaceCanvasPage() {
       showToast("error", "No active canvas to export.");
       return;
     }
-    const headers = ["Comparison Criteria", ...activeCanvas.comparison_matrix.document_headers];
-    const rows = activeCanvas.comparison_matrix.rows.map((r) => [r.criteria, ...r.values]);
+    const headers = activeCanvas.matrix_data?.headers || ["Criteria", "Summary"];
+    const rows = (activeCanvas.matrix_data?.rows || []).map((r) => [
+      r.topic,
+      r.summary,
+      ...(r.values || []),
+    ]);
 
     exportToPdf({
       title: activeCanvas.title,
       subtitle: `Multi-Document Comparative Matrix & Synthesis • ${workspace?.name || "Workspace"}`,
-      badge: `${activeCanvas.comparison_matrix.document_headers.length} Synthesized Documents • Live Canvas`,
+      badge: `${activeCanvas.document_ids?.length || 0} Synthesized Documents • Live Canvas`,
       workspaceName: workspace?.name,
       sections: [
         {
-          heading: "Executive Canvas Synthesis",
-          type: "callout",
-          content: activeCanvas.summary,
-        },
-        {
           heading: "Action Items & Implementation Tasks",
           type: "bullets",
-          bullets: activeCanvas.checklists.map((c) => `[${c.completed ? "COMPLETED" : "PENDING"}] <strong>${c.task}</strong> (Owner: ${c.owner_tag})`),
+          bullets: (activeCanvas.checklists || []).map(
+            (c) =>
+              `[${c.completed ? "COMPLETED" : "PENDING"}] <strong>${c.task}</strong> (Source: ${c.source_doc})`
+          ),
         },
         {
           heading: "Compliance & Risk Assessment Heat Map",
           type: "bullets",
-          bullets: activeCanvas.risk_heat_map.map((r) => `<strong>${r.risk_title} (${r.severity.toUpperCase()} Risk):</strong> ${r.description} — <em>Mitigation:</em> ${r.mitigation}`),
+          bullets: (activeCanvas.heat_map || []).map(
+            (r) =>
+              `<strong>${r.clause_title} (${r.risk_level.toUpperCase()} Risk - ${r.category}):</strong> ${r.description} — <em>Recommendation:</em> ${r.recommendation}`
+          ),
         },
       ],
       table: {
