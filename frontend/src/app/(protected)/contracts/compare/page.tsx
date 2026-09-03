@@ -243,7 +243,7 @@ Analyze risk shifts, liabilities, indemnities, and termination terms.`;
     exportToPdf({
       title: "Executive Contract Redline & Risk Audit",
       subtitle: `Differential Legal Audit • ${diffResult.doc_a_title} vs ${diffResult.doc_b_title}`,
-      badge: `Risk Level: ${diffResult.overall_risk.toUpperCase()} • ${diffResult.diff_clauses.length} Analyzed Clauses`,
+      badge: `Risk Level: ${diffResult.overall_risk?.toUpperCase() || "AUDIT"} • ${diffResult.clauses?.length || 0} Analyzed Clauses`,
       documentSource: `${diffResult.doc_a_title} ⇄ ${diffResult.doc_b_title}`,
       workspaceName: workspace?.name,
       sections: [
@@ -257,7 +257,7 @@ Analyze risk shifts, liabilities, indemnities, and termination terms.`;
           type: "bullets",
           bullets: diffResult.key_changes,
         },
-        ...diffResult.diff_clauses.map((c, i) => ({
+        ...(diffResult.clauses || []).map((c, i) => ({
           heading: `Clause ${i + 1}: ${c.clause_title} (${c.risk_level.toUpperCase()} Risk)`,
           type: "bullets" as const,
           bullets: [

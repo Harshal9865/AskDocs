@@ -62,30 +62,19 @@ export default function WorkspaceDigestPage() {
     exportToPdf({
       title: activeDigest.title || "Workspace Weekly Executive Digest",
       subtitle: `AI-Synthesized Weekly Knowledge Digest • ${workspace?.name || "Workspace"}`,
-      badge: `Executive Briefing • ${new Date(activeDigest.period_start).toLocaleDateString()} – ${new Date(activeDigest.period_end).toLocaleDateString()}`,
+      badge: `Executive Briefing • ${new Date(activeDigest.created_at).toLocaleDateString()}`,
       workspaceName: workspace?.name,
       sections: [
         {
           heading: "Executive Briefing Summary",
           type: "callout",
-          content: activeDigest.summary,
+          content: activeDigest.summary_markdown,
         },
         {
           heading: "Key Document Highlights & Deliverables",
           type: "bullets",
-          bullets: activeDigest.key_highlights,
+          bullets: activeDigest.key_takeaways || [],
         },
-        ...(activeDigest.action_items && activeDigest.action_items.length > 0
-          ? [
-              {
-                heading: "Priority Action Items & Follow-ups",
-                type: "bullets" as const,
-                bullets: activeDigest.action_items.map(
-                  (a) => `<strong>${a.title}:</strong> ${a.description} (${a.priority.toUpperCase()} priority)`
-                ),
-              },
-            ]
-          : []),
       ],
     });
     showToast("success", "Preparing Weekly Digest PDF for print/download...");

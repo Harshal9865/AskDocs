@@ -78,11 +78,11 @@ export default function InstitutionalMemoryPage() {
           content: `This log records temporal organizational decisions, key agreements, policy exceptions, and team facts automatically preserved in the AskDocs Knowledge Graph.`,
         },
         ...memories.map((m, i) => ({
-          heading: `Memory Record ${i + 1}: ${m.key_phrase || m.title || "Indexed Context"} (${m.source_type.toUpperCase()})`,
+          heading: `Memory Record ${i + 1}: ${m.title || "Indexed Context"} (${m.source_type.toUpperCase()})`,
           type: "bullets" as const,
           bullets: [
             `<strong>Core Principle / Finding:</strong> ${m.summary}`,
-            `<strong>Relevance / Entities:</strong> ${m.entities.join(", ") || "General Workspace Context"}`,
+            `<strong>Relevance / Entities:</strong> ${(m.entities || []).join(", ") || "General Workspace Context"}`,
             `<strong>Recorded Date:</strong> ${new Date(m.created_at).toLocaleDateString()}`,
           ],
         })),

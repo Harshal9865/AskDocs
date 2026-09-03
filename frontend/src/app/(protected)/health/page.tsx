@@ -52,19 +52,20 @@ export default function DocumentHealthDashboardPage() {
     exportToPdf({
       title: "Workspace Document Health & Compliance Audit",
       subtitle: `Automated Repository Integrity Scan • ${workspace?.name || "Workspace"}`,
-      badge: `Health Score: ${report.health_score}/100 • ${report.issues.length} Identified Issues`,
+      badge: `Health Score: ${report.health_score}/100 • ${report.issues?.length || 0} Identified Issues`,
       workspaceName: workspace?.name,
       sections: [
         {
           heading: "Executive Integrity Summary",
           type: "callout",
-          content: `Overall Workspace Health Score: <strong>${report.health_score}/100</strong>. Audited ${report.scanned_docs} total documents. Detected ${report.stale_count} stale documents and ${report.conflict_count} contradictory policy flags.`,
+          content: `Overall Workspace Health Score: <strong>${report.health_score}/100</strong>. Audited ${report.total_documents} total documents. Detected ${report.critical_issues_count} critical issues and ${report.warning_issues_count} warnings. Healthy document count: ${report.healthy_documents_count}.`,
         },
         {
           heading: "Key Audit Findings & Discrepancies",
           type: "bullets",
-          bullets: report.issues.map(
-            (iss, i) => `<strong>Issue ${i + 1} (${iss.severity.toUpperCase()}):</strong> ${iss.document_title} — ${iss.description}<br/><em>Action:</em> ${iss.recommendation}`
+          bullets: (report.issues || []).map(
+            (iss, i) =>
+              `<strong>Issue ${i + 1} (${iss.severity?.toUpperCase()} - ${iss.title}):</strong> ${iss.description}${iss.suggested_action ? `<br/><em>Action:</em> ${iss.suggested_action}` : ""}`
           ),
         },
       ],
