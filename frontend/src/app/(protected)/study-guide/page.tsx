@@ -11,8 +11,11 @@ import {
   Download,
   FileQuestion,
   FileSpreadsheet,
+  FileText,
   GraduationCap,
+  Grid,
   Lightbulb,
+  List,
   Printer,
   RefreshCw,
   RotateCw,
@@ -121,6 +124,7 @@ export default function StudyGuidePage() {
   // Search & Filter State for multi-file handling
   const [docSearchQuery, setDocSearchQuery] = useState<string>("");
   const [docFilterType, setDocFilterType] = useState<DocFilterType>("all");
+  const [docViewLayout, setDocViewLayout] = useState<"list" | "grid">("list");
   const [uploadingDoc, setUploadingDoc] = useState<boolean>(false);
   const [uploadingSampleFile, setUploadingSampleFile] = useState<boolean>(false);
 
@@ -679,23 +683,58 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
 
       {/* Synthesis Config & Multi-Document Selector Card */}
       <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-6">
-        {/* Document Multi-Select Chips with Live Search & Upload */}
+        {/* Document Multi-Select Chips with Live Search, Upload & Spotify List View */}
         <div className="space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               <label className="text-xs font-black uppercase tracking-wider text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
-                <BookOpen className="h-4 w-4" /> 1. Select Workspace Documents to Synthesize (Up to 5)
+                <BookOpen className="h-4 w-4 text-[#1db954]" /> 1. Select Workspace Documents to Synthesize (Up to 5)
               </label>
-              <div className="text-[11px] font-bold text-slate-500 dark:text-zinc-400">
-                Selected ({selectedDocIds.length} / 5):{" "}
-                <span className="text-purple-600 dark:text-purple-400">
-                  {docs.filter((d) => selectedDocIds.includes(d.id)).map((d) => d.title).join(", ") || "None selected"}
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-black tracking-wider transition-all ${
+                  selectedDocIds.length > 0
+                    ? "bg-[#1db954]/20 border border-[#1db954]/50 text-[#1db954] dark:text-[#1ed760] shadow-xs"
+                    : "bg-slate-100 dark:bg-white/5 text-slate-500"
+                }`}>
+                  <span className={`h-2 w-2 rounded-full ${selectedDocIds.length > 0 ? "bg-[#1db954] animate-pulse" : "bg-slate-400"}`} />
+                  <span>Selected: {selectedDocIds.length} / 5</span>
+                </span>
+                <span className="text-[11px] text-slate-500 dark:text-zinc-400 truncate max-w-[280px]">
+                  {docs.filter((d) => selectedDocIds.includes(d.id)).map((d) => d.title).join(", ") || "No files selected"}
                 </span>
               </div>
             </div>
 
-            {/* Direct Document Upload to Workspace */}
-            <div className="flex items-center gap-2">
+            {/* Direct Document Upload & Layout View Toggle */}
+            <div className="flex items-center gap-2 shrink-0">
+              {/* List / Grid layout toggle (Spotify style) */}
+              <div className="flex items-center rounded-xl border border-slate-200 bg-slate-100 p-0.5 dark:border-white/10 dark:bg-white/5">
+                <button
+                  type="button"
+                  onClick={() => setDocViewLayout("list")}
+                  className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                    docViewLayout === "list"
+                      ? "bg-white dark:bg-white/15 text-[#1db954] shadow-xs"
+                      : "text-slate-400 hover:text-slate-700 dark:hover:text-white"
+                  }`}
+                  title="Spotify Tracklist View"
+                >
+                  <List className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDocViewLayout("grid")}
+                  className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                    docViewLayout === "grid"
+                      ? "bg-white dark:bg-white/15 text-[#1db954] shadow-xs"
+                      : "text-slate-400 hover:text-slate-700 dark:hover:text-white"
+                  }`}
+                  title="Grid Cards View"
+                >
+                  <Grid className="h-3.5 w-3.5" />
+                </button>
+              </div>
+
               <input
                 type="file"
                 ref={docFileInputRef}
@@ -707,7 +746,7 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
                 type="button"
                 onClick={() => docFileInputRef.current?.click()}
                 disabled={uploadingDoc}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-purple-500/30 bg-purple-500/10 px-3.5 py-1.5 text-xs font-bold text-purple-700 dark:text-purple-300 hover:bg-purple-500/20 active:scale-95 transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-[#1db954]/15 border border-[#1db954]/30 px-3.5 py-1.5 text-xs font-black text-[#1db954] hover:bg-[#1db954]/25 active:scale-95 transition-all cursor-pointer"
                 title="Upload a new document directly into workspace"
               >
                 {uploadingDoc ? (
@@ -717,7 +756,7 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
                   </>
                 ) : (
                   <>
-                    <UploadCloud className="h-3.5 w-3.5 text-purple-500" />
+                    <UploadCloud className="h-3.5 w-3.5" />
                     <span>+ Upload Document</span>
                   </>
                 )}
@@ -729,7 +768,7 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
                   onClick={handleClearSelection}
                   className="rounded-xl border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400 cursor-pointer"
                 >
-                  Clear All
+                  Clear
                 </button>
               )}
             </div>
@@ -743,8 +782,8 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
                 type="text"
                 value={docSearchQuery}
                 onChange={(e) => setDocSearchQuery(e.target.value)}
-                placeholder="🔍 Search documents by file name or keyword..."
-                className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/80 pl-9 pr-8 py-2 text-xs font-medium text-slate-900 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white"
+                placeholder="🔍 Search documents by name or keyword..."
+                className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/80 pl-9 pr-8 py-2 text-xs font-medium text-slate-900 outline-none focus:border-[#1db954] focus:ring-2 focus:ring-[#1db954]/20 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white"
               />
               {docSearchQuery && (
                 <button
@@ -773,7 +812,7 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
                   onClick={() => setDocFilterType(f.id)}
                   className={`rounded-xl px-3 py-1.5 text-[11px] font-bold transition-all whitespace-nowrap cursor-pointer ${
                     docFilterType === f.id
-                      ? "bg-purple-600 text-white shadow-sm"
+                      ? "bg-[#1db954] text-black font-extrabold shadow-sm shadow-[#1db954]/30"
                       : "border border-slate-200/80 bg-slate-50 text-slate-600 hover:bg-slate-100 dark:border-white/5 dark:bg-[#1f1f2e] dark:text-zinc-400"
                   }`}
                 >
@@ -785,7 +824,7 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
                 <button
                   type="button"
                   onClick={handleSelectAllFiltered}
-                  className="rounded-xl border border-purple-500/20 bg-purple-500/10 px-3 py-1.5 text-[11px] font-bold text-purple-700 dark:text-purple-300 hover:bg-purple-500/20 whitespace-nowrap cursor-pointer"
+                  className="rounded-xl border border-[#1db954]/30 bg-[#1db954]/10 px-3 py-1.5 text-[11px] font-black text-[#1db954] hover:bg-[#1db954]/20 whitespace-nowrap cursor-pointer"
                 >
                   Select Top 5
                 </button>
@@ -793,73 +832,118 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
             </div>
           </div>
 
-          {/* Document Chips Grid */}
-          <div className="flex flex-wrap gap-2 pt-1 max-h-48 overflow-y-auto pr-1">
-            {filteredDocs.map((d) => {
-              const isSelected = selectedDocIds.includes(d.id);
-              const isPdf = d.file_type === "pdf" || d.title.toLowerCase().endsWith(".pdf");
-              const isDocx = d.file_type === "docx" || d.title.toLowerCase().endsWith(".docx");
+          {/* Document Selector: Spotify Tracklist Style vs Grid */}
+          {docViewLayout === "list" ? (
+            /* Spotify Playlist Tracklist Layout */
+            <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 dark:border-white/10 dark:bg-[#121218]/90 max-h-56 overflow-y-auto divide-y divide-slate-100 dark:divide-white/5 shadow-inner">
+              {filteredDocs.map((d, index) => {
+                const isSelected = selectedDocIds.includes(d.id);
+                const isPdf = d.file_type === "pdf" || d.title.toLowerCase().endsWith(".pdf");
+                const isDocx = d.file_type === "docx" || d.title.toLowerCase().endsWith(".docx");
 
-              return (
-                <button
-                  key={d.id}
-                  type="button"
-                  onClick={() => toggleDocSelection(d.id)}
-                  className={`inline-flex items-center gap-2 rounded-2xl px-3.5 py-2 text-xs font-bold transition-all cursor-pointer ${
-                    isSelected
-                      ? "border border-purple-500 bg-purple-500/15 text-purple-700 dark:text-purple-300 shadow-md shadow-purple-500/10 scale-102"
-                      : "border border-slate-200/80 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-purple-300 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-zinc-300"
-                  }`}
-                >
-                  <span className={`text-[10px] font-black rounded-md px-1.5 py-0.5 ${
-                    isPdf ? "bg-rose-500/15 text-rose-600 dark:text-rose-400" : isDocx ? "bg-blue-500/15 text-blue-600 dark:text-blue-400" : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
-                  }`}>
-                    {isPdf ? "PDF" : isDocx ? "DOCX" : "TXT"}
-                  </span>
-                  <span className="truncate max-w-[220px]">{d.title}</span>
-                  <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-black ${
-                    isSelected ? "bg-purple-600 text-white" : "bg-slate-200 text-slate-500 dark:bg-white/10 dark:text-zinc-400"
-                  }`}>
-                    {isSelected ? "✓" : "+"}
-                  </span>
-                </button>
-              );
-            })}
+                return (
+                  <div
+                    key={d.id}
+                    onClick={() => toggleDocSelection(d.id)}
+                    className={`group flex items-center justify-between px-3.5 py-2.5 text-xs transition-all cursor-pointer ${
+                      isSelected
+                        ? "bg-[#1db954]/15 dark:bg-[#1db954]/20 text-slate-900 dark:text-white font-bold"
+                        : "hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-zinc-300"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      {/* Track # or Active Checkbox */}
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center text-xs font-mono">
+                        {isSelected ? (
+                          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#1db954] text-black font-black text-[10px] shadow-sm">
+                            ✓
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 group-hover:text-purple-400 font-bold text-[11px]">
+                            {index + 1}
+                          </span>
+                        )}
+                      </span>
 
-            {filteredDocs.length === 0 && (
-              <div className="py-6 text-center w-full space-y-2">
-                <p className="text-xs text-slate-500 dark:text-zinc-400">
-                  No documents found matching &ldquo;{docSearchQuery}&rdquo;.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDocSearchQuery("");
-                    setDocFilterType("all");
-                  }}
-                  className="text-xs font-bold text-purple-600 dark:text-purple-400 hover:underline cursor-pointer"
-                >
-                  Reset search & filters
-                </button>
-              </div>
-            )}
+                      {/* File Tag */}
+                      <span className={`text-[10px] font-black rounded-md px-1.5 py-0.5 shrink-0 uppercase ${
+                        isPdf ? "bg-rose-500/15 text-rose-600 dark:text-rose-400" : isDocx ? "bg-blue-500/15 text-blue-600 dark:text-blue-400" : "bg-[#1db954]/15 text-[#1db954]"
+                      }`}>
+                        {isPdf ? "PDF" : isDocx ? "DOCX" : "TXT"}
+                      </span>
 
-            {docs.length === 0 && (
-              <div className="py-8 text-center w-full space-y-3">
-                <p className="text-xs font-bold text-amber-500">
-                  No documents uploaded in this workspace yet.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => docFileInputRef.current?.click()}
-                  className="inline-flex items-center gap-1.5 rounded-2xl bg-purple-600 px-4 py-2 text-xs font-bold text-white shadow-md cursor-pointer"
-                >
-                  <UploadCloud className="h-4 w-4" />
-                  <span>Upload First Document</span>
-                </button>
-              </div>
-            )}
-          </div>
+                      {/* Document Title */}
+                      <span className={`truncate font-semibold ${isSelected ? "text-[#1db954] dark:text-[#1ed760] font-black" : ""}`}>
+                        {d.title}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-[11px] text-slate-400 hidden sm:inline">
+                        {new Date(d.created_at || Date.now()).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                      </span>
+                      <button
+                        type="button"
+                        className={`rounded-xl px-2.5 py-1 text-[11px] font-extrabold transition-all ${
+                          isSelected
+                            ? "bg-[#1db954] text-black shadow-xs"
+                            : "bg-slate-200/80 text-slate-600 group-hover:bg-[#1db954]/20 group-hover:text-[#1db954] dark:bg-white/10 dark:text-zinc-300"
+                        }`}
+                      >
+                        {isSelected ? "Selected" : "+ Add"}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {filteredDocs.length === 0 && (
+                <div className="py-8 text-center w-full space-y-2">
+                  <p className="text-xs text-slate-500 dark:text-zinc-400">
+                    No documents found matching &ldquo;{docSearchQuery}&rdquo;.
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Structured Grid Layout */
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto pr-1">
+              {filteredDocs.map((d) => {
+                const isSelected = selectedDocIds.includes(d.id);
+                const isPdf = d.file_type === "pdf" || d.title.toLowerCase().endsWith(".pdf");
+                const isDocx = d.file_type === "docx" || d.title.toLowerCase().endsWith(".docx");
+
+                return (
+                  <div
+                    key={d.id}
+                    onClick={() => toggleDocSelection(d.id)}
+                    className={`group flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer ${
+                      isSelected
+                        ? "border-[#1db954] bg-[#1db954]/10 dark:bg-[#1db954]/15 shadow-md shadow-[#1db954]/10"
+                        : "border-slate-200/80 bg-slate-50/80 hover:bg-slate-100 hover:border-slate-300 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-zinc-300"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={`text-[10px] font-black rounded-md px-1.5 py-0.5 shrink-0 uppercase ${
+                        isPdf ? "bg-rose-500/15 text-rose-600 dark:text-rose-400" : isDocx ? "bg-blue-500/15 text-blue-600 dark:text-blue-400" : "bg-[#1db954]/15 text-[#1db954]"
+                      }`}>
+                        {isPdf ? "PDF" : isDocx ? "DOCX" : "TXT"}
+                      </span>
+                      <span className="truncate text-xs font-bold text-slate-800 dark:text-white">
+                        {d.title}
+                      </span>
+                    </div>
+
+                    <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black ${
+                      isSelected ? "bg-[#1db954] text-black" : "bg-slate-200 text-slate-500 dark:bg-white/10 dark:text-zinc-400"
+                    }`}>
+                      {isSelected ? "✓" : "+"}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Persona Selectors */}
@@ -878,11 +962,11 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
                   onClick={() => setPersona(p.id)}
                   className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all cursor-pointer ${
                     isSelected
-                      ? "border-purple-500 bg-purple-500/10 text-purple-600 dark:text-purple-300 shadow-md shadow-purple-500/15"
+                      ? "border-[#1db954] bg-[#1db954]/10 text-[#1db954] dark:text-[#1ed760] shadow-md shadow-[#1db954]/20 font-black scale-102"
                       : "border-slate-200/80 bg-slate-50/50 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 dark:text-zinc-300"
                   }`}
                 >
-                  <Icon className={`h-5 w-5 mb-1.5 ${isSelected ? "text-purple-600 dark:text-purple-400" : "text-slate-400"}`} />
+                  <Icon className={`h-5 w-5 mb-1.5 ${isSelected ? "text-[#1db954]" : "text-slate-400"}`} />
                   <span className="text-[11px] font-bold leading-tight">{p.label}</span>
                 </button>
               );
@@ -890,7 +974,7 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
           </div>
         </div>
 
-        {/* Quantity and Difficulty Controls */}
+        {/* Quantity and Difficulty Controls with Spotify Green Accent */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 pt-1 border-t border-slate-100 dark:border-white/5">
           {/* Question Count */}
           <div className="space-y-1.5">
@@ -905,7 +989,7 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
                   onClick={() => setQuestionCount(count)}
                   className={`flex items-center justify-center rounded-2xl py-2.5 text-xs font-bold transition-all cursor-pointer ${
                     questionCount === count
-                      ? "bg-purple-600 text-white shadow-md shadow-purple-500/20"
+                      ? "bg-[#1db954] text-black font-black shadow-md shadow-[#1db954]/20"
                       : "border border-slate-200/80 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-white/5 dark:bg-[#1f1f2e] dark:text-zinc-300"
                   }`}
                 >
@@ -928,7 +1012,7 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
                   onClick={() => setFlashcardCount(count)}
                   className={`flex items-center justify-center rounded-2xl py-2.5 text-xs font-bold transition-all cursor-pointer ${
                     flashcardCount === count
-                      ? "bg-purple-600 text-white shadow-md shadow-purple-500/20"
+                      ? "bg-[#1db954] text-black font-black shadow-md shadow-[#1db954]/20"
                       : "border border-slate-200/80 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-white/5 dark:bg-[#1f1f2e] dark:text-zinc-300"
                   }`}
                 >
@@ -957,7 +1041,7 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
                   onClick={() => setDifficulty(d.id)}
                   className={`flex items-center justify-center rounded-2xl py-2.5 text-[11px] font-bold transition-all cursor-pointer ${
                     difficulty === d.id
-                      ? "bg-purple-600 text-white shadow-md shadow-purple-500/20"
+                      ? "bg-[#1db954] text-black font-black shadow-md shadow-[#1db954]/20"
                       : "border border-slate-200/80 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-white/5 dark:bg-[#1f1f2e] dark:text-zinc-300"
                   }`}
                 >
@@ -1028,12 +1112,12 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
           )}
         </div>
 
-        {/* Generate Button */}
+        {/* Generate Button with Spotify Green + Cosmic Purple Hybrid Gradient */}
         <div className="flex justify-end pt-2">
           <button
             onClick={handleGenerateStudyGuide}
             disabled={selectedDocIds.length === 0 || generating}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-8 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-purple-500/25 hover:shadow-purple-500/45 active:scale-95 disabled:opacity-50 transition-all duration-300 cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#1db954] via-purple-600 to-indigo-600 px-8 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-[#1db954]/25 hover:shadow-[#1db954]/45 hover:brightness-110 active:scale-95 disabled:opacity-50 transition-all duration-300 cursor-pointer"
           >
             {generating ? (
               <>

@@ -605,12 +605,12 @@ You MUST return ONLY a valid JSON object strictly matching this schema with no m
                   onClick={() => setPersona(p.id)}
                   className={`flex flex-col text-left p-4 rounded-2xl border transition-all cursor-pointer ${
                     isSelected
-                      ? "border-purple-500 bg-purple-500/10 text-purple-600 dark:text-purple-300 shadow-md shadow-purple-500/15"
+                      ? "border-[#1db954] bg-[#1db954]/10 text-[#1db954] dark:text-[#1ed760] shadow-md shadow-[#1db954]/20 font-bold scale-102"
                       : "border-slate-200/80 bg-slate-50/50 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 dark:text-zinc-300"
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <Icon className={`h-4 w-4 ${isSelected ? "text-purple-600 dark:text-purple-400" : "text-slate-400"}`} />
+                    <Icon className={`h-4 w-4 ${isSelected ? "text-[#1db954]" : "text-slate-400"}`} />
                     <span className="text-xs font-black leading-tight">{p.label}</span>
                   </div>
                   <p className="text-[11px] leading-relaxed text-slate-500 dark:text-zinc-400 font-medium">
@@ -622,12 +622,12 @@ You MUST return ONLY a valid JSON object strictly matching this schema with no m
           </div>
         </div>
 
-        {/* Generate Button */}
+        {/* Generate Button with Spotify Green + Cosmic Purple Hybrid Gradient */}
         <div className="flex justify-end pt-2 border-t border-slate-100 dark:border-white/5">
           <button
             onClick={handleGenerateBrief}
             disabled={!selectedDocId || generating}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-8 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-purple-500/25 hover:shadow-purple-500/45 active:scale-95 disabled:opacity-50 transition-all duration-300 cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#1db954] via-purple-600 to-indigo-600 px-8 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-[#1db954]/25 hover:shadow-[#1db954]/45 hover:brightness-110 active:scale-95 disabled:opacity-50 transition-all duration-300 cursor-pointer"
           >
             {generating ? (
               <>
@@ -647,12 +647,12 @@ You MUST return ONLY a valid JSON object strictly matching this schema with no m
       {/* Generated Audio Briefing Player */}
       <div ref={resultsRef} id="audio-suite-results">
         {currentBrief ? (
-          <div className="rounded-3xl border border-purple-500/30 bg-gradient-to-br from-slate-950 via-[#150f38] to-[#1c124a] p-6 sm:p-8 text-white shadow-2xl backdrop-blur-2xl space-y-6 animate-in fade-in duration-500">
+          <div className="rounded-3xl border border-[#1db954]/30 bg-gradient-to-br from-slate-950 via-[#10141f] to-[#0c1a16] p-6 sm:p-8 text-white shadow-2xl backdrop-blur-2xl space-y-6 animate-in fade-in duration-500">
             {/* Header / Meta */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
               <div className="space-y-1">
-                <span className="text-[10px] font-black uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
-                  <Radio className="h-3.5 w-3.5 animate-pulse text-cyan-400" />
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#1db954] flex items-center gap-1.5">
+                  <Radio className="h-3.5 w-3.5 animate-pulse text-[#1db954]" />
                   Format: {currentBrief.speaker_format.toUpperCase().replace("_", " ")}
                 </span>
                 <h2 className="text-xl sm:text-2xl font-black text-white">
@@ -678,7 +678,7 @@ You MUST return ONLY a valid JSON object strictly matching this schema with no m
 
                 <button
                   onClick={exportBriefPDF}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-purple-600 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-purple-500/25 hover:bg-purple-700 active:scale-95 transition-all cursor-pointer"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-purple-500/25 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
                 >
                   <Download className="h-4 w-4" />
                   <span>PDF Transcript</span>
@@ -686,14 +686,14 @@ You MUST return ONLY a valid JSON object strictly matching this schema with no m
               </div>
             </div>
 
-            {/* Pulsating Audio Waveform Visualizer */}
-            <div className="relative flex h-24 w-full items-center justify-center gap-1 sm:gap-2 overflow-hidden rounded-2xl border border-cyan-500/20 bg-black/50 p-4 backdrop-blur-md shadow-inner">
+            {/* Spotify Signature Audio Waveform Visualizer */}
+            <div className="relative flex h-24 w-full items-center justify-center gap-1 sm:gap-2 overflow-hidden rounded-2xl border border-[#1db954]/25 bg-black/60 p-4 backdrop-blur-md shadow-inner">
               {[45, 65, 85, 50, 95, 75, 35, 90, 100, 65, 45, 80, 95, 60, 85, 70, 50, 90, 75, 55, 85, 65, 40, 75, 95].map((h, i) => (
                 <div
                   key={i}
                   className={`w-1.5 sm:w-2 rounded-full transition-all duration-300 ${
                     isPlaying
-                      ? "bg-gradient-to-t from-purple-500 via-indigo-400 to-cyan-400 animate-pulse"
+                      ? "bg-gradient-to-t from-[#1db954] via-emerald-400 to-cyan-400 animate-pulse shadow-sm shadow-[#1db954]/50"
                       : "bg-slate-700/50"
                   }`}
                   style={{
@@ -704,15 +704,16 @@ You MUST return ONLY a valid JSON object strictly matching this schema with no m
               ))}
             </div>
 
-            {/* Playback Controls Toolbar */}
+            {/* Playback Controls Toolbar with Spotify Green Primary Play Button */}
             <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
               <div className="flex items-center gap-4">
-                {/* Play / Pause Primary Button */}
+                {/* Play / Pause Spotify Button */}
                 <button
                   onClick={handleTogglePlay}
-                  className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 text-white shadow-xl shadow-purple-500/40 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                  className="flex h-14 w-14 items-center justify-center rounded-full bg-[#1db954] hover:bg-[#1ed760] text-black shadow-xl shadow-[#1db954]/30 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                  title={isPlaying ? "Pause Broadcast" : "Play Broadcast"}
                 >
-                  {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-0.5" />}
+                  {isPlaying ? <Pause className="h-6 w-6 fill-black" /> : <Play className="h-6 w-6 ml-0.5 fill-black" />}
                 </button>
 
                 {/* Mute Toggle */}
@@ -738,7 +739,7 @@ You MUST return ONLY a valid JSON object strictly matching this schema with no m
                     onClick={() => handleRateChange(rate)}
                     className={`rounded-xl px-3 py-1.5 text-xs font-black transition-all cursor-pointer ${
                       playbackRate === rate
-                        ? "bg-purple-600 text-white shadow-sm"
+                        ? "bg-[#1db954] text-black shadow-xs font-black"
                         : "text-slate-300 hover:text-white"
                     }`}
                   >
@@ -752,7 +753,7 @@ You MUST return ONLY a valid JSON object strictly matching this schema with no m
             {currentBrief.dialogue_turns && currentBrief.dialogue_turns.length > 0 && (
               <div className="space-y-3 pt-2">
                 <span className="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                  <AudioLines className="h-3.5 w-3.5 text-cyan-400" /> Interactive Spoken Dialogue Turns (Click any turn to jump)
+                  <AudioLines className="h-3.5 w-3.5 text-[#1db954]" /> Interactive Spoken Dialogue Turns (Click any turn to jump)
                 </span>
                 <div className="space-y-2.5 max-h-80 overflow-y-auto pr-1">
                   {currentBrief.dialogue_turns.map((turn, tIdx) => {
@@ -765,20 +766,20 @@ You MUST return ONLY a valid JSON object strictly matching this schema with no m
                         onClick={() => playDialogueTurn(tIdx)}
                         className={`rounded-2xl border p-4 transition-all cursor-pointer ${
                           isActive
-                            ? "border-cyan-400 bg-cyan-500/20 shadow-lg shadow-cyan-500/20 scale-[1.01]"
+                            ? "border-[#1db954] bg-[#1db954]/15 shadow-lg shadow-[#1db954]/20 scale-[1.01]"
                             : "border-white/10 bg-white/5 hover:bg-white/10"
                         }`}
                       >
                         <div className="flex items-center justify-between mb-1.5">
                           <span
                             className={`rounded-lg px-2.5 py-0.5 text-[11px] font-mono font-bold ${
-                              isAlex ? "bg-purple-500/30 text-purple-300" : "bg-cyan-500/30 text-cyan-300"
+                              isAlex ? "bg-purple-500/30 text-purple-300" : "bg-[#1db954]/30 text-[#1db954]"
                             }`}
                           >
                             🎙️ {turn.speaker}
                           </span>
                           {isActive && (
-                            <span className="text-[10px] font-black uppercase text-cyan-400 animate-pulse flex items-center gap-1">
+                            <span className="text-[10px] font-black uppercase text-[#1db954] animate-pulse flex items-center gap-1">
                               <Radio className="h-3 w-3" /> Speaking now
                             </span>
                           )}
