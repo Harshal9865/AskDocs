@@ -596,7 +596,7 @@ const NEW_CAPABILITIES = [
   {
     badge: "Slide Deck Studio",
     title: "1-Click Presentation Generator & Gamma Bridge",
-    desc: "Convert PDFs into high-impact slide decks with Spotify Obsidian themes, fullscreen presenter mode, and instant 1-click export to Gamma AI (gamma.app).",
+    desc: "Convert PDFs into high-impact slide decks with Spotify Obsidian themes, fullscreen presenter mode, and instant 1-click export to Gamma AI (gamma.app/create).",
     icon: Presentation,
     color: "from-pink-500 via-purple-600 to-indigo-500",
     glow: "glow-pink",

@@ -14,9 +14,16 @@ import {
   Info,
   Key,
   ExternalLink,
-  UploadCloud,
-  Search,
   Globe,
+  LayoutGrid,
+  X,
+  Play,
+  Minimize2,
+  Grid3X3,
+  Moon,
+  Sun,
+  Tv,
+  MonitorPlay,
 } from "lucide-react";
 import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
@@ -53,8 +60,14 @@ export default function SlideDeckStudioPage() {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [copiedDeck, setCopiedDeck] = useState(false);
   const [copiedGamma, setCopiedGamma] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [showKeyGuide, setShowKeyGuide] = useState(false);
+
+  // Microsoft PowerPoint Presentation Mode State
+  const [isPowerPointMode, setIsPowerPointMode] = useState(false);
+  const [blackoutMode, setBlackoutMode] = useState<"none" | "black" | "white">("none");
+  const [showSlideGrid, setShowSlideGrid] = useState(false);
+  const [showHud, setShowHud] = useState(true);
+  const hudTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [deckTitle, setDeckTitle] = useState("Executive Strategic Briefing");
   const [slides, setSlides] = useState<Slide[]>([
@@ -115,6 +128,128 @@ export default function SlideDeckStudioPage() {
   useEffect(() => {
     void loadDocuments();
   }, [loadDocuments]);
+
+  // PowerPoint Presentation Mode Handlers
+  const enterPowerPointMode = useCallback((startIndex?: number) => {
+    if (startIndex !== undefined) setCurrentSlideIndex(startIndex);
+    setIsPowerPointMode(true);
+    setBlackoutMode("none");
+    setShowSlideGrid(false);
+    setShowHud(true);
+    try {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+    } catch {
+      /* ignore */
+    }
+    showToast("info", "PowerPoint Slideshow active! [Space/Arrows]: Next • [B]: Blackout • [G]: Grid • [Esc]: Exit");
+  }, []);
+
+  const exitPowerPointMode = useCallback(() => {
+    setIsPowerPointMode(false);
+    setBlackoutMode("none");
+    setShowSlideGrid(false);
+    try {
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const nextSlide = useCallback(() => {
+    if (blackoutMode !== "none") {
+      setBlackoutMode("none");
+      return;
+    }
+    setCurrentSlideIndex((prev) => Math.min(slides.length - 1, prev + 1));
+  }, [slides.length, blackoutMode]);
+
+  const prevSlide = useCallback(() => {
+    if (blackoutMode !== "none") {
+      setBlackoutMode("none");
+      return;
+    }
+    setCurrentSlideIndex((prev) => Math.max(0, prev - 1));
+  }, [blackoutMode]);
+
+  // Handle Fullscreen change sync
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && isPowerPointMode) {
+        setIsPowerPointMode(false);
+        setBlackoutMode("none");
+        setShowSlideGrid(false);
+      }
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, [isPowerPointMode]);
+
+  // PowerPoint Keyboard Navigation Hook
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (["INPUT", "TEXTAREA"].includes((e.target as HTMLElement)?.tagName)) return;
+
+      if (e.key === "F5") {
+        e.preventDefault();
+        if (e.shiftKey) {
+          enterPowerPointMode(currentSlideIndex);
+        } else {
+          enterPowerPointMode(0);
+        }
+        return;
+      }
+
+      if (isPowerPointMode) {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          if (showSlideGrid) {
+            setShowSlideGrid(false);
+          } else if (blackoutMode !== "none") {
+            setBlackoutMode("none");
+          } else {
+            exitPowerPointMode();
+          }
+        } else if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === " " || e.key === "PageDown" || e.key === "Enter") {
+          e.preventDefault();
+          nextSlide();
+        } else if (e.key === "ArrowLeft" || e.key === "ArrowUp" || e.key === "PageUp" || e.key === "Backspace") {
+          e.preventDefault();
+          prevSlide();
+        } else if (e.key === "Home") {
+          e.preventDefault();
+          setCurrentSlideIndex(0);
+        } else if (e.key === "End") {
+          e.preventDefault();
+          setCurrentSlideIndex(slides.length - 1);
+        } else if (e.key === "b" || e.key === "B") {
+          e.preventDefault();
+          setBlackoutMode((prev) => (prev === "black" ? "none" : "black"));
+        } else if (e.key === "w" || e.key === "W") {
+          e.preventDefault();
+          setBlackoutMode((prev) => (prev === "white" ? "none" : "white"));
+        } else if (e.key === "g" || e.key === "G") {
+          e.preventDefault();
+          setShowSlideGrid((prev) => !prev);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isPowerPointMode, showSlideGrid, blackoutMode, currentSlideIndex, nextSlide, prevSlide, enterPowerPointMode, exitPowerPointMode, slides.length]);
+
+  const handleMouseMove = () => {
+    if (!isPowerPointMode) return;
+    setShowHud(true);
+    if (hudTimeoutRef.current) clearTimeout(hudTimeoutRef.current);
+    hudTimeoutRef.current = setTimeout(() => {
+      setShowHud(false);
+    }, 2500);
+  };
 
   // Generate Deck from Selected Document using Gemini
   const handleGenerateDeck = async () => {
@@ -318,7 +453,7 @@ ${s.takeaway ? `**Takeaway:** ${s.takeaway}` : ""}
 
   const openGammaApp = () => {
     copyGammaPrompt();
-    window.open("https://gamma.app/create/from-text", "_blank", "noopener,noreferrer");
+    window.open("https://gamma.app/create", "_blank", "noopener,noreferrer");
   };
 
   const exportHtmlPresentation = () => {
@@ -531,11 +666,12 @@ ${s.takeaway ? `**Takeaway:** ${s.takeaway}` : ""}
             </button>
 
             <button
-              onClick={() => setIsFullscreen(!isFullscreen)}
-              className="inline-flex items-center gap-1.5 rounded-2xl border border-white/15 bg-white/10 px-3.5 py-2.5 text-xs font-bold text-white hover:bg-white/20 active:scale-95 transition-all cursor-pointer backdrop-blur-md"
+              onClick={() => enterPowerPointMode(0)}
+              className="inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-[#1db954] px-4 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-purple-500/25 hover:shadow-purple-500/40 hover:brightness-110 active:scale-95 transition-all cursor-pointer backdrop-blur-md"
+              title="Start Microsoft PowerPoint Slideshow (F5)"
             >
-              <Maximize2 className="h-3.5 w-3.5 text-purple-300" />
-              <span>{isFullscreen ? "Exit" : "Present"}</span>
+              <MonitorPlay className="h-4 w-4 text-purple-200" />
+              <span>▶ Present (F5)</span>
             </button>
           </div>
         </div>
@@ -749,7 +885,7 @@ ${s.takeaway ? `**Takeaway:** ${s.takeaway}` : ""}
       </div>
 
       {/* Main Slide Viewer Canvas */}
-      <div className={`relative transition-all duration-300 ${isFullscreen ? "fixed inset-0 z-50 bg-black p-8 flex flex-col justify-between" : ""}`}>
+      <div className="relative transition-all duration-300">
         <div
           className={`relative min-h-[440px] rounded-3xl border ${activeTheme.border} ${activeTheme.cardBg} p-8 sm:p-12 text-white shadow-2xl backdrop-blur-2xl flex flex-col justify-between overflow-hidden animate-in fade-in duration-300`}
         >
@@ -765,10 +901,13 @@ ${s.takeaway ? `**Takeaway:** ${s.takeaway}` : ""}
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300">
-                Verified Facts
-              </span>
+              <button
+                onClick={() => enterPowerPointMode(currentSlideIndex)}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 px-3 py-1 text-xs font-bold text-white transition-all cursor-pointer shadow-sm"
+              >
+                <MonitorPlay className="h-3.5 w-3.5" />
+                <span>Present (F5)</span>
+              </button>
             </div>
           </div>
 
@@ -855,6 +994,254 @@ ${s.takeaway ? `**Takeaway:** ${s.takeaway}` : ""}
           </div>
         </div>
       </div>
+
+      {/* ========================================================================= */}
+      {/* 📽️ MICROSOFT POWERPOINT FULLSCREEN SLIDESHOW PRESENTATION MODE */}
+      {/* ========================================================================= */}
+      {isPowerPointMode && (
+        <div
+          onMouseMove={handleMouseMove}
+          className="fixed inset-0 z-[100] flex flex-col justify-between bg-[#040508] p-4 sm:p-8 select-none overflow-hidden cursor-default animate-in fade-in zoom-in-95 duration-200"
+        >
+          {/* Blackout / Whiteout Screen Overlay */}
+          {blackoutMode !== "none" && (
+            <div
+              onClick={() => setBlackoutMode("none")}
+              className={`fixed inset-0 z-[110] flex flex-col items-center justify-center cursor-pointer ${
+                blackoutMode === "black" ? "bg-black text-white/50" : "bg-white text-black/50"
+              }`}
+            >
+              <p className="text-xs font-mono uppercase tracking-widest animate-pulse">
+                Screen {blackoutMode === "black" ? "Blacked Out" : "Whited Out"} • Click anywhere or press B/W/Space to resume
+              </p>
+            </div>
+          )}
+
+          {/* Top Subtle Status Bar */}
+          <div className={`transition-opacity duration-300 flex items-center justify-between px-4 py-2 ${showHud ? "opacity-100" : "opacity-0"}`}>
+            <div className="flex items-center gap-2">
+              <span className="rounded-lg bg-white/10 px-2.5 py-1 text-[11px] font-mono font-black text-purple-300">
+                SLIDE {currentSlideIndex + 1} OF {slides.length}
+              </span>
+              <span className="text-xs text-slate-400 font-bold truncate max-w-sm sm:max-w-xl">
+                {deckTitle}
+              </span>
+            </div>
+            <button
+              onClick={exitPowerPointMode}
+              className="flex items-center gap-1 rounded-xl bg-white/10 hover:bg-white/20 px-3 py-1.5 text-xs font-bold text-white transition-all cursor-pointer"
+            >
+              <X className="h-3.5 w-3.5" />
+              <span>End Show (Esc)</span>
+            </button>
+          </div>
+
+          {/* Central 16:9 Widescreen Presentation Canvas */}
+          <div className="relative my-auto mx-auto w-full max-w-6xl aspect-[16/9] max-h-[82vh] flex items-center justify-center">
+            {/* Click zones: Left 25% for prev, Right 75% for next */}
+            <div
+              onClick={prevSlide}
+              title="Previous slide"
+              className="absolute left-0 top-0 bottom-0 w-[25%] z-20 cursor-w-resize"
+            />
+            <div
+              onClick={nextSlide}
+              title="Next slide"
+              className="absolute right-0 top-0 bottom-0 w-[75%] z-20 cursor-e-resize"
+            />
+
+            {/* Slide Frame */}
+            <div
+              className={`relative w-full h-full rounded-3xl border ${activeTheme.border} ${activeTheme.cardBg} p-8 sm:p-14 text-white shadow-2xl flex flex-col justify-between overflow-hidden`}
+            >
+              {/* Slide Header */}
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <span className="text-xs font-mono font-black tracking-widest text-purple-300 uppercase">
+                  Slide {currentSlideIndex + 1}
+                </span>
+                <span className="rounded-full bg-emerald-500/20 border border-emerald-500/40 px-3 py-0.5 text-[10px] font-bold text-emerald-300 uppercase">
+                  Verified Context
+                </span>
+              </div>
+
+              {/* Main Body */}
+              <div className="my-auto space-y-6">
+                <div className="space-y-2">
+                  <h1 className={`text-3xl sm:text-5xl font-black tracking-tight bg-gradient-to-r ${activeTheme.textGrad} bg-clip-text text-transparent leading-tight`}>
+                    {currentSlide.title}
+                  </h1>
+                  {currentSlide.subtitle && (
+                    <p className="text-sm sm:text-lg text-slate-300 font-medium">
+                      {currentSlide.subtitle}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-center pt-2">
+                  <div className="space-y-4 sm:col-span-2">
+                    {currentSlide.bullets.map((b, idx) => (
+                      <div key={idx} className="flex items-start gap-3.5">
+                        <span className={`h-2.5 w-2.5 rounded-full mt-2 shrink-0 ${activeTheme.bulletDot}`} />
+                        <p className="text-sm sm:text-xl leading-relaxed text-slate-100 font-normal">
+                          {b}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {currentSlide.stat && (
+                    <div className="rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8 text-center space-y-2 shadow-inner">
+                      <div className={`text-4xl sm:text-6xl font-black bg-gradient-to-r ${activeTheme.textGrad} bg-clip-text text-transparent`}>
+                        {currentSlide.stat.value}
+                      </div>
+                      <div className="text-xs uppercase font-bold text-slate-300 tracking-wider">
+                        {currentSlide.stat.label}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {currentSlide.takeaway && (
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-xs sm:text-sm text-slate-300 font-medium flex items-center gap-2.5">
+                    <Zap className="h-4 w-4 text-amber-400 shrink-0" />
+                    <span><strong>Key Takeaway:</strong> {currentSlide.takeaway}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Progress Line */}
+              <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-purple-500 via-[#1db954] to-cyan-400 transition-all duration-300"
+                  style={{ width: `${((currentSlideIndex + 1) / slides.length) * 100}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Floating PowerPoint Presenter HUD Bar (Auto-hides) */}
+          <div className={`transition-all duration-300 flex justify-center pb-2 ${showHud ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}>
+            <div className="flex items-center gap-2 rounded-2xl border border-white/15 bg-slate-900/90 px-4 py-2 text-white shadow-2xl backdrop-blur-xl">
+              <button
+                onClick={prevSlide}
+                disabled={currentSlideIndex === 0}
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 disabled:opacity-30 cursor-pointer"
+                title="Previous slide (Left Arrow / Backspace)"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+
+              <span className="px-2 text-xs font-mono font-bold text-purple-300">
+                {currentSlideIndex + 1} / {slides.length}
+              </span>
+
+              <button
+                onClick={nextSlide}
+                disabled={currentSlideIndex === slides.length - 1}
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-600 hover:bg-purple-500 active:scale-95 disabled:opacity-30 cursor-pointer"
+                title="Next slide (Space / Right Arrow / Enter)"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+
+              <div className="h-5 w-px bg-white/15 mx-1" />
+
+              <button
+                onClick={() => setShowSlideGrid(true)}
+                className="flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/20 px-3 py-1.5 text-xs font-bold cursor-pointer"
+                title="See All Slides Grid (G)"
+              >
+                <Grid3X3 className="h-4 w-4" />
+                <span>All Slides</span>
+              </button>
+
+              <button
+                onClick={() => setBlackoutMode((prev) => (prev === "black" ? "none" : "black"))}
+                className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all cursor-pointer ${
+                  blackoutMode === "black" ? "bg-purple-600 text-white" : "bg-white/10 hover:bg-white/20 text-slate-300"
+                }`}
+                title="Toggle Black Screen (B)"
+              >
+                <Moon className="h-4 w-4" />
+              </button>
+
+              <button
+                onClick={() => setBlackoutMode((prev) => (prev === "white" ? "none" : "white"))}
+                className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all cursor-pointer ${
+                  blackoutMode === "white" ? "bg-purple-600 text-white" : "bg-white/10 hover:bg-white/20 text-slate-300"
+                }`}
+                title="Toggle White Screen (W)"
+              >
+                <Sun className="h-4 w-4" />
+              </button>
+
+              <div className="h-5 w-px bg-white/15 mx-1" />
+
+              <button
+                onClick={exitPowerPointMode}
+                className="flex items-center gap-1.5 rounded-xl bg-red-600/80 hover:bg-red-600 px-3 py-1.5 text-xs font-bold text-white cursor-pointer"
+                title="Exit Slideshow (Esc)"
+              >
+                <Minimize2 className="h-3.5 w-3.5" />
+                <span>Exit</span>
+              </button>
+            </div>
+          </div>
+
+          {/* PowerPoint 'See All Slides' Slide Grid Modal */}
+          {showSlideGrid && (
+            <div
+              onClick={() => setShowSlideGrid(false)}
+              className="fixed inset-0 z-[120] flex items-center justify-center bg-black/90 p-6 backdrop-blur-md animate-in fade-in"
+            >
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-5xl rounded-3xl border border-white/15 bg-slate-950 p-6 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto"
+              >
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <div className="flex items-center gap-2">
+                    <Grid3X3 className="h-5 w-5 text-purple-400" />
+                    <h3 className="text-base font-black text-white">Slide Navigator • Click any slide to jump</h3>
+                  </div>
+                  <button
+                    onClick={() => setShowSlideGrid(false)}
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 cursor-pointer"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {slides.map((s, idx) => {
+                    const isSelected = currentSlideIndex === idx;
+                    return (
+                      <div
+                        key={s.id}
+                        onClick={() => {
+                          setCurrentSlideIndex(idx);
+                          setShowSlideGrid(false);
+                        }}
+                        className={`cursor-pointer rounded-2xl border p-4 transition-all duration-200 hover:scale-102 ${
+                          isSelected
+                            ? "border-purple-500 bg-purple-950/40 shadow-lg shadow-purple-500/20"
+                            : "border-white/10 bg-white/5 hover:border-white/30"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between text-[11px] font-mono text-purple-300 font-bold mb-2">
+                          <span>SLIDE {idx + 1}</span>
+                          {isSelected && <span className="text-[#1db954]">● Active</span>}
+                        </div>
+                        <h4 className="text-sm font-bold text-white line-clamp-1">{s.title}</h4>
+                        <p className="text-[11px] text-slate-400 line-clamp-2 mt-1">{s.subtitle || s.bullets[0]}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
