@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, Compass, Home, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, UsersRound, Pencil, User, CalendarClock, FileSpreadsheet, Activity, LayoutGrid, Brain } from "lucide-react";
+import { ChevronDown, Compass, Home, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, UsersRound, Pencil, User, CalendarClock, FileSpreadsheet, Activity, LayoutGrid, Brain, ShieldCheck, GraduationCap, Building2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -11,6 +11,7 @@ import NotificationBell from "@/components/NotificationBell";
 import Avatar from "@/components/Avatar";
 import ThemeToggle, { useTheme } from "@/components/ThemeToggle";
 import EditProfileModal from "@/components/EditProfileModal";
+import { showToast } from "@/components/Toast";
 
 export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
   const pathname = usePathname();
@@ -22,8 +23,27 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const [brandSrc, setBrandSrc] = useState<string | null>(null);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const [audienceMode, setAudienceMode] = useState<"academic" | "enterprise">("academic");
   const menuRef = useRef<HTMLDivElement>(null);
   const { dark, toggle } = useTheme();
+
+  useEffect(() => {
+    const saved = localStorage.getItem("askdocs_audience_mode");
+    if (saved === "enterprise" || saved === "academic") {
+      setAudienceMode(saved);
+    }
+  }, []);
+
+  const toggleAudienceMode = () => {
+    const next = audienceMode === "academic" ? "enterprise" : "academic";
+    setAudienceMode(next);
+    localStorage.setItem("askdocs_audience_mode", next);
+    if (next === "enterprise") {
+      showToast("success", "🏢 Enterprise Mode Active: Strict NDA data isolation, non-disclosure watermarks, and compliance audit tracking enabled.");
+    } else {
+      showToast("success", "🎓 Academic Mode Active: Flashcards, timed exam quizzes, study guide notes, and study studio enabled.");
+    }
+  };
 
   // resolve uploaded brand logo for the active workspace
   useEffect(() => {
@@ -304,6 +324,35 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         >
           <Home className="h-4 w-4" />
         </Link>
+
+        {/* Audience & Confidentiality Mode Switcher */}
+        <button
+          onClick={toggleAudienceMode}
+          type="button"
+          aria-label="Toggle Audience Mode"
+          title={
+            audienceMode === "enterprise"
+              ? "Enterprise Confidential Mode Active: Strict NDA data isolation enabled. Click to switch to Academic Mode."
+              : "Academic & Student Mode Active: Study studio, flashcards, and exam tools enabled. Click to switch to Enterprise Mode."
+          }
+          className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold transition-all cursor-pointer border ${
+            audienceMode === "enterprise"
+              ? "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300 shadow-xs"
+              : "border-purple-500/30 bg-purple-500/10 text-purple-700 dark:text-purple-300 shadow-xs"
+          }`}
+        >
+          {audienceMode === "enterprise" ? (
+            <>
+              <ShieldCheck className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
+              <span className="hidden md:inline font-mono uppercase text-[10px] tracking-wider">Enterprise NDA</span>
+            </>
+          ) : (
+            <>
+              <GraduationCap className="h-3.5 w-3.5 text-purple-500" />
+              <span className="hidden md:inline font-mono uppercase text-[10px] tracking-wider">Academic Mode</span>
+            </>
+          )}
+        </button>
 
         <ThemeToggle dark={dark} onToggle={toggle} />
         <NotificationBell />

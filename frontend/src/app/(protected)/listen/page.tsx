@@ -516,6 +516,56 @@ You MUST return ONLY a valid JSON object strictly matching this schema with no m
         </div>
       </div>
 
+      {/* Quick Start & How-To-Use Guide Banner */}
+      <div className="rounded-3xl border border-cyan-500/20 bg-gradient-to-r from-cyan-500/10 via-indigo-500/5 to-transparent p-4 sm:p-5 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 backdrop-blur-md">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-cyan-500/20 text-cyan-400">
+            <Lightbulb className="h-4 w-4" />
+          </div>
+          <div>
+            <span className="font-bold text-slate-900 dark:text-white">How Audio Studio Works: </span>
+            <span className="text-slate-600 dark:text-zinc-300">
+              Pick any uploaded PDF/DOCX ➔ choose your broadcast format (2-Host Podcast, Rapid Brief, Medical Rounds, SOP Brief) ➔ click Generate for instant dual-voice spoken dialogue with live soundwave controls!
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowQuickGuide(!showQuickGuide)}
+          className="inline-flex items-center gap-1.5 shrink-0 text-xs font-bold text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 cursor-pointer"
+        >
+          <span>{showQuickGuide ? "Hide Guide" : "View Audio Playbook"}</span>
+        </button>
+      </div>
+
+      {/* Expandable Playbook Accordion */}
+      {showQuickGuide && (
+        <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-4 animate-in fade-in duration-200 text-xs">
+          <h4 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <Headphones className="h-4 w-4 text-cyan-500" /> Audio Studio Playbook
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div className="p-3.5 rounded-2xl bg-cyan-500/5 border border-cyan-500/20 space-y-1">
+              <span className="font-extrabold text-cyan-600 dark:text-cyan-400">1. Select Document</span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Choose any research paper, medical case file, team SOP, or financial balance sheet in your workspace.</p>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 space-y-1">
+              <span className="font-extrabold text-indigo-600 dark:text-indigo-400">2. Pick Broadcast Style</span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Select NotebookLM-style 2-Host Deep-Dive, 2-Min Executive Brief, Clinical Grand Rounds, or Legal Compliance.</p>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-purple-500/5 border border-purple-500/20 space-y-1">
+              <span className="font-extrabold text-purple-600 dark:text-purple-400">3. Interactive Speech</span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Listen in-browser with natural browser dual-voice synthesis, adjust speed (0.75x to 2x), and click any turn to jump.</p>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 space-y-1">
+              <span className="font-extrabold text-emerald-600 dark:text-emerald-400">4. Broadcast Exports</span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Download printable PDF broadcast transcripts with chapter timestamps or raw teleprompter .TXT scripts.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Synthesis Configuration & Persona Selector */}
       <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-6">
         {/* Document Select */}

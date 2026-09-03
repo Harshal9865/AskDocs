@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Presentation,
   Sparkles,
@@ -14,6 +14,10 @@ import {
   Info,
   Key,
   ExternalLink,
+  UploadCloud,
+  Search,
+  Globe,
+  Share2,
 } from "lucide-react";
 import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
@@ -35,8 +39,13 @@ type DeckPersona = "executive" | "student" | "medical" | "hr" | "tech" | "story"
 
 export default function SlideDeckStudioPage() {
   const { workspace } = useWorkspace();
+  const docFileInputRef = useRef<HTMLInputElement>(null);
+
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [selectedDocId, setSelectedDocId] = useState<string>("");
+  const [docSearchQuery, setDocSearchQuery] = useState<string>("");
+  const [uploadingDoc, setUploadingDoc] = useState<boolean>(false);
+
   const [loadingDocs, setLoadingDocs] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [theme, setTheme] = useState<SlideTheme>("cosmic");
@@ -44,8 +53,10 @@ export default function SlideDeckStudioPage() {
   const [slideCount, setSlideCount] = useState<number>(4);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [copiedDeck, setCopiedDeck] = useState(false);
+  const [copiedGamma, setCopiedGamma] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showKeyGuide, setShowKeyGuide] = useState(false);
+  const [showGammaModal, setShowGammaModal] = useState(false);
 
   const [deckTitle, setDeckTitle] = useState("Executive Strategic Briefing");
   const [slides, setSlides] = useState<Slide[]>([
@@ -286,6 +297,137 @@ interface SlideDeckJsonResponse {
     showToast("success", "Slide deck markdown copied to clipboard");
   };
 
+  const copyGammaPrompt = () => {
+    const gammaMarkdown = `Create an ultra-modern, executive presentation for "${deckTitle}".
+
+Style: ${theme.toUpperCase()} theme, clean typography, executive card spacing, visual metric callouts, and structured bullet points.
+
+---
+` + slides.map((s, i) => `## Slide ${i + 1}: ${s.title}
+${s.subtitle ? `*${s.subtitle}*` : ""}
+
+${s.bullets.map((b) => `- ${b}`).join("\n")}
+
+${s.stat ? `> **Key Metric:** ${s.stat.value} — ${s.stat.label}` : ""}
+${s.takeaway ? `**Takeaway:** ${s.takeaway}` : ""}
+`).join("\n---\n");
+
+    void navigator.clipboard.writeText(gammaMarkdown);
+    setCopiedGamma(true);
+    setTimeout(() => setCopiedGamma(false), 2500);
+    showToast("success", "Gamma AI outline copied to clipboard!");
+  };
+
+  const openGammaApp = () => {
+    copyGammaPrompt();
+    window.open("https://gamma.app/create/from-text", "_blank", "noopener,noreferrer");
+  };
+
+  const exportHtmlPresentation = () => {
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${deckTitle} — Interactive Web Deck</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #0c0824; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden; height: 100vh; }
+    .slide { display: none; height: 100vh; width: 100vw; justify-content: center; align-items: center; padding: 2rem; }
+    .slide.active { display: flex; animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+  </style>
+</head>
+<body class="flex flex-col justify-between">
+  <div class="p-6 flex justify-between items-center text-xs font-bold text-purple-400 border-b border-white/10">
+    <div class="flex items-center gap-2"><span>✦</span> <span>${deckTitle}</span></div>
+    <div id="counter">Slide 1 / ${slides.length}</div>
+  </div>
+
+  <div id="slides-container" class="flex-1 flex items-center justify-center">
+    ${slides.map((s, idx) => `
+      <div class="slide ${idx === 0 ? "active" : ""}" data-index="${idx}">
+        <div class="max-w-4xl w-full p-8 md:p-12 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl shadow-2xl space-y-6">
+          <div class="text-xs uppercase font-mono tracking-widest text-purple-400 font-extrabold">Slide ${idx + 1}</div>
+          <h1 class="text-3xl md:text-5xl font-black bg-gradient-to-r from-purple-300 via-pink-200 to-indigo-300 bg-clip-text text-transparent">${s.title}</h1>
+          ${s.subtitle ? `<p class="text-sm md:text-base text-slate-300 font-medium">${s.subtitle}</p>` : ""}
+          
+          <ul class="space-y-3 pt-4">
+            ${s.bullets.map((b) => `<li class="flex items-start gap-3 text-sm md:text-lg text-slate-200 font-normal"><span class="h-2.5 w-2.5 rounded-full bg-purple-400 mt-2 shrink-0"></span><span>${b}</span></li>`).join("")}
+          </ul>
+
+          ${s.stat ? `
+            <div class="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 inline-flex items-center gap-4">
+              <div class="text-2xl md:text-3xl font-black text-purple-300">${s.stat.value}</div>
+              <div class="text-xs uppercase font-bold text-slate-300 tracking-wider">${s.stat.label}</div>
+            </div>
+          ` : ""}
+
+          ${s.takeaway ? `
+            <div class="pt-4 border-t border-white/10 text-xs md:text-sm text-slate-400 italic">
+              <strong>Executive Takeaway:</strong> ${s.takeaway}
+            </div>
+          ` : ""}
+        </div>
+      </div>
+    `).join("")}
+  </div>
+
+  <div class="p-6 flex justify-between items-center text-xs text-slate-400 border-t border-white/10">
+    <button id="prevBtn" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold cursor-pointer">← Previous</button>
+    <div class="hidden sm:block">Use Left / Right arrow keys or spacebar to navigate</div>
+    <button id="nextBtn" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold cursor-pointer">Next →</button>
+  </div>
+
+  <script>
+    let currentIndex = 0;
+    const totalSlides = ${slides.length};
+    const slides = document.querySelectorAll('.slide');
+    const counter = document.getElementById('counter');
+
+    function updateSlide(index) {
+      if (index < 0 || index >= totalSlides) return;
+      slides[currentIndex].classList.remove('active');
+      currentIndex = index;
+      slides[currentIndex].classList.add('active');
+      counter.textContent = 'Slide ' + (currentIndex + 1) + ' / ' + totalSlides;
+    }
+
+    document.getElementById('prevBtn').onclick = () => updateSlide(currentIndex - 1);
+    document.getElementById('nextBtn').onclick = () => updateSlide(currentIndex + 1);
+
+    window.onkeydown = (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') updateSlide(currentIndex + 1);
+      if (e.key === 'ArrowLeft') updateSlide(currentIndex - 1);
+    };
+  </script>
+</body>
+</html>`;
+    downloadBlob(`${deckTitle.toLowerCase().replace(/\s+/g, "_")}_interactive.html`, html, "text/html");
+    showToast("success", "Interactive HTML presentation deck downloaded!");
+  };
+
+  const handleDirectDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !workspace?.id) return;
+    setUploadingDoc(true);
+    try {
+      const uploaded = await api.uploadDocument(workspace.id, file);
+      setDocs((prev) => [uploaded, ...prev]);
+      setSelectedDocId(uploaded.id);
+      showToast("success", `Uploaded & selected "${uploaded.title}"!`);
+    } catch {
+      showToast("error", "Failed to upload document.");
+    } finally {
+      setUploadingDoc(false);
+      if (docFileInputRef.current) docFileInputRef.current.value = "";
+    }
+  };
+
+  const filteredDocs = docs.filter((d) =>
+    !docSearchQuery.trim() || d.title.toLowerCase().includes(docSearchQuery.toLowerCase())
+  );
+
   const themeStyles: Record<SlideTheme, { cardBg: string; textGrad: string; bulletDot: string; border: string }> = {
     cosmic: {
       cardBg: "bg-gradient-to-br from-[#0c0824] via-[#150e38] to-[#1c124a]",
@@ -338,34 +480,53 @@ interface SlideDeckJsonResponse {
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
               Documents to{" "}
               <span className="bg-gradient-to-r from-purple-300 via-pink-200 to-indigo-300 bg-clip-text text-transparent">
-                Slide Decks & PDF
+                Slide Decks, Gamma AI & PDF
               </span>
             </h1>
 
             <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-              Transform any uploaded PDF into professional presentation slide decks using Free Google Gemini AI. Export to printable high-resolution PDF slides or Markdown.
+              Transform any uploaded PDF into presentation slide decks using Free Google Gemini AI. Export to printable PDF slides, interactive HTML web decks, or 1-click bridge to Gamma AI.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 shrink-0">
+            {/* Gamma AI 1-Click Action */}
+            <button
+              onClick={openGammaApp}
+              className="inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 px-4 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-pink-500/25 hover:shadow-pink-500/40 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+              title="Copy outline and open Gamma AI (100% Free)"
+            >
+              <Sparkles className="h-4 w-4 text-pink-200" />
+              <span>{copiedGamma ? "Copied! Launching Gamma..." : "✦ Open in Gamma AI"}</span>
+            </button>
+
             <button
               onClick={exportPDF}
               className="inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-purple-500/25 hover:shadow-purple-500/40 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
             >
               <Presentation className="h-4 w-4" />
-              <span>Download PDF Deck</span>
+              <span>PDF Deck</span>
+            </button>
+
+            <button
+              onClick={exportHtmlPresentation}
+              className="inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-cyan-600 to-teal-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+              title="Download standalone interactive web deck"
+            >
+              <Globe className="h-4 w-4" />
+              <span>HTML Deck</span>
             </button>
 
             <button
               onClick={exportMarkdownFile}
               className="inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
             >
-              <span>Export .MD</span>
+              <span>.MD</span>
             </button>
 
             <button
               onClick={copyDeckMarkdown}
-              className="inline-flex items-center gap-1.5 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-xs font-bold text-white hover:bg-white/20 active:scale-95 transition-all cursor-pointer backdrop-blur-md"
+              className="inline-flex items-center gap-1.5 rounded-2xl border border-white/15 bg-white/10 px-3.5 py-2.5 text-xs font-bold text-white hover:bg-white/20 active:scale-95 transition-all cursor-pointer backdrop-blur-md"
             >
               {copiedDeck ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
               <span>{copiedDeck ? "Copied" : "Copy"}</span>
@@ -373,34 +534,46 @@ interface SlideDeckJsonResponse {
 
             <button
               onClick={() => setIsFullscreen(!isFullscreen)}
-              className="inline-flex items-center gap-1.5 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-xs font-bold text-white hover:bg-white/20 active:scale-95 transition-all cursor-pointer backdrop-blur-md"
+              className="inline-flex items-center gap-1.5 rounded-2xl border border-white/15 bg-white/10 px-3.5 py-2.5 text-xs font-bold text-white hover:bg-white/20 active:scale-95 transition-all cursor-pointer backdrop-blur-md"
             >
               <Maximize2 className="h-3.5 w-3.5 text-purple-300" />
-              <span>{isFullscreen ? "Exit Fullscreen" : "Presenter Mode"}</span>
+              <span>{isFullscreen ? "Exit" : "Present"}</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Free AI & API Guide Notice Banner */}
-      <div className="rounded-3xl border border-purple-500/20 bg-gradient-to-r from-purple-500/10 via-indigo-500/5 to-transparent p-4 sm:p-5 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 backdrop-blur-md">
+      {/* Free AI & Gamma AI Notice Banner */}
+      <div className="rounded-3xl border border-purple-500/20 bg-gradient-to-r from-purple-500/10 via-pink-500/5 to-transparent p-4 sm:p-5 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 backdrop-blur-md">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-purple-500/20 text-purple-400">
-            <Zap className="h-4 w-4" />
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500/30 to-pink-500/30 text-pink-300">
+            <Sparkles className="h-4 w-4" />
           </div>
           <div>
-            <span className="font-bold text-slate-900 dark:text-white">Free AI Included: </span>
-            <span className="text-slate-600 dark:text-zinc-300">AskDocs uses built-in Google Gemini 3.6 Flash. No subscription, API key, or payment is required to generate presentation slide decks and export vector PDFs.</span>
+            <span className="font-bold text-slate-900 dark:text-white">Free AI & Gamma AI Support: </span>
+            <span className="text-slate-600 dark:text-zinc-300">
+              Generate slides directly with AskDocs&apos; free AI, or click <strong>&ldquo;✦ Open in Gamma AI&rdquo;</strong> to paste your outline into Gamma for free 3D interactive slides. Zero cost or subscription needed!
+            </span>
           </div>
         </div>
 
-        <button
-          onClick={() => setShowKeyGuide(!showKeyGuide)}
-          className="inline-flex items-center gap-1.5 shrink-0 text-xs font-bold text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 cursor-pointer"
-        >
-          <Info className="h-3.5 w-3.5" />
-          <span>{showKeyGuide ? "Hide Guide" : "How Free AI Works"}</span>
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={copyGammaPrompt}
+            className="inline-flex items-center gap-1 text-xs font-bold text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 cursor-pointer"
+          >
+            <Copy className="h-3.5 w-3.5" />
+            <span>Copy Gamma Prompt</span>
+          </button>
+          <span className="text-slate-400">•</span>
+          <button
+            onClick={() => setShowKeyGuide(!showKeyGuide)}
+            className="inline-flex items-center gap-1 text-xs font-bold text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 cursor-pointer"
+          >
+            <Info className="h-3.5 w-3.5" />
+            <span>{showKeyGuide ? "Hide Guide" : "How Free AI Works"}</span>
+          </button>
+        </div>
       </div>
 
       {/* Expandable Free API Key Guide */}
@@ -434,23 +607,58 @@ interface SlideDeckJsonResponse {
       {/* Controls Bar */}
       <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-5">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Doc Picker */}
+          {/* Doc Picker with In-Place Upload & Search */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
-              Select Document Source
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+                Select Document Source
+              </label>
+              <div>
+                <input
+                  type="file"
+                  ref={docFileInputRef}
+                  onChange={handleDirectDocUpload}
+                  accept=".pdf,.docx,.doc,.txt,.md"
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => docFileInputRef.current?.click()}
+                  disabled={uploadingDoc}
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline cursor-pointer"
+                >
+                  <UploadCloud className="h-3 w-3" />
+                  <span>{uploadingDoc ? "Uploading..." : "+ Upload"}</span>
+                </button>
+              </div>
+            </div>
+
+            {docs.length > 4 && (
+              <div className="relative mb-1">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-400" />
+                <input
+                  type="text"
+                  value={docSearchQuery}
+                  onChange={(e) => setDocSearchQuery(e.target.value)}
+                  placeholder="Filter files..."
+                  className="w-full rounded-xl border border-slate-200/80 bg-slate-50/80 pl-7 pr-2 py-1 text-[11px] text-slate-800 outline-none focus:border-purple-500 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white"
+                />
+              </div>
+            )}
+
             <select
               value={selectedDocId}
               onChange={(e) => setSelectedDocId(e.target.value)}
               disabled={loadingDocs || docs.length === 0}
               className="w-full rounded-2xl border border-slate-200/80 bg-slate-50 px-3.5 py-3 text-xs font-bold text-slate-900 outline-none focus:border-purple-500 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white transition-all cursor-pointer"
             >
-              {docs.map((d) => (
+              {filteredDocs.map((d) => (
                 <option key={d.id} value={d.id}>
                   {d.title} ({d.file_type.toUpperCase()})
                 </option>
               ))}
               {docs.length === 0 && <option value="">No documents in workspace</option>}
+              {docs.length > 0 && filteredDocs.length === 0 && <option value="">No matching documents</option>}
             </select>
           </div>
 

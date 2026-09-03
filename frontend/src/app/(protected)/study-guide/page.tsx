@@ -118,6 +118,7 @@ export default function StudyGuidePage() {
   const [difficulty, setDifficulty] = useState<DifficultyLevel>("medium");
   const [sampleQuestions, setSampleQuestions] = useState<string>("");
   const [showSampleInput, setShowSampleInput] = useState<boolean>(false);
+  const [showQuickGuide, setShowQuickGuide] = useState<boolean>(false);
 
   // Search & Filter State for multi-file handling
   const [docSearchQuery, setDocSearchQuery] = useState<string>("");
@@ -627,6 +628,56 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
           </div>
         </div>
       </div>
+
+      {/* Quick Start & How-To-Use Guide Banner */}
+      <div className="rounded-3xl border border-purple-500/20 bg-gradient-to-r from-purple-500/10 via-indigo-500/5 to-transparent p-4 sm:p-5 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 backdrop-blur-md">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-purple-500/20 text-purple-400">
+            <Lightbulb className="h-4 w-4" />
+          </div>
+          <div>
+            <span className="font-bold text-slate-900 dark:text-white">How Study Studio Works: </span>
+            <span className="text-slate-600 dark:text-zinc-300">
+              Select 1 to 5 documents ➔ choose your audience persona (Student, Clinical, Corporate, Legal, Finance) ➔ pick question counts & optional past question style mimicry ➔ generate your 4-tab interactive study suite!
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowQuickGuide(!showQuickGuide)}
+          className="inline-flex items-center gap-1.5 shrink-0 text-xs font-bold text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 cursor-pointer"
+        >
+          <span>{showQuickGuide ? "Hide Guide" : "View Step-by-Step Playbook"}</span>
+        </button>
+      </div>
+
+      {/* Expandable Playbook Accordion */}
+      {showQuickGuide && (
+        <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-4 animate-in fade-in duration-200 text-xs">
+          <h4 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <BookOpen className="h-4 w-4 text-purple-500" /> Study Studio Playbook for All Audiences
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div className="p-3.5 rounded-2xl bg-purple-500/5 border border-purple-500/20 space-y-1">
+              <span className="font-extrabold text-purple-600 dark:text-purple-400">Step 1: Pick / Upload Docs</span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Search through your files or click &ldquo;+ Upload Document&rdquo; to add new course syllabi, clinical guidelines, or SOPs.</p>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 space-y-1">
+              <span className="font-extrabold text-indigo-600 dark:text-indigo-400">Step 2: Choose Persona</span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Select whether you need Academic review, Clinical case scenarios, Corporate onboarding, or Legal clause tests.</p>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-pink-500/5 border border-pink-500/20 space-y-1">
+              <span className="font-extrabold text-pink-600 dark:text-pink-400">Step 3: Question Mimicry</span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Upload a past exam paper or paste questions. AI matches the exact syntax, tricks, and difficulty level.</p>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 space-y-1">
+              <span className="font-extrabold text-emerald-600 dark:text-emerald-400">Step 4: Practice & Export</span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Flip 3D flashcards, take timed mock exams, or download executive PDF study packets & Anki TSV flashcards.</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Synthesis Config & Multi-Document Selector Card */}
       <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-6">

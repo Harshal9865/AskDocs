@@ -26,6 +26,7 @@ import {
   Check,
   Search,
   UploadCloud,
+  Lightbulb,
 } from "lucide-react";
 
 export default function WorkspaceCanvasPage() {
@@ -41,6 +42,8 @@ export default function WorkspaceCanvasPage() {
   const [copiedMatrix, setCopiedMatrix] = useState<boolean>(false);
   const [modalSearchQuery, setModalSearchQuery] = useState<string>("");
   const [uploadingDoc, setUploadingDoc] = useState<boolean>(false);
+  const [docSearchQuery, setDocSearchQuery] = useState<string>("");
+  const [showQuickGuide, setShowQuickGuide] = useState<boolean>(false);
 
   const loadData = useCallback(async () => {
     if (!workspace?.id) return;
@@ -405,6 +408,56 @@ Return ONLY valid JSON matching this schema:
           </div>
         </div>
       </div>
+
+      {/* Quick Start & How-To-Use Guide Banner */}
+      <div className="rounded-3xl border border-purple-500/20 bg-gradient-to-r from-purple-500/10 via-indigo-500/5 to-transparent p-4 sm:p-5 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 backdrop-blur-md">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-purple-500/20 text-purple-400">
+            <Lightbulb className="h-4 w-4" />
+          </div>
+          <div>
+            <span className="font-bold text-slate-900 dark:text-white">How Live AI Canvas Works: </span>
+            <span className="text-slate-600 dark:text-zinc-300">
+              Select 2 or more documents from your workspace ➔ generate a multi-document synthesis featuring a side-by-side comparison matrix, verified action checklists, and visual risk heat map!
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowQuickGuide(!showQuickGuide)}
+          className="inline-flex items-center gap-1.5 shrink-0 text-xs font-bold text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 cursor-pointer"
+        >
+          <span>{showQuickGuide ? "Hide Guide" : "View Canvas Playbook"}</span>
+        </button>
+      </div>
+
+      {/* Expandable Playbook Accordion */}
+      {showQuickGuide && (
+        <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-4 animate-in fade-in duration-200 text-xs">
+          <h4 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <Grid className="h-4 w-4 text-purple-500" /> Multi-Document Live Canvas Playbook
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div className="p-3.5 rounded-2xl bg-purple-500/5 border border-purple-500/20 space-y-1">
+              <span className="font-extrabold text-purple-600 dark:text-purple-400">1. Select 2+ Docs</span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Pick agreements, vendor bids, course syllabi, or medical protocols to compare simultaneously.</p>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 space-y-1">
+              <span className="font-extrabold text-indigo-600 dark:text-indigo-400">2. Comparison Matrix</span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">AI aligns topics side-by-side (Primary Scope, Operational Standards, Timelines, Costs, and Risk Governance).</p>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-rose-500/5 border border-rose-500/20 space-y-1">
+              <span className="font-extrabold text-rose-600 dark:text-rose-400">3. Risk & Compliance Map</span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Identifies Critical, Warning, and Low liability points with severity badges and actionable remediation.</p>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 space-y-1">
+              <span className="font-extrabold text-emerald-600 dark:text-emerald-400">4. Checklists & Export</span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Check off procedural milestones with citations, or download the complete Executive PDF statement.</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex h-64 flex-col items-center justify-center text-slate-400">

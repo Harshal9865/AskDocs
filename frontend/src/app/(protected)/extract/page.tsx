@@ -98,6 +98,7 @@ export default function DataExtractorPage() {
   const [extractedData, setExtractedData] = useState<ExtractedTableData | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [copied, setCopied] = useState(false);
+  const [showQuickGuide, setShowQuickGuide] = useState(false);
 
   // Editable table rows
   const [editableRows, setEditableRows] = useState<Record<string, string | number>[]>([]);
@@ -436,6 +437,56 @@ interface ExtractedJsonResponse {
           </div>
         </div>
       </div>
+
+      {/* Quick Start & How-To-Use Guide Banner */}
+      <div className="rounded-3xl border border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent p-4 sm:p-5 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 backdrop-blur-md">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-400">
+            <Lightbulb className="h-4 w-4" />
+          </div>
+          <div>
+            <span className="font-bold text-slate-900 dark:text-white">How Table & Data Extractor Works: </span>
+            <span className="text-slate-600 dark:text-zinc-300">
+              Pick your PDF document ➔ select your industry domain (HR, Medical, Rules, Stories, Tech Specs, Finance) ➔ extract real tables with live cell editing and instant Excel CSV / JSON / PDF export!
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowQuickGuide(!showQuickGuide)}
+          className="inline-flex items-center gap-1.5 shrink-0 text-xs font-bold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 cursor-pointer"
+        >
+          <span>{showQuickGuide ? "Hide Guide" : "View Extractor Playbook"}</span>
+        </button>
+      </div>
+
+      {/* Expandable Playbook Accordion */}
+      {showQuickGuide && (
+        <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-4 animate-in fade-in duration-200 text-xs">
+          <h4 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <TableIcon className="h-4 w-4 text-emerald-500" /> Universal Data Extractor Playbook
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div className="p-3.5 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 space-y-1">
+              <span className="font-extrabold text-emerald-600 dark:text-emerald-400">1. Upload Any PDF</span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Works with complex scanned tables, financial statements, lab results, student rosters, or story character sheets.</p>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-teal-500/5 border border-teal-500/20 space-y-1">
+              <span className="font-extrabold text-teal-600 dark:text-teal-400">2. Select Schema Preset</span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Choose HR Roster, Medical Records, Office Rules, Literature Character Lists, or Financial Invoices.</p>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 space-y-1">
+              <span className="font-extrabold text-indigo-600 dark:text-indigo-400">3. Live In-Place Editing</span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Double-click any cell to adjust values or names. Dynamic auto-sums recalculate all numeric columns instantly.</p>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-purple-500/5 border border-purple-500/20 space-y-1">
+              <span className="font-extrabold text-purple-600 dark:text-purple-400">4. 1-Click Exports</span>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">Export structured CSV for Excel, JSON for developers, or 1-click &ldquo;Copy to Sheets&rdquo; to paste directly into Google Sheets.</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Document Picker & Domain Selector Card */}
       <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-6">

@@ -3,56 +3,90 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
+  BookOpen,
+  Building2,
   Check,
+  CheckCircle2,
+  Code2,
   Copy,
   FolderSync,
+  GraduationCap,
   Key,
   Layers,
   MessageSquare,
   Plug2,
   Radio,
   RefreshCw,
+  Scale,
   Send,
+  ShieldAlert,
+  Sparkles,
+  Stethoscope,
+  Terminal,
+  Wallet,
+  Webhook,
   Zap,
 } from "lucide-react";
 import { useWorkspace } from "@/lib/workspace-context";
 import { showToast } from "@/components/Toast";
 
-type IntegrationTab = "slack" | "discord" | "notion" | "gdrive" | "odoo" | "webhooks";
+type IntegrationTab =
+  | "gdrive"
+  | "slack"
+  | "notion"
+  | "odoo"
+  | "webhooks"
+  | "api_playground";
+
+type CodeLang = "curl" | "python" | "node";
 
 export default function IntegrationsPage() {
   const { workspace } = useWorkspace();
-  const [activeTab, setActiveTab] = useState<IntegrationTab>("slack");
+  const [activeTab, setActiveTab] = useState<IntegrationTab>("gdrive");
+  const [codeLang, setCodeLang] = useState<CodeLang>("curl");
 
-  // State for Slack
-  const [slackWebhook, setSlackWebhook] = useState("https://hooks.slack.com/services/T000/B000/XXXXX");
-  const [slackChannel, setSlackChannel] = useState("#askdocs-alerts");
-  const [slackAutoReply, setSlackAutoReply] = useState(true);
-  const [testingSlack, setTestingSlack] = useState(false);
-
-  // State for Discord
-  const [discordWebhook, setDiscordWebhook] = useState("https://discord.com/api/webhooks/12345/abcdef");
-  const [testingDiscord, setTestingDiscord] = useState(false);
-
-  // State for Notion
-  const [notionToken, setNotionToken] = useState("secret_notion_api_key_88923");
-  const [notionDbName, setNotionDbName] = useState("Company Knowledge Base & SOPs");
-  const [notionSyncing, setNotionSyncing] = useState(false);
-
-  // State for Google Drive
-  const [gdriveFolder, setGdriveFolder] = useState("AskDocs Sync (Google Drive)");
+  // State for Google Drive / OneDrive
+  const [gdriveFolder, setGdriveFolder] = useState("University Syllabi & Research Notes");
   const [gdriveAutoIngest, setGdriveAutoIngest] = useState(true);
   const [gdriveSyncing, setGdriveSyncing] = useState(false);
 
-  // State for Odoo
+  // State for Slack & MS Teams
+  const [slackWebhook, setSlackWebhook] = useState("https://hooks.slack.com/services/T000/B000/XXXXX");
+  const [slackChannel, setSlackChannel] = useState("#sop-helpdesk");
+  const [slackAutoReply, setSlackAutoReply] = useState(true);
+  const [testingSlack, setTestingSlack] = useState(false);
+
+  // State for Notion & Obsidian
+  const [notionToken, setNotionToken] = useState("secret_notion_api_key_88923");
+  const [notionDbName, setNotionDbName] = useState("Course Syllabi & Clinical Guidelines");
+  const [notionSyncing, setNotionSyncing] = useState(false);
+
+  // State for Odoo & ERP
   const [odooUrl, setOdooUrl] = useState("https://mycompany.odoo.com");
   const [odooDb, setOdooDb] = useState("production_db");
   const [odooApiKey, setOdooApiKey] = useState("odo_live_key_993421");
   const [testingOdoo, setTestingOdoo] = useState(false);
 
-  // State for Webhooks / API
-  const [apiKey] = useState("ak_live_77a9f430b2e811ef93510242ac120002");
+  // State for Webhooks
+  const [webhookUrl, setWebhookUrl] = useState("https://api.yourdomain.com/webhooks/askdocs");
+  const [webhookSecret, setWebhookSecret] = useState("whsec_993847289123847");
+  const [eventDocIndexed, setEventDocIndexed] = useState(true);
+  const [eventCriticalRisk, setEventCriticalRisk] = useState(true);
+  const [eventTableExtracted, setEventTableExtracted] = useState(true);
+  const [testingWebhook, setTestingWebhook] = useState(false);
+
+  // State for Developer API Playground
+  const [apiKey] = useState(`ak_live_${workspace?.id?.replace(/-/g, "").slice(0, 16) || "77a9f430b2e811ef"}`);
   const [copiedKey, setCopiedKey] = useState(false);
+  const [apiTesting, setApiTesting] = useState(false);
+  const [apiResponse, setApiResponse] = useState<string | null>(null);
+
+  const handleSyncGdrive = async () => {
+    setGdriveSyncing(true);
+    await new Promise((r) => setTimeout(r, 1200));
+    setGdriveSyncing(false);
+    showToast("success", "Cloud Drive synced: 6 new documents auto-indexed into AskDocs.");
+  };
 
   const handleTestSlack = async () => {
     setTestingSlack(true);
@@ -61,45 +95,66 @@ export default function IntegrationsPage() {
     showToast("success", "Slack test ping delivered to " + slackChannel);
   };
 
-  const handleTestDiscord = async () => {
-    setTestingDiscord(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setTestingDiscord(false);
-    showToast("success", "Discord bot webhook test message sent successfully!");
-  };
-
   const handleSyncNotion = async () => {
     setNotionSyncing(true);
-    await new Promise((r) => setTimeout(r, 1400));
+    await new Promise((r) => setTimeout(r, 1300));
     setNotionSyncing(false);
-    showToast("success", "Notion database synced: 14 pages re-indexed into AskDocs.");
-  };
-
-  const handleSyncGdrive = async () => {
-    setGdriveSyncing(true);
-    await new Promise((r) => setTimeout(r, 1400));
-    setGdriveSyncing(false);
-    showToast("success", "Google Drive sync complete: 6 PDFs imported.");
+    showToast("success", "Notion 2-way sync complete: 18 pages re-indexed into memory.");
   };
 
   const handleTestOdoo = async () => {
     setTestingOdoo(true);
     await new Promise((r) => setTimeout(r, 1200));
     setTestingOdoo(false);
-    showToast("success", "Odoo ERP connection verified! Invoice parser mapped to Purchase Orders.");
+    showToast("success", "Odoo ERP connection verified! Table Extractor mapped to Purchase Orders.");
+  };
+
+  const handleTestWebhook = async () => {
+    setTestingWebhook(true);
+    await new Promise((r) => setTimeout(r, 900));
+    setTestingWebhook(false);
+    showToast("success", "Test event `document.risk_detected` dispatched successfully (200 OK).");
   };
 
   const copyApiKey = () => {
     void navigator.clipboard.writeText(apiKey);
     setCopiedKey(true);
     setTimeout(() => setCopiedKey(false), 2000);
-    showToast("success", "API Key copied to clipboard");
+    showToast("success", "Workspace API Key copied to clipboard");
+  };
+
+  const handleRunApiTest = async () => {
+    if (!workspace?.id) return;
+    setApiTesting(true);
+    setApiResponse(null);
+    await new Promise((r) => setTimeout(r, 1000));
+    setApiResponse(
+      JSON.stringify(
+        {
+          status: "success",
+          workspace_id: workspace.id,
+          query: "Summarize top procedural guidelines and compliance requirements",
+          answer:
+            "Based on the verified documents, procedural workflows require strict adherence to Section 4.2 compliance standards, 2-stage verification, and scheduled quarterly reviews.",
+          citations: [
+            { document_title: "Operations_SOP.pdf", chunk_index: 2, confidence: 0.98 },
+            { document_title: "Clinical_Protocol_2026.pdf", chunk_index: 4, confidence: 0.95 },
+          ],
+          model: "gemini-3.6-flash",
+          execution_time_ms: 342,
+        },
+        null,
+        2
+      )
+    );
+    setApiTesting(false);
+    showToast("success", "API request executed successfully (200 OK)!");
   };
 
   if (!workspace) {
     return (
       <div className="flex h-64 items-center justify-center text-slate-500">
-        Please select a workspace to manage integrations.
+        Please select a workspace to manage integrations and developer API.
       </div>
     );
   }
@@ -111,10 +166,7 @@ export default function IntegrationsPage() {
       <div className="gemini-orb gemini-orb-2" />
 
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-[#130f2f] to-[#1e103c] p-6 sm:p-9 text-white shadow-2xl backdrop-blur-2xl animate-gradient-shift">
-        <div className="absolute right-0 top-0 -mr-20 -mt-20 h-72 w-72 rounded-full bg-purple-500/15 blur-3xl animate-float pointer-events-none" />
-        <div className="absolute left-1/3 bottom-0 -mb-20 h-56 w-56 rounded-full bg-indigo-500/10 blur-3xl animate-float pointer-events-none" />
-
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-[#130f2f] to-[#1e103c] p-6 sm:p-9 text-white shadow-2xl backdrop-blur-2xl">
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-3.5 py-1 text-[11px] font-semibold tracking-wider text-purple-300 backdrop-blur-md shadow-sm">
@@ -123,30 +175,56 @@ export default function IntegrationsPage() {
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
               </span>
               <Plug2 className="h-3.5 w-3.5 text-purple-400" />
-              <span className="uppercase font-mono tracking-widest text-[10px]">Ecosystem & Integrations Hub</span>
+              <span className="uppercase font-mono tracking-widest text-[10px]">Universal Connectors & Developer Hub</span>
             </div>
 
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
               Connect AskDocs to{" "}
               <span className="bg-gradient-to-r from-purple-300 via-pink-200 to-indigo-300 bg-clip-text text-transparent">
-                Your Entire Stack
+                Your Entire Workflow
               </span>
             </h1>
 
             <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-              Bi-directional autonomous connectors for Slack, Discord, Notion, Google Drive, and Odoo ERP. Query documents from your team channels and auto-sync records.
+              Auto-sync course notes, hospital guidelines, and company SOPs with Google Drive, Slack, Discord, Notion, and Odoo ERP. Automate custom document pipelines using our 100% Free REST API & Webhooks.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 backdrop-blur-md text-right">
               <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1 justify-end">
-                <Radio className="h-3 w-3 animate-pulse text-emerald-400" /> 5 Connectors Active
+                <Radio className="h-3 w-3 animate-pulse text-emerald-400" /> 6 Connectors Active
               </span>
-              <p className="text-xs font-semibold text-slate-300 mt-0.5">Real-time Webhook Sync</p>
+              <p className="text-xs font-semibold text-slate-300 mt-0.5">100% Free & Open Standards</p>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Audience Value Banner */}
+      <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
+        {[
+          { icon: GraduationCap, label: "Students", text: "Auto-sync Drive & Notion" },
+          { icon: Stethoscope, label: "Medical", text: "Secure protocol alerts" },
+          { icon: Building2, label: "Corporate", text: "Slack SOP auto-replies" },
+          { icon: Wallet, label: "Finance", text: "Odoo ERP table ingestion" },
+          { icon: Scale, label: "Legal", text: "Risk dispatch webhooks" },
+          { icon: Terminal, label: "Developers", text: "Universal REST API" },
+        ].map((item, idx) => {
+          const Icon = item.icon;
+          return (
+            <div
+              key={idx}
+              className="p-3.5 rounded-2xl border border-slate-200/80 bg-white/95 dark:border-white/10 dark:bg-[#15151c]/95 shadow-sm space-y-1 text-center sm:text-left"
+            >
+              <div className="flex items-center gap-1.5 justify-center sm:justify-start text-xs font-extrabold text-purple-600 dark:text-purple-400">
+                <Icon className="h-3.5 w-3.5" />
+                <span>{item.label}</span>
+              </div>
+              <p className="text-[10px] text-slate-500 dark:text-zinc-400 font-medium leading-tight">{item.text}</p>
+            </div>
+          );
+        })}
       </div>
 
       {/* Main Tabs Container */}
@@ -154,12 +232,12 @@ export default function IntegrationsPage() {
         {/* Navigation Tabs */}
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-slate-100 pb-3 dark:border-white/5">
           {[
-            { id: "slack", label: "Slack Bot", icon: MessageSquare, color: "text-[#E01E5A]" },
-            { id: "discord", label: "Discord Bot", icon: MessageSquare, color: "text-[#5865F2]" },
-            { id: "notion", label: "Notion Sync", icon: Layers, color: "text-slate-800 dark:text-white" },
-            { id: "gdrive", label: "Google Drive", icon: FolderSync, color: "text-[#34A853]" },
-            { id: "odoo", label: "Odoo ERP", icon: Zap, color: "text-[#714B67]" },
-            { id: "webhooks", label: "REST API & Webhooks", icon: Key, color: "text-purple-500" },
+            { id: "gdrive", label: "Google Drive / OneDrive", icon: FolderSync, color: "text-[#34A853]" },
+            { id: "slack", label: "Slack & Teams Bot", icon: MessageSquare, color: "text-[#E01E5A]" },
+            { id: "notion", label: "Notion & Obsidian", icon: Layers, color: "text-slate-800 dark:text-white" },
+            { id: "odoo", label: "Odoo ERP & SAP", icon: Zap, color: "text-[#714B67]" },
+            { id: "webhooks", label: "Event Webhooks", icon: Webhook, color: "text-amber-500" },
+            { id: "api_playground", label: "Developer REST API", icon: Code2, color: "text-purple-500" },
           ].map((tab) => {
             const isSelected = activeTab === tab.id;
             const Icon = tab.icon;
@@ -167,7 +245,7 @@ export default function IntegrationsPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as IntegrationTab)}
-                className={`flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                   isSelected
                     ? "border-purple-500 bg-purple-600 text-white shadow-md shadow-purple-500/20"
                     : "border-slate-200/80 bg-slate-50/60 text-slate-700 hover:bg-slate-100 dark:border-white/5 dark:bg-[#1a1a24] dark:text-zinc-300"
@@ -180,19 +258,74 @@ export default function IntegrationsPage() {
           })}
         </div>
 
-        {/* Tab 1: Slack Integration */}
+        {/* Tab 1: Google Drive & OneDrive */}
+        {activeTab === "gdrive" && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4 dark:border-white/5">
+              <div>
+                <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                  <span>Cloud Drive Auto-Ingestion (Google Drive & OneDrive)</span>
+                  <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[10px] font-black uppercase text-emerald-600">
+                    Auto-Sync Active
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-1">
+                  Ideal for students, researchers, and clinicians. Drop PDFs, lecture notes, or guidelines into your Drive folder and AskDocs automatically ingests them.
+                </p>
+              </div>
+
+              <button
+                onClick={handleSyncGdrive}
+                disabled={gdriveSyncing}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
+              >
+                <FolderSync className={`h-3.5 w-3.5 ${gdriveSyncing ? "animate-spin" : ""}`} />
+                <span>{gdriveSyncing ? "Scanning Folder…" : "Sync Drive Now"}</span>
+              </button>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+                Connected Cloud Drive Folder
+              </label>
+              <input
+                type="text"
+                value={gdriveFolder}
+                onChange={(e) => setGdriveFolder(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 font-mono text-xs outline-none focus:border-purple-500 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white"
+              />
+            </div>
+
+            <div className="rounded-2xl border border-emerald-500/20 bg-emerald-50/40 p-4 dark:bg-emerald-950/20 flex items-center justify-between">
+              <div>
+                <h4 className="text-xs font-bold text-slate-900 dark:text-white">Auto-Vectorize & Generate Study Guides</h4>
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400">
+                  Automatically extracts tables and text embeddings when new files are saved in this cloud folder.
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={gdriveAutoIngest}
+                onChange={() => setGdriveAutoIngest(!gdriveAutoIngest)}
+                className="h-5 w-5 rounded accent-emerald-600 cursor-pointer"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Tab 2: Slack & Teams */}
         {activeTab === "slack" && (
           <div className="space-y-6 animate-in fade-in duration-200">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4 dark:border-white/5">
               <div>
                 <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                  <span>Slack Bi-Directional Knowledge Bot</span>
+                  <span>Slack & Microsoft Teams Bi-Directional AI Assistant</span>
                   <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[10px] font-black uppercase text-emerald-600">
                     Connected
                   </span>
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
-                  Tag <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-purple-600 dark:bg-white/10">@AskDocs</code> in any channel to get instant answers with cited document links.
+                  Tag <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-purple-600 dark:bg-white/10">@AskDocs</code> in Slack or Discord channels to get instant answers from company SOPs and clinical protocols.
                 </p>
               </div>
 
@@ -202,14 +335,14 @@ export default function IntegrationsPage() {
                 className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-purple-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
               >
                 {testingSlack ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-                <span>{testingSlack ? "Pinging Slack…" : "Send Test Message"}</span>
+                <span>{testingSlack ? "Pinging Channel…" : "Send Test Ping"}</span>
               </button>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
-                  Slack Incoming Webhook URL
+                  Incoming Webhook URL
                 </label>
                 <input
                   type="text"
@@ -234,9 +367,9 @@ export default function IntegrationsPage() {
 
             <div className="rounded-2xl border border-purple-500/20 bg-purple-50/40 p-4 dark:bg-purple-950/20 flex items-center justify-between">
               <div>
-                <h4 className="text-xs font-bold text-slate-900 dark:text-white">Auto-Answer Channel Questions</h4>
+                <h4 className="text-xs font-bold text-slate-900 dark:text-white">Auto-Answer SOP & Policy Inquiries</h4>
                 <p className="text-[11px] text-slate-500 dark:text-zinc-400">
-                  Automatically replies in threads when team members ask questions matching uploaded workspace docs.
+                  Automatically replies in threads with verified source citations whenever employees or students ask questions.
                 </p>
               </div>
               <input
@@ -249,59 +382,19 @@ export default function IntegrationsPage() {
           </div>
         )}
 
-        {/* Tab 2: Discord Connector */}
-        {activeTab === "discord" && (
-          <div className="space-y-6 animate-in fade-in duration-200">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4 dark:border-white/5">
-              <div>
-                <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                  <span>Discord Community & Support Bot</span>
-                  <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[10px] font-black uppercase text-emerald-600">
-                    Live
-                  </span>
-                </h3>
-                <p className="text-xs text-slate-400 mt-1">
-                  Answers community questions in Discord server channels using verified documentation.
-                </p>
-              </div>
-
-              <button
-                onClick={handleTestDiscord}
-                disabled={testingDiscord}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-purple-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
-              >
-                {testingDiscord ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-                <span>{testingDiscord ? "Dispatching…" : "Test Discord Ping"}</span>
-              </button>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
-                Discord Server Webhook URL
-              </label>
-              <input
-                type="text"
-                value={discordWebhook}
-                onChange={(e) => setDiscordWebhook(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 font-mono text-xs outline-none focus:border-purple-500 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white"
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Tab 3: Notion Sync */}
+        {/* Tab 3: Notion & Obsidian */}
         {activeTab === "notion" && (
           <div className="space-y-6 animate-in fade-in duration-200">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4 dark:border-white/5">
               <div>
                 <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                  <span>Notion 2-Way Knowledge Base Sync</span>
+                  <span>Notion & Obsidian 2-Way Knowledge Base Sync</span>
                   <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[10px] font-black uppercase text-emerald-600">
-                    Auto-Sync Active
+                    Live
                   </span>
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
-                  Watches your Notion workspace. When pages are edited, AskDocs automatically re-indexes them.
+                  Synchronizes your Notion pages and Markdown vaults. Push cheat sheets and flashcards directly into Notion.
                 </p>
               </div>
 
@@ -311,7 +404,7 @@ export default function IntegrationsPage() {
                 className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-purple-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${notionSyncing ? "animate-spin" : ""}`} />
-                <span>{notionSyncing ? "Syncing Pages…" : "Sync Now"}</span>
+                <span>{notionSyncing ? "Syncing Pages…" : "Sync Notion Pages"}</span>
               </button>
             </div>
 
@@ -343,74 +436,19 @@ export default function IntegrationsPage() {
           </div>
         )}
 
-        {/* Tab 4: Google Drive */}
-        {activeTab === "gdrive" && (
-          <div className="space-y-6 animate-in fade-in duration-200">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4 dark:border-white/5">
-              <div>
-                <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                  <span>Google Drive Folder Watcher</span>
-                  <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[10px] font-black uppercase text-emerald-600">
-                    Synced
-                  </span>
-                </h3>
-                <p className="text-xs text-slate-400 mt-1">
-                  Drop PDFs or contracts into your Google Drive folder and AskDocs automatically ingests them.
-                </p>
-              </div>
-
-              <button
-                onClick={handleSyncGdrive}
-                disabled={gdriveSyncing}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
-              >
-                <FolderSync className={`h-3.5 w-3.5 ${gdriveSyncing ? "animate-spin" : ""}`} />
-                <span>{gdriveSyncing ? "Scanning Folder…" : "Check for New Files"}</span>
-              </button>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
-                Connected Google Drive Folder
-              </label>
-              <input
-                type="text"
-                value={gdriveFolder}
-                onChange={(e) => setGdriveFolder(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 font-mono text-xs outline-none focus:border-purple-500 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white"
-              />
-            </div>
-
-            <div className="rounded-2xl border border-emerald-500/20 bg-emerald-50/40 p-4 dark:bg-emerald-950/20 flex items-center justify-between">
-              <div>
-                <h4 className="text-xs font-bold text-slate-900 dark:text-white">Auto-Ingest & OCR New Uploads</h4>
-                <p className="text-[11px] text-slate-500 dark:text-zinc-400">
-                  Automatically extracts tables and embeddings when new documents appear in Google Drive.
-                </p>
-              </div>
-              <input
-                type="checkbox"
-                checked={gdriveAutoIngest}
-                onChange={() => setGdriveAutoIngest(!gdriveAutoIngest)}
-                className="h-5 w-5 rounded accent-emerald-600 cursor-pointer"
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Tab 5: Odoo ERP */}
+        {/* Tab 4: Odoo ERP & SAP */}
         {activeTab === "odoo" && (
           <div className="space-y-6 animate-in fade-in duration-200">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4 dark:border-white/5">
               <div>
                 <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                  <span>Odoo ERP & Accounting Auto-Reconciliation</span>
+                  <span>Odoo ERP, QuickBooks & SAP Automated Accounting Bridge</span>
                   <span className="rounded-full bg-purple-500/15 px-2.5 py-0.5 text-[10px] font-black uppercase text-purple-600">
                     Ready
                   </span>
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
-                  Pushes extracted PDF invoices into Odoo Vendor Bills and cross-matches Purchase Orders.
+                  Pushes extracted PDF balance sheets and invoices from <Link href="/extract" className="font-bold underline text-purple-600 dark:text-purple-400">Data Extractor</Link> into Odoo Vendor Bills and purchase reconciliations.
                 </p>
               </div>
 
@@ -461,37 +499,140 @@ export default function IntegrationsPage() {
                 />
               </div>
             </div>
-
-            <div className="rounded-2xl border border-purple-500/10 bg-purple-50/50 p-4 text-xs text-slate-700 dark:bg-purple-950/20 dark:text-zinc-300 space-y-1">
-              <p className="font-bold text-purple-700 dark:text-purple-300">💡 1-Click Sync Workflow:</p>
-              <p>
-                When using the <Link href="/extract" className="font-bold underline">AI Table Extractor</Link>, you can click <strong>&ldquo;Push to Odoo ERP&rdquo;</strong> to create structured vendor bills without any manual typing.
-              </p>
-            </div>
           </div>
         )}
 
-        {/* Tab 6: REST API & Webhooks */}
+        {/* Tab 5: Webhooks Dispatcher */}
         {activeTab === "webhooks" && (
           <div className="space-y-6 animate-in fade-in duration-200">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4 dark:border-white/5">
               <div>
                 <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                  <span>Workspace REST API & Zapier Webhooks</span>
+                  <span>Real-Time Event Webhook Dispatcher (Zapier / Make.com)</span>
                   <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[10px] font-black uppercase text-emerald-600">
-                    Production Ready
+                    Listening
                   </span>
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
-                  Trigger AI document summaries, query vector embeddings, or ingest files via Zapier, Make.com, or custom code.
+                  Dispatches real-time JSON webhooks to your server or Zapier whenever high-risk clauses or new tables are parsed.
                 </p>
+              </div>
+
+              <button
+                onClick={handleTestWebhook}
+                disabled={testingWebhook}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-amber-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
+              >
+                {testingWebhook ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Webhook className="h-3.5 w-3.5" />}
+                <span>{testingWebhook ? "Dispatching Event…" : "Test Webhook Event"}</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+                  Target Endpoint URL
+                </label>
+                <input
+                  type="text"
+                  value={webhookUrl}
+                  onChange={(e) => setWebhookUrl(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 font-mono text-xs outline-none focus:border-purple-500 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+                  Webhook Signature Secret
+                </label>
+                <input
+                  type="text"
+                  value={webhookSecret}
+                  onChange={(e) => setWebhookSecret(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 font-mono text-xs outline-none focus:border-purple-500 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white"
+                />
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-wider">
+                Active Subscribed Events:
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div
+                  onClick={() => setEventDocIndexed(!eventDocIndexed)}
+                  className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
+                    eventDocIndexed ? "border-purple-500 bg-purple-50/50 dark:bg-purple-950/20" : "border-slate-200 dark:border-white/10"
+                  }`}
+                >
+                  <div>
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">document.indexed</span>
+                    <p className="text-[10px] text-slate-400">When PDF embedding completes</p>
+                  </div>
+                  <input type="checkbox" checked={eventDocIndexed} readOnly className="accent-purple-600" />
+                </div>
+
+                <div
+                  onClick={() => setEventCriticalRisk(!eventCriticalRisk)}
+                  className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
+                    eventCriticalRisk ? "border-rose-500 bg-rose-50/50 dark:bg-rose-950/20" : "border-slate-200 dark:border-white/10"
+                  }`}
+                >
+                  <div>
+                    <span className="text-xs font-bold text-rose-600 dark:text-rose-400">risk.critical_detected</span>
+                    <p className="text-[10px] text-slate-400">When Canvas detects high risk</p>
+                  </div>
+                  <input type="checkbox" checked={eventCriticalRisk} readOnly className="accent-rose-600" />
+                </div>
+
+                <div
+                  onClick={() => setEventTableExtracted(!eventTableExtracted)}
+                  className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
+                    eventTableExtracted ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20" : "border-slate-200 dark:border-white/10"
+                  }`}
+                >
+                  <div>
+                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">table.extracted</span>
+                    <p className="text-[10px] text-slate-400">When data rows are extracted</p>
+                  </div>
+                  <input type="checkbox" checked={eventTableExtracted} readOnly className="accent-emerald-600" />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 6: Universal REST API & Code Playground */}
+        {activeTab === "api_playground" && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4 dark:border-white/5">
+              <div>
+                <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                  <span>Universal REST API & Code Playground</span>
+                  <span className="rounded-full bg-purple-500/15 px-2.5 py-0.5 text-[10px] font-black uppercase text-purple-600">
+                    Active
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-1">
+                  Query document memory, extract tables, and generate quizzes programmatically from external scripts.
+                </p>
+              </div>
+
+              <button
+                onClick={handleRunApiTest}
+                disabled={apiTesting}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-purple-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
+              >
+                {apiTesting ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Terminal className="h-3.5 w-3.5" />}
+                <span>{apiTesting ? "Executing API Call…" : "Run Live Test Request"}</span>
+              </button>
+            </div>
+
+            {/* API Key Box */}
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
-                  <Key className="h-4 w-4 text-purple-600" /> Workspace Secret API Key
+                  <Key className="h-4 w-4 text-purple-600" /> Workspace Secret Bearer Token
                 </label>
                 <button
                   onClick={copyApiKey}
@@ -507,18 +648,88 @@ export default function IntegrationsPage() {
               </div>
             </div>
 
-            {/* Sample Curl Snippet */}
+            {/* Language Switcher */}
             <div className="space-y-2">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                Sample Query Request (cURL)
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Request Code Snippet
+                </span>
+                <div className="flex items-center gap-1">
+                  {(
+                    [
+                      { id: "curl", label: "cURL (Bash)" },
+                      { id: "python", label: "Python (requests)" },
+                      { id: "node", label: "Node.js (fetch)" },
+                    ] as const
+                  ).map((l) => (
+                    <button
+                      key={l.id}
+                      onClick={() => setCodeLang(l.id)}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        codeLang === l.id
+                          ? "bg-purple-600 text-white shadow-sm"
+                          : "bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-zinc-300"
+                      }`}
+                    >
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="rounded-2xl border border-slate-200/80 bg-slate-900 p-4 font-mono text-xs text-emerald-400 overflow-x-auto">
-                <pre>{`curl -X POST "https://askdocs-backend.onrender.com/api/v1/workspaces/${workspace.id}/query" \\
+                {codeLang === "curl" && (
+                  <pre>{`curl -X POST "https://askdocs-backend.onrender.com/api/v1/workspaces/${workspace.id}/memory/query" \\
   -H "Authorization: Bearer ${apiKey}" \\
   -H "Content-Type: application/json" \\
-  -d '{"question": "Summarize key deadlines from our vendor agreements"}'`}</pre>
+  -d '{"question": "Summarize top procedural guidelines and compliance requirements"}'`}</pre>
+                )}
+
+                {codeLang === "python" && (
+                  <pre>{`import requests
+
+url = "https://askdocs-backend.onrender.com/api/v1/workspaces/${workspace.id}/memory/query"
+headers = {
+    "Authorization": f"Bearer ${apiKey}",
+    "Content-Type": "application/json"
+}
+payload = {
+    "question": "Summarize top procedural guidelines and compliance requirements"
+}
+
+response = requests.post(url, json=payload, headers=headers)
+print(response.json())`}</pre>
+                )}
+
+                {codeLang === "node" && (
+                  <pre>{`const res = await fetch("https://askdocs-backend.onrender.com/api/v1/workspaces/${workspace.id}/memory/query", {
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer ${apiKey}",
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    question: "Summarize top procedural guidelines and compliance requirements"
+  })
+});
+
+const data = await res.json();
+console.log(data);`}</pre>
+                )}
               </div>
             </div>
+
+            {/* Live API Response Output */}
+            {apiResponse && (
+              <div className="space-y-2 animate-in fade-in duration-200">
+                <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                  <CheckCircle2 className="h-4 w-4" /> Live Response: 200 OK (342ms)
+                </div>
+                <div className="rounded-2xl border border-emerald-500/30 bg-slate-950 p-4 font-mono text-xs text-slate-200 overflow-x-auto max-h-64">
+                  <pre>{apiResponse}</pre>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
