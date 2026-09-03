@@ -20,6 +20,7 @@ import {
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
 import { showToast } from "@/components/Toast";
+import { exportToPdf, downloadBlob } from "@/lib/pdf-export";
 import type { DocumentItem, StudyGuideDeck } from "@/lib/types";
 
 type StudyTab = "cheatsheet" | "flashcards" | "quiz" | "terms";
@@ -268,12 +269,58 @@ export default function StudyGuidePage() {
     };
   };
 
+  const exportStudyPacketPDF = () => {
+    if (!studyDeck) return;
+    exportToPdf({
+      title: studyDeck.title,
+      subtitle: `Comprehensive Multi-Document Study Packet & Quiz • Sources: ${studyDeck.document_titles.join(", ")}`,
+      badge: "🎓 High-Yield Study Packet • AskDocs Study Studio",
+      documentSource: studyDeck.document_titles.join(", "),
+      workspaceName: workspace?.name,
+      sections: [
+        {
+          heading: "1. Executive Core Principles & Cheat Sheet",
+          type: "callout",
+          content: studyDeck.executive_cheat_sheet.replace(/\n/g, "<br/>"),
+        },
+        {
+          heading: "2. Key Terminology & Definitions",
+          type: "bullets",
+          bullets: studyDeck.key_concepts.map((k) => `<strong>${k.term}:</strong> ${k.definition}`),
+        },
+        {
+          heading: "3. High-Yield Flashcard Questions & Answers",
+          type: "bullets",
+          bullets: studyDeck.flashcards.map(
+            (fc, i) => `<strong>Q${i + 1} (${fc.category}):</strong> ${fc.question}<br/><em>Answer:</em> ${fc.answer}`
+          ),
+        },
+        {
+          heading: "4. Practice Examination & Solutions",
+          type: "bullets",
+          bullets: studyDeck.quiz.map(
+            (q, i) => `<strong>Question ${i + 1}:</strong> ${q.question}<br/><strong>Correct Answer:</strong> ${q.options[q.correct_option_index]}<br/><em>Rationale:</em> ${q.explanation} (${q.source_citation})`
+          ),
+        },
+      ],
+    });
+    showToast("success", "Preparing PDF Study Packet for print/download...");
+  };
+
+  const exportAnkiTSV = () => {
+    if (!studyDeck) return;
+    const rows = studyDeck.flashcards.map((fc) => `"${fc.question.replace(/"/g, '""')}"\t"${fc.answer.replace(/"/g, '""')}"\t"${fc.category}"`);
+    downloadBlob(`${studyDeck.title.toLowerCase().replace(/\s+/g, "_")}_anki.tsv`, rows.join("\n"), "text/tab-separated-values");
+    showToast("success", "Anki flashcards TSV exported!");
+  };
+
   const copyStudyGuide = () => {
     if (!studyDeck) return;
     const text = `# ${studyDeck.title} — Study Guide & Cheat Sheet\n\n${studyDeck.executive_cheat_sheet}\n\n## Key Terms\n${studyDeck.key_concepts.map((k) => `- **${k.term}:** ${k.definition}`).join("\n")}`;
     void navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    showToast("success", "Study guide copied to clipboard");
   };
 
   const currentCard = studyDeck?.flashcards[currentCardIdx];
@@ -293,12 +340,9 @@ export default function StudyGuidePage() {
       <div className="gemini-orb gemini-orb-2" />
 
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-[#140e33] to-[#201042] p-6 sm:p-9 text-white shadow-2xl backdrop-blur-2xl animate-gradient-shift">
-        <div className="absolute right-0 top-0 -mr-20 -mt-20 h-72 w-72 rounded-full bg-purple-500/15 blur-3xl animate-float pointer-events-none" />
-        <div className="absolute left-1/3 bottom-0 -mb-20 h-56 w-56 rounded-full bg-indigo-500/10 blur-3xl animate-float pointer-events-none" />
-        
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-[#140e33] to-[#201042] p-6 sm:p-8 text-white shadow-2xl backdrop-blur-2xl">
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-3.5 py-1 text-[11px] font-semibold tracking-wider text-purple-300 backdrop-blur-md shadow-sm">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75"></span>
@@ -308,7 +352,7 @@ export default function StudyGuidePage() {
               <span className="uppercase font-mono tracking-widest text-[10px]">AI Multi-Doc Study Studio</span>
             </div>
             
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
               Multi-Doc Study Guide &{" "}
               <span className="bg-gradient-to-r from-purple-300 via-pink-200 to-indigo-300 bg-clip-text text-transparent">
                 Quiz Studio
@@ -316,18 +360,35 @@ export default function StudyGuidePage() {
             </h1>
             
             <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-              Synthesize 1–5 uploaded documents into executive cheat sheets, interactive 3D flippable flashcards, and self-testing quizzes with instant scoring.
+              Synthesize 1–5 uploaded documents into executive cheat sheets, interactive 3D flippable flashcards, and printable PDF study packets with self-testing quizzes.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              onClick={exportStudyPacketPDF}
+              disabled={!studyDeck}
+              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-purple-500/25 hover:shadow-purple-500/40 hover:brightness-110 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+            >
+              <Award className="h-4 w-4" />
+              <span>Download PDF Packet</span>
+            </button>
+
+            <button
+              onClick={exportAnkiTSV}
+              disabled={!studyDeck}
+              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:brightness-110 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+            >
+              <span>Export Anki (.TSV)</span>
+            </button>
+
             <button
               onClick={copyStudyGuide}
               disabled={!studyDeck}
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-md hover:bg-white/20 active:scale-95 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-md hover:bg-white/20 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
             >
               {copied ? <Check className="h-4 w-4 text-emerald-300" /> : <Copy className="h-4 w-4" />}
-              <span>{copied ? "Copied" : "Copy Study Guide"}</span>
+              <span>{copied ? "Copied" : "Copy Guide"}</span>
             </button>
           </div>
         </div>

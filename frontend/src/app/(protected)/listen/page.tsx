@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
+import { showToast } from "@/components/Toast";
+import { exportToPdf, downloadBlob } from "@/lib/pdf-export";
 import type { AudioBriefItem, DocumentItem } from "@/lib/types";
 
 export default function AudioBriefPlayerPage() {
@@ -166,11 +168,46 @@ Format as a natural spoken narrative with clear chapter takeaways.`;
       }
       setIsPlaying(false);
       setCurrentBrief(newBrief);
+      showToast("success", "Audio briefing generated successfully!");
     } catch (err) {
-      alert("Audio Brief generation failed: " + String(err));
+      showToast("error", "Audio Brief generation failed: " + String(err));
     } finally {
       setGenerating(false);
     }
+  };
+
+  const exportBriefPDF = () => {
+    if (!currentBrief) return;
+    exportToPdf({
+      title: currentBrief.title,
+      subtitle: `Executive Spoken Briefing & Transcript • Est. Duration: ${Math.round(currentBrief.duration_estimate_seconds / 60)} Minutes`,
+      badge: "🎧 Spoken Audio Brief • AskDocs Audio Studio",
+      workspaceName: workspace?.name,
+      sections: [
+        {
+          heading: "Executive Key Takeaways",
+          type: "bullets",
+          bullets: currentBrief.key_takeaways,
+        },
+        {
+          heading: "Chapter Timestamps & Agenda",
+          type: "bullets",
+          bullets: currentBrief.chapter_timestamps.map((c) => `<strong>${c.timestamp}:</strong> ${c.title}`),
+        },
+        {
+          heading: "Full Audio Briefing Script",
+          type: "callout",
+          content: currentBrief.script_content.replace(/\n\n/g, "<br/><br/>"),
+        },
+      ],
+    });
+    showToast("success", "Preparing Audio Brief PDF for print/download...");
+  };
+
+  const exportScriptText = () => {
+    if (!currentBrief) return;
+    downloadBlob(`${currentBrief.title.toLowerCase().replace(/\s+/g, "_")}_script.txt`, currentBrief.script_content, "text/plain");
+    showToast("success", "Audio briefing script downloaded!");
   };
 
   const copyScript = () => {
@@ -178,6 +215,7 @@ Format as a natural spoken narrative with clear chapter takeaways.`;
     void navigator.clipboard.writeText(currentBrief.script_content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    showToast("success", "Audio briefing script copied to clipboard");
   };
 
   if (!workspace) {
@@ -195,12 +233,9 @@ Format as a natural spoken narrative with clear chapter takeaways.`;
       <div className="gemini-orb gemini-orb-2" />
 
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-[#160d36] to-[#221045] p-6 sm:p-9 text-white shadow-2xl backdrop-blur-2xl animate-gradient-shift">
-        <div className="absolute right-0 top-0 -mr-20 -mt-20 h-72 w-72 rounded-full bg-violet-500/15 blur-3xl animate-float pointer-events-none" />
-        <div className="absolute left-1/3 bottom-0 -mb-20 h-56 w-56 rounded-full bg-cyan-500/10 blur-3xl animate-float pointer-events-none" />
-        
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-[#160d36] to-[#221045] p-6 sm:p-8 text-white shadow-2xl backdrop-blur-2xl">
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3.5 py-1 text-[11px] font-semibold tracking-wider text-violet-300 backdrop-blur-md shadow-sm">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75"></span>
@@ -210,7 +245,7 @@ Format as a natural spoken narrative with clear chapter takeaways.`;
               <span className="uppercase font-mono tracking-widest text-[10px]">AI Spoken Audio Briefing</span>
             </div>
             
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
               Listen to Any PDF in{" "}
               <span className="bg-gradient-to-r from-cyan-300 via-teal-200 to-indigo-300 bg-clip-text text-transparent">
                 3 Minutes
@@ -218,18 +253,35 @@ Format as a natural spoken narrative with clear chapter takeaways.`;
             </h1>
             
             <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-              Transform 40-page reports, research papers, and legal agreements into engaging spoken audio briefings. Listen on the go with real-time waveform visualizers.
+              Transform 40-page reports, research papers, and legal agreements into spoken audio briefings with downloadable PDF transcripts and sound wave visualizers.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              onClick={exportBriefPDF}
+              disabled={!currentBrief}
+              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-purple-500/25 hover:shadow-purple-500/40 hover:brightness-110 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+            >
+              <Headphones className="h-4 w-4" />
+              <span>Download PDF Transcript</span>
+            </button>
+
+            <button
+              onClick={exportScriptText}
+              disabled={!currentBrief}
+              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:brightness-110 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+            >
+              <span>Export Script (.TXT)</span>
+            </button>
+
             <button
               onClick={copyScript}
               disabled={!currentBrief}
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-md hover:bg-white/20 active:scale-95 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-md hover:bg-white/20 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
             >
               {copied ? <Check className="h-4 w-4 text-emerald-300" /> : <Copy className="h-4 w-4" />}
-              <span>{copied ? "Copied" : "Copy Audio Script"}</span>
+              <span>{copied ? "Copied" : "Copy"}</span>
             </button>
           </div>
         </div>

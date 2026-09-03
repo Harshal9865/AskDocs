@@ -16,6 +16,7 @@ import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
 import { DocumentItem } from "@/lib/types";
 import { showToast } from "@/components/Toast";
+import { exportToPdf, downloadBlob } from "@/lib/pdf-export";
 
 interface Slide {
   id: number;
@@ -142,6 +143,36 @@ export default function SlideDeckStudioPage() {
     }
   };
 
+  const exportPDF = () => {
+    if (slides.length === 0) return;
+    const currentDoc = docs.find((d) => d.id === selectedDocId);
+
+    exportToPdf({
+      title: deckTitle,
+      subtitle: `Executive Presentation Deck • Synthesized from ${currentDoc?.title || "Workspace Documents"}`,
+      badge: `${slides.length} Executive Slides • Presentation Ready`,
+      documentSource: currentDoc?.title || "Document Analysis",
+      workspaceName: workspace?.name,
+      sections: slides.map((s, idx) => ({
+        heading: `Slide ${idx + 1}: ${s.title}`,
+        type: "bullets",
+        bullets: [
+          ...(s.subtitle ? [`<strong>Focus:</strong> ${s.subtitle}`] : []),
+          ...s.bullets,
+          ...(s.stat ? [`<strong>Key Metric:</strong> ${s.stat.value} — ${s.stat.label}`] : []),
+          ...(s.takeaway ? [`<strong>Executive Takeaway:</strong> ${s.takeaway}`] : []),
+        ],
+      })),
+    });
+    showToast("success", "Generating printable PDF presentation slides...");
+  };
+
+  const exportMarkdownFile = () => {
+    const md = `# ${deckTitle}\n\n` + slides.map((s, i) => `--- \n## Slide ${i + 1}: ${s.title}\n*${s.subtitle || ""}*\n\n${s.bullets.map((b) => `- ${b}`).join("\n")}\n\n**Takeaway:** ${s.takeaway || ""}`).join("\n\n");
+    downloadBlob(`${deckTitle.toLowerCase().replace(/\s+/g, "_")}.md`, md, "text/markdown");
+    showToast("success", "Markdown presentation downloaded!");
+  };
+
   const copyDeckMarkdown = () => {
     const md = `# ${deckTitle}\n\n` + slides.map((s, i) => `--- \n## Slide ${i + 1}: ${s.title}\n*${s.subtitle || ""}*\n\n${s.bullets.map((b) => `- ${b}`).join("\n")}\n\n**Takeaway:** ${s.takeaway || ""}`).join("\n\n");
     void navigator.clipboard.writeText(md);
@@ -187,12 +218,9 @@ export default function SlideDeckStudioPage() {
       <div className="gemini-orb gemini-orb-2" />
 
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-[#130f2f] to-[#1e103c] p-6 sm:p-9 text-white shadow-2xl backdrop-blur-2xl animate-gradient-shift">
-        <div className="absolute right-0 top-0 -mr-20 -mt-20 h-72 w-72 rounded-full bg-purple-500/15 blur-3xl animate-float pointer-events-none" />
-        <div className="absolute left-1/3 bottom-0 -mb-20 h-56 w-56 rounded-full bg-indigo-500/10 blur-3xl animate-float pointer-events-none" />
-
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-[#130f2f] to-[#1e103c] p-6 sm:p-8 text-white shadow-2xl backdrop-blur-2xl">
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-3.5 py-1 text-[11px] font-semibold tracking-wider text-purple-300 backdrop-blur-md shadow-sm">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75"></span>
@@ -202,7 +230,7 @@ export default function SlideDeckStudioPage() {
               <span className="uppercase font-mono tracking-widest text-[10px]">AI Presentation Deck Studio</span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
               Documents to{" "}
               <span className="bg-gradient-to-r from-purple-300 via-pink-200 to-indigo-300 bg-clip-text text-transparent">
                 Slide Decks
@@ -210,24 +238,39 @@ export default function SlideDeckStudioPage() {
             </h1>
 
             <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-              Transform 40-page PDFs and reports into sleek, executive presentation decks with themes, presenter mode, and 1-click exports.
+              Transform 40-page PDFs and reports into sleek, executive presentation decks with themes, presenter mode, and 1-click PDF and Markdown downloads.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              onClick={exportPDF}
+              className="inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-purple-500/25 hover:shadow-purple-500/40 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+            >
+              <Presentation className="h-4 w-4" />
+              <span>Download PDF Deck</span>
+            </button>
+
+            <button
+              onClick={exportMarkdownFile}
+              className="inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+            >
+              <span>Export .MD</span>
+            </button>
+
             <button
               onClick={copyDeckMarkdown}
               className="inline-flex items-center gap-1.5 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-xs font-bold text-white hover:bg-white/20 active:scale-95 transition-all cursor-pointer backdrop-blur-md"
             >
               {copiedDeck ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-              <span>{copiedDeck ? "Copied" : "Copy Deck"}</span>
+              <span>{copiedDeck ? "Copied" : "Copy"}</span>
             </button>
 
             <button
               onClick={() => setIsFullscreen(!isFullscreen)}
-              className="inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-4 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-purple-500/30 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-xs font-bold text-white hover:bg-white/20 active:scale-95 transition-all cursor-pointer backdrop-blur-md"
             >
-              <Maximize2 className="h-3.5 w-3.5" />
+              <Maximize2 className="h-3.5 w-3.5 text-purple-300" />
               <span>{isFullscreen ? "Exit Fullscreen" : "Presenter Mode"}</span>
             </button>
           </div>

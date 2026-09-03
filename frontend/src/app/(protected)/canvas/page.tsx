@@ -6,6 +6,7 @@ import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
 import { DocumentItem, WorkspaceCanvas, MatrixRow } from "@/lib/types";
 import { showToast } from "@/components/Toast";
+import { exportToPdf, downloadBlob } from "@/lib/pdf-export";
 import {
   CheckCircle2,
   FileText,
@@ -121,6 +122,44 @@ export default function WorkspaceCanvasPage() {
     }
   };
 
+  const exportCanvasPDF = () => {
+    if (!activeCanvas) {
+      showToast("error", "No active canvas to export.");
+      return;
+    }
+    const headers = ["Comparison Criteria", ...activeCanvas.comparison_matrix.document_headers];
+    const rows = activeCanvas.comparison_matrix.rows.map((r) => [r.criteria, ...r.values]);
+
+    exportToPdf({
+      title: activeCanvas.title,
+      subtitle: `Multi-Document Comparative Matrix & Synthesis • ${workspace?.name || "Workspace"}`,
+      badge: `${activeCanvas.comparison_matrix.document_headers.length} Synthesized Documents • Live Canvas`,
+      workspaceName: workspace?.name,
+      sections: [
+        {
+          heading: "Executive Canvas Synthesis",
+          type: "callout",
+          content: activeCanvas.summary,
+        },
+        {
+          heading: "Action Items & Implementation Tasks",
+          type: "bullets",
+          bullets: activeCanvas.checklists.map((c) => `[${c.completed ? "COMPLETED" : "PENDING"}] <strong>${c.task}</strong> (Owner: ${c.owner_tag})`),
+        },
+        {
+          heading: "Compliance & Risk Assessment Heat Map",
+          type: "bullets",
+          bullets: activeCanvas.risk_heat_map.map((r) => `<strong>${r.risk_title} (${r.severity.toUpperCase()} Risk):</strong> ${r.description} — <em>Mitigation:</em> ${r.mitigation}`),
+        },
+      ],
+      table: {
+        headers,
+        rows,
+      },
+    });
+    showToast("success", "Preparing Executive Canvas PDF for print/download...");
+  };
+
   if (!workspace) {
     return (
       <div className="flex h-64 items-center justify-center text-slate-500">
@@ -136,12 +175,9 @@ export default function WorkspaceCanvasPage() {
       <div className="gemini-orb gemini-orb-2" />
 
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-[#130f2f] to-[#1e103c] p-6 sm:p-9 text-white shadow-2xl backdrop-blur-2xl animate-gradient-shift">
-        <div className="absolute right-0 top-0 -mr-20 -mt-20 h-72 w-72 rounded-full bg-purple-500/15 blur-3xl animate-float pointer-events-none" />
-        <div className="absolute left-1/3 bottom-0 -mb-20 h-56 w-56 rounded-full bg-indigo-500/10 blur-3xl animate-float pointer-events-none" />
-
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-[#130f2f] to-[#1e103c] p-6 sm:p-8 text-white shadow-2xl backdrop-blur-2xl">
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-3.5 py-1 text-[11px] font-semibold tracking-wider text-purple-300 backdrop-blur-md shadow-sm">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75"></span>
@@ -151,7 +187,7 @@ export default function WorkspaceCanvasPage() {
               <span className="uppercase font-mono tracking-widest text-[10px]">AI Multi-Document Canvas</span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
               AskDocs Live{" "}
               <span className="bg-gradient-to-r from-purple-300 via-pink-200 to-indigo-300 bg-clip-text text-transparent">
                 Multi-Doc Canvas
@@ -159,17 +195,28 @@ export default function WorkspaceCanvasPage() {
             </h1>
 
             <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-              Transform static documents into dynamic side-by-side comparison matrices, interactive task checklists, and cross-doc risk heat maps.
+              Transform static documents into dynamic side-by-side comparison matrices, interactive task checklists, risk heat maps, and printable PDF reports.
             </p>
           </div>
 
-          <button
-            onClick={() => setCreateModalOpen(true)}
-            className="group relative flex items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-6 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 hover:brightness-110 active:scale-95 transition-all duration-300 cursor-pointer shrink-0"
-          >
-            <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
-            <span>Generate Live Canvas</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              onClick={exportCanvasPDF}
+              disabled={!activeCanvas}
+              className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-purple-500/25 hover:shadow-purple-500/40 hover:brightness-110 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+            >
+              <LayoutGrid className="h-4 w-4" />
+              <span>Download PDF Canvas</span>
+            </button>
+
+            <button
+              onClick={() => setCreateModalOpen(true)}
+              className="group relative flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:brightness-110 active:scale-95 transition-all duration-300 cursor-pointer shrink-0"
+            >
+              <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
+              <span>Generate Canvas</span>
+            </button>
+          </div>
         </div>
       </div>
 

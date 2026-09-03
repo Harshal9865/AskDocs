@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
 import { MemoryGraphOut, WorkspaceMemory } from "@/lib/types";
+import { showToast } from "@/components/Toast";
+import { exportToPdf, downloadBlob } from "@/lib/pdf-export";
 import {
   Brain,
   Calendar,
@@ -59,14 +61,45 @@ export default function InstitutionalMemoryPage() {
     loadMemoryData();
   }, [loadMemoryData]);
 
+  const exportMemoryLogPDF = () => {
+    if (memories.length === 0) {
+      showToast("error", "No organizational memories found to export.");
+      return;
+    }
+    exportToPdf({
+      title: "Permanent Institutional Memory & Decision Log",
+      subtitle: `Enterprise Knowledge Graph • ${workspace?.name || "Workspace"}`,
+      badge: `${memories.length} Permanent Records Indexed`,
+      workspaceName: workspace?.name,
+      sections: [
+        {
+          heading: "Executive Knowledge Summary",
+          type: "callout",
+          content: `This log records temporal organizational decisions, key agreements, policy exceptions, and team facts automatically preserved in the AskDocs Knowledge Graph.`,
+        },
+        ...memories.map((m, i) => ({
+          heading: `Memory Record ${i + 1}: ${m.key_phrase || m.title || "Indexed Context"} (${m.source_type.toUpperCase()})`,
+          type: "bullets" as const,
+          bullets: [
+            `<strong>Core Principle / Finding:</strong> ${m.summary}`,
+            `<strong>Relevance / Entities:</strong> ${m.entities.join(", ") || "General Workspace Context"}`,
+            `<strong>Recorded Date:</strong> ${new Date(m.created_at).toLocaleDateString()}`,
+          ],
+        })),
+      ],
+    });
+    showToast("success", "Preparing Memory Log PDF for print/download...");
+  };
+
   const handleSearchMemory = async () => {
     if (!workspace?.id || !query.trim() || querying) return;
     setQuerying(true);
     try {
       const res = await api.queryWorkspaceMemory(workspace.id, query.trim());
       setQueryAnswer(res.answer);
+      showToast("success", "Memory synthesis complete");
     } catch {
-      alert("Failed to query workspace memory.");
+      showToast("error", "Failed to query workspace memory.");
     } finally {
       setQuerying(false);
     }
@@ -86,8 +119,9 @@ export default function InstitutionalMemoryPage() {
       setTranscriptTitle("");
       setTranscriptText("");
       await loadMemoryData();
+      showToast("success", "Meeting transcript ingested and graph updated!");
     } catch {
-      alert("Failed to process meeting transcript.");
+      showToast("error", "Failed to process meeting transcript.");
     } finally {
       setIngesting(false);
     }
@@ -116,32 +150,32 @@ export default function InstitutionalMemoryPage() {
       <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 p-6 sm:p-8 text-white shadow-2xl dark:border-white/10">
         <div className="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl" />
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/20 px-3.5 py-1 text-xs font-bold text-indigo-300 backdrop-blur-md shadow-inner">
               <Brain className="h-3.5 w-3.5 text-purple-400 animate-pulse" />
               <span className="tracking-wider">PERMANENT ORGANIZATIONAL BRAIN</span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white drop-shadow-md">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-md">
               Institutional Memory & Knowledge Graph
             </h1>
             <p className="max-w-2xl text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Never lose context. Automatically index workspace decisions, meeting transcripts, policy exceptions, and document relationships into an immutable Knowledge Mind Map.
+              Never lose context. Automatically index workspace decisions, meeting transcripts, policy exceptions, and document relationships into an immutable Knowledge Mind Map with downloadable PDF decision logs.
             </p>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
             <button
-              onClick={() => setTranscriptModalOpen(true)}
-              className="group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-5 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 active:scale-95 transition-all duration-300 cursor-pointer"
+              onClick={exportMemoryLogPDF}
+              className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-purple-500/25 hover:shadow-purple-500/40 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
             >
-              <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
-              <span>Add Meeting Transcript</span>
+              <Brain className="h-4 w-4" />
+              <span>Download PDF Log</span>
             </button>
 
             <button
               onClick={loadMemoryData}
               disabled={loading}
-              className="flex items-center justify-center rounded-2xl bg-slate-800/80 p-3.5 text-white hover:bg-slate-700 active:scale-95 transition-all cursor-pointer"
+              className="flex items-center justify-center rounded-2xl bg-slate-800/80 p-2.5 text-white hover:bg-slate-700 active:scale-95 transition-all cursor-pointer"
               title="Sync Mind Map"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />

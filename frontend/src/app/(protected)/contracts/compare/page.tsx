@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
+import { showToast } from "@/components/Toast";
+import { exportToPdf, downloadBlob } from "@/lib/pdf-export";
 import type { ContractDiffResult, DiffClause, DocumentItem } from "@/lib/types";
 
 type ViewMode = "split" | "unified" | "playbook";
@@ -236,12 +238,47 @@ Analyze risk shifts, liabilities, indemnities, and termination terms.`;
     document.body.removeChild(link);
   };
 
+  const exportRedlineAuditPDF = () => {
+    if (!diffResult) return;
+    exportToPdf({
+      title: "Executive Contract Redline & Risk Audit",
+      subtitle: `Differential Legal Audit • ${diffResult.doc_a_title} vs ${diffResult.doc_b_title}`,
+      badge: `Risk Level: ${diffResult.overall_risk.toUpperCase()} • ${diffResult.diff_clauses.length} Analyzed Clauses`,
+      documentSource: `${diffResult.doc_a_title} ⇄ ${diffResult.doc_b_title}`,
+      workspaceName: workspace?.name,
+      sections: [
+        {
+          heading: "Executive Risk Summary",
+          type: "callout",
+          content: diffResult.summary,
+        },
+        {
+          heading: "Key Contractual Changes & Shift in Liability",
+          type: "bullets",
+          bullets: diffResult.key_changes,
+        },
+        ...diffResult.diff_clauses.map((c, i) => ({
+          heading: `Clause ${i + 1}: ${c.clause_title} (${c.risk_level.toUpperCase()} Risk)`,
+          type: "bullets" as const,
+          bullets: [
+            `<strong>Version A (Baseline):</strong> ${c.doc_a_text || "Clause not present in Baseline"}`,
+            `<strong>Version B (Revision):</strong> ${c.doc_b_text || "Clause omitted in Revision"}`,
+            `<strong>Legal Analysis & Shift:</strong> ${c.analysis}`,
+            `<strong>Recommended Counter-Position:</strong> ${c.recommendation}`,
+          ],
+        })),
+      ],
+    });
+    showToast("success", "Preparing Legal Redline Audit PDF...");
+  };
+
   const copySummary = () => {
     if (!diffResult) return;
     const text = `# Contract Redline Diff: ${diffResult.doc_a_title} vs ${diffResult.doc_b_title}\n\n## Summary\n${diffResult.summary}\n\n## Key Changes\n${diffResult.key_changes.join("\n")}`;
     void navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    showToast("success", "Redline diff copied to clipboard");
   };
 
   if (!workspace) {
@@ -259,12 +296,9 @@ Analyze risk shifts, liabilities, indemnities, and termination terms.`;
       <div className="gemini-orb gemini-orb-2" />
 
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-[#150f33] to-[#24103f] p-6 sm:p-9 text-white shadow-2xl backdrop-blur-2xl animate-gradient-shift">
-        <div className="absolute right-0 top-0 -mr-20 -mt-20 h-72 w-72 rounded-full bg-rose-500/15 blur-3xl animate-float pointer-events-none" />
-        <div className="absolute left-1/3 bottom-0 -mb-20 h-56 w-56 rounded-full bg-purple-500/10 blur-3xl animate-float pointer-events-none" />
-        
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-[#150f33] to-[#24103f] p-6 sm:p-8 text-white shadow-2xl backdrop-blur-2xl">
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-3">
+          <div className="space-y-2">
             <Link
               href="/contracts"
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-300 hover:text-white transition-colors"
@@ -281,7 +315,7 @@ Analyze risk shifts, liabilities, indemnities, and termination terms.`;
               <span className="uppercase font-mono tracking-widest text-[10px]">AI Contract Redline & Diff</span>
             </div>
             
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
               Side-by-Side Document{" "}
               <span className="bg-gradient-to-r from-rose-300 via-pink-200 to-amber-200 bg-clip-text text-transparent">
                 Redline & Diff Studio
@@ -291,6 +325,26 @@ Analyze risk shifts, liabilities, indemnities, and termination terms.`;
             <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
               Compare contract drafts, revised vendor agreements, or regulatory proposals. Automatically surface hidden liabilities, indemnity shifts, and favorable terms.
             </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              onClick={exportRedlineAuditPDF}
+              disabled={!diffResult}
+              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-rose-500/25 hover:shadow-rose-500/40 hover:brightness-110 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+            >
+              <Scale className="h-4 w-4" />
+              <span>Download PDF Audit Memo</span>
+            </button>
+
+            <button
+              onClick={copySummary}
+              disabled={!diffResult}
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-md hover:bg-white/20 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+            >
+              {copied ? <Check className="h-4 w-4 text-emerald-300" /> : <Copy className="h-4 w-4" />}
+              <span>{copied ? "Copied" : "Copy"}</span>
+            </button>
           </div>
         </div>
       </div>

@@ -16,6 +16,7 @@ import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
 import { DocumentItem } from "@/lib/types";
 import { showToast } from "@/components/Toast";
+import { exportToPdf, downloadBlob } from "@/lib/pdf-export";
 
 type TargetFormat = "markdown" | "text" | "json" | "csv";
 
@@ -160,6 +161,35 @@ export default function DocumentConverterStudioPage() {
     showToast("success", "Sanitized document copied to clipboard");
   };
 
+  const handleExportPdf = () => {
+    if (!convertedText) {
+      showToast("error", "Please convert or sanitize text first.");
+      return;
+    }
+    const currentDoc = docs.find((d) => d.id === selectedDocId);
+    const paragraphs = convertedText.split("\n\n").filter(Boolean);
+
+    exportToPdf({
+      title: "Sanitized & Redacted Document",
+      subtitle: `Autonomous PII Masking & Transformation • ${currentDoc?.title || "Document"}`,
+      badge: redactPii ? `🛡️ PII Masked (${redactionCount} Redactions)` : "Cleaned Text",
+      documentSource: currentDoc?.title || "Workspace Document",
+      workspaceName: workspace?.name,
+      sections: [
+        {
+          heading: "Compliance & Sanitization Notice",
+          type: "callout",
+          content: `This document has been sanitized according to workspace privacy controls. Identified sensitive attributes (emails, phone numbers, tax identification numbers, credit cards) have been masked with verified replacement tokens.`,
+        },
+        ...paragraphs.map((p, idx) => ({
+          heading: `Section ${idx + 1}`,
+          content: p,
+        })),
+      ],
+    });
+    showToast("success", "Generating sanitized PDF document...");
+  };
+
   const handleDownload = () => {
     if (!convertedText) return;
     const extensions: Record<TargetFormat, string> = {
@@ -177,14 +207,7 @@ export default function DocumentConverterStudioPage() {
 
     const ext = extensions[targetFormat];
     const mime = mimeTypes[targetFormat];
-    const blob = new Blob([convertedText], { type: `${mime};charset=utf-8;` });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `sanitized-doc-${Date.now()}.${ext}`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    downloadBlob(`sanitized-doc-${Date.now()}.${ext}`, convertedText, mime);
     showToast("success", `Downloaded sanitized .${ext} file!`);
   };
 
@@ -195,12 +218,9 @@ export default function DocumentConverterStudioPage() {
       <div className="gemini-orb gemini-orb-2" />
 
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-[#130f2f] to-[#1e103c] p-6 sm:p-9 text-white shadow-2xl backdrop-blur-2xl animate-gradient-shift">
-        <div className="absolute right-0 top-0 -mr-20 -mt-20 h-72 w-72 rounded-full bg-purple-500/15 blur-3xl animate-float pointer-events-none" />
-        <div className="absolute left-1/3 bottom-0 -mb-20 h-56 w-56 rounded-full bg-indigo-500/10 blur-3xl animate-float pointer-events-none" />
-
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-[#130f2f] to-[#1e103c] p-6 sm:p-8 text-white shadow-2xl backdrop-blur-2xl">
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-3.5 py-1 text-[11px] font-semibold tracking-wider text-purple-300 backdrop-blur-md shadow-sm">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75"></span>
@@ -210,7 +230,7 @@ export default function DocumentConverterStudioPage() {
               <span className="uppercase font-mono tracking-widest text-[10px]">Document Batch Converter & Redactor</span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
               Format Converter &{" "}
               <span className="bg-gradient-to-r from-purple-300 via-pink-200 to-indigo-300 bg-clip-text text-transparent">
                 PII Redactor
@@ -218,17 +238,37 @@ export default function DocumentConverterStudioPage() {
             </h1>
 
             <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-              Convert PDFs and Word docs into clean Markdown, JSON, CSV, or Text. Automatically mask sensitive emails, phone numbers, and financial IDs with 1-click downloads.
+              Convert documents into Markdown, JSON, CSV, and TXT with autonomous PII anonymization (masking emails, phone numbers, and SSNs) and 1-click printable PDF downloads.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 backdrop-blur-md text-right">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-purple-300 flex items-center gap-1 justify-end">
-                <Shield className="h-3 w-3 text-emerald-400" /> Zero-Leakage Privacy
-              </span>
-              <p className="text-xs font-semibold text-slate-300 mt-0.5">In-Browser Sanitization</p>
-            </div>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              onClick={handleExportPdf}
+              disabled={!convertedText}
+              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-purple-500/25 hover:shadow-purple-500/40 hover:brightness-110 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+            >
+              <FileCheck2 className="h-4 w-4" />
+              <span>Download PDF</span>
+            </button>
+
+            <button
+              onClick={handleDownload}
+              disabled={!convertedText}
+              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:brightness-110 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+            >
+              <Download className="h-4 w-4" />
+              <span>Export {targetFormat.toUpperCase()}</span>
+            </button>
+
+            <button
+              onClick={handleCopy}
+              disabled={!convertedText}
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-md hover:bg-white/20 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+            >
+              {copied ? <Check className="h-4 w-4 text-emerald-300" /> : <Copy className="h-4 w-4" />}
+              <span>{copied ? "Copied" : "Copy"}</span>
+            </button>
           </div>
         </div>
       </div>

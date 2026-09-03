@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
 import { WorkspaceHealthReport } from "@/lib/types";
+import { showToast } from "@/components/Toast";
+import { exportToPdf, downloadBlob } from "@/lib/pdf-export";
 import {
   Activity,
   AlertTriangle,
@@ -42,14 +44,43 @@ export default function DocumentHealthDashboardPage() {
     loadHealthData();
   }, [loadHealthData]);
 
+  const exportHealthAuditPDF = () => {
+    if (!report) {
+      showToast("error", "No health audit report available to export.");
+      return;
+    }
+    exportToPdf({
+      title: "Workspace Document Health & Compliance Audit",
+      subtitle: `Automated Repository Integrity Scan • ${workspace?.name || "Workspace"}`,
+      badge: `Health Score: ${report.health_score}/100 • ${report.issues.length} Identified Issues`,
+      workspaceName: workspace?.name,
+      sections: [
+        {
+          heading: "Executive Integrity Summary",
+          type: "callout",
+          content: `Overall Workspace Health Score: <strong>${report.health_score}/100</strong>. Audited ${report.scanned_docs} total documents. Detected ${report.stale_count} stale documents and ${report.conflict_count} contradictory policy flags.`,
+        },
+        {
+          heading: "Key Audit Findings & Discrepancies",
+          type: "bullets",
+          bullets: report.issues.map(
+            (iss, i) => `<strong>Issue ${i + 1} (${iss.severity.toUpperCase()}):</strong> ${iss.document_title} — ${iss.description}<br/><em>Action:</em> ${iss.recommendation}`
+          ),
+        },
+      ],
+    });
+    showToast("success", "Preparing Health Audit PDF for print/download...");
+  };
+
   const handleScan = async () => {
     if (!workspace?.id || scanning) return;
     setScanning(true);
     try {
       const updated = await api.scanWorkspaceHealth(workspace.id);
       setReport(updated);
+      showToast("success", "Workspace health audit complete!");
     } catch {
-      alert("Health scan failed. Please check your workspace documents.");
+      showToast("error", "Health scan failed. Please check your workspace documents.");
     } finally {
       setScanning(false);
     }
@@ -60,8 +91,9 @@ export default function DocumentHealthDashboardPage() {
     try {
       await api.updateHealthIssue(workspace.id, issueId, status);
       await loadHealthData();
+      showToast("success", `Issue marked as ${status}.`);
     } catch {
-      alert("Failed to update health issue status.");
+      showToast("error", "Failed to update health issue status.");
     }
   };
 
@@ -95,27 +127,38 @@ export default function DocumentHealthDashboardPage() {
       <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 p-6 sm:p-8 text-white shadow-2xl dark:border-white/10">
         <div className="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl" />
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/20 px-3.5 py-1 text-xs font-bold text-indigo-300 backdrop-blur-md shadow-inner">
               <Sparkles className="h-3.5 w-3.5 text-purple-400 animate-pulse" />
               <span className="tracking-wider">AUTOMATED QUALITY AUDITOR</span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white drop-shadow-md">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-md">
               Document Health & Integrity
             </h1>
             <p className="max-w-2xl text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Automated deep audit scanning text extraction clarity, duplicate files, stale documents, and operational integrity.
+              Automated deep audit scanning text extraction clarity, duplicate files, stale documents, and operational integrity with 1-click PDF compliance reports.
             </p>
           </div>
 
-          <button
-            onClick={handleScan}
-            disabled={scanning || !workspace}
-            className="group relative flex items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-6 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 active:scale-95 disabled:opacity-50 transition-all duration-300 cursor-pointer shrink-0"
-          >
-            <RefreshCw className={`h-4 w-4 transition-transform duration-500 ${scanning ? "animate-spin" : "group-hover:rotate-180"}`} />
-            <span>{scanning ? "Auditing Repository..." : "Scan Workspace Health"}</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              onClick={exportHealthAuditPDF}
+              disabled={!report}
+              className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-purple-500/25 hover:shadow-purple-500/40 hover:brightness-110 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+            >
+              <Activity className="h-4 w-4" />
+              <span>Download PDF Audit</span>
+            </button>
+
+            <button
+              onClick={handleScan}
+              disabled={scanning || !workspace}
+              className="group relative flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:brightness-110 active:scale-95 disabled:opacity-50 transition-all duration-300 cursor-pointer shrink-0"
+            >
+              <RefreshCw className={`h-4 w-4 transition-transform duration-500 ${scanning ? "animate-spin" : "group-hover:rotate-180"}`} />
+              <span>{scanning ? "Auditing..." : "Scan Health"}</span>
+            </button>
+          </div>
         </div>
       </div>
 

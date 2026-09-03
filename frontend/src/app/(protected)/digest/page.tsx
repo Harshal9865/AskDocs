@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
 import { WorkspaceDigest } from "@/lib/types";
+import { showToast } from "@/components/Toast";
+import { exportToPdf, downloadBlob } from "@/lib/pdf-export";
 import {
   FileSpreadsheet,
   Sparkles,
@@ -52,6 +54,43 @@ export default function WorkspaceDigestPage() {
     void loadDigests();
   }, [loadDigests]);
 
+  const exportDigestPDF = () => {
+    if (!activeDigest) {
+      showToast("error", "No active digest available to export.");
+      return;
+    }
+    exportToPdf({
+      title: activeDigest.title || "Workspace Weekly Executive Digest",
+      subtitle: `AI-Synthesized Weekly Knowledge Digest • ${workspace?.name || "Workspace"}`,
+      badge: `Executive Briefing • ${new Date(activeDigest.period_start).toLocaleDateString()} – ${new Date(activeDigest.period_end).toLocaleDateString()}`,
+      workspaceName: workspace?.name,
+      sections: [
+        {
+          heading: "Executive Briefing Summary",
+          type: "callout",
+          content: activeDigest.summary,
+        },
+        {
+          heading: "Key Document Highlights & Deliverables",
+          type: "bullets",
+          bullets: activeDigest.key_highlights,
+        },
+        ...(activeDigest.action_items && activeDigest.action_items.length > 0
+          ? [
+              {
+                heading: "Priority Action Items & Follow-ups",
+                type: "bullets" as const,
+                bullets: activeDigest.action_items.map(
+                  (a) => `<strong>${a.title}:</strong> ${a.description} (${a.priority.toUpperCase()} priority)`
+                ),
+              },
+            ]
+          : []),
+      ],
+    });
+    showToast("success", "Preparing Weekly Digest PDF for print/download...");
+  };
+
   const handleGenerate = async () => {
     if (!workspace || generating) return;
     try {
@@ -59,8 +98,9 @@ export default function WorkspaceDigestPage() {
       const newDigest = await api.generateWorkspaceDigest(workspace.id);
       setDigests((prev) => [newDigest, ...prev]);
       setActiveDigest(newDigest);
+      showToast("success", "Weekly AI digest synthesized successfully!");
     } catch {
-      alert("Failed to generate AI digest. Please check your workspace documents.");
+      showToast("error", "Failed to generate AI digest. Please check your workspace documents.");
     } finally {
       setGenerating(false);
     }
@@ -77,8 +117,9 @@ export default function WorkspaceDigestPage() {
       if (activeDigest?.id === digestId) {
         setActiveDigest(updated[0] || null);
       }
+      showToast("success", "Weekly digest deleted.");
     } catch {
-      alert("Failed to delete digest.");
+      showToast("error", "Failed to delete digest.");
     } finally {
       setDeletingId(null);
     }
@@ -102,27 +143,38 @@ export default function WorkspaceDigestPage() {
       <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 p-6 sm:p-8 text-white shadow-2xl dark:border-white/10">
         <div className="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl" />
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/20 px-3.5 py-1 text-xs font-bold text-indigo-300 backdrop-blur-md shadow-inner">
               <Sparkles className="h-3.5 w-3.5 text-purple-400 animate-pulse" />
               <span className="tracking-wider">PROACTIVE AI EXECUTIVE DIGEST</span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white drop-shadow-md">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-md">
               Workspace Weekly Digest
             </h1>
             <p className="max-w-2xl text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Automated weekly AI synthesis of workspace documents, contract obligations, and key strategic team takeaways.
+              Automated weekly AI synthesis of workspace documents, contract obligations, and key strategic takeaways with 1-click PDF briefing downloads.
             </p>
           </div>
 
-          <button
-            onClick={handleGenerate}
-            disabled={generating}
-            className="group relative flex items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-6 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 active:scale-95 disabled:opacity-50 transition-all duration-300 cursor-pointer shrink-0"
-          >
-            <RefreshCw className={`h-4 w-4 transition-transform duration-500 ${generating ? "animate-spin" : "group-hover:rotate-180"}`} />
-            <span>{generating ? "Synthesizing AI Digest..." : "Generate Fresh AI Digest"}</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              onClick={exportDigestPDF}
+              disabled={!activeDigest}
+              className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-purple-500/25 hover:shadow-purple-500/40 hover:brightness-110 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              <span>Download PDF Digest</span>
+            </button>
+
+            <button
+              onClick={handleGenerate}
+              disabled={generating}
+              className="group relative flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:brightness-110 active:scale-95 disabled:opacity-50 transition-all duration-300 cursor-pointer shrink-0"
+            >
+              <RefreshCw className={`h-4 w-4 transition-transform duration-500 ${generating ? "animate-spin" : "group-hover:rotate-180"}`} />
+              <span>{generating ? "Synthesizing..." : "Generate Fresh"}</span>
+            </button>
+          </div>
         </div>
       </div>
 
