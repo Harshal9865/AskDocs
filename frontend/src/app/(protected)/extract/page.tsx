@@ -546,11 +546,11 @@ interface ExtractedJsonResponse {
                   onClick={() => setSelectedDomain(preset.id)}
                   className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all cursor-pointer ${
                     isSelected
-                      ? "border-purple-500 bg-purple-500/10 text-purple-600 dark:text-purple-300 shadow-md shadow-purple-500/15"
+                      ? "border-[#1db954] bg-[#1db954]/10 text-[#1db954] dark:text-[#1ed760] shadow-md shadow-[#1db954]/20 font-black scale-102"
                       : "border-slate-200/80 bg-slate-50/50 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10 text-slate-600 dark:text-zinc-300"
                   }`}
                 >
-                  <Icon className={`h-5 w-5 mb-1.5 ${isSelected ? "text-purple-600 dark:text-purple-400" : "text-slate-400"}`} />
+                  <Icon className={`h-5 w-5 mb-1.5 ${isSelected ? "text-[#1db954]" : "text-slate-400"}`} />
                   <span className="text-[11px] font-bold leading-tight">{preset.label}</span>
                 </button>
               );
@@ -558,12 +558,12 @@ interface ExtractedJsonResponse {
           </div>
         </div>
 
-        {/* Run Extraction Button */}
+        {/* Run Extraction Button with Spotify Green + Cosmic Purple Hybrid Gradient */}
         <div className="flex justify-end pt-2">
           <button
             onClick={handleRunExtraction}
             disabled={!selectedDocId || extracting}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-8 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-purple-500/25 hover:shadow-purple-500/45 active:scale-95 disabled:opacity-50 transition-all duration-300 cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#1db954] via-purple-600 to-indigo-600 px-8 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-[#1db954]/25 hover:shadow-[#1db954]/45 hover:brightness-110 active:scale-95 disabled:opacity-50 transition-all duration-300 cursor-pointer"
           >
             {extracting ? (
               <>

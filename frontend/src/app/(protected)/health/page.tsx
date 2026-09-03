@@ -154,7 +154,7 @@ export default function DocumentHealthDashboardPage() {
             <button
               onClick={handleScan}
               disabled={scanning || !workspace}
-              className="group relative flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:brightness-110 active:scale-95 disabled:opacity-50 transition-all duration-300 cursor-pointer shrink-0"
+              className="group relative flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#1db954] via-emerald-600 to-teal-600 px-4 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-[#1db954]/25 hover:shadow-[#1db954]/45 hover:brightness-110 active:scale-95 disabled:opacity-50 transition-all duration-300 cursor-pointer shrink-0"
             >
               <RefreshCw className={`h-4 w-4 transition-transform duration-500 ${scanning ? "animate-spin" : "group-hover:rotate-180"}`} />
               <span>{scanning ? "Auditing..." : "Scan Health"}</span>

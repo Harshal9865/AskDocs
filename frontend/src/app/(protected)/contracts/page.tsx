@@ -169,7 +169,7 @@ export default function ContractsPage() {
 
             <button
               onClick={() => setScanModalOpen(true)}
-              className="group relative flex items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-6 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 active:scale-95 transition-all duration-300 cursor-pointer"
+              className="group relative flex items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-[#1db954] via-purple-600 to-indigo-600 px-6 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-[#1db954]/25 hover:shadow-[#1db954]/45 hover:brightness-110 active:scale-95 transition-all duration-300 cursor-pointer"
             >
               <Sparkles className="h-4 w-4 transition-transform duration-300 group-hover:rotate-12" />
               <span>Scan Contract with AI</span>

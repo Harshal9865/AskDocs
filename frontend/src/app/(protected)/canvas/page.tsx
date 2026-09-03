@@ -475,7 +475,7 @@ Return ONLY valid JSON matching this schema:
           </p>
           <button
             onClick={() => setCreateModalOpen(true)}
-            className="mt-6 flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-3 text-xs font-bold text-white shadow-lg shadow-purple-500/30 hover:from-purple-500 hover:to-indigo-500 active:scale-95 transition-all cursor-pointer"
+            className="mt-6 flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#1db954] via-purple-600 to-indigo-600 px-6 py-3 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-[#1db954]/25 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
           >
             <Sparkles className="h-4 w-4" /> Create First Live Canvas
           </button>

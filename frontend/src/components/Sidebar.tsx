@@ -436,11 +436,15 @@ export default function Sidebar({
           );
         })}
 
-        <div className="sb-label mb-1.5 mt-4 px-3 text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
-          Intelligence
+        <div className="sb-label mb-1.5 mt-4 flex items-center justify-between px-3 text-[10px] font-black uppercase tracking-wider text-purple-600 dark:text-purple-400">
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#1db954] animate-pulse" />
+            <span>Intelligence Studio</span>
+          </span>
+          <span className="rounded-md bg-[#1db954]/15 px-1.5 py-0.2 text-[9px] font-mono text-[#1db954]">PRO</span>
         </div>
         {NAV_INTELLIGENCE.map((item) => {
-          const active = pathname === item.href;
+          const active = pathname === item.href || (item.href === "/contracts/compare" && pathname.startsWith("/contracts/compare"));
           const Icon = item.icon;
           return (
             <Link
@@ -451,14 +455,14 @@ export default function Sidebar({
               aria-label={item.label}
               className={`group relative mb-1 flex h-8.5 items-center gap-2.5 rounded-xl px-3 text-[13px] font-medium transition-all duration-200 ${isCollapsed ? "justify-center px-0" : ""} ${
                 active 
-                  ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm font-semibold" 
+                  ? "bg-gradient-to-r from-[#1db954]/25 via-purple-600/30 to-indigo-600/20 border border-[#1db954]/50 text-slate-900 dark:text-white shadow-sm font-semibold shadow-[#1db954]/10" 
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-white/[0.06]"
               }`}
             >
               {active && (
-                <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-r-full bg-cyan-400" aria-hidden />
+                <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-r-full bg-[#1db954]" aria-hidden />
               )}
-              <Icon aria-hidden className={`h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${active ? "text-white" : "text-slate-400 dark:text-zinc-500 group-hover:text-purple-600 dark:group-hover:text-purple-400"}`} />
+              <Icon aria-hidden className={`h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${active ? "text-[#1db954] dark:text-[#1ed760]" : "text-slate-400 dark:text-zinc-500 group-hover:text-[#1db954] dark:group-hover:text-[#1db954]"}`} />
               {!isCollapsed && <span className="truncate">{item.label}</span>}
             </Link>
           );

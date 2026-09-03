@@ -440,10 +440,10 @@ ${s.takeaway ? `**Takeaway:** ${s.takeaway}` : ""}
       border: "border-white/10",
     },
     emerald: {
-      cardBg: "bg-gradient-to-br from-[#061e1a] via-[#092b25] to-[#0c3830]",
-      textGrad: "from-emerald-300 via-teal-200 to-cyan-300",
-      bulletDot: "bg-emerald-400",
-      border: "border-emerald-500/30",
+      cardBg: "bg-gradient-to-br from-[#0c1a16] via-[#101924] to-[#121212]",
+      textGrad: "from-[#1db954] via-emerald-200 to-teal-300",
+      bulletDot: "bg-[#1db954]",
+      border: "border-[#1db954]/40",
     },
     sunset: {
       cardBg: "bg-gradient-to-br from-[#240b17] via-[#330f21] to-[#45122b]",
@@ -708,7 +708,7 @@ ${s.takeaway ? `**Takeaway:** ${s.takeaway}` : ""}
               type="button"
               onClick={handleGenerateDeck}
               disabled={generating || docs.length === 0}
-              className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 py-3 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-purple-500/25 hover:brightness-110 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#1db954] via-purple-600 to-indigo-600 py-3 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-[#1db954]/25 hover:brightness-110 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
             >
               {generating ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               <span>{generating ? "Synthesizing Slides…" : "Generate with Free AI"}</span>

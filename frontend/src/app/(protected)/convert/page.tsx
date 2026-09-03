@@ -269,23 +269,30 @@ export default function DocumentConverterStudioPage() {
               {copied ? <Check className="h-4 w-4 text-emerald-300" /> : <Copy className="h-4 w-4" />}
               <span>{copied ? "Copied" : "Copy"}</span>
             </button>
+            <button
+              onClick={handleDownload}
+              disabled={!convertedText}
+              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#1db954] via-emerald-600 to-teal-600 px-4 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-[#1db954]/25 hover:shadow-[#1db954]/45 hover:brightness-110 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+            >
+              <Download className="h-4 w-4" />
+              <span>Download File</span>
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Control Panel */}
+      {/* Control Configuration Card */}
       <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {/* Document Selector */}
+          {/* Document Picker */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
-              Select Workspace Document
+              Select Document
             </label>
             <select
               value={selectedDocId}
               onChange={(e) => setSelectedDocId(e.target.value)}
-              disabled={loadingDocs || docs.length === 0}
-              className="w-full rounded-2xl border border-slate-200/80 bg-slate-50 px-3.5 py-3 text-xs font-bold text-slate-900 outline-none focus:border-purple-500 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white transition-all cursor-pointer"
+              className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3 text-xs font-bold text-slate-900 outline-none focus:border-[#1db954] focus:ring-2 focus:ring-[#1db954]/20 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white cursor-pointer"
             >
               {docs.map((d) => (
                 <option key={d.id} value={d.id}>
@@ -315,7 +322,7 @@ export default function DocumentConverterStudioPage() {
                   onClick={() => setTargetFormat(fmt.id)}
                   className={`rounded-xl py-2.5 text-xs font-black transition-all cursor-pointer ${
                     targetFormat === fmt.id
-                      ? "bg-purple-600 text-white shadow-md shadow-purple-500/20"
+                      ? "bg-[#1db954] text-black font-black shadow-md shadow-[#1db954]/20"
                       : "border border-slate-200/80 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-white/5 dark:bg-[#1f1f2e] dark:text-zinc-300"
                   }`}
                 >
@@ -325,13 +332,13 @@ export default function DocumentConverterStudioPage() {
             </div>
           </div>
 
-          {/* Action Trigger */}
+          {/* Action Trigger with Spotify Green + Cosmic Purple Gradient */}
           <div className="flex items-end">
             <button
               type="button"
               onClick={handleConvert}
               disabled={processing || !rawText.trim()}
-              className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 py-3 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-purple-500/25 hover:brightness-110 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#1db954] via-purple-600 to-indigo-600 py-3 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-[#1db954]/25 hover:brightness-110 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
             >
               {processing ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               <span>{processing ? "Sanitizing…" : "Convert & Redact Now"}</span>
