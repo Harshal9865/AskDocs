@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
 import { DocumentItem, WorkspaceCanvas, MatrixRow } from "@/lib/types";
+import { showToast } from "@/components/Toast";
 import {
   CheckCircle2,
   FileText,
@@ -81,7 +82,7 @@ export default function WorkspaceCanvasPage() {
       setSelectedDocIds([]);
       setCustomTitle("");
     } catch {
-      alert("Failed to generate AI Canvas. Please try again.");
+      showToast("error", "Failed to generate AI Canvas. Please try again.");
     } finally {
       setGenerating(false);
     }
@@ -114,8 +115,9 @@ export default function WorkspaceCanvasPage() {
       if (activeCanvas?.id === canvasId) {
         setActiveCanvas(updated[0] || null);
       }
+      showToast("success", "AI Canvas deleted successfully.");
     } catch {
-      alert("Failed to delete canvas.");
+      showToast("error", "Failed to delete canvas.");
     }
   };
 

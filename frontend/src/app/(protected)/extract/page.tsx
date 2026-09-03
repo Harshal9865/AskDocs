@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
+import { showToast } from "@/components/Toast";
 import type { DocumentItem, ExtractedTableData } from "@/lib/types";
 
 export default function DataExtractorPage() {
@@ -123,7 +124,7 @@ Provide headers and structured rows.`;
       setExtractedData(generated);
       setEditableRows(generated.rows);
     } catch (err) {
-      alert("Extraction failed: " + String(err));
+      showToast("error", "Extraction failed: " + String(err));
     } finally {
       setExtracting(false);
     }

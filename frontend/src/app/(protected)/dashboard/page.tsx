@@ -27,6 +27,9 @@ import {
   Table,
   GraduationCap,
   Headphones,
+  FileCode,
+  Presentation,
+  Plug2,
 } from "lucide-react";
 import type { ContractObligation, DocumentItem, PlanInfo, TeamChat, WorkspaceMemory } from "@/lib/types";
 
@@ -687,6 +690,69 @@ export default function DashboardPage() {
             {docCount > 0
               ? `${docCount} documents audited for freshness, clarity, and policy conflicts.`
               : "Audit document freshness and detect contradictory policies in real-time."}
+          </p>
+        </Link>
+
+        {/* AI Presentation Slide Decks */}
+        <Link
+          href="/slides"
+          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-indigo-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-indigo-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#17132e]/80"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400">
+                <Presentation className="h-4 w-4" />
+              </span>
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Slide Deck Studio</h3>
+            </div>
+            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform">
+              Present →
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
+            Transform 40-page reports into 4-slide executive presentation decks with themes.
+          </p>
+        </Link>
+
+        {/* Format Converter & PII Redactor */}
+        <Link
+          href="/convert"
+          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-purple-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#1c122e]/80"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400">
+                <FileCode className="h-4 w-4" />
+              </span>
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Format & PII Redact</h3>
+            </div>
+            <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 group-hover:translate-x-0.5 transition-transform">
+              Convert →
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
+            Convert docs to Markdown, JSON, CSV & mask emails, phones, and SSNs.
+          </p>
+        </Link>
+
+        {/* Integrations & Ecosystem Hub */}
+        <Link
+          href="/integrations"
+          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-emerald-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#12241b]/80"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
+                <Plug2 className="h-4 w-4" />
+              </span>
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Integrations & API</h3>
+            </div>
+            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 group-hover:translate-x-0.5 transition-transform">
+              Sync →
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
+            Connect Slack, Discord, Notion, Google Drive & Odoo ERP for auto-sync.
           </p>
         </Link>
       </div>

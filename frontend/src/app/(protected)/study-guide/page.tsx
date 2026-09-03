@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
+import { showToast } from "@/components/Toast";
 import type { DocumentItem, StudyGuideDeck } from "@/lib/types";
 
 type StudyTab = "cheatsheet" | "flashcards" | "quiz" | "terms";
@@ -232,7 +233,7 @@ export default function StudyGuidePage() {
       setSelectedAnswers({});
       setShowQuizResults(false);
     } catch (err) {
-      alert("Study Guide generation failed: " + String(err));
+      showToast("error", "Study Guide generation failed: " + String(err));
     } finally {
       setGenerating(false);
     }
