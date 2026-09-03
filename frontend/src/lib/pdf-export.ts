@@ -5,7 +5,7 @@
 
 export interface PdfExportSection {
   heading?: string;
-  content: string; // Markdown or plain text
+  content?: string; // Markdown or plain text
   type?: "paragraph" | "callout" | "bullets" | "key_value";
   bullets?: string[];
   keyValues?: Record<string, string | number>;
@@ -73,7 +73,7 @@ export function exportToPdf(options: PdfExportOptions): void {
             )
             .join("")}
         </div>`;
-      } else {
+      } else if (sec.content) {
         innerHtml += `<p style="font-size: 13px; line-height: 1.65; color: #334155; margin: 8px 0 12px 0;">${sec.content}</p>`;
       }
       return innerHtml;
