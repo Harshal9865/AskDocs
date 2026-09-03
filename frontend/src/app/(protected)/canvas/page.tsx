@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useWorkspace } from "@/lib/workspace-context";
 import { api } from "@/lib/api";
-import { DocumentItem, WorkspaceCanvas, MatrixRow } from "@/lib/types";
+import { DocumentItem, WorkspaceCanvas } from "@/lib/types";
 import {
   CheckCircle2,
   FileText,
@@ -134,25 +134,36 @@ export default function WorkspaceCanvasPage() {
       <div className="gemini-orb gemini-orb-2" />
 
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 p-6 sm:p-8 text-white shadow-2xl dark:border-white/10">
-        <div className="absolute right-0 top-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl" />
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-[#130f2f] to-[#1e103c] p-6 sm:p-9 text-white shadow-2xl backdrop-blur-2xl animate-gradient-shift">
+        <div className="absolute right-0 top-0 -mr-20 -mt-20 h-72 w-72 rounded-full bg-purple-500/15 blur-3xl animate-float pointer-events-none" />
+        <div className="absolute left-1/3 bottom-0 -mb-20 h-56 w-56 rounded-full bg-indigo-500/10 blur-3xl animate-float pointer-events-none" />
+
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-2.5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/20 px-3.5 py-1 text-xs font-bold text-indigo-300 backdrop-blur-md shadow-inner">
-              <Sparkles className="h-3.5 w-3.5 text-purple-400 animate-pulse" />
-              <span className="tracking-wider">AI MULTI-DOCUMENT WORKSPACE HYBRID</span>
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-3.5 py-1 text-[11px] font-semibold tracking-wider text-purple-300 backdrop-blur-md shadow-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-purple-500"></span>
+              </span>
+              <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+              <span className="uppercase font-mono tracking-widest text-[10px]">AI Multi-Document Canvas</span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white drop-shadow-md">
-              AskDocs Live AI Canvas
+
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+              AskDocs Live{" "}
+              <span className="bg-gradient-to-r from-purple-300 via-pink-200 to-indigo-300 bg-clip-text text-transparent">
+                Multi-Doc Canvas
+              </span>
             </h1>
-            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Transform static documents into dynamic, side-by-side comparison matrices, interactive task checklists, and risk heat maps.
+
+            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
+              Transform static documents into dynamic side-by-side comparison matrices, interactive task checklists, and cross-doc risk heat maps.
             </p>
           </div>
 
           <button
             onClick={() => setCreateModalOpen(true)}
-            className="group relative flex items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-6 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 active:scale-95 transition-all duration-300 cursor-pointer shrink-0"
+            className="group relative flex items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 px-6 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 hover:brightness-110 active:scale-95 transition-all duration-300 cursor-pointer shrink-0"
           >
             <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
             <span>Generate Live Canvas</span>
