@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, Compass, Home, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, UsersRound, Pencil, User, ShieldCheck, GraduationCap } from "lucide-react";
+import { ChevronDown, Compass, Home, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, UsersRound, Pencil, User, ShieldCheck, GraduationCap, FileSpreadsheet, CalendarClock, Brain } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -117,19 +117,75 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           </span>
         </button>
 
+        {/* Quick Nav Icons: 2 on mobile (<sm), 4 on tablet (sm..lg) */}
+        <div className="flex items-center gap-0.5 lg:hidden">
+          <Link
+            href="/dashboard"
+            title="Dashboard"
+            aria-label="Dashboard"
+            className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all ${
+              pathname === "/dashboard" || pathname.startsWith("/dashboard/")
+                ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
+                : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
+            }`}
+          >
+            <LayoutDashboard className="h-3.5 w-3.5" />
+          </Link>
+
+          <Link
+            href="/chat"
+            title="AI Chat"
+            aria-label="AI Chat"
+            className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all ${
+              pathname === "/chat" || pathname.startsWith("/chat/")
+                ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
+                : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
+            }`}
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+          </Link>
+
+          {/* Shown on sm..lg screens */}
+          <Link
+            href="/chats"
+            title={modeConfig.chatLabel}
+            aria-label={modeConfig.chatLabel}
+            className={`hidden sm:flex h-7 w-7 items-center justify-center rounded-lg transition-all ${
+              pathname === "/chats" || pathname.startsWith("/chats/")
+                ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
+                : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
+            }`}
+          >
+            <MessagesSquare className="h-3.5 w-3.5" />
+          </Link>
+
+          <Link
+            href="/documents"
+            title="Documents"
+            aria-label="Documents"
+            className={`hidden sm:flex h-7 w-7 items-center justify-center rounded-lg transition-all ${
+              pathname === "/documents" || pathname.startsWith("/documents/")
+                ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
+                : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
+            }`}
+          >
+            <FileText className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+
         {/* Three Dots Menu Button for Mobile & Small Screens (<lg) (Matching Image 2 & 3) */}
         <div className="relative lg:hidden">
           <button
             onClick={() => setMoreOpen((o) => !o)}
             aria-label="Navigation Menu"
             aria-expanded={moreOpen}
-            className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all ${
+            className={`flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-xl transition-all ${
               moreOpen
                 ? "bg-slate-900 text-white dark:bg-white dark:text-black shadow-xs font-bold"
                 : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
             }`}
           >
-            <MoreHorizontal className="h-5 w-5" />
+            <MoreHorizontal className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
           {moreOpen && (
             <>
@@ -140,6 +196,9 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
                   { href: "/chat", label: "AI Chat", Icon: Sparkles },
                   { href: "/chats", label: modeConfig.chatLabel, Icon: MessagesSquare },
                   { href: "/documents", label: "Documents", Icon: FileText },
+                  { href: "/digest", label: "Digest", Icon: FileSpreadsheet },
+                  { href: "/contracts", label: "Contracts", Icon: CalendarClock },
+                  { href: "/memory", label: "Memory Graph", Icon: Brain },
                 ].map(({ href, label, Icon }) => {
                   const active = pathname === href || pathname.startsWith(href + "/");
                   return (
@@ -172,20 +231,25 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         </div>
       </div>
 
-      {/* desktop nav — clean, compact primary hubs */}
-      <nav className="hidden items-center gap-1.5 lg:flex">
+      {/* desktop nav — expands progressively based on available laptop & desktop width */}
+      <nav className="hidden items-center gap-1 lg:flex">
         {[
           { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
           { href: "/chat", label: "AI Chat", Icon: Sparkles },
           { href: "/chats", label: modeConfig.chatLabel, Icon: MessagesSquare },
           { href: "/documents", label: "Documents", Icon: FileText },
-        ].map(({ href, label, Icon }) => {
+          { href: "/digest", label: "Digest", Icon: FileSpreadsheet },
+          { href: "/contracts", label: "Contracts", Icon: CalendarClock, extraOnly: true },
+          { href: "/memory", label: "Memory", Icon: Brain, extraOnly: true },
+        ].map(({ href, label, Icon, extraOnly }) => {
           const active = pathname === href || pathname.startsWith(href + "/");
           return (
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
+              className={`items-center gap-1.5 rounded-full px-2.5 xl:px-3 py-1.5 text-[13px] font-medium transition-colors ${
+                extraOnly ? "hidden xl:flex" : "flex"
+              } ${
                 active
                   ? "bg-slate-900 text-white dark:bg-white dark:text-black font-semibold shadow-xs"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white"
@@ -199,10 +263,10 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         {workspace && (
           <span
             title={`Workspace: ${workspace.name}`}
-            className="ml-2 flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300"
+            className="ml-1.5 flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300"
           >
             <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
-            <span className="hidden max-w-[120px] truncate xl:inline">{workspace.name}</span>
+            <span className="hidden max-w-[110px] truncate xl:inline">{workspace.name}</span>
             <span className="xl:hidden">{(workspace.name || "?").slice(0, 1).toUpperCase()}</span>
           </span>
         )}
