@@ -211,6 +211,7 @@ export interface TeamMessage {
   created_at: string;
   attachments: ChatAttachment[];
   read_by: string[];
+  reactions?: Record<string, string[]>;
   approval_card?: ApprovalCard | null;
 }
 

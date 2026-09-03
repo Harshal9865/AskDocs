@@ -13,6 +13,7 @@ from app.models.chat import (
     ConversationReadState,
     Message,
     MessageAttachment,
+    MessageReaction,
 )
 from app.models.file import FileBlob
 from app.models.user import User
@@ -84,6 +85,10 @@ class TeamConversationOut(BaseModel):
     unread_count: int = 0
 
 
+class ReactionTogglePayload(BaseModel):
+    emoji: str
+
+
 class TeamMessageOut(BaseModel):
     id: uuid.UUID
     sender_id: uuid.UUID | None
@@ -91,6 +96,7 @@ class TeamMessageOut(BaseModel):
     created_at: object
     attachments: list[AttachmentOut] = []
     read_by: list[str] = []
+    reactions: dict[str, list[str]] = {}
     approval_card: dict | None = None
 
     class Config:
@@ -229,6 +235,18 @@ async def _build_message_out(db, msg: Message, user_id: uuid.UUID | None = None)
         except Exception:
             approval_card = None
 
+    reactions_dict: dict[str, list[str]] = {}
+    try:
+        reactions_res = await db.execute(
+            select(MessageReaction.emoji, MessageReaction.user_id).where(
+                MessageReaction.message_id == msg.id
+            )
+        )
+        for emoji, uid in reactions_res.all():
+            reactions_dict.setdefault(emoji, []).append(str(uid))
+    except Exception:
+        reactions_dict = {}
+
     return TeamMessageOut(
         id=msg.id,
         sender_id=msg.sender_id,
@@ -236,6 +254,7 @@ async def _build_message_out(db, msg: Message, user_id: uuid.UUID | None = None)
         created_at=msg.created_at,
         attachments=atts,
         read_by=read_by,
+        reactions=reactions_dict,
         approval_card=approval_card,
     )
 
@@ -629,6 +648,58 @@ async def update_message_approval(
             logger.warning("Failed to update message approval card: %s", err)
 
     return await _build_message_out(db, msg, user.id)
+
+
+@router.post("/team-chats/messages/{message_id}/reactions")
+async def toggle_team_message_reaction(
+    message_id: uuid.UUID,
+    payload: ReactionTogglePayload,
+    db: DbSession,
+    user: CurrentUser,
+):
+    """Toggle an emoji reaction on a message. Stored in DB so all participants see it."""
+    msg = await db.get(Message, message_id)
+    if msg is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Message not found")
+
+    part = await db.execute(
+        select(ConversationParticipant).where(
+            ConversationParticipant.conversation_id == msg.conversation_id,
+            ConversationParticipant.user_id == user.id,
+        )
+    )
+    if part.scalar_one_or_none() is None:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Not a participant in this chat")
+
+    emoji = payload.emoji.strip()
+    if not emoji:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Emoji required")
+
+    existing = await db.execute(
+        select(MessageReaction).where(
+            MessageReaction.message_id == msg.id,
+            MessageReaction.user_id == user.id,
+            MessageReaction.emoji == emoji,
+        )
+    )
+    existing_row = existing.scalar_one_or_none()
+    if existing_row:
+        await db.delete(existing_row)
+    else:
+        db.add(MessageReaction(message_id=msg.id, user_id=user.id, emoji=emoji))
+
+    await db.commit()
+
+    reactions_res = await db.execute(
+        select(MessageReaction.emoji, MessageReaction.user_id).where(
+            MessageReaction.message_id == msg.id
+        )
+    )
+    reactions_dict: dict[str, list[str]] = {}
+    for em, uid in reactions_res.all():
+        reactions_dict.setdefault(em, []).append(str(uid))
+
+    return {"reactions": reactions_dict}
 
 
 IMAGE_TYPES = ("image/png", "image/jpeg", "image/webp", "image/gif")

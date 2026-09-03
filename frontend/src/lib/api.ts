@@ -301,6 +301,11 @@ export const api = {
       method: "POST",
       ...json({ content, attachment_ids: attachmentIds ?? [] }),
     }),
+  toggleTeamMessageReaction: (messageId: string, emoji: string) =>
+    request<{ reactions: Record<string, string[]> }>(`/team-chats/messages/${messageId}/reactions`, {
+      method: "POST",
+      ...json({ emoji }),
+    }),
 
   // ---- chat attachments ----
   uploadChatAttachment: (file: File) => {

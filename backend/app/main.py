@@ -110,6 +110,15 @@ async def lifespan(app: FastAPI):
                 created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
             );
             CREATE INDEX IF NOT EXISTS ix_workspace_memories_workspace_id ON workspace_memories (workspace_id);
+            CREATE TABLE IF NOT EXISTS message_reactions (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                message_id UUID NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
+                user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                emoji VARCHAR(32) NOT NULL,
+                created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                CONSTRAINT uq_message_reactions UNIQUE (message_id, user_id, emoji)
+            );
+            CREATE INDEX IF NOT EXISTS ix_message_reactions_message_id ON message_reactions (message_id);
             """))
             await session.commit()
     except Exception as e:

@@ -308,23 +308,35 @@ export default function ChatsPage() {
     } catch {}
   }, []);
 
-  const toggleReaction = (msgId: string, emoji: string) => {
+  const toggleReaction = async (msgId: string, emoji: string) => {
     if (!user?.id) return;
-    setReactions((prev) => {
-      const msgReactions = { ...(prev[msgId] || {}) };
-      const currentUsers = msgReactions[emoji] || [];
-      if (currentUsers.includes(user.id)) {
-        msgReactions[emoji] = currentUsers.filter((id) => id !== user.id);
-        if (msgReactions[emoji].length === 0) delete msgReactions[emoji];
-      } else {
-        msgReactions[emoji] = [...currentUsers, user.id];
+    // 1. Optimistic UI update across active messages
+    setMessages((prev) =>
+      prev.map((msg) => {
+        if (msg.id !== msgId) return msg;
+        const currentReactions = { ...(msg.reactions || {}) };
+        const currentUsers = currentReactions[emoji] || [];
+        if (currentUsers.includes(user.id)) {
+          currentReactions[emoji] = currentUsers.filter((id) => id !== user.id);
+          if (currentReactions[emoji].length === 0) delete currentReactions[emoji];
+        } else {
+          currentReactions[emoji] = [...currentUsers, user.id];
+        }
+        return { ...msg, reactions: currentReactions };
+      })
+    );
+
+    // 2. Persist to shared database so all group members & DM recipients see it in real-time
+    try {
+      const res = await api.toggleTeamMessageReaction(msgId, emoji);
+      if (res && res.reactions) {
+        setMessages((prev) =>
+          prev.map((msg) => (msg.id === msgId ? { ...msg, reactions: res.reactions } : msg))
+        );
       }
-      const next = { ...prev, [msgId]: msgReactions };
-      try {
-        localStorage.setItem("askdocs_chat_reactions", JSON.stringify(next));
-      } catch {}
-      return next;
-    });
+    } catch {
+      /* ignore */
+    }
   };
 
   useEffect(() => {
@@ -403,9 +415,14 @@ export default function ChatsPage() {
         const msgs = await api.listTeamMessages(currentChatId); 
         if (!cancelled) {
           setMessages((prev) => {
-            // If message list is structurally identical, return exact reference to prevent re-render & scroll jitter
+            // If message list is structurally identical (including reactions and read status), return exact reference to prevent re-render & scroll jitter
             if (prev.length === msgs.length) {
-              const isDifferent = msgs.some((m, i) => m.id !== prev[i]?.id || (m.read_by?.length !== prev[i]?.read_by?.length));
+              const isDifferent = msgs.some(
+                (m, i) =>
+                  m.id !== prev[i]?.id ||
+                  m.read_by?.length !== prev[i]?.read_by?.length ||
+                  JSON.stringify(m.reactions || {}) !== JSON.stringify(prev[i]?.reactions || {})
+              );
               if (!isDifferent) return prev;
             }
             if (msgs.length > prevMsgCount.current && prevMsgCount.current > 0) {
@@ -1162,7 +1179,7 @@ export default function ChatsPage() {
               {displayedMessages.map((m) => {
                 const isMe = m.sender_id === user?.id;
                 const isBot = !m.sender_id;
-                const msgReactions = reactions[m.id] || {};
+                const msgReactions = m.reactions || reactions[m.id] || {};
                 const hasReactions = Object.keys(msgReactions).length > 0;
 
                 // Check for quoted reply format: > [Replying to Name]: Snippet\n\nActual message

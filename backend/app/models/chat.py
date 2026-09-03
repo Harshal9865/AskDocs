@@ -87,3 +87,15 @@ class ConversationReadState(BaseModel):
     )
     last_read_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
+
+class MessageReaction(BaseModel):
+    __tablename__ = "message_reactions"
+    __table_args__ = (UniqueConstraint("message_id", "user_id", "emoji"),)
+
+    message_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("messages.id", ondelete="CASCADE"), index=True
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    emoji: Mapped[str] = mapped_column(String(32))
