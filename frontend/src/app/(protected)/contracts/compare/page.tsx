@@ -24,7 +24,6 @@ import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
 import { showToast } from "@/components/Toast";
 import { exportToPdf } from "@/lib/pdf-export";
-import { useAudienceMode } from "@/lib/audience-mode-context";
 import type { ContractDiffResult, DiffClause, DocumentItem } from "@/lib/types";
 
 type ViewMode = "split" | "unified" | "playbook";
@@ -39,7 +38,6 @@ interface ClauseDecisionState {
 
 export default function ContractComparePage() {
   const { workspace } = useWorkspace();
-  const { modeConfig } = useAudienceMode();
   const searchParams = useSearchParams();
 
   const [docs, setDocs] = useState<DocumentItem[]>([]);

@@ -26,8 +26,6 @@ import {
   Ban,
   Check,
   PenTool,
-  HelpCircle,
-  Info,
   Lock,
   FileCode,
   Lightbulb,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, FileText, ImageIcon, Mic, MicOff, Paperclip, Plus, Smile, X, FileSpreadsheet, Camera, PenTool, FileCheck2 } from "lucide-react";
+import { ArrowUp, FileText, ImageIcon, Mic, MicOff, Paperclip, Plus, Smile, X, FileSpreadsheet, PenTool } from "lucide-react";
 
 export interface AttachedFile {
   file: File;

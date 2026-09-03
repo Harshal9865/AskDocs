@@ -23,6 +23,7 @@ import {
   EyeOff,
   FileSpreadsheet,
   FileText,
+  FileUp,
   MessageCirclePlus,
   MessagesSquare,
   MoreVertical,
