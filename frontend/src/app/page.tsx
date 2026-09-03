@@ -37,10 +37,19 @@ import {
   ChevronDown,
   LayoutDashboard,
   Brain,
-  Table,
-  GraduationCap,
-  Headphones,
   Scale,
+  Presentation,
+  FileSignature,
+  LayoutGrid,
+  FileSpreadsheet,
+  Play,
+  Pause,
+  RotateCw,
+  Terminal,
+  Code2,
+  Download,
+  Radio,
+  FileCode,
 } from "lucide-react";
 
 function AuroraHeroMock() {
@@ -88,6 +97,366 @@ function AuroraHeroMock() {
             </span>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function StudioLiveInteractivePlayground() {
+  const [activeTab, setActiveTab] = React.useState<"audio" | "study" | "extract" | "slides" | "canvas" | "connectors">("audio");
+  const [audienceMode, setAudienceMode] = React.useState<"student" | "enterprise">("student");
+  const [isPlayingAudio, setIsPlayingAudio] = React.useState(true);
+  const [audioSpeed, setAudioSpeed] = React.useState(1.0);
+  const [cardFlipped, setCardFlipped] = React.useState(false);
+  const [testedApi, setTestedApi] = React.useState(false);
+
+  return (
+    <div className="relative mx-auto w-full max-w-5xl rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#0c0f17]/95 space-y-6">
+      {/* Top Audience Mode Switcher Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4 dark:border-white/5">
+        <div className="flex items-center gap-2">
+          <span className="flex h-2.5 w-2.5 rounded-full bg-[#1db954] animate-pulse" />
+          <span className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
+            Live Interactive Studio Simulator
+          </span>
+          <span className="rounded-full bg-[#1db954]/15 px-2 py-0.5 text-[10px] font-mono font-bold text-[#1db954]">
+            LIVE MOCKUP
+          </span>
+        </div>
+
+        {/* Audience Mode Switcher */}
+        <div className="flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-slate-100 p-1 dark:border-white/10 dark:bg-white/5">
+          <button
+            type="button"
+            onClick={() => setAudienceMode("student")}
+            className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              audienceMode === "student"
+                ? "bg-purple-600 text-white shadow-sm"
+                : "text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white"
+            }`}
+          >
+            <GraduationCap className="h-3.5 w-3.5" />
+            <span>Academic Mode</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setAudienceMode("enterprise")}
+            className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              audienceMode === "enterprise"
+                ? "bg-[#1db954] text-black font-extrabold shadow-sm"
+                : "text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white"
+            }`}
+          >
+            <Shield className="h-3.5 w-3.5" />
+            <span>Enterprise NDA Mode</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Studio Selection Navigation Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+        {[
+          { id: "audio", label: "Audio Studio", icon: Headphones },
+          { id: "study", label: "Study Studio", icon: GraduationCap },
+          { id: "extract", label: "Data Extractor", icon: Table },
+          { id: "slides", label: "Slide Decks & Gamma", icon: Presentation },
+          { id: "canvas", label: "Multi-Doc Canvas", icon: LayoutGrid },
+          { id: "connectors", label: "Universal API", icon: Code2 },
+        ].map((tab) => {
+          const Icon = tab.icon;
+          const isSelected = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                isSelected
+                  ? "bg-[#1db954] text-black font-black shadow-lg shadow-[#1db954]/25 scale-102"
+                  : "border border-slate-200/80 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-white/5 dark:bg-[#151520] dark:text-zinc-300"
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Interactive Studio Preview Content Box */}
+      <div className="rounded-2xl border border-slate-200/80 bg-slate-950 p-6 text-white shadow-inner dark:border-white/10 dark:bg-black/80">
+        {/* TAB 1: AUDIO STUDIO */}
+        {activeTab === "audio" && (
+          <div className="space-y-4 animate-in fade-in duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#1db954] flex items-center gap-1.5">
+                  <Radio className="h-3 w-3 animate-pulse" /> 2-Host Dialogue Podcast Brief
+                </span>
+                <h4 className="text-base sm:text-lg font-black text-white mt-0.5">
+                  {audienceMode === "student" ? "Quantum Algorithms & Grover Search Walkthrough" : "Q3 Master Services Agreement Liability Assessment"}
+                </h4>
+              </div>
+              <span className="text-xs font-mono text-slate-400">02:45 / 04:30</span>
+            </div>
+
+            {/* Spotify Waveform Equalizer */}
+            <div className="flex h-16 w-full items-center justify-center gap-1 rounded-2xl bg-white/5 p-3 border border-white/10">
+              {[40, 75, 95, 60, 85, 100, 45, 65, 90, 80, 50, 70, 95, 60, 40, 85, 90, 65, 50, 80, 100, 75, 45, 90].map((h, i) => (
+                <div
+                  key={i}
+                  className={`w-1.5 sm:w-2 rounded-full transition-all duration-300 ${
+                    isPlayingAudio ? "bg-gradient-to-t from-[#1db954] via-emerald-400 to-cyan-400 animate-pulse" : "bg-slate-700"
+                  }`}
+                  style={{
+                    height: isPlayingAudio ? `${Math.max(20, (h * ((i % 3) + 1)) % 100)}%` : "20%",
+                    animationDelay: `${(i * 50) % 500}ms`,
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Controls Bar */}
+            <div className="flex items-center justify-between pt-1">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsPlayingAudio(!isPlayingAudio)}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1db954] text-black font-black hover:scale-105 active:scale-95 transition-all shadow-md shadow-[#1db954]/30"
+                >
+                  {isPlayingAudio ? <Pause className="h-5 w-5 fill-black" /> : <Play className="h-5 w-5 ml-0.5 fill-black" />}
+                </button>
+                <div className="text-xs font-bold text-slate-300">
+                  <span className="text-[#1db954]">Host Alex:</span> &ldquo;{audienceMode === "student" ? "Notice how Grover's search achieves quadratic speedup..." : "Clause 14.2 limits total aggregate damages to 12 months fees..."}&rdquo;
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1">
+                {[1.0, 1.25, 1.5].map((speed) => (
+                  <button
+                    key={speed}
+                    type="button"
+                    onClick={() => setAudioSpeed(speed)}
+                    className={`rounded-lg px-2 py-1 text-[11px] font-bold transition-all ${
+                      audioSpeed === speed ? "bg-[#1db954] text-black font-black" : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    {speed}x
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: STUDY STUDIO */}
+        {activeTab === "study" && (
+          <div className="space-y-4 animate-in fade-in duration-300">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-purple-400">
+                3D Interactive Flashcard with Question Mimicry
+              </span>
+              <span className="text-xs font-bold text-slate-400">Card 1 of 12</span>
+            </div>
+
+            {/* 3D Flippable Card */}
+            <div
+              onClick={() => setCardFlipped(!cardFlipped)}
+              className="cursor-pointer rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-950/40 via-[#150f2f] to-slate-900 p-6 text-center transition-all duration-300 hover:border-purple-400/60 shadow-lg min-h-[140px] flex flex-col items-center justify-center"
+            >
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#1db954] mb-2">
+                {cardFlipped ? "Answer (Click to flip back)" : "Question (Click to flip)"}
+              </span>
+              <p className="text-sm sm:text-base font-bold text-white max-w-lg leading-relaxed">
+                {cardFlipped
+                  ? audienceMode === "student"
+                    ? "In O(log N) time because the search interval is halved at each step."
+                    : "Direct indemnification clause with zero liability cap for third-party intellectual property infringement."
+                  : audienceMode === "student"
+                    ? "Explain why Binary Search requires logarithmic time complexity on sorted arrays."
+                    : "What is the primary unrestricted indemnity exposure identified in Section 8.1?"}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
+              <span className="flex items-center gap-1 text-[#1db954]">
+                <Check className="h-3.5 w-3.5" /> Exact University Exam Syntax Mimicked
+              </span>
+              <Link href="/study-guide" className="text-xs font-bold text-purple-400 hover:underline">
+                Open Full Study Studio ➔
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: DATA EXTRACTOR */}
+        {activeTab === "extract" && (
+          <div className="space-y-3 animate-in fade-in duration-300 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">
+                Scanned Table ➔ Clean Interactive Spreadsheet
+              </span>
+              <span className="rounded-full bg-[#1db954]/20 border border-[#1db954]/40 px-2 py-0.5 text-[10px] font-bold text-[#1db954]">
+                100% In-Place Editable
+              </span>
+            </div>
+
+            <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/5">
+              <table className="w-full text-left font-mono text-[11px]">
+                <thead>
+                  <tr className="border-b border-white/10 bg-white/5 text-slate-300 font-bold">
+                    <th className="p-2.5">Item / Metric</th>
+                    <th className="p-2.5">Category</th>
+                    <th className="p-2.5">Q1 Value</th>
+                    <th className="p-2.5">Q2 Projected</th>
+                    <th className="p-2.5 text-right">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5 text-slate-300">
+                  <tr>
+                    <td className="p-2.5 font-bold text-white">Cloud Infrastructure</td>
+                    <td className="p-2.5 text-purple-300">Engineering</td>
+                    <td className="p-2.5">$14,200</td>
+                    <td className="p-2.5 text-[#1db954] font-bold">$18,400</td>
+                    <td className="p-2.5 text-right text-emerald-400">✓ Audited</td>
+                  </tr>
+                  <tr>
+                    <td className="p-2.5 font-bold text-white">Vector Storage Tier</td>
+                    <td className="p-2.5 text-cyan-300">Database</td>
+                    <td className="p-2.5">$6,800</td>
+                    <td className="p-2.5 text-[#1db954] font-bold">$8,100</td>
+                    <td className="p-2.5 text-right text-emerald-400">✓ Audited</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[11px] text-slate-400">Auto-Sum recalculates numeric columns in real time.</span>
+              <Link href="/extract" className="inline-flex items-center gap-1 text-xs font-bold text-[#1db954] hover:underline">
+                <Download className="h-3 w-3" /> Export to Excel (.xlsx) / CSV ➔
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: SLIDES */}
+        {activeTab === "slides" && (
+          <div className="space-y-4 animate-in fade-in duration-300">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-pink-400">
+                1-Click Slide Deck Studio & Gamma AI Bridge
+              </span>
+              <span className="rounded-full bg-pink-500/20 border border-pink-500/40 px-2.5 py-0.5 text-[10px] font-black text-pink-300">
+                Gamma.app Ready
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="rounded-xl border border-[#1db954]/40 bg-gradient-to-br from-[#0c1a16] via-[#101924] to-[#121212] p-4 space-y-2 shadow-md">
+                <span className="text-[10px] font-mono text-[#1db954] font-bold">SLIDE 1 of 6 • EXECUTIVE SUMMARY</span>
+                <h5 className="text-sm font-black text-white">Strategic Architecture & Scaling</h5>
+                <p className="text-[11px] text-slate-300 leading-relaxed">
+                  Comprehensive breakdown of data isolation protocols, vector chunking pipelines, and zero data leakage.
+                </p>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-gradient-to-br from-[#120e24] to-[#1b1538] p-4 space-y-2">
+                <span className="text-[10px] font-mono text-purple-300 font-bold">SLIDE 2 of 6 • RISK GOVERNANCE</span>
+                <h5 className="text-sm font-black text-white">Liability Redline & Mitigation</h5>
+                <p className="text-[11px] text-slate-300 leading-relaxed">
+                  High-priority contract risk analysis with automated cross-document inconsistency alerts.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
+              <span>Free AI Generation • Zero subscription required</span>
+              <Link href="/slides" className="font-bold text-pink-400 hover:underline">
+                Generate Presentation Decks ➔
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 5: CANVAS */}
+        {activeTab === "canvas" && (
+          <div className="space-y-4 animate-in fade-in duration-300 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-cyan-400">
+                Multi-Doc Comparison Matrix & Risk Heat Map
+              </span>
+              <span className="rounded-full bg-cyan-500/20 px-2 py-0.5 text-[10px] font-mono text-cyan-300">
+                3 Documents Active
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="rounded-xl border border-rose-500/30 bg-rose-950/20 p-3 space-y-1">
+                <span className="rounded-md bg-rose-500/20 px-1.5 py-0.5 text-[9px] font-black text-rose-400 uppercase">
+                  Critical Severity
+                </span>
+                <h6 className="font-bold text-white text-[11px]">Uncapped Indemnity Clause</h6>
+                <p className="text-[10px] text-slate-400">Vendor MSA Sec 14 contradicts standard SLA terms.</p>
+              </div>
+              <div className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-3 space-y-1">
+                <span className="rounded-md bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-black text-amber-400 uppercase">
+                  Warning
+                </span>
+                <h6 className="font-bold text-white text-[11px]">30-Day Notice Window</h6>
+                <p className="text-[10px] text-slate-400">Requires early renewal notification by October 15.</p>
+              </div>
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-3 space-y-1">
+                <span className="rounded-md bg-emerald-500/20 px-1.5 py-0.5 text-[9px] font-black text-[#1db954] uppercase">
+                  Low / Safe
+                </span>
+                <h6 className="font-bold text-white text-[11px]">GDPR & SOC2 Compliance</h6>
+                <p className="text-[10px] text-slate-400">Full data sovereignty protocols confirmed.</p>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-1">
+              <Link href="/canvas" className="font-bold text-cyan-400 hover:underline">
+                Open Live Synthesis Canvas ➔
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 6: CONNECTORS */}
+        {activeTab === "connectors" && (
+          <div className="space-y-4 animate-in fade-in duration-300 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#1db954]">
+                Universal REST API & Webhook Simulator
+              </span>
+              <button
+                type="button"
+                onClick={() => setTestedApi(true)}
+                className="rounded-xl bg-[#1db954] px-3 py-1 text-[11px] font-black text-black hover:bg-[#1ed760] transition-all cursor-pointer"
+              >
+                {testedApi ? "✓ 200 OK Simulated" : "▶ Run Test Request"}
+              </button>
+            </div>
+
+            <div className="rounded-xl border border-white/10 bg-black/90 p-3.5 font-mono text-[11px] text-slate-300 space-y-1.5">
+              <p className="text-purple-400"># Universal Ingestion cURL Endpoint</p>
+              <p className="text-emerald-400">curl -X POST https://askdocs.app/api/v1/workspaces/ws_live/documents \</p>
+              <p className="text-slate-400 pl-4">-H "Authorization: Bearer sk_live_askdocs_prod" \</p>
+              <p className="text-slate-400 pl-4">-F "file=@Syllabus_2026.pdf"</p>
+            </div>
+
+            {testedApi && (
+              <div className="rounded-xl border border-[#1db954]/30 bg-[#1db954]/10 p-2.5 font-mono text-[10px] text-[#1db954] animate-in fade-in">
+                {`{"status": 200, "message": "Document ingested and indexed into Vector Store", "chunks": 42}`}
+              </div>
+            )}
+
+            <div className="flex justify-end pt-1">
+              <Link href="/integrations" className="font-bold text-[#1db954] hover:underline">
+                View Developer API Playground ➔
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -198,57 +567,111 @@ const FEATURES = [
 const NEW_CAPABILITIES = [
   {
     badge: "AI Table Extractor",
-    title: "PDF Invoices & Reports to Live Excel",
-    desc: "Transform scanned invoices, receipts, balance sheets, and survey data into clean, interactive in-browser spreadsheets with 1-click Excel (.xlsx), CSV, and JSON export.",
+    title: "Scanned PDF Tables to Live Excel",
+    desc: "Transform scanned invoices, receipts, lab results, and financial tables into interactive spreadsheets with in-place cell editing, live auto-sums, and 1-click Excel/CSV export.",
     icon: Table,
-    color: "from-emerald-500 via-teal-500 to-cyan-400",
+    color: "from-[#1db954] via-emerald-500 to-teal-500",
     glow: "glow-emerald",
-    tags: ["Invoice to Excel", "Interactive Grid", "1-Click CSV / JSON", "Auto-Sum"],
+    tags: ["Invoice to Excel", "Interactive Grid", "1-Click CSV/JSON", "Live Auto-Sum"],
   },
   {
     badge: "Study Studio",
     title: "Multi-Doc Cheat Sheets, 3D Flashcards & Quizzes",
-    desc: "Select 1 to 5 workspace documents to synthesize executive cheat sheets, interactive 3D flippable flashcards with mastery tracking, and self-testing quizzes with instant scoring.",
+    desc: "Select 1 to 5 documents to synthesize executive cheat sheets, 3D flip flashcards, and exam quizzes mimicking your professor or company's exact question syntax.",
     icon: GraduationCap,
     color: "from-purple-500 via-pink-500 to-indigo-500",
     glow: "glow-violet",
-    tags: ["Multi-Doc Picker", "3D Flip Flashcards", "Instant Quiz Scoring", "Tutor Mode"],
+    tags: ["Multi-Doc Tracklist", "3D Flip Flashcards", "Exam Style Mimicry", "Anki Export"],
   },
   {
     badge: "Audio Brief Player",
-    title: "Listen to Any PDF in 3 Minutes",
-    desc: "Convert dense 40-page whitepapers and research reports into concise, engaging spoken audio summaries with animated frequency wave visualizers and speed controls.",
+    title: "Dual-Host Podcast Broadcasts & Rapid Briefs",
+    desc: "Convert dense whitepapers into conversational spoken podcasts (Alex & Taylor) with live soundwave visualizers, variable playback speed, and downloadable PDF transcripts.",
     icon: Headphones,
-    color: "from-violet-500 via-indigo-500 to-purple-500",
+    color: "from-violet-500 via-indigo-500 to-[#1db954]",
     glow: "glow-sky",
-    tags: ["3-Min Spoken Briefs", "Sound Wave Visualizer", "Speed Controls", "Audio Chapters"],
+    tags: ["2-Host Dialogue", "Spotify Equalizer", "Speed Controls", "PDF Broadcast Script"],
   },
   {
-    badge: "Universal Search",
-    title: "Multi-Document Deep Search & AI Synthesis",
-    desc: "Query across all uploaded PDFs, contracts, and office chats simultaneously with instant AI synthesis answer boxes and exact side-by-side citations.",
-    icon: Search,
-    color: "from-amber-500 via-orange-500 to-purple-500",
-    glow: "glow-amber",
-    tags: ["Cross-Doc Synthesis", "Relevance Match", "Side-by-Side Excerpts"],
+    badge: "Slide Deck Studio",
+    title: "1-Click Presentation Generator & Gamma Bridge",
+    desc: "Convert PDFs into high-impact slide decks with Spotify Obsidian themes, fullscreen presenter mode, and instant 1-click export to Gamma AI (gamma.app).",
+    icon: Presentation,
+    color: "from-pink-500 via-purple-600 to-indigo-500",
+    glow: "glow-pink",
+    tags: ["Gamma AI Bridge", "Spotify Obsidian Deck", "Fullscreen Mode", "Vector PDF"],
   },
   {
-    badge: "Contract Redline",
+    badge: "Multi-Doc Canvas",
+    title: "Live Comparison Matrix & Risk Heat Map",
+    desc: "Synthesize 2+ documents simultaneously into side-by-side comparison tables, actionable procedural checklists, and critical liability heat maps.",
+    icon: LayoutGrid,
+    color: "from-cyan-500 via-blue-500 to-indigo-500",
+    glow: "glow-cyan",
+    tags: ["Side-by-Side Matrix", "Risk Heat Map", "Action Checklists", "Vector PDF Canvas"],
+  },
+  {
+    badge: "Contract Redline Diff",
     title: "Side-by-Side Contract Redline & Diff Studio",
-    desc: "Compare two contract versions with automated liability detection, dynamic risk score recalculators, and 1-click counter-proposal generation.",
+    desc: "Compare two contract drafts with automated clause variance detection, dynamic liability score recalculation, and 1-click counter-proposals.",
     icon: Scale,
     color: "from-rose-500 via-pink-500 to-purple-500",
     glow: "glow-rose",
     tags: ["Side-by-Side Redline", "Dynamic Risk Recalculator", "Counter-Proposals"],
   },
   {
+    badge: "Contract Expiry Tracker",
+    title: "Automated Renewal & Obligation Monitoring",
+    desc: "Extract payment milestones, termination notice windows, and auto-renewal deadlines across all vendor and client contracts with proactive urgency alerts.",
+    icon: FileSignature,
+    color: "from-amber-500 via-orange-500 to-purple-500",
+    glow: "glow-amber",
+    tags: ["Notice Window Alerts", "Obligation Tracking", "Urgent Expiry Badges"],
+  },
+  {
     badge: "Institutional Memory",
-    title: "Self-Evolving Knowledge & Memory Graph",
-    desc: "Ingest decisions and project commitments into a living workspace memory graph. Query institutional knowledge with auto-extracted entities and temporal relevance tracking.",
+    title: "Permanent Knowledge & Memory Graph",
+    desc: "Ingest decisions, meeting transcripts, and policy exceptions into an immutable living mind map. Query institutional context with auto-extracted entity relationships.",
     icon: Brain,
     color: "from-indigo-500 via-purple-500 to-cyan-400",
     glow: "glow-indigo",
-    tags: ["Knowledge Graph", "Decision Tracking", "Temporal Relevance"],
+    tags: ["Mind Map Graph", "Decision Tracking", "Meeting Transcripts", "PDF Logs"],
+  },
+  {
+    badge: "Document Health",
+    title: "Automated Quality & Extraction Readiness Audit",
+    desc: "Continuous health checks for corrupt fonts, low-DPI OCR scans, and structural formatting errors with 1-click PDF executive health reports.",
+    icon: Activity,
+    color: "from-emerald-500 via-teal-500 to-[#1db954]",
+    glow: "glow-emerald",
+    tags: ["100-Point Quality Score", "OCR Scan Auditor", "Executive PDF Audit"],
+  },
+  {
+    badge: "Weekly AI Digest",
+    title: "Proactive Workspace Executive Synthesis",
+    desc: "Automated weekly rollups synthesizing new files, contract obligations, and strategic milestones into a high-yield executive PDF briefing.",
+    icon: FileSpreadsheet,
+    color: "from-purple-600 via-indigo-600 to-[#1db954]",
+    glow: "glow-violet",
+    tags: ["Weekly Milestone Rollups", "Strategic Takeaways", "1-Click PDF Digest"],
+  },
+  {
+    badge: "Batch Format & Redact",
+    title: "Automated PII Masking & Format Converter",
+    desc: "Convert files into Markdown, JSON, CSV, and TXT with autonomous redaction of sensitive emails, phone numbers, and SSNs for safe sharing.",
+    icon: FileCode,
+    color: "from-blue-500 via-indigo-500 to-purple-500",
+    glow: "glow-blue",
+    tags: ["PII Anonymization", "Clean Markdown", "Developer JSON", "Sanitized PDFs"],
+  },
+  {
+    badge: "Universal Connectors & API",
+    title: "6 Audience Connectors & Live REST API Playground",
+    desc: "Sync Google Drive, Slack, Notion, Obsidian, and Odoo ERP with real-time webhooks and an interactive REST API playground with cURL, Python, and Node.js snippets.",
+    icon: Plug2,
+    color: "from-[#1db954] via-emerald-600 to-teal-600",
+    glow: "glow-emerald",
+    tags: ["Google Drive & Slack", "Notion & ERP", "cURL / Python / Node.js", "Webhooks"],
   },
 ];
 
@@ -797,7 +1220,14 @@ export default function Home() {
             </div>
           </Reveal>
 
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Live Interactive Studio Simulator Playground */}
+          <div className="mt-10">
+            <Reveal dir="up" delay={100}>
+              <StudioLiveInteractivePlayground />
+            </Reveal>
+          </div>
+
+          <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {NEW_CAPABILITIES.map((cap, i) => (
               <Reveal key={cap.title} dir={i % 2 === 0 ? "left" : "right"} delay={i * 120}>
                 <div className={`glow-card ${cap.glow} relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-300 hover:shadow-xl dark:border-white/10 dark:bg-[#111122]/90 dark:hover:border-purple-500/40`}>
