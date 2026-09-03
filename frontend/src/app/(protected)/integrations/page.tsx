@@ -135,13 +135,6 @@ export default function IntegrationsPage() {
   const [apiTesting, setApiTesting] = useState(false);
   const [apiResponse, setApiResponse] = useState<string | null>(null);
 
-  const handleSyncGdrive = async () => {
-    setGdriveSyncing(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setGdriveSyncing(false);
-    showToast("success", "Cloud Drive synced: 6 new documents auto-indexed into AskDocs.");
-  };
-
   const handleTestSlack = async () => {
     setTestingSlack(true);
     await new Promise((r) => setTimeout(r, 1000));
