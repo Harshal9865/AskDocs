@@ -21,6 +21,18 @@ import {
   ChevronDown,
   X,
   Sparkles,
+  BookOpen,
+  ShieldCheck,
+  Ban,
+  Check,
+  PenTool,
+  HelpCircle,
+  Info,
+  Lock,
+  FileCode,
+  Lightbulb,
+  Layers,
+  Image as ImageIcon,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -98,6 +110,8 @@ export default function DocumentsPage() {
   const [bulkBusy, setBulkBusy] = useState(false);
   const [viewMode, setViewMode] = useState<"workspace" | "mine">(getInitialView());
   const [pricingOpen, setPricingOpen] = useState(false);
+  const [rulebookOpen, setRulebookOpen] = useState(false);
+  const [activeRuleTab, setActiveRuleTab] = useState<"allowed" | "prohibited" | "tips">("allowed");
 
   // upload state
   const [uploadQueue, setUploadQueue] = useState<UploadItem[]>([]);
@@ -435,13 +449,255 @@ export default function DocumentsPage() {
               <p className="mt-1 text-xs text-slate-400 dark:text-zinc-400">
                 PDF (including scanned/handwritten), DOCX, MD, TXT, PNG, JPG, WEBP, GIF · Max 20 MB
               </p>
-              <p className="mt-1 text-[11px] font-medium text-purple-600 dark:text-purple-400">
+
+              {/* Supported format quick pill chips */}
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5 text-[11px] font-bold">
+                <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2.5 py-0.5 text-red-600 dark:text-red-400 border border-red-500/20">
+                  <FileText className="h-3 w-3" /> PDFs & E-Books
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/10 px-2.5 py-0.5 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                  <PenTool className="h-3 w-3" /> Handwritten Notes
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2.5 py-0.5 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                  <ImageIcon className="h-3 w-3" /> Whiteboards & Diagrams
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-emerald-600 dark:text-emerald-300 border border-emerald-500/20">
+                  <FileCode className="h-3 w-3" /> Word & Markdown
+                </span>
+              </div>
+
+              <p className="mt-2 text-[11px] font-medium text-purple-600 dark:text-purple-400">
                 ✨ Scanned & handwritten documents are auto-transcribed using Gemini Multimodal AI
               </p>
             </>
           )}
         </div>
       )}
+
+      {/* Interactive AI Ingestion Rulebook & Supported Formats Card */}
+      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-5 sm:p-6 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#13111f]/95 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/20">
+              <BookOpen className="h-4 w-4" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-black text-slate-900 dark:text-white">
+                  Document Ingestion Rulebook & AI Compatibility
+                </h3>
+                <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-black text-purple-700 dark:bg-purple-950/60 dark:text-purple-300">
+                  Gemini Vision OCR
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-zinc-400">
+                Learn what file types our AI can process, handwriting guidelines, and prohibited uploads.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setRulebookOpen((o) => !o)}
+            className="inline-flex items-center gap-1.5 self-start sm:self-auto rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10 transition-all cursor-pointer"
+          >
+            <span>{rulebookOpen ? "Hide Rulebook" : "View Full Rulebook"}</span>
+            <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${rulebookOpen ? "rotate-180" : ""}`} />
+          </button>
+        </div>
+
+        {/* Expandable Rulebook Tabs & Content */}
+        {rulebookOpen && (
+          <div className="pt-3 border-t border-slate-100 dark:border-white/5 space-y-4 animate-in fade-in duration-200">
+            {/* Tab Navigation */}
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setActiveRuleTab("allowed")}
+                className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                  activeRuleTab === "allowed"
+                    ? "bg-emerald-500 text-white shadow-xs"
+                    : "border border-slate-200/80 bg-slate-50 text-slate-600 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400"
+                }`}
+              >
+                <Check className="h-3.5 w-3.5" /> What You CAN Upload (Supported)
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveRuleTab("prohibited")}
+                className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                  activeRuleTab === "prohibited"
+                    ? "bg-rose-500 text-white shadow-xs"
+                    : "border border-slate-200/80 bg-slate-50 text-slate-600 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400"
+                }`}
+              >
+                <Ban className="h-3.5 w-3.5" /> What NOT to Upload (Restricted)
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveRuleTab("tips")}
+                className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                  activeRuleTab === "tips"
+                    ? "bg-purple-600 text-white shadow-xs"
+                    : "border border-slate-200/80 bg-slate-50 text-slate-600 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-400"
+                }`}
+              >
+                <Lightbulb className="h-3.5 w-3.5" /> AI Quality Tips
+              </button>
+            </div>
+
+            {/* Tab 1: Allowed / Supported Files */}
+            {activeRuleTab === "allowed" && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="rounded-2xl border border-emerald-500/20 bg-emerald-50/20 p-3.5 dark:bg-emerald-950/10 space-y-1">
+                  <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-bold text-xs">
+                    <FileText className="h-4 w-4" /> PDFs & Large Books
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-zinc-300 leading-relaxed">
+                    Textbooks, scientific research papers, syllabi, legal contracts, NDAs, and corporate reports. Auto-chunked with page-level citations.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-purple-500/20 bg-purple-50/20 p-3.5 dark:bg-purple-950/10 space-y-1">
+                  <div className="flex items-center gap-2 text-purple-700 dark:text-purple-300 font-bold text-xs">
+                    <PenTool className="h-4 w-4" /> Handwritten Notes & Math
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-zinc-300 leading-relaxed">
+                    Photos of class notebooks, exam scratchpads, math formulas, and handwritten essays. Transcribed via Multimodal AI vision.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-blue-500/20 bg-blue-50/20 p-3.5 dark:bg-blue-950/10 space-y-1">
+                  <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 font-bold text-xs">
+                    <ImageIcon className="h-4 w-4" /> Whiteboards & Diagrams
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-zinc-300 leading-relaxed">
+                    System architecture flowcharts, medical anatomy sketches, circuit diagrams, and boardroom whiteboard photos (`.png`, `.jpg`, `.webp`).
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-indigo-500/20 bg-indigo-50/20 p-3.5 dark:bg-indigo-950/10 space-y-1">
+                  <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300 font-bold text-xs">
+                    <FileCode className="h-4 w-4" /> Word, TXT & Markdown
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-zinc-300 leading-relaxed">
+                    Microsoft Word (`.docx`), Markdown notes (`.md`), plain text files (`.txt`), and formatted code snippets.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-teal-500/20 bg-teal-50/20 p-3.5 dark:bg-teal-950/10 space-y-1">
+                  <div className="flex items-center gap-2 text-teal-700 dark:text-teal-300 font-bold text-xs">
+                    <CheckCircle2 className="h-4 w-4" /> Scanned Slips & Invoices
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-zinc-300 leading-relaxed">
+                    Scanned invoices, receipts, tax slips, and lab results. Numbers and line items are automatically parsed for Data Extractor.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-3.5 dark:border-white/5 dark:bg-white/5 space-y-1">
+                  <div className="flex items-center gap-2 text-slate-800 dark:text-white font-bold text-xs">
+                    <Layers className="h-4 w-4 text-purple-500" /> Multi-File Knowledge Base
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-zinc-300 leading-relaxed">
+                    Upload multiple related documents together to enable holistic cross-document synthesis across chat and study decks.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Tab 2: Prohibited / Restricted Files */}
+            {activeRuleTab === "prohibited" && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="rounded-2xl border border-rose-500/20 bg-rose-50/20 p-3.5 dark:bg-rose-950/10 space-y-1">
+                  <div className="flex items-center gap-2 text-rose-700 dark:text-rose-400 font-bold text-xs">
+                    <Lock className="h-4 w-4" /> Password-Protected PDFs
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-zinc-300 leading-relaxed">
+                    Password-encrypted PDFs cannot be indexed by AI. Please remove encryption or export an unlocked copy before uploading.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-rose-500/20 bg-rose-50/20 p-3.5 dark:bg-rose-950/10 space-y-1">
+                  <div className="flex items-center gap-2 text-rose-700 dark:text-rose-400 font-bold text-xs">
+                    <Ban className="h-4 w-4" /> Executables & Scripts
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-zinc-300 leading-relaxed">
+                    `.exe`, `.bat`, `.sh`, `.bin`, `.dll` and shell scripts are strictly prohibited to maintain repository security.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-rose-500/20 bg-rose-50/20 p-3.5 dark:bg-rose-950/10 space-y-1">
+                  <div className="flex items-center gap-2 text-rose-700 dark:text-rose-400 font-bold text-xs">
+                    <Ban className="h-4 w-4" /> Compressed Archives
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-zinc-300 leading-relaxed">
+                    `.zip`, `.rar`, `.7z`, and `.tar.gz` files cannot be ingested directly. Please extract individual documents before uploading.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-rose-500/20 bg-rose-50/20 p-3.5 dark:bg-rose-950/10 space-y-1">
+                  <div className="flex items-center gap-2 text-rose-700 dark:text-rose-400 font-bold text-xs">
+                    <Ban className="h-4 w-4" /> Raw Video Files
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-zinc-300 leading-relaxed">
+                    Raw video files are not supported in Document Vault. Use our dedicated Audio Briefs studio for audio podcasts and briefings.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-rose-500/20 bg-rose-50/20 p-3.5 dark:bg-rose-950/10 space-y-1">
+                  <div className="flex items-center gap-2 text-rose-700 dark:text-rose-400 font-bold text-xs">
+                    <AlertCircle className="h-4 w-4" /> 0-Byte or Corrupted Files
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-zinc-300 leading-relaxed">
+                    Files with 0 bytes or corrupted file headers will fail extraction. Verify files open properly on your computer first.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-rose-500/20 bg-rose-50/20 p-3.5 dark:bg-rose-950/10 space-y-1">
+                  <div className="flex items-center gap-2 text-rose-700 dark:text-rose-400 font-bold text-xs">
+                    <ShieldCheck className="h-4 w-4 text-purple-500" /> Tier Size Limit Exceeded
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-zinc-300 leading-relaxed">
+                    Max 20 MB/file on Free, 50 MB on Professional, and 200 MB on Ultra VIP. Compress heavy PDFs if you hit quota limits.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Tab 3: AI Quality Tips */}
+            {activeRuleTab === "tips" && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="rounded-2xl border border-purple-500/20 bg-purple-50/20 p-4 dark:bg-purple-950/10 space-y-1.5">
+                  <div className="flex items-center gap-2 text-purple-700 dark:text-purple-300 font-bold text-xs">
+                    <Sparkles className="h-4 w-4" /> 1. Crisp Lighting for Notes
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-zinc-300 leading-relaxed">
+                    When photographing handwritten notes or chalkboard equations, shoot directly from above with even lighting and zero glare for 99.8% transcription precision.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-indigo-500/20 bg-indigo-50/20 p-4 dark:bg-indigo-950/10 space-y-1.5">
+                  <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300 font-bold text-xs">
+                    <Layers className="h-4 w-4" /> 2. Upload Syllabi & Lecture Packs
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-zinc-300 leading-relaxed">
+                    Upload course syllabi, lecture slides, and past papers into the same workspace so AI can connect exam dates, grade weights, and lecture concepts seamlessly.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-teal-500/20 bg-teal-50/20 p-4 dark:bg-teal-950/10 space-y-1.5">
+                  <div className="flex items-center gap-2 text-teal-700 dark:text-teal-300 font-bold text-xs">
+                    <ShieldCheck className="h-4 w-4" /> 3. 100% Encrypted & Private
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-zinc-300 leading-relaxed">
+                    Your documents are isolated within your workspace and encrypted. Data is never used to train public LLMs or leaked across workspaces.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {error && (
         <p className="rounded-2xl border border-red-200 bg-red-50/80 px-4 py-2.5 text-xs font-bold text-red-700 dark:border-red-900/30 dark:bg-red-950/30 dark:text-red-300">{error}</p>
