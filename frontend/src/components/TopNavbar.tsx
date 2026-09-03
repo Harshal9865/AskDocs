@@ -117,59 +117,58 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           </span>
         </button>
 
-        {/* Quick Nav Icons for small & tablet screens (<lg) */}
-        <div className="flex items-center gap-0.5 lg:hidden">
-          <Link
-            href="/dashboard"
-            title="Dashboard"
-            aria-label="Dashboard"
-            className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all ${
-              pathname === "/dashboard" || pathname.startsWith("/dashboard/")
-                ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
+        {/* Three Dots Menu Button for Mobile & Small Screens (<lg) (Matching Image 2 & 3) */}
+        <div className="relative lg:hidden">
+          <button
+            onClick={() => setMoreOpen((o) => !o)}
+            aria-label="Navigation Menu"
+            aria-expanded={moreOpen}
+            className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all ${
+              moreOpen
+                ? "bg-slate-900 text-white dark:bg-white dark:text-black shadow-xs font-bold"
                 : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
             }`}
           >
-            <LayoutDashboard className="h-3.5 w-3.5" />
-          </Link>
-
-          <Link
-            href="/chat"
-            title="AI Chat"
-            aria-label="AI Chat"
-            className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all ${
-              pathname === "/chat" || pathname.startsWith("/chat/")
-                ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
-                : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
-            }`}
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-          </Link>
-
-          <Link
-            href="/chats"
-            title={modeConfig.chatLabel}
-            aria-label={modeConfig.chatLabel}
-            className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all ${
-              pathname === "/chats" || pathname.startsWith("/chats/")
-                ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
-                : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
-            }`}
-          >
-            <MessagesSquare className="h-3.5 w-3.5" />
-          </Link>
-
-          <Link
-            href="/documents"
-            title="Documents"
-            aria-label="Documents"
-            className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all ${
-              pathname === "/documents" || pathname.startsWith("/documents/")
-                ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
-                : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
-            }`}
-          >
-            <FileText className="h-3.5 w-3.5" />
-          </Link>
+            <MoreHorizontal className="h-5 w-5" />
+          </button>
+          {moreOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setMoreOpen(false)} />
+              <div className="dark:border-white/10 dark:bg-[#16181f] absolute left-0 z-50 mt-2 w-52 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-2xl animate-in zoom-in-95 duration-150">
+                {[
+                  { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
+                  { href: "/chat", label: "AI Chat", Icon: Sparkles },
+                  { href: "/chats", label: modeConfig.chatLabel, Icon: MessagesSquare },
+                  { href: "/documents", label: "Documents", Icon: FileText },
+                ].map(({ href, label, Icon }) => {
+                  const active = pathname === href || pathname.startsWith(href + "/");
+                  return (
+                    <button
+                      key={href}
+                      onClick={() => {
+                        setMoreOpen(false);
+                        router.push(href);
+                      }}
+                      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+                        active
+                          ? "bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 font-bold"
+                          : "text-slate-700 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/5"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4 shrink-0 text-slate-400 dark:text-zinc-400" />
+                      <span>{label}</span>
+                    </button>
+                  );
+                })}
+                {workspace && (
+                  <div className="dark:border-white/10 mt-1.5 flex items-center gap-2 border-t border-slate-100 px-3 pb-1 pt-2 text-xs text-slate-500 dark:text-zinc-400">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
+                    <span className="truncate font-medium">{workspace.name}</span>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -209,60 +208,6 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         )}
       </nav>
 
-      {/* compact More menu — hidden on phones (rail already shows icons), only for tablet gap md..lg */}
-      <div className="relative hidden md:block lg:hidden">
-        <button
-          onClick={() => setMoreOpen((o) => !o)}
-          aria-label="More pages"
-          aria-expanded={moreOpen}
-          className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
-            moreOpen
-              ? "bg-slate-900 text-white dark:bg-white dark:text-black"
-              : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
-          }`}
-        >
-          <MoreHorizontal className="h-5 w-5" />
-        </button>
-        {moreOpen && (
-          <>
-            <div className="fixed inset-0 z-40" onClick={() => setMoreOpen(false)} />
-            <div className="dark:border-white/10 dark:bg-[#242424] absolute left-0 z-50 mt-2 w-48 rounded-xl border border-slate-200 bg-white p-1 shadow-xl">
-              {[
-                { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
-                { href: "/chat", label: "AI Chat", Icon: Sparkles },
-                { href: "/chats", label: modeConfig.chatLabel, Icon: MessagesSquare },
-                { href: "/documents", label: "Documents", Icon: FileText },
-              ].map(({ href, label, Icon }) => {
-                const active = pathname === href || pathname.startsWith(href + "/");
-                return (
-                  <button
-                    key={href}
-                    onClick={() => {
-                      setMoreOpen(false);
-                      router.push(href);
-                    }}
-                    className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors ${
-                      active
-                        ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300"
-                        : "text-slate-700 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {label}
-                  </button>
-                );
-              })}
-              {workspace && (
-                <div className="dark:border-white/10 mt-1 flex items-center gap-2 border-t border-slate-100 px-3 pb-1.5 pt-2 text-xs text-slate-500 dark:text-zinc-400">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  <span className="truncate">{workspace.name}</span>
-                </div>
-              )}
-            </div>
-          </>
-        )}
-      </div>
-
       {/* Search — hidden on phones, icon navigates to /search to save space */}
       <form
         onSubmit={(e) => {
@@ -301,13 +246,13 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           <Home className="h-4 w-4" />
         </Link>
 
-        {/* Audience Mode Switcher Pill Button (Matching Image 2) */}
+        {/* Audience Mode Switcher Pill Button (Matching Image 1, 2, 4) */}
         <button
           onClick={() => setModeModalOpen(true)}
           type="button"
           aria-label="Switch Operational Mode"
           title={`Active Operational Mode: ${modeConfig.name}. Click to change mode.`}
-          className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black tracking-wider transition-all cursor-pointer border shadow-sm ${
+          className={`flex items-center justify-center gap-1.5 rounded-full px-2 sm:px-3 py-1 text-xs font-black tracking-wider transition-all cursor-pointer border shadow-sm ${
             mode === "office"
               ? "border-[#d97706]/70 bg-[#d97706]/15 text-[#fbbf24] shadow-amber-500/10 hover:bg-[#d97706]/25 hover:border-[#fbbf24]"
               : mode === "academic"
@@ -324,32 +269,32 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           {mode === "office" ? (
             <>
               <ShieldCheck className="h-3.5 w-3.5 text-[#fbbf24] animate-pulse" />
-              <span className="font-mono uppercase text-[11px] font-bold">ENTERPRISE NDA</span>
+              <span className="hidden sm:inline font-mono uppercase text-[11px] font-bold">ENTERPRISE NDA</span>
             </>
           ) : mode === "academic" ? (
             <>
               <GraduationCap className="h-3.5 w-3.5 text-purple-400" />
-              <span className="font-mono uppercase text-[11px] font-bold">STUDY MODE</span>
+              <span className="hidden sm:inline font-mono uppercase text-[11px] font-bold">STUDY MODE</span>
             </>
           ) : mode === "legal" ? (
             <>
               <ShieldCheck className="h-3.5 w-3.5 text-rose-400" />
-              <span className="font-mono uppercase text-[11px] font-bold">LEGAL VAULT</span>
+              <span className="hidden sm:inline font-mono uppercase text-[11px] font-bold">LEGAL VAULT</span>
             </>
           ) : mode === "finance" ? (
             <>
               <span className="text-[11px]">💰</span>
-              <span className="font-mono uppercase text-[11px] font-bold">FINANCE DESK</span>
+              <span className="hidden sm:inline font-mono uppercase text-[11px] font-bold">FINANCE DESK</span>
             </>
           ) : mode === "clinical" ? (
             <>
               <span className="text-[11px]">🩺</span>
-              <span className="font-mono uppercase text-[11px] font-bold">CLINICAL LAB</span>
+              <span className="hidden sm:inline font-mono uppercase text-[11px] font-bold">CLINICAL LAB</span>
             </>
           ) : (
             <>
               <span className="text-[11px]">💼</span>
-              <span className="font-mono uppercase text-[11px] font-bold">SOLO STUDIO</span>
+              <span className="hidden sm:inline font-mono uppercase text-[11px] font-bold">SOLO STUDIO</span>
             </>
           )}
         </button>
