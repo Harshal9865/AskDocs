@@ -28,6 +28,7 @@ import {
   GraduationCap,
   Headphones,
   Plug2,
+  FileCode,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -46,6 +47,7 @@ const NAV = [
 
 const NAV_INTELLIGENCE = [
   { href: "/extract", label: "Data Extractor", icon: Table },
+  { href: "/convert", label: "Format & Redact", icon: FileCode },
   { href: "/study-guide", label: "Study Studio", icon: GraduationCap },
   { href: "/listen", label: "Audio Briefs", icon: Headphones },
   { href: "/contracts", label: "Contracts", icon: FileSignature },
