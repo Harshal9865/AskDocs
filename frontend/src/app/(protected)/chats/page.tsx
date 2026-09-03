@@ -544,7 +544,7 @@ export default function ChatsPage() {
           {/* Top Sticky Bar */}
           <div className="sticky top-0 z-10 border-b border-slate-100 bg-white/95 px-2 pb-3.5 pt-2 backdrop-blur dark:border-white/5 dark:bg-[#0b0f14]/95">
             <div className="mb-3 flex items-center justify-between gap-1">
-              <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">Office Chats</h2>
+              <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">Chats</h2>
               <div className="flex shrink-0 items-center gap-2">
                 <button 
                   onClick={() => setShowNewChat(true)} 
@@ -1293,9 +1293,9 @@ export default function ChatsPage() {
       {showNewGroup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" onClick={() => setShowNewGroup(false)}>
           <div className="max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-5 shadow-xl sm:p-6 dark:bg-[#181818]" onClick={(e) => e.stopPropagation()}>
-            <h2 className="mb-4 text-lg font-bold text-slate-900 dark:text-white">New group chat</h2>
+            <h2 className="mb-4 text-lg font-bold text-slate-900 dark:text-white">New Group Chat</h2>
             <label className="mb-1 block text-sm font-medium text-slate-900 dark:text-white" htmlFor="group-title">Group name</label>
-            <input id="group-title" value={groupTitle} onChange={(e) => setGroupTitle(e.target.value)} placeholder="e.g. Launch planning" className="mb-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#1DB954] focus:ring-2 focus:ring-[#1DB954]/20 dark:border-white/10 dark:bg-[#242424] dark:text-white" />
+            <input id="group-title" value={groupTitle} onChange={(e) => setGroupTitle(e.target.value)} placeholder="e.g. CS201 Study Group, Sprint Launch, Research Lab" className="mb-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#1DB954] focus:ring-2 focus:ring-[#1DB954]/20 dark:border-white/10 dark:bg-[#242424] dark:text-white" />
             <label className="mb-1 block text-sm font-medium text-slate-900 dark:text-white">Select members (min 2)</label>
             {colleagues.length === 0 ? <p className="mb-4 text-sm text-slate-500 dark:text-zinc-400">No colleagues to add yet.</p> : (
               <ul className="mb-4 max-h-48 space-y-1 overflow-y-auto">

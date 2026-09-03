@@ -11,7 +11,6 @@ import {
   Download,
   FileQuestion,
   FileSpreadsheet,
-  FileText,
   GraduationCap,
   Grid,
   Lightbulb,

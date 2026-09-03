@@ -24,7 +24,6 @@ export default function DocumentConverterStudioPage() {
   const { workspace } = useWorkspace();
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [selectedDocId, setSelectedDocId] = useState<string>("");
-  const [loadingDocs, setLoadingDocs] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [targetFormat, setTargetFormat] = useState<TargetFormat>("markdown");
   const [redactPii, setRedactPii] = useState(true);
@@ -38,7 +37,6 @@ export default function DocumentConverterStudioPage() {
 
   const loadDocuments = useCallback(async () => {
     if (!workspace?.id) return;
-    setLoadingDocs(true);
     try {
       const list = await api.listDocuments(workspace.id);
       setDocs(list);
@@ -47,8 +45,6 @@ export default function DocumentConverterStudioPage() {
       }
     } catch {
       /* ignore */
-    } finally {
-      setLoadingDocs(false);
     }
   }, [workspace?.id]);
 

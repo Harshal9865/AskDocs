@@ -44,12 +44,13 @@ import {
   FileSpreadsheet,
   Play,
   Pause,
-  RotateCw,
-  Terminal,
   Code2,
   Download,
   Radio,
   FileCode,
+  Table,
+  GraduationCap,
+  Headphones,
 } from "lucide-react";
 
 function AuroraHeroMock() {
@@ -168,7 +169,7 @@ function StudioLiveInteractivePlayground() {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as "audio" | "study" | "extract" | "slides" | "canvas" | "connectors")}
               className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 isSelected
                   ? "bg-[#1db954] text-black font-black shadow-lg shadow-[#1db954]/25 scale-102"
@@ -678,7 +679,7 @@ const NEW_CAPABILITIES = [
 const FEATURE_MARQUEE = [
   { icon: FileText, title: "Documents", desc: "Upload PDFs, DOCs, TXTs. Auto-chunked & embedded.", color: "from-indigo-500 to-violet-500" },
   { icon: Sparkles, title: "AI Chat", desc: "Ask anything. Cited answers with sources.", color: "from-violet-500 to-fuchsia-500" },
-  { icon: MessagesSquare, title: "Office Chats", desc: "WhatsApp-style DMs & groups with presence.", color: "from-emerald-500 to-teal-500" },
+  { icon: MessagesSquare, title: "Chats", desc: "WhatsApp-style study groups & DMs with presence.", color: "from-emerald-500 to-teal-500" },
   { icon: Search, title: "Semantic Search", desc: "Find any paragraph across all docs.", color: "from-amber-500 to-orange-500" },
   { icon: UsersRound, title: "Friends", desc: "Cross-workspace friends with online status.", color: "from-sky-500 to-cyan-500" },
   { icon: Shield, title: "Workspaces", desc: "Public or private, roles, trash & activity log.", color: "from-rose-500 to-red-500" },
@@ -710,10 +711,10 @@ const FAQS = [
     gradient: "from-cyan-500 via-blue-600 to-indigo-600",
   },
   {
-    q: "Can I chat with my team inside AskDocs?",
-    a: "Yes. Office Chats give you WhatsApp-style DMs and groups with presence dots, read receipts, typing indicators and emoji reactions — no context switch needed.",
+    q: "Can I chat with my team or study groups inside AskDocs?",
+    a: "Yes. Chats give you WhatsApp-style DMs and study/team group chats with presence dots, read receipts, typing indicators and emoji reactions — no context switch needed.",
     icon: MessagesSquare,
-    badge: "Team Chats",
+    badge: "Group & Direct Chats",
     gradient: "from-emerald-500 via-teal-600 to-cyan-600",
   },
   {
