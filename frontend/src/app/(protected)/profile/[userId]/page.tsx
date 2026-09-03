@@ -392,7 +392,7 @@ export default function ProfilePage() {
           )}
 
           {/* Enterprise Navigation Tabs (Odoo Style) */}
-          <div className="flex items-center gap-1 border-b border-slate-100 dark:border-white/10 pb-px mb-6 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1.5 border-b border-slate-100 dark:border-white/10 pb-px mb-6 overflow-x-auto no-scrollbar">
             {[
               { id: "overview" as ProfileTab, label: "Overview & Contact", icon: Briefcase },
               { id: "skills" as ProfileTab, label: "Skills & Expertise", icon: Award },
@@ -406,9 +406,9 @@ export default function ProfilePage() {
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                  className={`btn-pop flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                     active
-                      ? "border-b-2 border-purple-600 bg-purple-50/80 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 shadow-2xs"
+                      ? "border-b-2 border-purple-600 bg-purple-50/80 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 shadow-2xs scale-102"
                       : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white"
                   }`}
                 >
@@ -504,7 +504,7 @@ export default function ProfilePage() {
                   ].map((skill, idx) => (
                     <span
                       key={idx}
-                      className="inline-flex items-center gap-1 rounded-xl border border-purple-200/80 bg-purple-50/70 px-3 py-1.5 text-xs font-bold text-purple-700 dark:border-purple-500/20 dark:bg-purple-950/40 dark:text-purple-300"
+                      className="badge-pop inline-flex items-center gap-1 rounded-xl border border-purple-200/80 bg-purple-50/70 px-3 py-1.5 text-xs font-bold text-purple-700 dark:border-purple-500/20 dark:bg-purple-950/40 dark:text-purple-300 shadow-2xs cursor-default"
                     >
                       <CheckCircle2 className="h-3 w-3 text-purple-600 dark:text-purple-400" />
                       {skill}

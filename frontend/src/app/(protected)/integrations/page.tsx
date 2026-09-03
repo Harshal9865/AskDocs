@@ -257,40 +257,89 @@ export default function IntegrationsPage() {
 
         {/* Tab 1: Google Drive & OneDrive */}
         {activeTab === "gdrive" && (
-          <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="space-y-6 animate-pop-in">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4 dark:border-white/5">
               <div>
-                <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                  <span>Cloud Drive Auto-Ingestion (Google Drive & OneDrive)</span>
-                  <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[10px] font-black uppercase text-emerald-600">
-                    Auto-Sync Active
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-black text-slate-900 dark:text-white">
+                    Cloud Drive Auto-Ingestion (Google Drive & OneDrive)
+                  </h3>
+                  <span className="badge-pop inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    <CheckCircle2 className="h-3 w-3" /> OAuth 2.0 Connected
                   </span>
-                </h3>
-                <p className="text-xs text-slate-400 mt-1">
-                  Ideal for students, researchers, and clinicians. Drop PDFs, lecture notes, or guidelines into your Drive folder and AskDocs automatically ingests them.
+                </div>
+                <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
+                  Ideal for students, researchers, and corporate teams. Drop PDFs, lecture notes, or guidelines into your Drive folder and AskDocs automatically ingests and vectorizes them.
                 </p>
               </div>
 
               <button
                 onClick={handleSyncGdrive}
                 disabled={gdriveSyncing}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
+                className="btn-pop inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
               >
                 <FolderSync className={`h-3.5 w-3.5 ${gdriveSyncing ? "animate-spin" : ""}`} />
-                <span>{gdriveSyncing ? "Scanning Folder…" : "Sync Drive Now"}</span>
+                <span>{gdriveSyncing ? "Scanning Drive Vault…" : "Sync Drive Now"}</span>
               </button>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
-                Connected Cloud Drive Folder
-              </label>
-              <input
-                type="text"
-                value={gdriveFolder}
-                onChange={(e) => setGdriveFolder(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 font-mono text-xs outline-none focus:border-purple-500 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white"
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+                  Target Google Drive Folder
+                </label>
+                <input
+                  type="text"
+                  value={gdriveFolder}
+                  onChange={(e) => setGdriveFolder(e.target.value)}
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 font-mono text-xs outline-none focus:border-purple-500 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white transition-colors"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+                  Sync Frequency & Polling
+                </label>
+                <select className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-medium outline-none focus:border-purple-500 dark:border-white/10 dark:bg-[#1f1f2e] dark:text-white transition-colors">
+                  <option>Real-Time Push Webhooks (Recommended)</option>
+                  <option>Every 15 Minutes (Scheduled Poll)</option>
+                  <option>Hourly Batch Ingestion</option>
+                  <option>Manual Trigger Only</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Synced Files Live Feed */}
+            <div className="rounded-3xl border border-slate-200/80 bg-slate-50/50 p-4.5 dark:border-white/5 dark:bg-white/[0.02] space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-800 dark:text-zinc-200 flex items-center gap-1.5">
+                  <FolderSync className="h-3.5 w-3.5 text-emerald-500" />
+                  <span>Recently Discovered & Ingested Cloud Files</span>
+                </span>
+                <span className="text-[10px] font-bold text-slate-400">4 Active Sync Links</span>
+              </div>
+
+              <div className="divide-y divide-slate-200/60 dark:divide-white/5 text-xs">
+                {[
+                  { name: "Bioengineering_Lecture_04.pdf", size: "1.4 MB", status: "Indexed & Chunked", time: "10 mins ago" },
+                  { name: "Clinical_Protocol_2026.xlsx", size: "840 KB", status: "Table Extracted", time: "1 hour ago" },
+                  { name: "Corporate_Expenditure_SOP.docx", size: "512 KB", status: "Indexed & Chunked", time: "3 hours ago" },
+                  { name: "Brain_Anatomy_Diagram.png", size: "2.1 MB", status: "OCR & Vision Ready", time: "Yesterday" },
+                ].map((f, i) => (
+                  <div key={i} className="pop-spring flex items-center justify-between py-2.5 px-2 rounded-xl hover:bg-white/80 dark:hover:bg-white/5 cursor-default">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="text-base">📄</span>
+                      <div className="min-w-0">
+                        <p className="truncate font-bold text-slate-800 dark:text-zinc-200">{f.name}</p>
+                        <p className="text-[10px] text-slate-400">{f.size} • {f.time}</p>
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
+                      <CheckCircle2 className="h-3 w-3" /> {f.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="rounded-2xl border border-emerald-500/20 bg-emerald-50/40 p-4 dark:bg-emerald-950/20 flex items-center justify-between">

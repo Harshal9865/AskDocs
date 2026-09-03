@@ -1153,5 +1153,57 @@ button.bg-indigo-600:hover {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* ---------- Aesthetic Spring & Pop Motion Classes ---------- */
+@keyframes pop-in {
+  0% {
+    transform: scale(0.92) translateY(4px);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.02) translateY(-1px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-pop-in {
+  animation: pop-in 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.pop-spring {
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease-out, border-color 0.2s ease-out;
+}
+
+.pop-spring:hover {
+  transform: scale(1.025) translateY(-2px);
+}
+
+.pop-spring:active {
+  transform: scale(0.97) translateY(0);
+}
+
+.btn-pop {
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-pop:hover {
+  transform: scale(1.05) translateY(-1px);
+}
+
+.btn-pop:active {
+  transform: scale(0.94);
+}
+
+.badge-pop {
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.badge-pop:hover {
+  transform: scale(1.08);
+}
+
+
 
 
