@@ -887,10 +887,15 @@ function FrontierVoiceStudio() {
               {[60, 90, 45, 100, 75, 110, 85, 120, 95, 70, 105, 55, 80, 115, 65, 90].map((h, i) => (
                 <span
                   key={i}
-                  className="w-1.5 rounded-full transition-all duration-150"
+                  className={`w-1.5 rounded-full transition-all duration-150 ${
+                    isListening
+                      ? "bg-rose-500"
+                      : isSpeaking
+                      ? "bg-[#1DB954]"
+                      : "bg-slate-300 dark:bg-zinc-800"
+                  }`}
                   style={{
                     height: isListening || isSpeaking ? `${h}%` : "15%",
-                    backgroundColor: isListening ? "#f43f5e" : isSpeaking ? "#1DB954" : dark ? "#27272a" : "#cbd5e1",
                     animation: isListening || isSpeaking ? `pulse 0.6s infinite ${i * 0.05}s` : "none",
                   }}
                 />
