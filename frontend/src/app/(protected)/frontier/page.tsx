@@ -29,6 +29,11 @@ import {
   Play,
   Square,
   Radio,
+  ShieldAlert,
+  ShieldCheck,
+  Lock,
+  BookOpen,
+  X,
 } from "lucide-react";
 import { useWorkspace } from "@/lib/workspace-context";
 import { useAuth } from "@/lib/auth-context";
@@ -47,13 +52,53 @@ export default function FrontierLabsPage() {
   const { dark, toggle } = useTheme();
   const initialTab = (searchParams.get("tab") as FrontierTab) || "command";
   const [activeTab, setActiveTab] = useState<FrontierTab>(initialTab);
-  const { workspace } = useWorkspace();
+  const { workspace, loading: wsLoading } = useWorkspace();
   const { user, logout, avatarSrc } = useAuth();
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [searchFilter, setSearchFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [guideModalOpen, setGuideModalOpen] = useState(false);
+  const [myRole, setMyRole] = useState<string | null>(null);
+  const [roleLoading, setRoleLoading] = useState(true);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Determine user admin status in workspace
+  useEffect(() => {
+    if (!workspace?.id || !user) {
+      if (!wsLoading) setRoleLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setRoleLoading(true);
+    api.listMembers(workspace.id)
+      .then((members) => {
+        if (!cancelled) {
+          const me = members.find((m) => m.email === user.email);
+          setMyRole(me?.role ?? workspace.role ?? null);
+          setRoleLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setMyRole(workspace.role ?? null);
+          setRoleLoading(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [workspace?.id, workspace?.role, user, wsLoading]);
+
+  const isAdmin =
+    workspace?.role === "admin" ||
+    workspace?.role === "owner" ||
+    myRole === "admin" ||
+    myRole === "owner" ||
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (user as any)?.is_superuser ||
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (user as any)?.role === "admin";
 
   // Load existing workspace documents
   useEffect(() => {
@@ -212,6 +257,16 @@ export default function FrontierLabsPage() {
 
           {/* Right Cluster: Live Workspace Indicator + Bell + Theme + Avatar */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Studio Guide Trigger */}
+            <button
+              onClick={() => setGuideModalOpen(true)}
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-950/40 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 shadow-xs transition-all active:scale-95"
+              title="Open Studio User Guide"
+            >
+              <BookOpen className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
+              <span>User Guide</span>
+            </button>
+
             {workspace && (
               <div className="hidden lg:flex items-center gap-2 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/80 px-3 py-1 text-xs text-slate-700 dark:text-zinc-300 shadow-xs">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-xs dark:shadow-[0_0_8px_#10B981] animate-pulse" />
@@ -315,130 +370,342 @@ export default function FrontierLabsPage() {
           <div className="absolute top-10 right-10 h-80 w-80 rounded-full bg-emerald-500 animate-pulse" style={{ animationDuration: "10s", animationDelay: "1s" }} />
         </div>
 
-        {/* 🌟 HERO CONSOLE: DUAL ACOUSTIC & COGNITIVE MISSION DECK */}
-        <div className="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#0d101a] p-6 sm:p-8 shadow-xl dark:shadow-2xl transition-colors duration-200">
-          {/* Background Grid Pattern */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f080_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f080_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1f243810_1px,transparent_1px),linear-gradient(to_bottom,#1f243810_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
-
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="space-y-3 max-w-2xl">
-              {/* Dual-Badge Frequency Header */}
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-950/40 px-3 py-1 text-[11px] font-mono font-bold text-indigo-700 dark:text-indigo-300">
-                  <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400 animate-ping" />
-                  COGNITIVE INTELLIGENCE ENGINE
-                </span>
-                <span className="text-slate-400 dark:text-zinc-600 font-bold">×</span>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 dark:border-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1 text-[11px] font-mono font-bold text-emerald-700 dark:text-emerald-400">
-                  <Volume2 className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                  REAL-TIME ACOUSTIC ENGINE
-                </span>
+        {/* 🔒 ADMIN GATEKEEPER AUTHORIZATION CHECK */}
+        {roleLoading ? (
+          <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-8 rounded-3xl border border-slate-200 dark:border-zinc-800 bg-white/80 dark:bg-[#0b0e18]/80 backdrop-blur-xl">
+            <div className="h-8 w-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin mb-4" />
+            <p className="text-xs font-mono text-slate-600 dark:text-zinc-400">Verifying administrator clearance…</p>
+          </div>
+        ) : !isAdmin ? (
+          <div className="flex flex-col items-center justify-center min-h-[500px] text-center p-6 sm:p-12 relative overflow-hidden rounded-3xl border border-indigo-200 dark:border-indigo-500/30 bg-white/90 dark:bg-[#0b0e18]/90 backdrop-blur-2xl shadow-2xl space-y-6">
+            <div className="relative">
+              <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-indigo-500 to-emerald-500 blur-xl opacity-30 animate-pulse" />
+              <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl border border-indigo-200 dark:border-indigo-500/40 bg-indigo-50 dark:bg-indigo-950/60 shadow-lg">
+                <ShieldAlert className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />
               </div>
+            </div>
 
-              <h1 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight text-slate-900 dark:text-white">
-                Frontier <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-teal-600 to-emerald-600 dark:from-indigo-400 dark:via-teal-300 dark:to-emerald-400">Acoustic & Neural</span> Studios
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 leading-relaxed max-w-xl">
-                An advanced enterprise workspace pairing deep analytical document research with real-time hands-free voice interrogation, live financial formula ledgers, and automated workflow pipelines.
+            <div className="space-y-2 max-w-xl">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-950/40 px-3.5 py-1 text-[11px] font-mono font-bold text-indigo-700 dark:text-indigo-300">
+                <Lock className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
+                ADMINISTRATOR PRIVILEGES MANDATORY
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                Frontier Labs Authorization Required
+              </h2>
+              <p className="text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">
+                Frontier Labs houses autonomous deep research synthesis, 48kHz acoustic voice interrogation, reactive financial modeling, and automated pipeline execution. This area is strictly reserved for <strong>Workspace Administrators and Owners</strong>.
               </p>
             </div>
 
-            {/* Live Dual Engine Status Gauges */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              {/* Left Gauge: Cognitive Intelligence */}
-              <div className="rounded-2xl border border-indigo-200 dark:border-indigo-500/20 bg-indigo-50/50 dark:bg-indigo-950/20 p-3.5 space-y-1.5 min-w-[150px]">
-                <div className="flex items-center justify-between text-[11px] font-mono text-indigo-700 dark:text-indigo-400">
-                  <span>NEURAL INDEX</span>
-                  <span className="font-bold">{documents.length} Docs</span>
+            {/* Current Workspace Role Status Card */}
+            <div className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/60 p-4 max-w-md w-full space-y-2 text-xs font-mono text-left">
+              <div className="flex items-center justify-between text-slate-600 dark:text-zinc-400">
+                <span>Active Workspace:</span>
+                <span className="font-bold text-slate-900 dark:text-white truncate max-w-[200px]">{workspace?.name || "AskDocs Workspace"}</span>
+              </div>
+              <div className="flex items-center justify-between text-slate-600 dark:text-zinc-400">
+                <span>Your Current Role:</span>
+                <span className="font-bold text-rose-600 dark:text-rose-400 uppercase">{myRole || "Member / Viewer"}</span>
+              </div>
+              <div className="flex items-center justify-between text-slate-600 dark:text-zinc-400">
+                <span>Required Role:</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400 uppercase">Administrator or Owner</span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+              <Link
+                href="/dashboard"
+                className="btn-pop inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 hover:bg-indigo-500 px-6 py-3 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 transition-all cursor-pointer w-full sm:w-auto"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span>Return to Dashboard</span>
+              </Link>
+              <Link
+                href="/hub"
+                className="btn-pop inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-6 py-3 text-xs font-bold text-slate-800 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all cursor-pointer w-full sm:w-auto"
+              >
+                <Sparkles className="h-4 w-4 text-emerald-500" />
+                <span>Explore Innovation Hub</span>
+              </Link>
+            </div>
+
+            <p className="text-[11px] text-slate-400 dark:text-zinc-500 max-w-md">
+              To obtain administrative clearance, please request a role upgrade from your workspace owner in Workspace Settings.
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* 🌟 HERO CONSOLE: DUAL ACOUSTIC & COGNITIVE MISSION DECK */}
+            <div className="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#0d101a] p-6 sm:p-8 shadow-xl dark:shadow-2xl transition-colors duration-200">
+              {/* Background Grid Pattern */}
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f080_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f080_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1f243810_1px,transparent_1px),linear-gradient(to_bottom,#1f243810_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+
+              <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div className="space-y-3 max-w-2xl">
+                  {/* Dual-Badge Frequency Header */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-950/40 px-3 py-1 text-[11px] font-mono font-bold text-indigo-700 dark:text-indigo-300">
+                      <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400 animate-ping" />
+                      COGNITIVE INTELLIGENCE ENGINE
+                    </span>
+                    <span className="text-slate-400 dark:text-zinc-600 font-bold">×</span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 dark:border-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1 text-[11px] font-mono font-bold text-emerald-700 dark:text-emerald-400">
+                      <Volume2 className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                      REAL-TIME ACOUSTIC ENGINE
+                    </span>
+                    <button
+                      onClick={() => setGuideModalOpen(true)}
+                      className="inline-flex items-center gap-1 rounded-full border border-slate-200 dark:border-zinc-700 bg-white/80 dark:bg-zinc-800/80 px-2.5 py-1 text-[10px] font-bold text-slate-700 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer"
+                    >
+                      <BookOpen className="h-3 w-3 text-indigo-500" />
+                      <span>How to Use Studios</span>
+                    </button>
+                  </div>
+
+                  <h1 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight text-slate-900 dark:text-white">
+                    Frontier <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-teal-600 to-emerald-600 dark:from-indigo-400 dark:via-teal-300 dark:to-emerald-400">Acoustic & Neural</span> Studios
+                  </h1>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 leading-relaxed max-w-xl">
+                    An advanced enterprise workspace pairing deep analytical document research with real-time hands-free voice interrogation, live financial formula ledgers, and automated workflow pipelines.
+                  </p>
                 </div>
-                <div className="h-1.5 w-full bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-full" style={{ width: "85%" }} />
+
+                {/* Live Dual Engine Status Gauges */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  {/* Left Gauge: Cognitive Intelligence */}
+                  <div className="rounded-2xl border border-indigo-200 dark:border-indigo-500/20 bg-indigo-50/50 dark:bg-indigo-950/20 p-3.5 space-y-1.5 min-w-[150px]">
+                    <div className="flex items-center justify-between text-[11px] font-mono text-indigo-700 dark:text-indigo-400">
+                      <span>NEURAL INDEX</span>
+                      <span className="font-bold">{documents.length} Docs</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-full" style={{ width: "85%" }} />
+                    </div>
+                    <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-mono">Cross-Analysis: Active</p>
+                  </div>
+
+                  {/* Right Gauge: Real-time Acoustic Engine */}
+                  <div className="rounded-2xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20 p-3.5 space-y-1.5 min-w-[150px]">
+                    <div className="flex items-center justify-between text-[11px] font-mono text-emerald-700 dark:text-emerald-400">
+                      <span>ACOUSTIC DECK</span>
+                      <span className="font-bold">48kHz Live</span>
+                    </div>
+                    <div className="flex items-center gap-1 h-2">
+                      <span className="h-full w-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                      <span className="h-3/4 w-1.5 bg-emerald-500 rounded-full animate-pulse" style={{ animationDelay: "150ms" }} />
+                      <span className="h-full w-1.5 bg-emerald-500 rounded-full animate-pulse" style={{ animationDelay: "300ms" }} />
+                      <span className="h-1/2 w-1.5 bg-emerald-500 rounded-full animate-pulse" style={{ animationDelay: "450ms" }} />
+                      <span className="h-full w-1.5 bg-emerald-500 rounded-full animate-pulse" style={{ animationDelay: "200ms" }} />
+                    </div>
+                    <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-mono">Speech Synth: Ready</p>
+                  </div>
                 </div>
-                <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-mono">Cross-Analysis: Active</p>
+              </div>
+            </div>
+
+            {/* 🎛️ STUDIO SWITCHBOARD DOCK */}
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 p-2 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white/90 dark:bg-[#0a0d16]/90 backdrop-blur-2xl shadow-md dark:shadow-xl transition-colors duration-200">
+              {DOCK_ITEMS.map((tab) => {
+                const Icon = tab.icon;
+                const isSelected = activeTab === tab.id;
+                const isAcoustic = tab.type === "acoustic";
+
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as FrontierTab)}
+                    className={`btn-pop shrink-0 inline-flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold transition-all cursor-pointer ${
+                      isSelected
+                        ? isAcoustic
+                          ? "bg-emerald-600 dark:bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-102"
+                          : "bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-[0_0_20px_rgba(99,102,241,0.4)] scale-102"
+                        : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800/60"
+                    }`}
+                  >
+                    <Icon className={`h-4 w-4 ${isSelected ? "text-white" : "text-slate-500 dark:text-zinc-500"}`} />
+                    <span>{tab.label}</span>
+                    {isSelected && (
+                      <span className="text-[9px] px-1.5 py-0.2 rounded font-mono bg-white/20 text-white">
+                        LIVE
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* =========================================================================
+                STUDIO VIEWS (EACH WITH BESPOKE, DISTINCTIVE UI/UX)
+                ========================================================================= */}
+
+            {/* Tab 1: Master Console Hub */}
+            {activeTab === "command" && (
+              <FrontierCommandDeck
+                searchFilter={searchFilter}
+                categoryFilter={categoryFilter}
+                onSetCategory={setCategoryFilter}
+                onSelectStudio={(tab) => setActiveTab(tab)}
+              />
+            )}
+
+            {/* Tab 2: Voice Co-Pilot Studio */}
+            {activeTab === "voice" && <FrontierVoiceStudio />}
+
+            {/* Tab 3: Deep Research Dossier */}
+            {activeTab === "research" && <FrontierResearchStudio documents={documents} />}
+
+            {/* Tab 4: Financial Scenario Modeler */}
+            {activeTab === "sheets" && <FrontierSheetsStudio />}
+
+            {/* Tab 5: Dual-Chamber Redline Conflict Radar */}
+            {activeTab === "radar" && <FrontierRadarStudio />}
+
+            {/* Tab 6: Equilibrium Tradeoff Decision Matrix */}
+            {activeTab === "decisions" && <FrontierDecisionsStudio />}
+
+            {/* Tab 7: Circuit Logic Workflow Automator */}
+            {activeTab === "workflows" && <FrontierWorkflowsStudio />}
+          </>
+        )}
+      </div>
+
+      {/* =========================================================================
+          INTERACTIVE USER GUIDE MODAL (EASY WORDS & STEP-BY-STEP WALKTHROUGH)
+          ========================================================================= */}
+      {guideModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-150">
+          <div className="relative w-full max-w-3xl max-h-[85vh] overflow-y-auto rounded-3xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#0c0f1a] p-6 sm:p-8 shadow-2xl space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-zinc-800">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-400">
+                  <BookOpen className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">Frontier Labs — Easy User Guide</h3>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400">Simple instructions on how to use each of the 6 specialized studios.</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setGuideModalOpen(false)}
+                className="rounded-full p-2 text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+                aria-label="Close Guide Modal"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-5 text-xs text-slate-700 dark:text-zinc-300">
+              {/* Studio 1 */}
+              <div className="rounded-2xl border border-emerald-200 dark:border-emerald-500/20 bg-emerald-50/40 dark:bg-emerald-950/10 p-4 space-y-2">
+                <div className="flex items-center gap-2 font-bold text-sm text-emerald-800 dark:text-emerald-400">
+                  <Mic className="h-4 w-4" />
+                  <span>1. Spoken Voice Co-Pilot (Hands-Free Speech)</span>
+                </div>
+                <p className="text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  <strong>What it does:</strong> Allows you to talk to your documents using your microphone and hear the answers spoken back aloud.
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-zinc-400 pl-2">
+                  <li>Tap the green circular <strong>Microphone button</strong> to start listening and ask any question.</li>
+                  <li>Or tap any of the <strong>Executive Query Presets</strong> (e.g. &ldquo;Executive Contract Liabilities&rdquo;) for instant 1-tap playback.</li>
+                  <li>Use the <strong>Speed</strong> and <strong>Persona Mode</strong> controls to adjust playback speed and voice tone.</li>
+                  <li>Click <strong>&ldquo;Mute / Interrupt Speech&rdquo;</strong> at any time to pause the AI voice.</li>
+                </ul>
               </div>
 
-              {/* Right Gauge: Real-time Acoustic Engine */}
-              <div className="rounded-2xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20 p-3.5 space-y-1.5 min-w-[150px]">
-                <div className="flex items-center justify-between text-[11px] font-mono text-emerald-700 dark:text-emerald-400">
-                  <span>ACOUSTIC DECK</span>
-                  <span className="font-bold">48kHz Live</span>
+              {/* Studio 2 */}
+              <div className="rounded-2xl border border-indigo-200 dark:border-indigo-500/20 bg-indigo-50/40 dark:bg-indigo-950/10 p-4 space-y-2">
+                <div className="flex items-center gap-2 font-bold text-sm text-indigo-800 dark:text-indigo-400">
+                  <FileText className="h-4 w-4" />
+                  <span>2. Autonomous Deep Research Dossier</span>
                 </div>
-                <div className="flex items-center gap-1 h-2">
-                  <span className="h-full w-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                  <span className="h-3/4 w-1.5 bg-emerald-500 rounded-full animate-pulse" style={{ animationDelay: "150ms" }} />
-                  <span className="h-full w-1.5 bg-emerald-500 rounded-full animate-pulse" style={{ animationDelay: "300ms" }} />
-                  <span className="h-1/2 w-1.5 bg-emerald-500 rounded-full animate-pulse" style={{ animationDelay: "450ms" }} />
-                  <span className="h-full w-1.5 bg-emerald-500 rounded-full animate-pulse" style={{ animationDelay: "200ms" }} />
-                </div>
-                <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-mono">Speech Synth: Ready</p>
+                <p className="text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  <strong>What it does:</strong> Analyzes all files in your workspace and builds a complete multi-page research report with charts and source citations.
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-zinc-400 pl-2">
+                  <li>Type your research question into the topic input box, or click a preset pill.</li>
+                  <li>Click <strong>&ldquo;Generate Dossier&rdquo;</strong> to start the 4-phase reasoning engine.</li>
+                  <li>Review the synthesized summary and the dynamic SVG topology variance matrix.</li>
+                  <li>Click <strong>&ldquo;PDF&rdquo;</strong> or <strong>&ldquo;LaTeX&rdquo;</strong> in the top-right to download the formatted report.</li>
+                </ul>
               </div>
+
+              {/* Studio 3 */}
+              <div className="rounded-2xl border border-teal-200 dark:border-teal-500/20 bg-teal-50/40 dark:bg-teal-950/10 p-4 space-y-2">
+                <div className="flex items-center gap-2 font-bold text-sm text-teal-800 dark:text-teal-400">
+                  <Table className="h-4 w-4" />
+                  <span>3. Financial Scenario Modeler (Reactive Formulas)</span>
+                </div>
+                <p className="text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  <strong>What it does:</strong> Turns static document financials into an interactive math spreadsheet with live calculation updates.
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-zinc-400 pl-2">
+                  <li>Slide the <strong>Scenario Delta slider</strong> (e.g. +15% or +25%) to simulate business growth.</li>
+                  <li>Watch every line item and the bottom <strong>Net Consolidated Yield</strong> recalculate automatically in real time.</li>
+                  <li>Click <strong>&ldquo;Export .XLSX&rdquo;</strong> to save the data into an Excel spreadsheet.</li>
+                </ul>
+              </div>
+
+              {/* Studio 4 */}
+              <div className="rounded-2xl border border-rose-200 dark:border-rose-500/20 bg-rose-50/40 dark:bg-rose-950/10 p-4 space-y-2">
+                <div className="flex items-center gap-2 font-bold text-sm text-rose-800 dark:text-rose-400">
+                  <Scale className="h-4 w-4" />
+                  <span>4. Conflict & Discrepancy Radar (Redline Matrix)</span>
+                </div>
+                <p className="text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  <strong>What it does:</strong> Detects contradictory clauses, mismatched notice dates, and conflicting liability caps across contracts.
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-zinc-400 pl-2">
+                  <li>Compare clauses between <strong>Chamber Alpha</strong> (Agreement 1) and <strong>Chamber Beta</strong> (Agreement 2).</li>
+                  <li>Check the risk severity badge (e.g. <em>HIGH RISK</em> or <em>CRITICAL</em>).</li>
+                  <li>Click <strong>&ldquo;1-Click AI Harmonize&rdquo;</strong> to instantly generate a clean compromise clause that resolves the clash.</li>
+                </ul>
+              </div>
+
+              {/* Studio 5 */}
+              <div className="rounded-2xl border border-purple-200 dark:border-purple-500/20 bg-purple-50/40 dark:bg-purple-950/10 p-4 space-y-2">
+                <div className="flex items-center gap-2 font-bold text-sm text-purple-800 dark:text-purple-400">
+                  <Brain className="h-4 w-4" />
+                  <span>5. Tradeoff Decision Solver (Objective Ranker)</span>
+                </div>
+                <p className="text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  <strong>What it does:</strong> Helps you objectively compare vendor bids, architectures, or business strategies based on custom priorities.
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-zinc-400 pl-2">
+                  <li>Adjust the 3 faders: <strong>Cost Efficiency</strong>, <strong>Deployment Speed</strong>, and <strong>Risk & Compliance</strong>.</li>
+                  <li>The composite proposal score bar (out of 100) recalculates instantly to reveal the best overall option.</li>
+                </ul>
+              </div>
+
+              {/* Studio 6 */}
+              <div className="rounded-2xl border border-emerald-200 dark:border-emerald-500/20 bg-emerald-50/40 dark:bg-emerald-950/10 p-4 space-y-2">
+                <div className="flex items-center gap-2 font-bold text-sm text-emerald-800 dark:text-emerald-400">
+                  <GitBranch className="h-4 w-4" />
+                  <span>6. Circuit Logic Workflow Automator</span>
+                </div>
+                <p className="text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  <strong>What it does:</strong> Visualizes and simulates automatic document processing steps from upload to OCR, redlining, and executive alerts.
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-zinc-400 pl-2">
+                  <li>Click <strong>&ldquo;Run Pipeline Simulation&rdquo;</strong> to start the 4-node flow.</li>
+                  <li>Watch each node light up in sequence as it validates and generates output checkmarks.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-200 dark:border-zinc-800 flex justify-end">
+              <button
+                onClick={() => setGuideModalOpen(false)}
+                className="btn-pop rounded-2xl bg-indigo-600 hover:bg-indigo-500 px-6 py-2.5 text-xs font-bold text-white shadow-md transition-all cursor-pointer"
+              >
+                Close User Guide
+              </button>
             </div>
           </div>
         </div>
-
-        {/* 🎛️ STUDIO SWITCHBOARD DOCK */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 p-2 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white/90 dark:bg-[#0a0d16]/90 backdrop-blur-2xl shadow-md dark:shadow-xl transition-colors duration-200">
-          {DOCK_ITEMS.map((tab) => {
-            const Icon = tab.icon;
-            const isSelected = activeTab === tab.id;
-            const isAcoustic = tab.type === "acoustic";
-
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as FrontierTab)}
-                className={`btn-pop shrink-0 inline-flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold transition-all cursor-pointer ${
-                  isSelected
-                    ? isAcoustic
-                      ? "bg-emerald-600 dark:bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-102"
-                      : "bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-[0_0_20px_rgba(99,102,241,0.4)] scale-102"
-                    : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800/60"
-                }`}
-              >
-                <Icon className={`h-4 w-4 ${isSelected ? "text-white" : "text-slate-500 dark:text-zinc-500"}`} />
-                <span>{tab.label}</span>
-                {isSelected && (
-                  <span className="text-[9px] px-1.5 py-0.2 rounded font-mono bg-white/20 text-white">
-                    LIVE
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* =========================================================================
-            STUDIO VIEWS (EACH WITH BESPOKE, DISTINCTIVE UI/UX)
-            ========================================================================= */}
-
-        {/* Tab 1: Master Console Hub */}
-        {activeTab === "command" && (
-          <FrontierCommandDeck
-            searchFilter={searchFilter}
-            categoryFilter={categoryFilter}
-            onSetCategory={setCategoryFilter}
-            onSelectStudio={(tab) => setActiveTab(tab)}
-          />
-        )}
-
-        {/* Tab 2: Voice Co-Pilot Studio */}
-        {activeTab === "voice" && <FrontierVoiceStudio />}
-
-        {/* Tab 3: Deep Research Dossier */}
-        {activeTab === "research" && <FrontierResearchStudio documents={documents} />}
-
-        {/* Tab 4: Financial Scenario Modeler */}
-        {activeTab === "sheets" && <FrontierSheetsStudio />}
-
-        {/* Tab 5: Dual-Chamber Redline Conflict Radar */}
-        {activeTab === "radar" && <FrontierRadarStudio />}
-
-        {/* Tab 6: Equilibrium Tradeoff Decision Matrix */}
-        {activeTab === "decisions" && <FrontierDecisionsStudio />}
-
-        {/* Tab 7: Circuit Logic Workflow Automator */}
-        {activeTab === "workflows" && <FrontierWorkflowsStudio />}
-      </div>
+      )}
     </div>
   );
 }

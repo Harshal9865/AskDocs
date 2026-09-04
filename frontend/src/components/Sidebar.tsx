@@ -487,7 +487,9 @@ export default function Sidebar({
                 <div className="flex items-center justify-between flex-1 min-w-0">
                   <span className="truncate">{item.label}</span>
                   {isFrontier && (
-                    <span className="flex h-2 w-2 rounded-full bg-[#1db954] animate-ping" />
+                    <span className="rounded bg-indigo-500/20 px-1.5 py-0.5 text-[9px] font-mono font-bold text-indigo-400 border border-indigo-500/30">
+                      ADMIN
+                    </span>
                   )}
                 </div>
               )}
