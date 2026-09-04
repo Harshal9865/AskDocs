@@ -166,7 +166,23 @@ export default function IntegrationsPage() {
       }
 
       if (!res.ok) {
-        throw new Error(`Google API returned status ${res.status}`);
+        let detailedError = `Google API returned status ${res.status}`;
+        try {
+          const errJson = await res.json();
+          if (errJson?.error?.message) {
+            detailedError = errJson.error.message;
+          }
+        } catch {
+          /* ignore */
+        }
+        if (res.status === 403) {
+          throw new Error(
+            detailedError.includes("Google Drive API") || detailedError.includes("disabled")
+              ? "Google Drive API is not enabled in your Google Cloud project. Enable it at console.cloud.google.com/apis/library/drive.googleapis.com"
+              : `Google Drive 403: ${detailedError}. Ensure Google Drive API is enabled and OAuth status is in Testing mode with your email added to Test Users.`
+          );
+        }
+        throw new Error(detailedError);
       }
 
       const data = await res.json();
