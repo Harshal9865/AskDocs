@@ -102,12 +102,11 @@ function AuroraHeroMock() {
 }
 
 function StudioLiveInteractivePlayground() {
-  const [activeTab, setActiveTab] = React.useState<"audio" | "study" | "extract" | "slides" | "canvas" | "connectors">("audio");
+  const [activeTab, setActiveTab] = React.useState<"audio" | "study" | "extract" | "slides" | "canvas" | "memory">("audio");
   const [audienceMode, setAudienceMode] = React.useState<"student" | "enterprise">("student");
   const [isPlayingAudio, setIsPlayingAudio] = React.useState(true);
   const [audioSpeed, setAudioSpeed] = React.useState(1.0);
   const [cardFlipped, setCardFlipped] = React.useState(false);
-  const [testedApi, setTestedApi] = React.useState(false);
 
   return (
     <div className="relative mx-auto w-full max-w-5xl rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#0c0f17]/95 space-y-6">
@@ -1524,11 +1523,11 @@ export default function Home() {
               </div>
               <div className="col-span-2 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#121212]">
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
-                  <Plug2 className="h-5 w-5" />
+                  <Shield className="h-5 w-5" />
                 </span>
                 <div>
-                  <div className="text-sm font-semibold">Connectors coming soon</div>
-                  <div className="text-xs text-slate-500 dark:text-zinc-400">Slack, Google Drive, Notion — join the waitlist from your dashboard.</div>
+                  <div className="text-sm font-semibold">Zero Model Training</div>
+                  <div className="text-xs text-slate-500 dark:text-zinc-400">100% private workspace isolation with AES-256 encryption.</div>
                 </div>
               </div>
             </Reveal>

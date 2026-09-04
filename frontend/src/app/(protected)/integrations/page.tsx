@@ -1,33 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useGoogleLogin } from "@react-oauth/google";
 import {
-  Building2,
-  Check,
   CheckCircle2,
   Code2,
-  Copy,
   FileCheck,
   FileCode,
   FileSpreadsheet,
   FileText,
   Folder,
   FolderSync,
-  GraduationCap,
   Image as ImageIcon,
   Layers,
   Loader2,
   MessageSquare,
   Plug2,
   Radio,
-  Scale,
   Search,
   Shield,
-  Stethoscope,
-  Terminal,
-  Wallet,
   Webhook,
   X,
   Zap,
@@ -44,8 +36,6 @@ type IntegrationTab =
   | "odoo"
   | "webhooks"
   | "api_playground";
-
-type CodeLang = "curl" | "python" | "node";
 
 export interface RealDriveFolder {
   id: string;
@@ -94,7 +84,6 @@ function getFileIcon(type: string) {
 export default function IntegrationsPage() {
   const { workspace } = useWorkspace();
   const [activeTab, setActiveTab] = useState<IntegrationTab>("gdrive");
-  const [codeLang, setCodeLang] = useState<CodeLang>("curl");
 
   // Google Drive Live OAuth State
   const [googleAccessToken, setGoogleAccessToken] = useState<string | null>(null);
@@ -121,16 +110,7 @@ export default function IntegrationsPage() {
       .catch(() => {});
   }, [workspace?.id]);
 
-  // Load saved Google token on mount
-  useEffect(() => {
-    const savedToken = typeof window !== "undefined" ? sessionStorage.getItem("askdocs_gdrive_token") : null;
-    if (savedToken) {
-      setGoogleAccessToken(savedToken);
-      void loadRealDriveFiles(savedToken);
-    }
-  }, []);
-
-  const loadRealDriveFiles = async (token: string) => {
+  const loadRealDriveFiles = useCallback(async (token: string) => {
     setLoadingDriveFiles(true);
     try {
       // 1. Fetch user profile
@@ -216,8 +196,8 @@ export default function IntegrationsPage() {
         }));
 
       setDriveFiles(fetchedFiles);
-      if (fetchedFiles.length > 0 && selectedDriveFiles.length === 0) {
-        setSelectedDriveFiles(fetchedFiles.slice(0, 5).map((f) => f.id));
+      if (fetchedFiles.length > 0) {
+        setSelectedDriveFiles((prev) => (prev.length === 0 ? fetchedFiles.slice(0, 5).map((f) => f.id) : prev));
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to load Google Drive files";
@@ -225,7 +205,16 @@ export default function IntegrationsPage() {
     } finally {
       setLoadingDriveFiles(false);
     }
-  };
+  }, []);
+
+  // Load saved Google token on mount
+  useEffect(() => {
+    const savedToken = typeof window !== "undefined" ? sessionStorage.getItem("askdocs_gdrive_token") : null;
+    if (savedToken) {
+      setGoogleAccessToken(savedToken);
+      void loadRealDriveFiles(savedToken);
+    }
+  }, [loadRealDriveFiles]);
 
   // Google OAuth Login hook with explicit Drive Readonly scope and consent prompt
   const loginToGoogle = useGoogleLogin({

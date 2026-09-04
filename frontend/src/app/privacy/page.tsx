@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, Lock, Shield, Sparkles } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Shield } from "lucide-react";
 
 export const metadata = {
   title: "Privacy Policy | AskDocs AI",
