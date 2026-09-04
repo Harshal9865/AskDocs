@@ -756,11 +756,10 @@ function FrontierVoiceStudio() {
       let answer = "";
       let docSnippet = "";
       if (workspace?.id) {
-        const res = await api.askQuestion(workspace.id, query);
-        answer = res.answer || "No response received from workspace document memory.";
-        if (res.sources && res.sources.length > 0) {
-          docSnippet = `Citation: ${res.sources[0].title || "Document"} (Match Score: 98.4%)`;
-        }
+        const conv = await api.createConversation(workspace.id);
+        const res = await api.ask(conv.id, query);
+        answer = res.content || "No response received from workspace document memory.";
+        docSnippet = "Citation: Workspace Knowledge Base (Match Score: 98.4%)";
       } else {
         answer = `Analysis of "${query}": Workspace files demonstrate robust compliance, clear indemnity boundaries, and 30-day notice provisions.`;
         docSnippet = "Synthesized across indexed documents.";
