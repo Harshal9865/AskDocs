@@ -21,7 +21,6 @@ import {
   ArrowLeft,
   Search,
   Sparkles,
-  ChevronRight,
   LogOut,
   User,
   Settings,
@@ -36,13 +35,14 @@ import { showToast } from "@/components/Toast";
 import type { DocumentItem } from "@/lib/types";
 import NotificationBell from "@/components/NotificationBell";
 import Avatar from "@/components/Avatar";
-import ThemeToggle from "@/components/ThemeToggle";
+import ThemeToggle, { useTheme } from "@/components/ThemeToggle";
 
 type FrontierTab = "command" | "voice" | "research" | "sheets" | "radar" | "decisions" | "workflows";
 
 export default function FrontierLabsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { dark, toggle } = useTheme();
   const initialTab = (searchParams.get("tab") as FrontierTab) || "command";
   const [activeTab, setActiveTab] = useState<FrontierTab>(initialTab);
   const { workspace } = useWorkspace();
@@ -164,7 +164,7 @@ export default function FrontierLabsPage() {
 
             {/* Day / Dark Theme Mode Toggle */}
             <div className="flex items-center">
-              <ThemeToggle />
+              <ThemeToggle dark={dark} onToggle={toggle} />
             </div>
 
             {/* User Profile Avatar with Dropdown */}

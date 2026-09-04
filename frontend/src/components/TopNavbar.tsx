@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, Globe, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, Pencil, User, ShieldCheck, GraduationCap, FileSpreadsheet, CalendarClock, Brain, Compass, Rocket } from "lucide-react";
+import { ChevronDown, Globe, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, Pencil, User, ShieldCheck, GraduationCap, FileSpreadsheet, CalendarClock, Brain, Compass } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
