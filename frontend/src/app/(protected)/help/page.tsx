@@ -11,6 +11,7 @@ import {
   MessageSquare,
   Radio,
   Search,
+  Shield,
   ShieldCheck,
   Sparkles,
   Trash2,
@@ -111,6 +112,22 @@ export default function HelpPage() {
       icon: <ShieldCheck className="h-4 w-4" />,
       badge: "Data Isolation",
       gradient: "from-emerald-600 via-teal-600 to-blue-600",
+    },
+    {
+      q: "Where is the official AskDocs Privacy Policy?",
+      a: (
+        <>
+          You can review our complete{" "}
+          <Link href="/privacy" className="font-semibold text-purple-600 hover:underline dark:text-purple-400">
+            Privacy Policy & Security Disclosures
+          </Link>
+          , which covers our zero-model-training guarantee, Google API Limited Use compliance, AES-256 encryption, and full right to deletion.
+        </>
+      ),
+      category: "privacy",
+      icon: <Shield className="h-4 w-4" />,
+      badge: "Privacy Policy",
+      gradient: "from-indigo-600 via-purple-600 to-pink-600",
     },
   ];
 
@@ -243,6 +260,12 @@ export default function HelpPage() {
               className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white backdrop-blur-md hover:bg-white/20 transition-transform active:scale-95"
             >
               <MessageSquare className="h-4 w-4" /> Office Chats
+            </Link>
+            <Link
+              href="/privacy"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white backdrop-blur-md hover:bg-white/20 transition-transform active:scale-95"
+            >
+              <Shield className="h-4 w-4" /> Privacy Policy
             </Link>
           </div>
         </div>

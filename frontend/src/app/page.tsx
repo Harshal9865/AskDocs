@@ -1820,7 +1820,7 @@ export default function Home() {
               <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-white">Trust & security</h3>
               <ul className="mt-4 space-y-3 text-sm">
                 <li><a href="#security" className="text-slate-500 transition-colors hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400">Security center</a></li>
-                <li><a href="#faq" className="text-slate-500 transition-colors hover:text-emerald-600 dark:text-zinc-400 dark:hover:text-emerald-400">Privacy policy</a></li>
+                <li><Link href="/privacy" className="text-slate-500 transition-colors hover:text-emerald-600 dark:text-zinc-400 dark:hover:text-emerald-400">Privacy policy</Link></li>
                 <li><a href="#faq" className="text-slate-500 transition-colors hover:text-violet-600 dark:text-zinc-400 dark:hover:text-violet-400">Terms of service</a></li>
                 <li><a href="#faq" className="text-slate-500 transition-colors hover:text-amber-600 dark:text-zinc-400 dark:hover:text-amber-400">Cookie policy</a></li>
               </ul>
