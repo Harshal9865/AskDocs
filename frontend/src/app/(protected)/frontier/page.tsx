@@ -198,37 +198,40 @@ export default function FrontierLabsPage() {
   return (
     <div className="min-h-screen bg-[#f8fafc] dark:bg-[#07090e] text-slate-900 dark:text-zinc-100 flex flex-col font-sans transition-colors duration-200 selection:bg-emerald-500/30 selection:text-emerald-500">
       {/* =========================================================================
-          TOP HYBRID DUAL-ENGINE CONSOLE NAVBAR (LIGHT / DARK COMPATIBLE)
+          TOP HYBRID DUAL-ENGINE CONSOLE NAVBAR (LIGHT / DARK COMPATIBLE & RESPONSIVE)
           ========================================================================= */}
       <header className="sticky top-0 z-50 w-full border-b border-slate-200/90 dark:border-zinc-800/80 bg-white/90 dark:bg-[#090b11]/90 backdrop-blur-2xl shadow-xs dark:shadow-2xl transition-colors duration-200">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
+        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-1.5 sm:gap-4">
           {/* Left Cluster: Back to Dashboard & Frontier Studio Identity */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 min-w-0">
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 px-3.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 shadow-xs transition-all active:scale-95 group"
+              className="inline-flex items-center gap-1 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-xs font-semibold text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 shadow-xs transition-all active:scale-95 group"
+              title="Return to Dashboard"
             >
               <ArrowLeft className="h-3.5 w-3.5 text-slate-500 dark:text-zinc-400 transition-transform group-hover:-translate-x-0.5" />
               <span className="hidden sm:inline">Dashboard</span>
-              <span className="sm:hidden">Back</span>
             </Link>
 
             <div className="h-4 w-px bg-slate-200 dark:bg-zinc-800 hidden sm:block" />
 
             {/* Frontier Logo Badge */}
-            <div className="flex items-center gap-2.5">
-              <div className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-emerald-500 to-teal-400 p-[1px] shadow-sm dark:shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-                <div className="flex h-full w-full items-center justify-center rounded-[11px] bg-white dark:bg-[#0c0e17]">
-                  <Rocket className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
+              <div className="relative flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-emerald-500 to-teal-400 p-[1px] shadow-sm dark:shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                <div className="flex h-full w-full items-center justify-center rounded-[10px] sm:rounded-[11px] bg-white dark:bg-[#0c0e17]">
+                  <Rocket className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600 dark:text-emerald-400" />
                 </div>
               </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-2">
-                  <span className="font-black text-sm tracking-tight text-slate-900 dark:text-white">
-                    AskDocs <span className="text-indigo-600 dark:text-indigo-400">Frontier</span>
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <span className="font-black text-xs sm:text-sm tracking-tight text-slate-900 dark:text-white truncate">
+                    <span className="hidden sm:inline">AskDocs </span><span className="text-indigo-600 dark:text-indigo-400">Frontier</span>
                   </span>
-                  <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/30 px-2 py-0.5 text-[9px] font-mono font-bold text-emerald-700 dark:text-emerald-300">
+                  <span className="hidden sm:inline-flex rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/30 px-2 py-0.5 text-[9px] font-mono font-bold text-emerald-700 dark:text-emerald-300">
                     ENTERPRISE v3.5
+                  </span>
+                  <span className="sm:hidden rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/30 px-1.5 py-0.2 text-[8px] font-mono font-bold text-emerald-700 dark:text-emerald-300">
+                    v3.5
                   </span>
                 </div>
               </div>
@@ -255,16 +258,16 @@ export default function FrontierLabsPage() {
             )}
           </div>
 
-          {/* Right Cluster: Live Workspace Indicator + Bell + Theme + Avatar */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Right Cluster: Live Workspace Indicator + Guide + Bell + Theme + Avatar */}
+          <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
             {/* Studio Guide Trigger */}
             <button
               onClick={() => setGuideModalOpen(true)}
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-950/40 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 shadow-xs transition-all active:scale-95"
+              className="inline-flex items-center gap-1 rounded-full border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-950/40 px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 shadow-xs transition-all active:scale-95"
               title="Open Studio User Guide"
             >
               <BookOpen className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-              <span>User Guide</span>
+              <span className="hidden sm:inline">User Guide</span>
             </button>
 
             {workspace && (
@@ -292,14 +295,14 @@ export default function FrontierLabsPage() {
                 <Avatar
                   name={user?.name || user?.email || "User"}
                   src={avatarSrc ?? undefined}
-                  size={32}
+                  size={28}
                   online={true}
                   showPresence={true}
                 />
               </button>
 
               {profileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#0f121d] p-2 shadow-2xl animate-in zoom-in-95 duration-150 z-50">
+                <div className="absolute right-0 mt-2 w-48 sm:w-56 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#0f121d] p-2 shadow-2xl animate-in zoom-in-95 duration-150 z-50">
                   <div className="px-3 py-2 border-b border-slate-100 dark:border-zinc-800/80">
                     <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{user?.name || "User"}</p>
                     <p className="text-[11px] text-slate-500 dark:text-zinc-400 truncate">{user?.email}</p>
