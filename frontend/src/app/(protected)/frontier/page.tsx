@@ -14,7 +14,6 @@ import {
   Table,
   Layers,
   CheckCircle2,
-  AlertTriangle,
   Download,
   Copy,
   GitBranch,
@@ -25,17 +24,11 @@ import {
   User,
   Settings,
   CircleHelp,
-  ShieldCheck,
-  Zap,
   ExternalLink,
   Volume2,
-  VolumeX,
   Play,
   Square,
-  RefreshCw,
-  Sliders,
   Radio,
-  Share2,
 } from "lucide-react";
 import { useWorkspace } from "@/lib/workspace-context";
 import { useAuth } from "@/lib/auth-context";
@@ -421,7 +414,6 @@ export default function FrontierLabsPage() {
         {/* Tab 1: Master Console Hub (Modular Asymmetrical Deck) */}
         {activeTab === "command" && (
           <FrontierCommandDeck
-            documents={documents}
             searchFilter={searchFilter}
             categoryFilter={categoryFilter}
             onSetCategory={setCategoryFilter}
@@ -430,22 +422,22 @@ export default function FrontierLabsPage() {
         )}
 
         {/* Tab 2: Spotify Spoken Voice Deck */}
-        {activeTab === "voice" && <FrontierVoiceStudio documents={documents} />}
+        {activeTab === "voice" && <FrontierVoiceStudio />}
 
         {/* Tab 3: Velvet Indigo Deep Research Dossier */}
         {activeTab === "research" && <FrontierResearchStudio documents={documents} />}
 
         {/* Tab 4: Formula Financial Ledger & Modeler */}
-        {activeTab === "sheets" && <FrontierSheetsStudio documents={documents} />}
+        {activeTab === "sheets" && <FrontierSheetsStudio />}
 
         {/* Tab 5: Dual-Chamber Redline Conflict Radar */}
-        {activeTab === "radar" && <FrontierRadarStudio documents={documents} />}
+        {activeTab === "radar" && <FrontierRadarStudio />}
 
         {/* Tab 6: Equilibrium Tradeoff Decision Matrix */}
-        {activeTab === "decisions" && <FrontierDecisionsStudio documents={documents} />}
+        {activeTab === "decisions" && <FrontierDecisionsStudio />}
 
         {/* Tab 7: Circuit Logic Workflow Automator */}
-        {activeTab === "workflows" && <FrontierWorkflowsStudio documents={documents} />}
+        {activeTab === "workflows" && <FrontierWorkflowsStudio />}
       </div>
     </div>
   );
@@ -455,13 +447,11 @@ export default function FrontierLabsPage() {
    1. MASTER CONSOLE OVERVIEW (ASYMMETRICAL DUAL-FREQUENCY STUDIOS)
    ========================================================================= */
 function FrontierCommandDeck({
-  documents,
   searchFilter,
   categoryFilter,
   onSetCategory,
   onSelectStudio,
 }: {
-  documents: DocumentItem[];
   searchFilter: string;
   categoryFilter: string;
   onSetCategory: (cat: string) => void;
@@ -713,7 +703,7 @@ function FrontierCommandDeck({
 /* =========================================================================
    2. SPOTIFY SPOKEN VOICE STUDIO (48kHz ACOUSTIC DECK)
    ========================================================================= */
-function FrontierVoiceStudio({ documents }: { documents: DocumentItem[] }) {
+function FrontierVoiceStudio() {
   const { workspace } = useWorkspace();
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -1209,13 +1199,13 @@ function FrontierResearchStudio({ documents }: { documents: DocumentItem[] }) {
 /* =========================================================================
    4. FINANCIAL SCENARIO MODELER STUDIO (REACTIVE =SUM FORMULAS)
    ========================================================================= */
-function FrontierSheetsStudio({ documents }: { documents: DocumentItem[] }) {
+function FrontierSheetsStudio() {
   const [growthRate, setGrowthRate] = useState(15);
-  const [data, setData] = useState([
+  const data = [
     { metric: "Software Subscription Revenue", q1: 120000, q2: 135000, q3: 152000, q4: 175000 },
     { metric: "Consulting & Implementation", q1: 45000, q2: 50000, q3: 52000, q4: 58000 },
     { metric: "Operational Expenses (OpEx)", q1: -85000, q2: -92000, q3: -98000, q4: -105000 },
-  ]);
+  ];
 
   const multiplier = 1 + growthRate / 100;
 
@@ -1314,7 +1304,7 @@ function FrontierSheetsStudio({ documents }: { documents: DocumentItem[] }) {
 /* =========================================================================
    5. DUAL-CHAMBER REDLINE CONFLICT RADAR STUDIO
    ========================================================================= */
-function FrontierRadarStudio({ documents }: { documents: DocumentItem[] }) {
+function FrontierRadarStudio() {
   const [harmonized, setHarmonized] = useState(false);
 
   const CONFLICTS = [
@@ -1403,7 +1393,7 @@ function FrontierRadarStudio({ documents }: { documents: DocumentItem[] }) {
               <div className="rounded-2xl border border-[#1DB954]/40 bg-[#1DB954]/10 p-4 space-y-1.5 animate-in zoom-in-95">
                 <span className="text-[10px] font-mono text-[#1DB954] font-bold block">✨ SYNTHESIZED HARMONIZATION RESOLUTION</span>
                 <p className="text-xs text-zinc-200 leading-relaxed">
-                  "Either party may terminate upon 60 days prior written notice; in the event of statutory data incidents, liability shall follow standard DPA benchmarks with immediate mediation."
+                  &ldquo;Either party may terminate upon 60 days prior written notice; in the event of statutory data incidents, liability shall follow standard DPA benchmarks with immediate mediation.&rdquo;
                 </p>
               </div>
             )}
@@ -1417,7 +1407,7 @@ function FrontierRadarStudio({ documents }: { documents: DocumentItem[] }) {
 /* =========================================================================
    6. EQUILIBRIUM TRADEOFF DECISION SOLVER STUDIO
    ========================================================================= */
-function FrontierDecisionsStudio({ documents }: { documents: DocumentItem[] }) {
+function FrontierDecisionsStudio() {
   const [costWeight, setCostWeight] = useState(40);
   const [speedWeight, setSpeedWeight] = useState(35);
   const [riskWeight, setRiskWeight] = useState(25);
@@ -1534,7 +1524,7 @@ function FrontierDecisionsStudio({ documents }: { documents: DocumentItem[] }) {
 /* =========================================================================
    7. CIRCUIT LOGIC WORKFLOW AUTOMATOR STUDIO
    ========================================================================= */
-function FrontierWorkflowsStudio({ documents }: { documents: DocumentItem[] }) {
+function FrontierWorkflowsStudio() {
   const [runningStep, setRunningStep] = useState<number | null>(null);
 
   const STEPS = [
