@@ -176,10 +176,13 @@ export default function IntegrationsPage() {
           /* ignore */
         }
         if (res.status === 403) {
+          sessionStorage.removeItem("askdocs_gdrive_token");
+          setGoogleAccessToken(null);
+          setGoogleUser(null);
           throw new Error(
             detailedError.includes("Google Drive API") || detailedError.includes("disabled")
               ? "Google Drive API is not enabled in your Google Cloud project. Enable it at console.cloud.google.com/apis/library/drive.googleapis.com"
-              : `Google Drive 403: ${detailedError}. Ensure Google Drive API is enabled and OAuth status is in Testing mode with your email added to Test Users.`
+              : `Google Drive 403: ${detailedError}. Ensure Google Drive API is enabled in Google Cloud Console and OAuth status is in Testing mode with your email added to Test Users.`
           );
         }
         throw new Error(detailedError);
@@ -224,9 +227,10 @@ export default function IntegrationsPage() {
     }
   };
 
-  // Google OAuth Login hook with explicit Drive Readonly scope
+  // Google OAuth Login hook with explicit Drive Readonly scope and consent prompt
   const loginToGoogle = useGoogleLogin({
     scope: "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
+    prompt: "consent",
     onSuccess: async (tokenResponse) => {
       setGoogleAccessToken(tokenResponse.access_token);
       sessionStorage.setItem("askdocs_gdrive_token", tokenResponse.access_token);
