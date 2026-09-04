@@ -177,8 +177,9 @@ export default function FrontierLabsPage() {
                 <Avatar
                   name={user?.name || user?.email || "User"}
                   src={avatarSrc ?? undefined}
-                  size="sm"
-                  status="online"
+                  size={32}
+                  online={true}
+                  showPresence={true}
                 />
               </button>
 
