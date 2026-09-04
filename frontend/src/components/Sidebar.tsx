@@ -29,6 +29,8 @@ import {
   Headphones,
   FileCode,
   Presentation,
+  Rocket,
+  Zap,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -48,6 +50,7 @@ const NAV = [
 ];
 
 const NAV_INTELLIGENCE = [
+  { href: "/frontier", label: "✦ Frontier Labs", icon: Rocket, special: true },
   { href: "/hub", label: "Innovation Hub", icon: Compass },
   { href: "/extract", label: "Data Extractor", icon: Table },
   { href: "/convert", label: "Format & Redact", icon: FileCode },
@@ -459,6 +462,7 @@ export default function Sidebar({
         {prioritizedIntelligence.map((item) => {
           const active = pathname === item.href || (item.href === "/contracts/compare" && pathname.startsWith("/contracts/compare"));
           const Icon = item.icon;
+          const isFrontier = item.href === "/frontier";
           return (
             <Link
               key={item.href}
@@ -467,16 +471,27 @@ export default function Sidebar({
               title={item.label}
               aria-label={item.label}
               className={`group relative mb-1 flex h-8.5 items-center gap-2.5 rounded-xl px-3 text-[13px] font-medium transition-all duration-200 ${isCollapsed ? "justify-center px-0" : ""} ${
-                active 
-                  ? "bg-slate-900 text-white shadow-xs dark:bg-[#1a2032] dark:text-white dark:border dark:border-purple-500/20 dark:shadow-md dark:shadow-purple-500/5 font-semibold" 
+                active
+                  ? "bg-slate-900 text-white shadow-xs dark:bg-[#1a2032] dark:text-white dark:border dark:border-purple-500/20 dark:shadow-md dark:shadow-purple-500/5 font-semibold"
+                  : isFrontier
+                  ? "border border-purple-500/30 bg-gradient-to-r from-purple-950/40 via-[#181236] to-slate-900 text-purple-200 hover:border-purple-400 hover:text-white shadow-xs shadow-purple-500/10 font-bold"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-white/[0.06]"
               }`}
             >
               {active && (
                 <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-r-full bg-purple-500" aria-hidden />
               )}
-              <Icon aria-hidden className={`h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${active ? "text-purple-400 dark:text-purple-300" : "text-slate-400 dark:text-zinc-500 group-hover:text-purple-600 dark:group-hover:text-purple-400"}`} />
-              {!isCollapsed && <span className="truncate">{item.label}</span>}
+              <Icon aria-hidden className={`h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
+                active || isFrontier ? "text-purple-400 dark:text-purple-300" : "text-slate-400 dark:text-zinc-500 group-hover:text-purple-600 dark:group-hover:text-purple-400"
+              }`} />
+              {!isCollapsed && (
+                <div className="flex items-center justify-between flex-1 min-w-0">
+                  <span className="truncate">{item.label}</span>
+                  {isFrontier && (
+                    <span className="flex h-2 w-2 rounded-full bg-[#1db954] animate-ping" />
+                  )}
+                </div>
+              )}
             </Link>
           );
         })}
