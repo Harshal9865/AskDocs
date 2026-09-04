@@ -792,22 +792,22 @@ function FrontierVoiceStudio() {
       return;
     }
 
-    const SpeechRecognition =
-      (window as unknown as { SpeechRecognition?: typeof window.webkitSpeechRecognition }).SpeechRecognition ||
-      (window as unknown as { webkitSpeechRecognition?: typeof window.webkitSpeechRecognition }).webkitSpeechRecognition;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SpeechRecognitionClass = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
-    if (!SpeechRecognition) {
+    if (!SpeechRecognitionClass) {
       showToast("Speech recognition is not supported in this browser. Please use Chrome/Edge.", "error");
       return;
     }
 
     try {
-      const rec = new SpeechRecognition();
+      const rec = new SpeechRecognitionClass();
       rec.continuous = true;
       rec.interimResults = true;
       rec.lang = "en-US";
 
-      rec.onresult = (event: SpeechRecognitionEvent) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      rec.onresult = (event: any) => {
         let finalQuery = "";
         let interimText = "";
         for (let i = event.resultIndex; i < event.results.length; ++i) {
