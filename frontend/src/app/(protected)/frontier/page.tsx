@@ -83,7 +83,7 @@ export default function FrontierLabsPage() {
     return () => window.removeEventListener("mousedown", onClick);
   }, [profileMenuOpen]);
 
-  // DOCK NAVIGATION: Explicit color separation between Spotify Green (Audio/Execution) and Velvet Indigo (Intelligence/Research)
+  // DOCK NAVIGATION: Institutional Enterprise Color Roles (Emerald Precision for Audio & Pipelines, Indigo for Research & Decisions)
   const DOCK_ITEMS = [
     {
       id: "command",
@@ -96,20 +96,20 @@ export default function FrontierLabsPage() {
     },
     {
       id: "voice",
-      label: "Spotify Voice Deck",
+      label: "Voice Co-Pilot",
       icon: Mic,
-      type: "spotify",
-      accent: "from-[#1DB954] to-emerald-600",
-      badge: "SPOTIFY AUDIO",
-      tagColor: "bg-emerald-50 text-[#1DB954] border-[#1DB954]/30 dark:bg-[#1DB954]/20 dark:text-[#1DB954] dark:border-[#1DB954]/40",
+      type: "acoustic",
+      accent: "from-[#10B981] to-emerald-600",
+      badge: "SPOKEN DIALOGUE",
+      tagColor: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/40",
     },
     {
       id: "research",
       label: "Deep Research Dossier",
       icon: FileText,
-      type: "indigo",
+      type: "cognitive",
       accent: "from-indigo-600 via-indigo-500 to-blue-600",
-      badge: "VELVET INDIGO",
+      badge: "COGNITIVE SYNTHESIS",
       tagColor: "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/30",
     },
     {
@@ -125,7 +125,7 @@ export default function FrontierLabsPage() {
       id: "radar",
       label: "Conflict Radar",
       icon: Scale,
-      type: "indigo",
+      type: "cognitive",
       accent: "from-indigo-600 via-rose-600 to-indigo-800",
       badge: "REDLINE CLASH",
       tagColor: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/30",
@@ -134,7 +134,7 @@ export default function FrontierLabsPage() {
       id: "decisions",
       label: "Tradeoff Solver",
       icon: Brain,
-      type: "indigo",
+      type: "cognitive",
       accent: "from-indigo-700 via-purple-600 to-indigo-500",
       badge: "DECISION MATRIX",
       tagColor: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30",
@@ -143,15 +143,15 @@ export default function FrontierLabsPage() {
       id: "workflows",
       label: "Pipeline Automator",
       icon: GitBranch,
-      type: "spotify",
-      accent: "from-[#1DB954] via-emerald-600 to-teal-500",
+      type: "acoustic",
+      accent: "from-[#10B981] via-emerald-600 to-teal-500",
       badge: "CIRCUIT FLOW",
-      tagColor: "bg-emerald-50 text-[#1DB954] border-[#1DB954]/30 dark:bg-[#1DB954]/20 dark:text-[#1DB954] dark:border-[#1DB954]/40",
+      tagColor: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/40",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#07090e] text-slate-900 dark:text-zinc-100 flex flex-col font-sans transition-colors duration-200 selection:bg-[#1DB954]/30 selection:text-[#1DB954]">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#07090e] text-slate-900 dark:text-zinc-100 flex flex-col font-sans transition-colors duration-200 selection:bg-emerald-500/30 selection:text-emerald-500">
       {/* =========================================================================
           TOP HYBRID DUAL-ENGINE CONSOLE NAVBAR (LIGHT / DARK COMPATIBLE)
           ========================================================================= */}
@@ -172,9 +172,9 @@ export default function FrontierLabsPage() {
 
             {/* Frontier Logo Badge */}
             <div className="flex items-center gap-2.5">
-              <div className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-[#1DB954] to-emerald-400 p-[1px] shadow-sm dark:shadow-[0_0_15px_rgba(29,185,84,0.3)]">
+              <div className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-emerald-500 to-teal-400 p-[1px] shadow-sm dark:shadow-[0_0_15px_rgba(16,185,129,0.3)]">
                 <div className="flex h-full w-full items-center justify-center rounded-[11px] bg-white dark:bg-[#0c0e17]">
-                  <Rocket className="h-4 w-4 text-[#1DB954]" />
+                  <Rocket className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                 </div>
               </div>
               <div className="flex flex-col">
@@ -182,8 +182,8 @@ export default function FrontierLabsPage() {
                   <span className="font-black text-sm tracking-tight text-slate-900 dark:text-white">
                     AskDocs <span className="text-indigo-600 dark:text-indigo-400">Frontier</span>
                   </span>
-                  <span className="rounded-full bg-emerald-50 dark:bg-[#1DB954]/10 border border-emerald-200 dark:border-[#1DB954]/30 px-2 py-0.5 text-[9px] font-mono font-bold text-emerald-700 dark:text-[#1DB954]">
-                    DUAL-ENGINE v3.5
+                  <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/30 px-2 py-0.5 text-[9px] font-mono font-bold text-emerald-700 dark:text-emerald-300">
+                    ENTERPRISE v3.5
                   </span>
                 </div>
               </div>
@@ -198,7 +198,7 @@ export default function FrontierLabsPage() {
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
               placeholder="Search studios & capabilities…"
-              className="w-full rounded-full border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/70 py-1.5 pl-8 pr-3 text-xs outline-none focus:border-[#1DB954] focus:ring-1 focus:ring-[#1DB954] text-slate-800 dark:text-zinc-200 placeholder-slate-400 dark:placeholder-zinc-500 transition-all font-mono"
+              className="w-full rounded-full border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/70 py-1.5 pl-8 pr-3 text-xs outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-slate-800 dark:text-zinc-200 placeholder-slate-400 dark:placeholder-zinc-500 transition-all font-mono"
             />
             {searchFilter && (
               <button
@@ -214,7 +214,7 @@ export default function FrontierLabsPage() {
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {workspace && (
               <div className="hidden lg:flex items-center gap-2 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/80 px-3 py-1 text-xs text-slate-700 dark:text-zinc-300 shadow-xs">
-                <span className="h-2 w-2 rounded-full bg-[#1DB954] shadow-xs dark:shadow-[0_0_8px_#1DB954] animate-pulse" />
+                <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-xs dark:shadow-[0_0_8px_#10B981] animate-pulse" />
                 <span className="max-w-[120px] truncate font-mono text-[11px]">{workspace.name}</span>
               </div>
             )}
@@ -231,7 +231,7 @@ export default function FrontierLabsPage() {
             <div className="relative" ref={profileMenuRef}>
               <button
                 onClick={() => setProfileMenuOpen((o) => !o)}
-                className="flex items-center rounded-full p-0.5 hover:ring-2 hover:ring-[#1DB954]/50 transition-all cursor-pointer"
+                className="flex items-center rounded-full p-0.5 hover:ring-2 hover:ring-emerald-500/50 transition-all cursor-pointer"
                 aria-label="User Profile"
               >
                 <Avatar
@@ -270,9 +270,9 @@ export default function FrontierLabsPage() {
                     <Link
                       href="/hub"
                       onClick={() => setProfileMenuOpen(false)}
-                      className="flex items-center gap-2 rounded-xl px-3 py-2 text-slate-700 dark:text-zinc-300 hover:bg-emerald-50 dark:hover:bg-zinc-800/60 hover:text-emerald-700 dark:hover:text-[#1DB954] transition-colors"
+                      className="flex items-center gap-2 rounded-xl px-3 py-2 text-slate-700 dark:text-zinc-300 hover:bg-emerald-50 dark:hover:bg-zinc-800/60 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors"
                     >
-                      <Sparkles className="h-3.5 w-3.5 text-[#1DB954]" />
+                      <Sparkles className="h-3.5 w-3.5 text-emerald-500" />
                       <span>Innovation Playbook</span>
                     </Link>
                     <Link
@@ -306,16 +306,16 @@ export default function FrontierLabsPage() {
       </header>
 
       {/* =========================================================================
-          MAIN WORKSPACE DECK & UNIQUE SONIC-COGNITIVE ARCHITECTURE
+          MAIN WORKSPACE DECK & PROFESSIONAL ACOUSTIC-COGNITIVE ARCHITECTURE
           ========================================================================= */}
       <div className="flex-1 max-w-7xl mx-auto w-full p-3 sm:p-6 lg:p-8 space-y-6">
         {/* Ambient Subtle Glow Radiance */}
         <div className="pointer-events-none fixed top-16 left-1/2 -z-10 h-96 w-full max-w-6xl -translate-x-1/2 overflow-hidden opacity-20 dark:opacity-25 blur-[120px]" aria-hidden>
           <div className="absolute -top-10 left-10 h-80 w-80 rounded-full bg-indigo-500 dark:bg-indigo-600 animate-pulse" style={{ animationDuration: "8s" }} />
-          <div className="absolute top-10 right-10 h-80 w-80 rounded-full bg-[#1DB954] animate-pulse" style={{ animationDuration: "10s", animationDelay: "1s" }} />
+          <div className="absolute top-10 right-10 h-80 w-80 rounded-full bg-emerald-500 animate-pulse" style={{ animationDuration: "10s", animationDelay: "1s" }} />
         </div>
 
-        {/* 🌟 UNIQUE HERO CONSOLE: DUAL ACOUSTIC & NEURAL MISSION DECK */}
+        {/* 🌟 HERO CONSOLE: DUAL ACOUSTIC & COGNITIVE MISSION DECK */}
         <div className="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#0d101a] p-6 sm:p-8 shadow-xl dark:shadow-2xl transition-colors duration-200">
           {/* Background Grid Pattern */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f080_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f080_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1f243810_1px,transparent_1px),linear-gradient(to_bottom,#1f243810_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
@@ -326,26 +326,26 @@ export default function FrontierLabsPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-950/40 px-3 py-1 text-[11px] font-mono font-bold text-indigo-700 dark:text-indigo-300">
                   <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400 animate-ping" />
-                  VELVET INDIGO COGNITION
+                  COGNITIVE INTELLIGENCE ENGINE
                 </span>
                 <span className="text-slate-400 dark:text-zinc-600 font-bold">×</span>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 dark:border-[#1DB954]/40 bg-emerald-50 dark:bg-[#1DB954]/10 px-3 py-1 text-[11px] font-mono font-bold text-emerald-700 dark:text-[#1DB954]">
-                  <Volume2 className="h-3 w-3 text-[#1DB954]" />
-                  SPOTIFY ACOUSTIC DECK
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 dark:border-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1 text-[11px] font-mono font-bold text-emerald-700 dark:text-emerald-400">
+                  <Volume2 className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                  REAL-TIME ACOUSTIC ENGINE
                 </span>
               </div>
 
               <h1 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight text-slate-900 dark:text-white">
-                Frontier <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-teal-600 to-[#1DB954] dark:from-indigo-400 dark:via-teal-300 dark:to-[#1DB954]">Acoustic & Neural</span> Studios
+                Frontier <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-teal-600 to-emerald-600 dark:from-indigo-400 dark:via-teal-300 dark:to-emerald-400">Acoustic & Neural</span> Studios
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 leading-relaxed max-w-xl">
-                A dual-frequency environment pairing high-depth analytical research (Velvet Indigo) with tactile, real-time audio interaction and rapid workflow execution (Spotify Neon Green).
+                An advanced enterprise workspace pairing deep analytical document research with real-time hands-free voice interrogation, live financial formula ledgers, and automated workflow pipelines.
               </p>
             </div>
 
             {/* Live Dual Engine Status Gauges */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              {/* Left Gauge: Velvet Indigo Intelligence */}
+              {/* Left Gauge: Cognitive Intelligence */}
               <div className="rounded-2xl border border-indigo-200 dark:border-indigo-500/20 bg-indigo-50/50 dark:bg-indigo-950/20 p-3.5 space-y-1.5 min-w-[150px]">
                 <div className="flex items-center justify-between text-[11px] font-mono text-indigo-700 dark:text-indigo-400">
                   <span>NEURAL INDEX</span>
@@ -357,31 +357,31 @@ export default function FrontierLabsPage() {
                 <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-mono">Cross-Analysis: Active</p>
               </div>
 
-              {/* Right Gauge: Spotify Acoustic Engine */}
-              <div className="rounded-2xl border border-emerald-200 dark:border-[#1DB954]/30 bg-emerald-50/50 dark:bg-[#1DB954]/10 p-3.5 space-y-1.5 min-w-[150px]">
-                <div className="flex items-center justify-between text-[11px] font-mono text-emerald-700 dark:text-[#1DB954]">
+              {/* Right Gauge: Real-time Acoustic Engine */}
+              <div className="rounded-2xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20 p-3.5 space-y-1.5 min-w-[150px]">
+                <div className="flex items-center justify-between text-[11px] font-mono text-emerald-700 dark:text-emerald-400">
                   <span>ACOUSTIC DECK</span>
                   <span className="font-bold">48kHz Live</span>
                 </div>
                 <div className="flex items-center gap-1 h-2">
-                  <span className="h-full w-1.5 bg-[#1DB954] rounded-full animate-pulse" />
-                  <span className="h-3/4 w-1.5 bg-[#1DB954] rounded-full animate-pulse" style={{ animationDelay: "150ms" }} />
-                  <span className="h-full w-1.5 bg-[#1DB954] rounded-full animate-pulse" style={{ animationDelay: "300ms" }} />
-                  <span className="h-1/2 w-1.5 bg-[#1DB954] rounded-full animate-pulse" style={{ animationDelay: "450ms" }} />
-                  <span className="h-full w-1.5 bg-[#1DB954] rounded-full animate-pulse" style={{ animationDelay: "200ms" }} />
+                  <span className="h-full w-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                  <span className="h-3/4 w-1.5 bg-emerald-500 rounded-full animate-pulse" style={{ animationDelay: "150ms" }} />
+                  <span className="h-full w-1.5 bg-emerald-500 rounded-full animate-pulse" style={{ animationDelay: "300ms" }} />
+                  <span className="h-1/2 w-1.5 bg-emerald-500 rounded-full animate-pulse" style={{ animationDelay: "450ms" }} />
+                  <span className="h-full w-1.5 bg-emerald-500 rounded-full animate-pulse" style={{ animationDelay: "200ms" }} />
                 </div>
-                <p className="text-[10px] text-emerald-700 dark:text-emerald-400/80 font-mono">Speech Synth: Ready</p>
+                <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-mono">Speech Synth: Ready</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* 🎛️ TACTILE STUDIO SWITCHBOARD (FLOATING AUDIO DOCK) */}
+        {/* 🎛️ STUDIO SWITCHBOARD DOCK */}
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 p-2 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white/90 dark:bg-[#0a0d16]/90 backdrop-blur-2xl shadow-md dark:shadow-xl transition-colors duration-200">
           {DOCK_ITEMS.map((tab) => {
             const Icon = tab.icon;
             const isSelected = activeTab === tab.id;
-            const isSpotify = tab.type === "spotify";
+            const isAcoustic = tab.type === "acoustic";
 
             return (
               <button
@@ -389,16 +389,16 @@ export default function FrontierLabsPage() {
                 onClick={() => setActiveTab(tab.id as FrontierTab)}
                 className={`btn-pop shrink-0 inline-flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-bold transition-all cursor-pointer ${
                   isSelected
-                    ? isSpotify
-                      ? "bg-[#1DB954] text-black shadow-[0_0_20px_rgba(29,185,84,0.4)] scale-102"
+                    ? isAcoustic
+                      ? "bg-emerald-600 dark:bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-102"
                       : "bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-[0_0_20px_rgba(99,102,241,0.4)] scale-102"
                     : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800/60"
                 }`}
               >
-                <Icon className={`h-4 w-4 ${isSelected ? (isSpotify ? "text-black" : "text-white") : "text-slate-500 dark:text-zinc-500"}`} />
+                <Icon className={`h-4 w-4 ${isSelected ? "text-white" : "text-slate-500 dark:text-zinc-500"}`} />
                 <span>{tab.label}</span>
                 {isSelected && (
-                  <span className={`text-[9px] px-1.5 py-0.2 rounded font-mono ${isSpotify ? "bg-black/20 text-black font-black" : "bg-white/20 text-white"}`}>
+                  <span className="text-[9px] px-1.5 py-0.2 rounded font-mono bg-white/20 text-white">
                     LIVE
                   </span>
                 )}
@@ -411,7 +411,7 @@ export default function FrontierLabsPage() {
             STUDIO VIEWS (EACH WITH BESPOKE, DISTINCTIVE UI/UX)
             ========================================================================= */}
 
-        {/* Tab 1: Master Console Hub (Modular Asymmetrical Deck) */}
+        {/* Tab 1: Master Console Hub */}
         {activeTab === "command" && (
           <FrontierCommandDeck
             searchFilter={searchFilter}
@@ -421,13 +421,13 @@ export default function FrontierLabsPage() {
           />
         )}
 
-        {/* Tab 2: Spotify Spoken Voice Deck */}
+        {/* Tab 2: Voice Co-Pilot Studio */}
         {activeTab === "voice" && <FrontierVoiceStudio />}
 
-        {/* Tab 3: Velvet Indigo Deep Research Dossier */}
+        {/* Tab 3: Deep Research Dossier */}
         {activeTab === "research" && <FrontierResearchStudio documents={documents} />}
 
-        {/* Tab 4: Formula Financial Ledger & Modeler */}
+        {/* Tab 4: Financial Scenario Modeler */}
         {activeTab === "sheets" && <FrontierSheetsStudio />}
 
         {/* Tab 5: Dual-Chamber Redline Conflict Radar */}
@@ -459,36 +459,36 @@ function FrontierCommandDeck({
 }) {
   const CATEGORIES = [
     { id: "all", label: "All Studios" },
-    { id: "audio", label: "🎙️ Spotify Audio Deck" },
-    { id: "research", label: "📑 Velvet Indigo Research" },
-    { id: "finance", label: "📊 Formula Matrix" },
+    { id: "audio", label: "🎙️ Voice Co-Pilot" },
+    { id: "research", label: "📑 Deep Research" },
+    { id: "finance", label: "📊 Financial Matrix" },
     { id: "legal", label: "⚔️ Conflict Radar" },
     { id: "decisions", label: "🧠 Tradeoff Matrix" },
-    { id: "automation", label: "⚡ Circuit Pipelines" },
+    { id: "automation", label: "⚡ Pipeline Automator" },
   ];
 
   const STUDIOS = [
     {
       id: "voice" as FrontierTab,
       category: "audio",
-      engine: "spotify",
-      title: "Spotify Voice Co-Pilot",
-      badge: "LIVE 48kHz ACOUSTIC DECK",
-      accentBorder: "border-emerald-200 dark:border-[#1DB954]/40 hover:border-[#1DB954]",
-      accentGlow: "group-hover:shadow-lg dark:group-hover:shadow-[0_0_30px_rgba(29,185,84,0.18)]",
-      badgeStyle: "bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-[#1DB954]/15 dark:border-[#1DB954]/40 dark:text-[#1DB954]",
-      desc: "Spotify-styled hands-free audio conversation with real-time waveform frequency spectrum, audio scrubbing, and instant voice citation playback.",
+      engine: "acoustic",
+      title: "Spoken Voice Co-Pilot",
+      badge: "LIVE 48kHz ACOUSTIC DIALOGUE",
+      accentBorder: "border-emerald-200 dark:border-emerald-500/40 hover:border-emerald-500",
+      accentGlow: "group-hover:shadow-lg dark:group-hover:shadow-[0_0_30px_rgba(16,185,129,0.18)]",
+      badgeStyle: "bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-500/15 dark:border-emerald-500/40 dark:text-emerald-400",
+      desc: "Continuous hands-free spoken interrogation with real-time waveform frequency visualizers, audio scrubbing, and instant voice citation playback.",
       solvedIssue: "Hands-free examination & audio document exploration without typing or screen lock.",
-      highlights: ["Spotify Visualizer & Waveforms", "Spoken Citation Playback", "Voice Viva Simulation"],
-      cta: "Launch Spotify Audio Deck",
-      ctaStyle: "bg-[#1DB954] hover:bg-[#1ed760] text-black font-black",
+      highlights: ["Acoustic Frequency Visualizers", "Spoken Citation Playback", "Voice Viva Simulation"],
+      cta: "Launch Voice Co-Pilot",
+      ctaStyle: "bg-emerald-600 hover:bg-emerald-500 text-white font-bold",
       icon: Mic,
     },
     {
       id: "research" as FrontierTab,
       category: "research",
-      engine: "indigo",
-      title: "Velvet Indigo Research Dossier",
+      engine: "cognitive",
+      title: "Autonomous Deep Research Dossier",
       badge: "AUTONOMOUS SYNTHESIS",
       accentBorder: "border-indigo-200 dark:border-indigo-500/30 hover:border-indigo-500",
       accentGlow: "group-hover:shadow-lg dark:group-hover:shadow-[0_0_30px_rgba(99,102,241,0.18)]",
@@ -519,7 +519,7 @@ function FrontierCommandDeck({
     {
       id: "radar" as FrontierTab,
       category: "legal",
-      engine: "indigo",
+      engine: "cognitive",
       title: "Conflict & Discrepancy Radar",
       badge: "DUAL-CHAMBER REDLINE",
       accentBorder: "border-rose-200 dark:border-rose-500/30 hover:border-rose-500",
@@ -535,7 +535,7 @@ function FrontierCommandDeck({
     {
       id: "decisions" as FrontierTab,
       category: "decisions",
-      engine: "indigo",
+      engine: "cognitive",
       title: "Tradeoff Decision Solver",
       badge: "EQUILIBRIUM SOLVER",
       accentBorder: "border-purple-200 dark:border-indigo-500/30 hover:border-purple-500",
@@ -551,17 +551,17 @@ function FrontierCommandDeck({
     {
       id: "workflows" as FrontierTab,
       category: "automation",
-      engine: "spotify",
+      engine: "acoustic",
       title: "Circuit Logic Automator",
       badge: "NO-CODE PIPELINES",
-      accentBorder: "border-emerald-200 dark:border-[#1DB954]/40 hover:border-[#1DB954]",
-      accentGlow: "group-hover:shadow-lg dark:group-hover:shadow-[0_0_30px_rgba(29,185,84,0.18)]",
-      badgeStyle: "bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-[#1DB954]/15 dark:border-[#1DB954]/40 dark:text-[#1DB954]",
+      accentBorder: "border-emerald-200 dark:border-emerald-500/40 hover:border-emerald-500",
+      accentGlow: "group-hover:shadow-lg dark:group-hover:shadow-[0_0_30px_rgba(16,185,129,0.18)]",
+      badgeStyle: "bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-500/15 dark:border-emerald-500/40 dark:text-emerald-400",
       desc: "Visual node circuit canvas connecting file ingestion, OCR extraction, AI redlining, and Slack/Email dispatches with live step simulations.",
       solvedIssue: "Automates repetitive multi-step document pipelines without writing backend code.",
       highlights: ["Node Circuit State Canvas", "Live Simulation Runner", "Audit Log Generation"],
       cta: "Build Circuit Flow",
-      ctaStyle: "bg-[#1DB954] hover:bg-[#1ed760] text-black font-black",
+      ctaStyle: "bg-emerald-600 hover:bg-emerald-500 text-white font-bold",
       icon: GitBranch,
     },
   ];
@@ -581,7 +581,7 @@ function FrontierCommandDeck({
 
   return (
     <div className="space-y-6">
-      {/* Category Pills with Distinct Engine Tones */}
+      {/* Category Pills */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-1.5">
           {CATEGORIES.map((c) => (
@@ -601,18 +601,18 @@ function FrontierCommandDeck({
 
         <Link
           href="/hub"
-          className="inline-flex items-center gap-1.5 text-xs font-mono text-emerald-700 dark:text-[#1DB954] hover:underline"
+          className="inline-flex items-center gap-1.5 text-xs font-mono text-emerald-700 dark:text-emerald-400 hover:underline"
         >
           <span>Explore Cognitive Playbook</span>
           <ExternalLink className="h-3 w-3" />
         </Link>
       </div>
 
-      {/* 🌟 6 BESPOKE STUDIOS (NO MORE REPETITIVE IDENTICAL BOXES) */}
+      {/* 🌟 6 BESPOKE STUDIOS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredStudios.map((s) => {
           const Icon = s.icon;
-          const isSpotify = s.engine === "spotify";
+          const isAcoustic = s.engine === "acoustic";
 
           return (
             <div
@@ -626,13 +626,13 @@ function FrontierCommandDeck({
                     {s.badge}
                   </span>
                   <div className="flex items-center gap-1.5">
-                    {isSpotify ? (
-                      <span className="flex items-center gap-1 text-[10px] font-mono text-emerald-700 dark:text-[#1DB954] font-bold">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#1DB954] animate-ping" />
-                        SPOTIFY DECK
+                    {isAcoustic ? (
+                      <span className="flex items-center gap-1 text-[10px] font-mono text-emerald-700 dark:text-emerald-400 font-bold">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
+                        ACOUSTIC DIALOGUE
                       </span>
                     ) : (
-                      <span className="text-[10px] font-mono text-indigo-700 dark:text-indigo-400 font-bold">INDIGO NEURAL</span>
+                      <span className="text-[10px] font-mono text-indigo-700 dark:text-indigo-400 font-bold">COGNITIVE ENGINE</span>
                     )}
                   </div>
                 </div>
@@ -641,8 +641,8 @@ function FrontierCommandDeck({
                 <div className="flex items-start gap-3">
                   <div
                     className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border ${
-                      isSpotify
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-[#1DB954]/30 dark:bg-[#1DB954]/10 dark:text-[#1DB954]"
+                      isAcoustic
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/40 dark:text-emerald-400"
                         : "border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-500/30 dark:bg-indigo-950/40 dark:text-indigo-400"
                     }`}
                   >
@@ -661,12 +661,12 @@ function FrontierCommandDeck({
                 {/* Tactical Problem Solved Box */}
                 <div
                   className={`rounded-2xl border p-3 text-xs space-y-1 ${
-                    isSpotify
-                      ? "border-emerald-200 bg-emerald-50/50 text-slate-700 dark:border-[#1DB954]/20 dark:bg-[#1DB954]/5 dark:text-zinc-300"
+                    isAcoustic
+                      ? "border-emerald-200 bg-emerald-50/50 text-slate-700 dark:border-emerald-500/20 dark:bg-emerald-950/20 dark:text-zinc-300"
                       : "border-indigo-200 bg-indigo-50/50 text-slate-700 dark:border-indigo-500/20 dark:bg-indigo-950/20 dark:text-zinc-300"
                   }`}
                 >
-                  <span className={`font-mono text-[10px] font-bold block uppercase tracking-wider ${isSpotify ? "text-emerald-700 dark:text-[#1DB954]" : "text-indigo-700 dark:text-indigo-400"}`}>
+                  <span className={`font-mono text-[10px] font-bold block uppercase tracking-wider ${isAcoustic ? "text-emerald-700 dark:text-emerald-400" : "text-indigo-700 dark:text-indigo-400"}`}>
                     ⚡ Bottleneck Solved:
                   </span>
                   <p className="text-[11px] leading-snug">{s.solvedIssue}</p>
@@ -676,7 +676,7 @@ function FrontierCommandDeck({
                 <ul className="space-y-1.5 text-xs text-slate-600 dark:text-zinc-400">
                   {s.highlights.map((h, i) => (
                     <li key={i} className="flex items-center gap-2">
-                      <CheckCircle2 className={`h-3.5 w-3.5 shrink-0 ${isSpotify ? "text-[#1DB954]" : "text-indigo-600 dark:text-indigo-400"}`} />
+                      <CheckCircle2 className={`h-3.5 w-3.5 shrink-0 ${isAcoustic ? "text-emerald-600 dark:text-emerald-400" : "text-indigo-600 dark:text-indigo-400"}`} />
                       <span>{h}</span>
                     </li>
                   ))}
@@ -701,7 +701,7 @@ function FrontierCommandDeck({
 }
 
 /* =========================================================================
-   2. SPOTIFY SPOKEN VOICE STUDIO (48kHz ACOUSTIC DECK)
+   2. SPOKEN VOICE CO-PILOT STUDIO (48kHz ACOUSTIC DIALOGUE)
    ========================================================================= */
 function FrontierVoiceStudio() {
   const { workspace } = useWorkspace();
@@ -712,7 +712,7 @@ function FrontierVoiceStudio() {
   const [liveTranscript, setLiveTranscript] = useState<Array<{ sender: "user" | "ai"; text: string; time: string; docSnippet?: string }>>([
     {
       sender: "ai",
-      text: "Spotify Voice Deck activated. Ready for hands-free document interrogation. Tap the green microphone or select a prompt track below to begin.",
+      text: "Spoken Voice Co-Pilot active. Ready for hands-free document interrogation. Tap the microphone or select an executive query preset below to begin.",
       time: "Now",
     },
   ]);
@@ -835,46 +835,46 @@ function FrontierVoiceStudio() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      {/* Left Bay: Spotify Audio Deck Turntable & Control Bay (5 Cols) */}
-      <div className="lg:col-span-5 flex flex-col justify-between rounded-3xl border border-emerald-200 dark:border-[#1DB954]/30 bg-white dark:bg-[#090c12] p-6 shadow-xl dark:shadow-2xl relative overflow-hidden transition-colors duration-200">
-        {/* Ambient Spotify Green Radial Aura */}
-        <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-[#1DB954]/15 blur-3xl pointer-events-none" />
+      {/* Left Bay: Acoustic Audio Deck Control Bay (5 Cols) */}
+      <div className="lg:col-span-5 flex flex-col justify-between rounded-3xl border border-emerald-200 dark:border-emerald-500/30 bg-white dark:bg-[#090c12] p-6 shadow-xl dark:shadow-2xl relative overflow-hidden transition-colors duration-200">
+        {/* Ambient Radial Aura */}
+        <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
 
         <div className="space-y-6 relative z-10">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#1DB954] text-black font-black text-xs">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600 text-white font-black text-xs">
                 ▶
               </span>
-              <span className="font-mono text-xs font-bold text-emerald-800 dark:text-[#1DB954]">SPOTIFY VOICE STUDIO</span>
+              <span className="font-mono text-xs font-bold text-emerald-800 dark:text-emerald-400">VOICE CO-PILOT STUDIO</span>
             </div>
-            <span className="rounded-full bg-emerald-50 dark:bg-[#1DB954]/15 border border-emerald-200 dark:border-[#1DB954]/40 px-2.5 py-0.5 text-[10px] font-mono text-emerald-800 dark:text-[#1DB954] font-bold">
+            <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/40 px-2.5 py-0.5 text-[10px] font-mono text-emerald-800 dark:text-emerald-400 font-bold">
               {isListening ? "RECORDING..." : isSpeaking ? "PLAYING..." : "IDLE"}
             </span>
           </div>
 
-          {/* Spotify Turntable Disc & Equalizer Visualizer */}
+          {/* Equalizer Visualizer Disc */}
           <div className="flex flex-col items-center justify-center py-6">
             <div className="relative flex h-48 w-48 items-center justify-center rounded-full border-4 border-slate-200 dark:border-zinc-800 bg-slate-100 dark:bg-zinc-950 shadow-xl dark:shadow-2xl transition-colors">
               {/* Concentric Audio Waves */}
               {isListening && (
                 <>
-                  <div className="absolute inset-0 rounded-full border-2 border-[#1DB954] animate-ping opacity-75" />
-                  <div className="absolute -inset-4 rounded-full border border-[#1DB954]/40 animate-pulse" />
+                  <div className="absolute inset-0 rounded-full border-2 border-emerald-500 animate-ping opacity-75" />
+                  <div className="absolute -inset-4 rounded-full border border-emerald-500/40 animate-pulse" />
                 </>
               )}
               {isSpeaking && (
-                <div className="absolute -inset-3 rounded-full border-2 border-[#1DB954]/60 animate-spin" style={{ animationDuration: "6s" }} />
+                <div className="absolute -inset-3 rounded-full border-2 border-emerald-500/60 animate-spin" style={{ animationDuration: "6s" }} />
               )}
 
-              {/* Vinyl Grooves Center Button */}
+              {/* Center Record Button */}
               <button
                 onClick={toggleListening}
                 className={`relative z-10 flex h-24 w-24 items-center justify-center rounded-full transition-all cursor-pointer ${
                   isListening
                     ? "bg-rose-600 text-white shadow-[0_0_30px_rgba(225,29,72,0.6)] scale-110"
-                    : "bg-[#1DB954] text-black hover:bg-[#1ed760] shadow-lg dark:shadow-[0_0_35px_rgba(29,185,84,0.5)] active:scale-95"
+                    : "bg-emerald-600 dark:bg-emerald-500 text-white hover:bg-emerald-500 shadow-lg dark:shadow-[0_0_35px_rgba(16,185,129,0.5)] active:scale-95"
                 }`}
                 aria-label="Toggle Microphone"
               >
@@ -891,7 +891,7 @@ function FrontierVoiceStudio() {
                     isListening
                       ? "bg-rose-500"
                       : isSpeaking
-                      ? "bg-[#1DB954]"
+                      ? "bg-emerald-500"
                       : "bg-slate-300 dark:bg-zinc-800"
                   }`}
                   style={{
@@ -914,7 +914,7 @@ function FrontierVoiceStudio() {
                     onClick={() => setVoicePersona(p)}
                     className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase transition-colors ${
                       voicePersona === p
-                        ? "bg-[#1DB954] text-black font-black"
+                        ? "bg-emerald-600 text-white font-black"
                         : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:text-white"
                     }`}
                   >
@@ -933,7 +933,7 @@ function FrontierVoiceStudio() {
                 step="0.1"
                 value={voiceSpeed}
                 onChange={(e) => setVoiceSpeed(parseFloat(e.target.value))}
-                className="w-28 accent-[#1DB954] cursor-pointer"
+                className="w-28 accent-emerald-500 cursor-pointer"
               />
             </div>
           </div>
@@ -945,25 +945,25 @@ function FrontierVoiceStudio() {
             onClick={stopSpeaking}
             className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-900 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 dark:hover:text-white py-2.5 text-xs font-bold transition-colors"
           >
-            <Square className="h-3.5 w-3.5 text-[#1DB954] fill-[#1DB954]" />
+            <Square className="h-3.5 w-3.5 text-emerald-500 fill-emerald-500" />
             <span>Mute / Interrupt Speech Synthesis</span>
           </button>
         )}
       </div>
 
-      {/* Right Bay: Live Lyrics-Style Transcript & Track Prompts Queue (7 Cols) */}
+      {/* Right Bay: Live Dialogue Transcript & Query Presets (7 Cols) */}
       <div className="lg:col-span-7 flex flex-col justify-between rounded-3xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#0c0f17] p-6 shadow-xl dark:shadow-2xl space-y-6 transition-colors duration-200">
         <div>
           {/* Header */}
           <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-zinc-800">
             <div className="flex items-center gap-2">
-              <Radio className="h-4 w-4 text-[#1DB954]" />
+              <Radio className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               <h3 className="font-bold text-sm text-slate-900 dark:text-white">Live Interrogation Dialogue</h3>
             </div>
             <span className="font-mono text-[11px] text-slate-500 dark:text-zinc-500">{liveTranscript.length} Exchanges</span>
           </div>
 
-          {/* Transcript Feed (Synchronized Lyrics Style) */}
+          {/* Transcript Feed */}
           <div className="mt-4 max-h-[260px] overflow-y-auto space-y-3 pr-2 font-sans">
             {liveTranscript.map((t, idx) => (
               <div
@@ -975,7 +975,7 @@ function FrontierVoiceStudio() {
                 }`}
               >
                 <div className="flex items-center justify-between text-[10px] font-mono mb-1">
-                  <span className={t.sender === "user" ? "text-indigo-700 dark:text-indigo-300 font-bold" : "text-emerald-700 dark:text-[#1DB954] font-bold"}>
+                  <span className={t.sender === "user" ? "text-indigo-700 dark:text-indigo-300 font-bold" : "text-emerald-700 dark:text-emerald-400 font-bold"}>
                     {t.sender === "user" ? "YOU" : "ASKDOCS AI"}
                   </span>
                   <span className="text-slate-500 dark:text-zinc-400">{t.time}</span>
@@ -990,18 +990,18 @@ function FrontierVoiceStudio() {
             ))}
 
             {interim && (
-              <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-zinc-900/60 border border-dashed border-[#1DB954] text-xs text-emerald-800 dark:text-[#1DB954] animate-pulse">
+              <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-zinc-900/60 border border-dashed border-emerald-500 text-xs text-emerald-800 dark:text-emerald-400 animate-pulse">
                 🎙️ Listening: {interim}…
               </div>
             )}
           </div>
         </div>
 
-        {/* Spotify Track Prompts Queue */}
+        {/* Executive Query Presets */}
         <div className="space-y-2 pt-4 border-t border-slate-200 dark:border-zinc-800">
           <div className="flex items-center justify-between text-xs font-mono text-slate-600 dark:text-zinc-400">
-            <span>SUGGESTED TRACKS (1-TAP TO SPEAK)</span>
-            <span className="text-emerald-700 dark:text-[#1DB954] font-bold">● LIVE QUEUE</span>
+            <span>EXECUTIVE QUERY PRESETS (1-TAP TO SPEAK)</span>
+            <span className="text-emerald-700 dark:text-emerald-400 font-bold">● ACTIVE PRESETS</span>
           </div>
 
           <div className="space-y-1.5">
@@ -1009,15 +1009,15 @@ function FrontierVoiceStudio() {
               <button
                 key={t.track}
                 onClick={() => processQuery(t.query)}
-                className="btn-pop flex w-full items-center justify-between rounded-xl border border-slate-200 dark:border-zinc-800/80 bg-slate-50/70 dark:bg-zinc-900/40 px-3 py-2 text-xs text-left hover:border-[#1DB954]/50 hover:bg-slate-100 dark:hover:bg-zinc-800/60 group transition-all"
+                className="btn-pop flex w-full items-center justify-between rounded-xl border border-slate-200 dark:border-zinc-800/80 bg-slate-50/70 dark:bg-zinc-900/40 px-3 py-2 text-xs text-left hover:border-emerald-500/50 hover:bg-slate-100 dark:hover:bg-zinc-800/60 group transition-all"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="font-mono text-[11px] text-slate-500 dark:text-zinc-500 group-hover:text-[#1DB954]">{t.track}</span>
+                  <span className="font-mono text-[11px] text-slate-500 dark:text-zinc-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">{t.track}</span>
                   <span className="font-medium text-slate-800 dark:text-zinc-300 group-hover:text-slate-900 dark:group-hover:text-white truncate">{t.title}</span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="font-mono text-[10px] text-slate-500 dark:text-zinc-500">{t.duration}</span>
-                  <Play className="h-3 w-3 text-slate-400 dark:text-zinc-500 group-hover:text-[#1DB954] group-hover:fill-[#1DB954]" />
+                  <Play className="h-3 w-3 text-slate-400 dark:text-zinc-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:fill-emerald-500" />
                 </div>
               </button>
             ))}
@@ -1029,7 +1029,7 @@ function FrontierVoiceStudio() {
 }
 
 /* =========================================================================
-   3. VELVET INDIGO DEEP RESEARCH DOSSIER STUDIO
+   3. AUTONOMOUS DEEP RESEARCH DOSSIER STUDIO
    ========================================================================= */
 function FrontierResearchStudio({ documents }: { documents: DocumentItem[] }) {
   const [topic, setTopic] = useState("");
@@ -1080,7 +1080,7 @@ function FrontierResearchStudio({ documents }: { documents: DocumentItem[] }) {
 
         <div className="space-y-4 relative z-10">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-xs font-bold text-indigo-700 dark:text-indigo-400">📑 VELVET INDIGO COGNITIVE TERMINAL</span>
+            <span className="font-mono text-xs font-bold text-indigo-700 dark:text-indigo-400">📑 COGNITIVE RESEARCH TERMINAL</span>
             <span className="rounded-full bg-indigo-50 dark:bg-indigo-500/15 border border-indigo-200 dark:border-indigo-500/30 px-3 py-0.5 text-[10px] font-mono text-indigo-800 dark:text-indigo-300">
               AUTONOMOUS 4-PASS REASONER
             </span>
@@ -1173,7 +1173,7 @@ function FrontierResearchStudio({ documents }: { documents: DocumentItem[] }) {
                 { name: "Risk Index", val: "72%", height: "h-24", color: "from-indigo-600 to-indigo-400" },
                 { name: "Contract Gap", val: "48%", height: "h-16", color: "from-indigo-500 to-teal-400" },
                 { name: "OpEx Variance", val: "88%", height: "h-28", color: "from-teal-500 to-emerald-400" },
-                { name: "SLA Match", val: "94%", height: "h-32", color: "from-emerald-500 to-[#1DB954]" },
+                { name: "SLA Match", val: "94%", height: "h-32", color: "from-emerald-500 to-emerald-400" },
                 { name: "Compliance", val: "82%", height: "h-26", color: "from-indigo-600 to-emerald-500" },
               ].map((bar, i) => (
                 <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
@@ -1240,7 +1240,7 @@ function FrontierSheetsStudio() {
           <div className="flex items-center gap-4 bg-slate-50 dark:bg-zinc-900/80 border border-slate-200 dark:border-zinc-800 p-3 rounded-2xl">
             <div className="text-right">
               <span className="text-[10px] font-mono text-slate-500 dark:text-zinc-400 block">SCENARIO DELTA</span>
-              <span className="text-sm font-mono font-bold text-emerald-700 dark:text-[#1DB954]">+{growthRate}%</span>
+              <span className="text-sm font-mono font-bold text-emerald-700 dark:text-emerald-400">+{growthRate}%</span>
             </div>
             <input
               type="range"
@@ -1248,7 +1248,7 @@ function FrontierSheetsStudio() {
               max="50"
               value={growthRate}
               onChange={(e) => setGrowthRate(parseInt(e.target.value))}
-              className="w-36 accent-[#1DB954] cursor-pointer"
+              className="w-36 accent-emerald-500 cursor-pointer"
             />
           </div>
         </div>
@@ -1286,7 +1286,7 @@ function FrontierSheetsStudio() {
                   <td className="py-3 px-3 text-right text-slate-700 dark:text-zinc-300">${row.q1.toLocaleString()}</td>
                   <td className="py-3 px-3 text-right text-slate-700 dark:text-zinc-300">${row.q2.toLocaleString()}</td>
                   <td className="py-3 px-3 text-right text-slate-700 dark:text-zinc-300">${row.q3.toLocaleString()}</td>
-                  <td className="py-3 px-3 text-right text-emerald-700 dark:text-[#1DB954] font-bold">
+                  <td className="py-3 px-3 text-right text-emerald-700 dark:text-emerald-400 font-bold">
                     ${Math.round(row.q4 * multiplier).toLocaleString()}
                   </td>
                   <td className="py-3 px-3 text-right text-teal-700 dark:text-teal-300 font-bold">
@@ -1298,7 +1298,7 @@ function FrontierSheetsStudio() {
             <tr className="border-t-2 border-slate-300 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-900/60 font-bold text-slate-900 dark:text-white">
               <td className="py-3 px-3 font-sans">NET CONSOLIDATED YIELD</td>
               <td colSpan={4} className="text-right py-3 px-3 text-slate-600 dark:text-zinc-400">Simulated Net Impact:</td>
-              <td className="py-3 px-3 text-right text-emerald-700 dark:text-[#1DB954] text-sm">${Math.round(totalRev).toLocaleString()}</td>
+              <td className="py-3 px-3 text-right text-emerald-700 dark:text-emerald-400 text-sm">${Math.round(totalRev).toLocaleString()}</td>
             </tr>
           </tbody>
         </table>
@@ -1359,7 +1359,7 @@ function FrontierRadarStudio() {
               setHarmonized(true);
               showToast("success", "Synthesized unified harmonized clause draft!");
             }}
-            className="btn-pop rounded-2xl bg-gradient-to-r from-rose-600 via-indigo-600 to-[#1DB954] px-5 py-3 text-xs font-bold text-white shadow-lg transition-all shrink-0 cursor-pointer"
+            className="btn-pop rounded-2xl bg-gradient-to-r from-rose-600 via-indigo-600 to-emerald-600 px-5 py-3 text-xs font-bold text-white shadow-lg transition-all shrink-0 cursor-pointer"
           >
             {harmonized ? "Clause Harmonized ✓" : "1-Click AI Harmonize"}
           </button>
@@ -1396,8 +1396,8 @@ function FrontierRadarStudio() {
 
             {/* Harmonized AI Resolution Draft */}
             {harmonized && (
-              <div className="rounded-2xl border border-emerald-200 dark:border-[#1DB954]/40 bg-emerald-50 dark:bg-[#1DB954]/10 p-4 space-y-1.5 animate-in zoom-in-95">
-                <span className="text-[10px] font-mono text-emerald-800 dark:text-[#1DB954] font-bold block">✨ SYNTHESIZED HARMONIZATION RESOLUTION</span>
+              <div className="rounded-2xl border border-emerald-200 dark:border-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/20 p-4 space-y-1.5 animate-in zoom-in-95">
+                <span className="text-[10px] font-mono text-emerald-800 dark:text-emerald-400 font-bold block">✨ SYNTHESIZED HARMONIZATION RESOLUTION</span>
                 <p className="text-xs text-slate-800 dark:text-zinc-200 leading-relaxed">
                   &ldquo;Either party may terminate upon 60 days prior written notice; in the event of statutory data incidents, liability shall follow standard DPA benchmarks with immediate mediation.&rdquo;
                 </p>
@@ -1450,7 +1450,7 @@ function FrontierDecisionsStudio() {
           <div className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/60 p-3.5 space-y-2">
             <div className="flex justify-between text-xs font-mono text-slate-700 dark:text-zinc-300">
               <span>Cost Efficiency</span>
-              <span className="font-bold text-emerald-700 dark:text-[#1DB954]">{costWeight}%</span>
+              <span className="font-bold text-emerald-700 dark:text-emerald-400">{costWeight}%</span>
             </div>
             <input
               type="range"
@@ -1458,7 +1458,7 @@ function FrontierDecisionsStudio() {
               max="100"
               value={costWeight}
               onChange={(e) => setCostWeight(parseInt(e.target.value))}
-              className="w-full accent-[#1DB954] cursor-pointer"
+              className="w-full accent-emerald-500 cursor-pointer"
             />
           </div>
 
@@ -1511,11 +1511,11 @@ function FrontierDecisionsStudio() {
               <div className="flex items-center gap-4 sm:w-1/2">
                 <div className="flex-1 h-3 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-[#1DB954] transition-all duration-300 rounded-full"
+                    className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 transition-all duration-300 rounded-full"
                     style={{ width: `${score}%` }}
                   />
                 </div>
-                <span className="font-mono text-sm font-black text-emerald-700 dark:text-[#1DB954] shrink-0 w-12 text-right">
+                <span className="font-mono text-sm font-black text-emerald-700 dark:text-emerald-400 shrink-0 w-12 text-right">
                   {score}/100
                 </span>
               </div>
@@ -1537,7 +1537,7 @@ function FrontierWorkflowsStudio() {
     { id: 1, name: "Document Ingestion & OCR", desc: "Monitors upload dropzone and extracts text tables" },
     { id: 2, name: "Clause Extraction & Conflict Scan", desc: "Cross-checks indemnity boundaries against standard MSA" },
     { id: 3, name: "Financial =SUM Recalculator", desc: "Extracts balance line items and simulates growth rates" },
-    { id: 4, name: "Executive Dispatch & Alert", desc: "Generates Spotify voice brief & sends Slack webhook" },
+    { id: 4, name: "Executive Dispatch & Alert", desc: "Generates spoken voice brief & sends Slack webhook" },
   ];
 
   const runSimulation = () => {
@@ -1553,10 +1553,10 @@ function FrontierWorkflowsStudio() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-3xl border border-emerald-200 dark:border-[#1DB954]/30 bg-white dark:bg-[#0a110e] p-6 shadow-xl dark:shadow-2xl space-y-4 transition-colors duration-200">
+      <div className="rounded-3xl border border-emerald-200 dark:border-emerald-500/30 bg-white dark:bg-[#0a110e] p-6 shadow-xl dark:shadow-2xl space-y-4 transition-colors duration-200">
         <div className="flex items-center justify-between">
-          <span className="font-mono text-xs font-bold text-emerald-700 dark:text-[#1DB954]">⚡ CIRCUIT LOGIC PIPELINE</span>
-          <span className="rounded-full bg-emerald-50 dark:bg-[#1DB954]/15 border border-emerald-200 dark:border-[#1DB954]/40 px-3 py-0.5 text-[10px] font-mono text-emerald-800 dark:text-[#1DB954]">
+          <span className="font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400">⚡ CIRCUIT LOGIC PIPELINE</span>
+          <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/40 px-3 py-0.5 text-[10px] font-mono text-emerald-800 dark:text-emerald-400">
             4-NODE ACTIVE STATE
           </span>
         </div>
@@ -1572,7 +1572,7 @@ function FrontierWorkflowsStudio() {
           <button
             onClick={runSimulation}
             disabled={runningStep !== null}
-            className="btn-pop rounded-2xl bg-[#1DB954] hover:bg-[#1ed760] px-6 py-3 text-xs font-black text-black shadow-lg shadow-[#1DB954]/30 transition-all cursor-pointer disabled:opacity-50 shrink-0"
+            className="btn-pop rounded-2xl bg-emerald-600 hover:bg-emerald-500 px-6 py-3 text-xs font-bold text-white shadow-lg shadow-emerald-500/30 transition-all cursor-pointer disabled:opacity-50 shrink-0"
           >
             {runningStep !== null ? `Executing Node ${runningStep}…` : "Run Pipeline Simulation"}
           </button>
@@ -1590,7 +1590,7 @@ function FrontierWorkflowsStudio() {
               key={s.id}
               className={`rounded-3xl border p-5 space-y-3 transition-all duration-300 relative ${
                 isActive
-                  ? "border-[#1DB954] bg-emerald-50/80 dark:bg-[#0d1c14] shadow-md dark:shadow-[0_0_25px_rgba(29,185,84,0.3)] scale-102"
+                  ? "border-emerald-500 bg-emerald-50/80 dark:bg-[#0d1c14] shadow-md dark:shadow-[0_0_25px_rgba(16,185,129,0.3)] scale-102"
                   : isPassed
                   ? "border-emerald-300 dark:border-emerald-500/40 bg-slate-50 dark:bg-zinc-900/60"
                   : "border-slate-200 dark:border-zinc-800 bg-white dark:bg-[#0c0e17]"
@@ -1599,9 +1599,9 @@ function FrontierWorkflowsStudio() {
               <div className="flex items-center justify-between">
                 <span className="font-mono text-xs font-bold text-slate-400 dark:text-zinc-500">NODE 0{s.id}</span>
                 {isActive ? (
-                  <span className="h-2 w-2 rounded-full bg-[#1DB954] animate-ping" />
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
                 ) : isPassed ? (
-                  <CheckCircle2 className="h-4 w-4 text-[#1DB954]" />
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                 ) : null}
               </div>
 
