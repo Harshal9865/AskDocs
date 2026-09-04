@@ -2,53 +2,27 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
-  Activity,
   ArrowRight,
   Brain,
   Check,
-  CheckCircle2,
-  ChevronRight,
-  Clock,
-  Compass,
-  Copy,
-  ExternalLink,
-  Eye,
   EyeOff,
   FileCode,
   FileSignature,
-  FileSpreadsheet,
   FileText,
   FolderSync,
   GraduationCap,
   Headphones,
-  Key,
   Layers,
-  LayoutDashboard,
-  LayoutGrid,
-  Lock,
   MessagesSquare,
-  Play,
-  Plug2,
-  Presentation,
   Rocket,
   Scale,
   Search,
-  Send,
-  Shield,
-  ShieldAlert,
   ShieldCheck,
   Sparkles,
-  Stethoscope,
-  Table,
-  Terminal,
-  UsersRound,
-  Volume2,
-  Webhook,
   Zap,
+  type LucideIcon,
 } from "lucide-react";
-import { useWorkspace } from "@/lib/workspace-context";
 import { showToast } from "@/components/Toast";
 
 type CategoryFilter =
@@ -66,7 +40,7 @@ interface FeatureCardData {
   category: CategoryFilter;
   title: string;
   badge: { text: string; color: string };
-  icon: any;
+  icon: LucideIcon;
   iconBg: string;
   desc: string;
   highlights: string[];
@@ -243,8 +217,6 @@ const ROADMAP = [
 ];
 
 export default function InnovationHubPage() {
-  const { workspace } = useWorkspace();
-  const router = useRouter();
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [simulatedPII, setSimulatedPII] = useState("Patient John Doe (SSN: 992-12-8841) was diagnosed with hypertension on 08/24/2026. Contact: john.doe@email.com.");
@@ -473,7 +445,7 @@ export default function InnovationHubPage() {
               {redactedResult ? (
                 <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{redactedResult}</span>
               ) : (
-                <span className="text-slate-400 dark:text-zinc-500 italic">Click "Execute Redaction Test" to see automated sanitization...</span>
+                <span className="text-slate-400 dark:text-zinc-500 italic">Click &quot;Execute Redaction Test&quot; to see automated sanitization...</span>
               )}
             </div>
           </div>

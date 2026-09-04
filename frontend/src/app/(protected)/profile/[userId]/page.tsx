@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import Avatar from "@/components/Avatar";
 import { useUserAvatar } from "@/lib/use-user-avatar";
-import { ArrowLeft, Mail, Phone, MapPin, MessageCircle, Briefcase, Pencil, UserPlus, UserCheck, Clock, X, Trash2, Shield, UserSearch, Camera, Award, Calendar, CheckCircle2, Copy, FileText, Globe, KeyRound, Layers, Share2, Sparkles, Star, TrendingUp, Zap, Building2, ShieldCheck, Check } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, MessageCircle, Briefcase, Pencil, UserPlus, UserCheck, Clock, X, Trash2, Shield, UserSearch, Camera, Award, CheckCircle2, FileText, KeyRound, Share2, Sparkles, TrendingUp, ShieldCheck, Check } from "lucide-react";
 import EditProfileModal from "@/components/EditProfileModal";
 import { showToast } from "@/components/Toast";
 import type { User } from "@/lib/types";

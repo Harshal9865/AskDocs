@@ -16,10 +16,7 @@ import {
   ArrowRight,
   RefreshCw,
   Sliders,
-  Shield,
   ShieldCheck,
-  Check,
-  Settings,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
