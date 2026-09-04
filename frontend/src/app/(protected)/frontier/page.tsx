@@ -144,7 +144,7 @@ export default function FrontierLabsPage() {
    1. COMMAND DECK OVERVIEW
    ========================================================================= */
 function FrontierCommandDeck({
-  documents,
+  documents: _documents,
   onSelectStudio,
 }: {
   documents: DocumentItem[];
@@ -269,7 +269,7 @@ function FrontierCommandDeck({
 /* =========================================================================
    2. SPOKEN VOICE CO-PILOT STUDIO
    ========================================================================= */
-function FrontierVoiceStudio({ documents }: { documents: DocumentItem[] }) {
+function FrontierVoiceStudio({ documents: _documents }: { documents: DocumentItem[] }) {
   const { workspace } = useWorkspace();
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -277,7 +277,7 @@ function FrontierVoiceStudio({ documents }: { documents: DocumentItem[] }) {
     { sender: "ai", text: "Frontier Voice Co-Pilot active. Speak naturally to interrogate documents or simulate viva exams.", time: "Now" }
   ]);
   const [interim, setInterim] = useState("");
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<{ stop: () => void } | null>(null);
 
   const speak = (text: string) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -322,7 +322,8 @@ function FrontierVoiceStudio({ documents }: { documents: DocumentItem[] }) {
       return;
     }
 
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const win = typeof window !== "undefined" ? (window as unknown as { SpeechRecognition?: new () => { continuous: boolean; interimResults: boolean; lang: string; start: () => void; stop: () => void; onstart: () => void; onresult: (e: { resultIndex: number; results: Array<{ isFinal: boolean; [index: number]: { transcript: string } }> }) => void; onerror: () => void; onend: () => void }; webkitSpeechRecognition?: new () => { continuous: boolean; interimResults: boolean; lang: string; start: () => void; stop: () => void; onstart: () => void; onresult: (e: { resultIndex: number; results: Array<{ isFinal: boolean; [index: number]: { transcript: string } }> }) => void; onerror: () => void; onend: () => void } }) : {};
+    const SpeechRecognition = win.SpeechRecognition || win.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       showToast("error", "Web Speech is not supported in this browser.");
       return;
@@ -341,7 +342,7 @@ function FrontierVoiceStudio({ documents }: { documents: DocumentItem[] }) {
         setIsListening(true);
         setInterim("");
       };
-      rec.onresult = (e: any) => {
+      rec.onresult = (e: { resultIndex: number; results: Array<{ isFinal: boolean; [index: number]: { transcript: string } }> }) => {
         let fin = "";
         let inter = "";
         for (let i = e.resultIndex; i < e.results.length; ++i) {
@@ -438,16 +439,14 @@ function FrontierVoiceStudio({ documents }: { documents: DocumentItem[] }) {
 /* =========================================================================
    3. DEEP RESEARCH DOSSIER STUDIO
    ========================================================================= */
-function FrontierResearchStudio({ documents }: { documents: DocumentItem[] }) {
-  const [topic, setTopic] = useState("Comprehensive Enterprise Risk & Architecture Assessment 2026");
+function FrontierResearchStudio({ documents: _documents }: { documents: DocumentItem[] }) {
+  const topic = "Comprehensive Enterprise Risk & Architecture Assessment 2026";
   const [generating, setGenerating] = useState(false);
-  const [dossierReady, setDossierReady] = useState(true);
 
   const handleGenerate = async () => {
     setGenerating(true);
     await new Promise((r) => setTimeout(r, 1200));
     setGenerating(false);
-    setDossierReady(true);
     showToast("success", "Deep Research Dossier generated with verified citations!");
   };
 
@@ -536,13 +535,13 @@ function FrontierResearchStudio({ documents }: { documents: DocumentItem[] }) {
 /* =========================================================================
    4. LIVE FINANCIAL & SCENARIO MODELER
    ========================================================================= */
-function FrontierSheetsStudio({ documents }: { documents: DocumentItem[] }) {
+function FrontierSheetsStudio({ documents: _documents }: { documents: DocumentItem[] }) {
   const [growthRate, setGrowthRate] = useState(15);
-  const [rows, setRows] = useState([
+  const rows = [
     { id: "1", metric: "Software Licensing ARR", base: 120000, cost: 24000 },
     { id: "2", metric: "Cloud GPU Vector Compute", base: 45000, cost: 18000 },
     { id: "3", metric: "Enterprise Support Contracts", base: 60000, cost: 12000 },
-  ]);
+  ];
 
   const totalBase = rows.reduce((acc, r) => acc + r.base, 0);
   const totalCost = rows.reduce((acc, r) => acc + r.cost, 0);
@@ -622,7 +621,7 @@ function FrontierSheetsStudio({ documents }: { documents: DocumentItem[] }) {
 /* =========================================================================
    5. CONFLICT & DISCREPANCY RADAR STUDIO
    ========================================================================= */
-function FrontierRadarStudio({ documents }: { documents: DocumentItem[] }) {
+function FrontierRadarStudio({ documents: _documents }: { documents: DocumentItem[] }) {
   const CLASHES = [
     {
       id: "clash-1",
@@ -705,7 +704,7 @@ function FrontierRadarStudio({ documents }: { documents: DocumentItem[] }) {
 /* =========================================================================
    6. EXECUTIVE DECISION & TRADEOFF SOLVER
    ========================================================================= */
-function FrontierDecisionsStudio({ documents }: { documents: DocumentItem[] }) {
+function FrontierDecisionsStudio({ documents: _documents }: { documents: DocumentItem[] }) {
   const [costWeight, setCostWeight] = useState(40);
   const [speedWeight, setSpeedWeight] = useState(30);
   const [complianceWeight, setComplianceWeight] = useState(30);
@@ -797,7 +796,7 @@ function FrontierDecisionsStudio({ documents }: { documents: DocumentItem[] }) {
 /* =========================================================================
    7. VISUAL WORKFLOW AUTOMATOR STUDIO
    ========================================================================= */
-function FrontierWorkflowsStudio({ documents }: { documents: DocumentItem[] }) {
+function FrontierWorkflowsStudio({ documents: _documents }: { documents: DocumentItem[] }) {
   const [runningFlow, setRunningFlow] = useState(false);
 
   const handleTestFlow = async () => {

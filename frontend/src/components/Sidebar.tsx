@@ -30,7 +30,6 @@ import {
   FileCode,
   Presentation,
   Rocket,
-  Zap,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
