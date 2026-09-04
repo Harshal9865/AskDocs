@@ -49,6 +49,7 @@ const NAV = [
 ];
 
 const NAV_INTELLIGENCE = [
+  { href: "/hub", label: "Innovation Hub", icon: Compass },
   { href: "/extract", label: "Data Extractor", icon: Table },
   { href: "/convert", label: "Format & Redact", icon: FileCode },
   { href: "/slides", label: "Slide Decks", icon: Presentation },
