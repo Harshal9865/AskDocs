@@ -796,7 +796,7 @@ function FrontierVoiceStudio() {
     const SpeechRecognitionClass = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
     if (!SpeechRecognitionClass) {
-      showToast("Speech recognition is not supported in this browser. Please use Chrome/Edge.", "error");
+      showToast("error", "Speech recognition is not supported in this browser. Please use Chrome/Edge.");
       return;
     }
 
@@ -829,7 +829,7 @@ function FrontierVoiceStudio() {
       recognitionRef.current = rec;
       setIsListening(true);
     } catch {
-      showToast("Could not access microphone.", "error");
+      showToast("error", "Could not access microphone.");
     }
   };
 
@@ -1039,7 +1039,7 @@ function FrontierResearchStudio({ documents }: { documents: DocumentItem[] }) {
 
   const handleGenerate = () => {
     if (!topic.trim()) {
-      showToast("Please enter a research thesis or topic.", "error");
+      showToast("error", "Please enter a research thesis or topic.");
       return;
     }
     setIsGenerating(true);
@@ -1061,7 +1061,7 @@ function FrontierResearchStudio({ documents }: { documents: DocumentItem[] }) {
       setStage("Phase 4: Executive PDF & LaTeX Dossier Compiled");
       setIsGenerating(false);
       setDossierReady(true);
-      showToast("Deep Research Dossier synthesized successfully!", "success");
+      showToast("success", "Deep Research Dossier synthesized successfully!");
     }, 2700);
   };
 
@@ -1141,13 +1141,13 @@ function FrontierResearchStudio({ documents }: { documents: DocumentItem[] }) {
             </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => showToast("Exported PDF Dossier.", "success")}
+                onClick={() => showToast("success", "Exported PDF Dossier.")}
                 className="btn-pop rounded-xl border border-indigo-500/30 bg-indigo-950/40 px-3 py-2 text-xs font-bold text-indigo-300 hover:bg-indigo-900/60 transition-colors flex items-center gap-1.5"
               >
                 <Download className="h-3.5 w-3.5" /> PDF
               </button>
               <button
-                onClick={() => showToast("Exported LaTeX Document.", "success")}
+                onClick={() => showToast("success", "Exported LaTeX Document.")}
                 className="btn-pop rounded-xl border border-indigo-500/30 bg-indigo-950/40 px-3 py-2 text-xs font-bold text-indigo-300 hover:bg-indigo-900/60 transition-colors flex items-center gap-1.5"
               >
                 <Copy className="h-3.5 w-3.5" /> LaTeX
@@ -1252,7 +1252,7 @@ function FrontierSheetsStudio() {
         <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
           <span className="font-mono text-xs text-zinc-400">FORMULA BAR: <span className="text-teal-300 font-bold">=SUM(B2:E2) * (1 + {growthRate}%)</span></span>
           <button
-            onClick={() => showToast("Exported scenario to Excel (.xlsx)", "success")}
+            onClick={() => showToast("success", "Exported scenario to Excel (.xlsx)")}
             className="btn-pop rounded-xl bg-teal-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-teal-500 transition-colors flex items-center gap-1.5"
           >
             <Download className="h-3.5 w-3.5" /> Export .XLSX
@@ -1350,7 +1350,7 @@ function FrontierRadarStudio() {
           <button
             onClick={() => {
               setHarmonized(true);
-              showToast("Synthesized unified harmonized clause draft!", "success");
+              showToast("success", "Synthesized unified harmonized clause draft!");
             }}
             className="btn-pop rounded-2xl bg-gradient-to-r from-rose-600 via-indigo-600 to-[#1DB954] px-5 py-3 text-xs font-bold text-white shadow-lg transition-all shrink-0 cursor-pointer"
           >
@@ -1540,7 +1540,7 @@ function FrontierWorkflowsStudio() {
     setTimeout(() => setRunningStep(4), 2100);
     setTimeout(() => {
       setRunningStep(null);
-      showToast("Simulation pipeline executed successfully with 0 errors!", "success");
+      showToast("success", "Simulation pipeline executed successfully with 0 errors!");
     }, 2800);
   };
 
