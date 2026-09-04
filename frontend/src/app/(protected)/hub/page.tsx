@@ -13,12 +13,12 @@ import {
   FileCode,
   FileSignature,
   FileText,
-  FolderSync,
   GraduationCap,
   Headphones,
   Layers,
   MessagesSquare,
   Play,
+  Presentation,
   Rocket,
   Scale,
   Search,
@@ -38,7 +38,6 @@ type CategoryFilter =
   | "audio"
   | "docs"
   | "collab"
-  | "cloud"
   | "legal";
 
 interface FeatureCardData {
@@ -99,23 +98,23 @@ X-WAF-Inspection: PASSED (0.2ms)
 Payload-Integrity: 100% Sanitized`,
   },
   {
-    id: "gdrive_sync",
-    category: "cloud",
-    title: "Google Drive OAuth & Auto-Ingestion",
-    badge: { text: "CLOUD SYNC", color: "bg-blue-100 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300" },
-    icon: FolderSync,
+    id: "slide_studio",
+    category: "docs",
+    title: "Slide Deck Studio & PowerPoint Mode",
+    badge: { text: "PRESENTATIONS", color: "bg-blue-100 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300" },
+    icon: Presentation,
     iconBg: "bg-blue-500/15 text-blue-600 dark:text-blue-400",
     glowColor: "group-hover:shadow-blue-500/20 group-hover:border-blue-400/50",
-    desc: "Direct integration with Google Cloud. Pick loose files from My Drive (Root) or preset folders without typing.",
-    highlights: ["OAuth 2.0 Read-Only Scopes", "Selective File Picker Dialog", "Real-Time Webhook Auto-Fetch on upload"],
-    href: "/integrations",
-    actionText: "Open Cloud Hub",
-    metric: "Zero typing needed",
-    demoSnippet: `// Google Cloud OAuth 2.0 Ingest
-const driveSync = await askDocs.connectGoogleDrive({
-  folderPreset: "📁 My Drive (Root - loose files)",
-  autoIngestOnUpload: true,
-  extractOcrTables: true
+    desc: "Convert multi-document sources into executive 16:9 slide decks with fullscreen PowerPoint presenter mode (F5) and Gamma AI export.",
+    highlights: ["Interactive F5 Presentation Mode", "1-Click Gamma AI Bridge", "Printable Vector PDF & HTML Web Decks"],
+    href: "/slides",
+    actionText: "Open Slide Studio",
+    metric: "16:9 Fullscreen Presenter",
+    demoSnippet: `// 1-Click Slide Synthesis & Gamma Bridge
+const deck = await askDocs.generateSlides({
+  sources: ["Q3_Financials.pdf", "Engineering_Roadmap.docx"],
+  theme: "Spotify Obsidian Dark",
+  gammaBridge: true
 });`,
   },
   {
@@ -333,7 +332,7 @@ export default function InnovationHubPage() {
           </h1>
 
           <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-2xl">
-            From Enterprise Application Firewalls and Google Drive OAuth connectors to 2-host audio podcasts and token-efficient multi-document AI synthesis—discover how AskDocs elevates your institutional productivity.
+            From Enterprise Application Firewalls and PowerPoint presentation studios to 2-host audio podcasts and token-efficient multi-document AI synthesis—discover how AskDocs elevates your institutional productivity.
           </p>
 
           <div className="pt-2 flex flex-wrap items-center gap-3">
@@ -366,9 +365,8 @@ export default function InnovationHubPage() {
             { id: "ai", label: "AI & RAG", icon: Sparkles },
             { id: "security", label: "Security & WAF", icon: ShieldCheck },
             { id: "audio", label: "Audio Podcasts", icon: Headphones },
-            { id: "docs", label: "Document Ops", icon: FileText },
+            { id: "docs", label: "Presentations & Docs", icon: Presentation },
             { id: "collab", label: "Team Chats", icon: MessagesSquare },
-            { id: "cloud", label: "Cloud Connectors", icon: FolderSync },
             { id: "legal", label: "Contracts", icon: Scale },
           ].map((cat) => {
             const Icon = cat.icon;

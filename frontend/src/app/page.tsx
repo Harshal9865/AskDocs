@@ -29,7 +29,6 @@ import {
   Target,
   Lock,
   FileKey,
-  Plug2,
   ArrowUp,
   Settings,
   LogOut,
@@ -44,7 +43,6 @@ import {
   FileSpreadsheet,
   Play,
   Pause,
-  Code2,
   Download,
   Radio,
   FileCode,
@@ -162,14 +160,14 @@ function StudioLiveInteractivePlayground() {
           { id: "extract", label: "Data Extractor", icon: Table },
           { id: "slides", label: "Slide Decks & Gamma", icon: Presentation },
           { id: "canvas", label: "Multi-Doc Canvas", icon: LayoutGrid },
-          { id: "connectors", label: "Universal API", icon: Code2 },
+          { id: "memory", label: "Memory Graph", icon: Brain },
         ].map((tab) => {
           const Icon = tab.icon;
           const isSelected = activeTab === tab.id;
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as "audio" | "study" | "extract" | "slides" | "canvas" | "connectors")}
+              onClick={() => setActiveTab(tab.id as "audio" | "study" | "extract" | "slides" | "canvas" | "memory")}
               className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 isSelected
                   ? "bg-[#1db954] text-black font-black shadow-lg shadow-[#1db954]/25 scale-102"
@@ -422,38 +420,45 @@ function StudioLiveInteractivePlayground() {
           </div>
         )}
 
-        {/* TAB 6: CONNECTORS */}
-        {activeTab === "connectors" && (
+        {/* TAB 6: MEMORY GRAPH */}
+        {activeTab === "memory" && (
           <div className="space-y-4 animate-in fade-in duration-300 text-xs">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-wider text-[#1db954]">
-                Universal REST API & Webhook Simulator
+              <span className="text-[10px] font-black uppercase tracking-wider text-cyan-400">
+                Institutional Knowledge Mind Map & Entity Links
               </span>
-              <button
-                type="button"
-                onClick={() => setTestedApi(true)}
-                className="rounded-xl bg-[#1db954] px-3 py-1 text-[11px] font-black text-black hover:bg-[#1ed760] transition-all cursor-pointer"
-              >
-                {testedApi ? "✓ 200 OK Simulated" : "▶ Run Test Request"}
-              </button>
+              <span className="rounded-full bg-cyan-500/20 px-2 py-0.5 text-[10px] font-mono text-cyan-300">
+                Living Vector Graph
+              </span>
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-black/90 p-3.5 font-mono text-[11px] text-slate-300 space-y-1.5">
-              <p className="text-purple-400"># Universal Ingestion cURL Endpoint</p>
-              <p className="text-emerald-400">curl -X POST https://askdocs.app/api/v1/workspaces/ws_live/documents \</p>
-              <p className="text-slate-400 pl-4">-H "Authorization: Bearer sk_live_askdocs_prod" \</p>
-              <p className="text-slate-400 pl-4">-F "file=@Syllabus_2026.pdf"</p>
-            </div>
-
-            {testedApi && (
-              <div className="rounded-xl border border-[#1db954]/30 bg-[#1db954]/10 p-2.5 font-mono text-[10px] text-[#1db954] animate-in fade-in">
-                {`{"status": 200, "message": "Document ingested and indexed into Vector Store", "chunks": 42}`}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="rounded-xl border border-purple-500/30 bg-purple-950/20 p-3.5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono text-purple-300 font-bold">NODE #104 • ENTITY CLUSTER</span>
+                  <span className="h-2 w-2 rounded-full bg-purple-400 animate-ping" />
+                </div>
+                <h5 className="text-xs font-bold text-white">Vendor Indemnity ➔ SLA Milestone</h5>
+                <p className="text-[10px] text-slate-300 leading-relaxed">
+                  Linked across 14 clauses. Automated cross-referencing between MSA Section 4 and SOP Exhibit B.
+                </p>
               </div>
-            )}
+
+              <div className="rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-3.5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono text-cyan-300 font-bold">NODE #218 • DECISION TIMELINE</span>
+                  <span className="h-2 w-2 rounded-full bg-cyan-400" />
+                </div>
+                <h5 className="text-xs font-bold text-white">Board Approval ➔ Budget Release</h5>
+                <p className="text-[10px] text-slate-300 leading-relaxed">
+                  Extracted from Q3 meeting minutes. Unanimous authorization of infrastructure scaling budget.
+                </p>
+              </div>
+            </div>
 
             <div className="flex justify-end pt-1">
-              <Link href="/integrations" className="font-bold text-[#1db954] hover:underline">
-                View Developer API Playground ➔
+              <Link href="/memory" className="font-bold text-cyan-400 hover:underline">
+                Explore Full Memory Graph ➔
               </Link>
             </div>
           </div>
@@ -666,13 +671,13 @@ const NEW_CAPABILITIES = [
     tags: ["PII Anonymization", "Clean Markdown", "Developer JSON", "Sanitized PDFs"],
   },
   {
-    badge: "Universal Connectors & API",
-    title: "6 Audience Connectors & Live REST API Playground",
-    desc: "Sync Google Drive, Slack, Notion, Obsidian, and Odoo ERP with real-time webhooks and an interactive REST API playground with cURL, Python, and Node.js snippets.",
-    icon: Plug2,
+    badge: "Zero-Trust Security",
+    title: "Enterprise Application Firewall (WAF)",
+    desc: "Active perimeter defense inspection scanning all incoming requests against SQL Injection, XSS, and unauthorized probing with zero model training guarantees.",
+    icon: Shield,
     color: "from-[#1db954] via-emerald-600 to-teal-600",
     glow: "glow-emerald",
-    tags: ["Google Drive & Slack", "Notion & ERP", "cURL / Python / Node.js", "Webhooks"],
+    tags: ["Perimeter WAF", "SQLi & XSS Shield", "Zero Model Training", "AES-256"],
   },
 ];
 

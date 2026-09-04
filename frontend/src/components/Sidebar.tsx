@@ -27,7 +27,6 @@ import {
   Table,
   GraduationCap,
   Headphones,
-  Plug2,
   FileCode,
   Presentation,
 } from "lucide-react";
@@ -65,7 +64,6 @@ const NAV_INTELLIGENCE = [
 
 const NAV_SECONDARY = [
   { href: "/search", label: "Search", icon: Search },
-  { href: "/integrations", label: "Integrations & API", icon: Plug2 },
   { href: "/discover", label: "Discover", icon: Compass },
   { href: "/pricing", label: "Plans & Pricing", icon: Crown },
   { href: "/insights", label: "Insights", icon: BarChart3 },

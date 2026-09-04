@@ -245,7 +245,7 @@ export default function HelpPage() {
             </div>
             <h2 className="mt-2 text-xl font-bold sm:text-2xl">Can&apos;t find what you&apos;re looking for?</h2>
             <p className="mt-1 max-w-md text-xs sm:text-sm text-purple-200/80">
-              Our team is here to assist with document indexing, workspace setup, and custom team integrations.
+              Our team is here to assist with document indexing, workspace setup, and studio capabilities.
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap justify-center gap-2.5">
