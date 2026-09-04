@@ -178,7 +178,6 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
               <div className="fixed inset-0 z-40" onClick={() => setMoreOpen(false)} />
               <div className="dark:border-white/10 dark:bg-[#16181f] absolute left-0 z-50 mt-2 w-52 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-2xl animate-in zoom-in-95 duration-150">
                 {[
-                  { href: "/frontier", label: "✦ Frontier Labs", Icon: Rocket },
                   { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
                   { href: "/chat", label: "AI Chat", Icon: Sparkles },
                   { href: "/chats", label: modeConfig.chatLabel, Icon: MessagesSquare },
@@ -222,7 +221,6 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
       {/* desktop nav — expands progressively based on available laptop & desktop width */}
       <nav className="hidden items-center gap-1 lg:flex">
         {[
-          { href: "/frontier", label: "✦ Frontier", Icon: Rocket },
           { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
           { href: "/chat", label: "AI Chat", Icon: Sparkles },
           { href: "/chats", label: modeConfig.chatLabel, Icon: MessagesSquare },

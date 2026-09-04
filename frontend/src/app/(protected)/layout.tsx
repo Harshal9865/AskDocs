@@ -45,6 +45,24 @@ export default function ProtectedLayout({
   if (!user) return null;
 
   const isChatPage = pathname === "/chat" || pathname === "/chats";
+  const isFrontier = pathname === "/frontier" || pathname.startsWith("/frontier/");
+
+  if (isFrontier) {
+    return (
+      <WorkspaceProvider>
+        <AudienceModeProvider>
+          <div className="flex h-[100dvh] flex-col overflow-hidden bg-slate-50 dark:bg-[#07060f] text-slate-900 dark:text-white transition-colors">
+            <Toaster />
+            <main className="min-w-0 flex-1 min-h-0 overflow-y-auto">
+              <WelcomeModal />
+              <CommandPalette />
+              {children}
+            </main>
+          </div>
+        </AudienceModeProvider>
+      </WorkspaceProvider>
+    );
+  }
 
   return (
     <WorkspaceProvider>
