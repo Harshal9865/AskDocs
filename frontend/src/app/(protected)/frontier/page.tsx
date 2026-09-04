@@ -27,6 +27,7 @@ import {
   CircleHelp,
   ShieldCheck,
   Zap,
+  ExternalLink,
 } from "lucide-react";
 import { useWorkspace } from "@/lib/workspace-context";
 import { useAuth } from "@/lib/auth-context";
@@ -49,6 +50,7 @@ export default function FrontierLabsPage() {
   const { user, logout, avatarSrc } = useAuth();
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [searchFilter, setSearchFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
@@ -81,47 +83,47 @@ export default function FrontierLabsPage() {
   }, [profileMenuOpen]);
 
   const DOCK_ITEMS = [
-    { id: "command", label: "Command Deck", icon: Layers, gradient: "from-purple-600 via-indigo-600 to-blue-600", badge: "OVERVIEW" },
+    { id: "command", label: "Command Hub", icon: Layers, gradient: "from-emerald-600 via-teal-600 to-cyan-600", badge: "OVERVIEW" },
     { id: "voice", label: "Voice Co-Pilot", icon: Mic, gradient: "from-violet-600 via-indigo-600 to-purple-600", badge: "HANDS-FREE" },
     { id: "research", label: "Deep Research", icon: FileText, gradient: "from-cyan-500 via-blue-600 to-indigo-600", badge: "AUTONOMOUS" },
     { id: "sheets", label: "Financial Modeler", icon: Table, gradient: "from-emerald-500 via-teal-600 to-cyan-600", badge: "FORMULAS" },
     { id: "radar", label: "Conflict Radar", icon: Scale, gradient: "from-rose-500 via-pink-600 to-purple-600", badge: "CLASH MATRIX" },
-    { id: "decisions", label: "Decision Solver", icon: Brain, gradient: "from-fuchsia-600 via-purple-600 to-indigo-600", badge: "DECISION MATRIX" },
-    { id: "workflows", label: "Workflow Automator", icon: GitBranch, gradient: "from-amber-500 via-orange-500 to-rose-500", badge: "NO-CODE" },
+    { id: "decisions", label: "Decision Solver", icon: Brain, gradient: "from-fuchsia-600 via-purple-600 to-indigo-600", badge: "TRADE-OFFS" },
+    { id: "workflows", label: "Workflow Automator", icon: GitBranch, gradient: "from-amber-500 via-orange-500 to-rose-500", badge: "PIPELINES" },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#07060f] text-slate-900 dark:text-white transition-colors flex flex-col">
+    <div className="min-h-screen bg-[#f7f9f6] dark:bg-[#07090c] text-slate-900 dark:text-zinc-100 transition-colors flex flex-col font-sans">
       {/* =========================================================================
           FRONTIER STANDALONE INDEPENDENT TOP NAVBAR
           ========================================================================= */}
-      <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-[#0c0a1f]/80 backdrop-blur-2xl shadow-xs transition-colors">
+      <header className="sticky top-0 z-40 w-full border-b border-emerald-900/10 dark:border-white/10 bg-white/85 dark:bg-[#0d1217]/85 backdrop-blur-2xl shadow-xs transition-colors">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
           {/* Left Cluster: Back to Dashboard & Frontier Brand */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-white/10 bg-slate-100/80 dark:bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:bg-slate-200 dark:hover:bg-white/10 transition-all active:scale-95 group"
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-white/10 shadow-xs transition-all active:scale-95 group"
             >
-              <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
+              <ArrowLeft className="h-3.5 w-3.5 text-slate-500 dark:text-zinc-400 transition-transform group-hover:-translate-x-0.5" />
               <span className="hidden sm:inline">Back to Dashboard</span>
               <span className="sm:hidden">Back</span>
             </Link>
 
             <div className="h-4 w-px bg-slate-200 dark:bg-white/10 hidden sm:block" />
 
-            {/* Brand Logo & Glowing Badge */}
+            {/* Brand Logo & Studio Pill */}
             <div className="flex items-center gap-2">
-              <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/20 shrink-0">
+              <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 via-teal-600 to-indigo-600 text-white shadow-md shadow-emerald-500/20 shrink-0">
                 <Rocket className="h-4 w-4" />
               </span>
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
                   <span className="font-extrabold text-sm tracking-tight text-slate-900 dark:text-white">
-                    AskDocs <span className="text-purple-600 dark:text-purple-400">Frontier</span>
+                    AskDocs <span className="text-emerald-600 dark:text-emerald-400">Frontier</span>
                   </span>
-                  <span className="rounded-full bg-purple-100 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-500/30 px-1.5 py-0.2 text-[9px] font-black uppercase text-purple-700 dark:text-purple-300">
-                    v3.0
+                  <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-500/30 px-2 py-0.2 text-[9px] font-black uppercase text-emerald-800 dark:text-emerald-300">
+                    LABS v3.0
                   </span>
                 </div>
               </div>
@@ -135,8 +137,8 @@ export default function FrontierLabsPage() {
               type="text"
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
-              placeholder="Search studio tools (e.g. voice, radar)…"
-              className="w-full rounded-full border border-slate-200 dark:border-white/10 bg-slate-100/60 dark:bg-white/5 py-1.5 pl-8 pr-3 text-xs outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 dark:text-zinc-200 transition-all"
+              placeholder="Search studios & capabilities…"
+              className="w-full rounded-full border border-slate-200 dark:border-white/10 bg-slate-100/80 dark:bg-white/5 py-1.5 pl-8 pr-3 text-xs outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-slate-800 dark:text-zinc-200 transition-all"
             />
             {searchFilter && (
               <button
@@ -148,10 +150,10 @@ export default function FrontierLabsPage() {
             )}
           </div>
 
-          {/* Right Cluster: Workspace Pill + Bell + Theme Toggle + User Avatar */}
+          {/* Right Cluster: Workspace Status + Bell + Theme Toggle + User Avatar */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {workspace && (
-              <div className="hidden lg:flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-2.5 py-1 text-xs text-slate-600 dark:text-zinc-300">
+              <div className="hidden lg:flex items-center gap-1.5 rounded-full border border-slate-200/80 dark:border-white/10 bg-white dark:bg-white/5 px-2.5 py-1 text-xs text-slate-600 dark:text-zinc-300 shadow-xs">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="max-w-[120px] truncate font-medium">{workspace.name}</span>
               </div>
@@ -171,7 +173,7 @@ export default function FrontierLabsPage() {
             <div className="relative" ref={profileMenuRef}>
               <button
                 onClick={() => setProfileMenuOpen((o) => !o)}
-                className="flex items-center gap-1.5 rounded-full p-0.5 hover:ring-2 hover:ring-purple-500/40 transition-all cursor-pointer"
+                className="flex items-center gap-1.5 rounded-full p-0.5 hover:ring-2 hover:ring-emerald-500/40 transition-all cursor-pointer"
                 aria-label="User Profile Menu"
               >
                 <Avatar
@@ -184,7 +186,7 @@ export default function FrontierLabsPage() {
               </button>
 
               {profileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#141226] p-2 shadow-2xl animate-in zoom-in-95 duration-150 z-50">
+                <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#141820] p-2 shadow-2xl animate-in zoom-in-95 duration-150 z-50">
                   <div className="px-3 py-2 border-b border-slate-100 dark:border-white/5">
                     <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{user?.name || "User"}</p>
                     <p className="text-[11px] text-slate-500 dark:text-zinc-400 truncate">{user?.email}</p>
@@ -206,6 +208,14 @@ export default function FrontierLabsPage() {
                     >
                       <Settings className="h-3.5 w-3.5 text-slate-400 dark:text-zinc-400" />
                       <span>Account Settings</span>
+                    </Link>
+                    <Link
+                      href="/hub"
+                      onClick={() => setProfileMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-xl px-3 py-2 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+                    >
+                      <Sparkles className="h-3.5 w-3.5 text-emerald-500" />
+                      <span>Innovation Hub Notes</span>
                     </Link>
                     <Link
                       href="/help"
@@ -238,27 +248,27 @@ export default function FrontierLabsPage() {
       </header>
 
       {/* =========================================================================
-          MAIN STUDIO CANVAS & APPLE-STYLE WIDGET EXPERIENCE
+          MAIN STUDIO CANVAS & BENTO GLASS WIDGET SYSTEM
           ========================================================================= */}
       <div className="flex-1 max-w-7xl mx-auto w-full p-3 sm:p-6 lg:p-8 space-y-6 animate-in fade-in duration-300">
-        {/* Ambient Gradient Glow Orbs (Help Page Style) */}
-        <div className="pointer-events-none fixed top-16 left-1/2 -z-10 h-96 w-full max-w-4xl -translate-x-1/2 overflow-hidden opacity-30 dark:opacity-20 blur-3xl" aria-hidden>
-          <div className="absolute -top-10 left-1/4 h-64 w-64 rounded-full bg-purple-500 animate-pulse" style={{ animationDuration: "8s" }} />
-          <div className="absolute top-10 right-1/4 h-64 w-64 rounded-full bg-indigo-500 animate-pulse" style={{ animationDuration: "10s", animationDelay: "1s" }} />
-          <div className="absolute top-24 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-rose-500 animate-pulse" style={{ animationDuration: "9s", animationDelay: "2s" }} />
+        {/* Soft Ambient Glow Orbs */}
+        <div className="pointer-events-none fixed top-16 left-1/2 -z-10 h-96 w-full max-w-4xl -translate-x-1/2 overflow-hidden opacity-25 dark:opacity-15 blur-3xl" aria-hidden>
+          <div className="absolute -top-10 left-1/4 h-64 w-64 rounded-full bg-emerald-500 animate-pulse" style={{ animationDuration: "9s" }} />
+          <div className="absolute top-10 right-1/4 h-64 w-64 rounded-full bg-teal-500 animate-pulse" style={{ animationDuration: "11s", animationDelay: "1s" }} />
+          <div className="absolute top-24 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-indigo-500 animate-pulse" style={{ animationDuration: "10s", animationDelay: "2s" }} />
         </div>
 
-        {/* Hero Apple Widget Header */}
-        <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 dark:border-purple-500/30 bg-gradient-to-br from-white via-slate-50 to-purple-50/50 dark:from-[#0f0c24] dark:via-[#151134] dark:to-[#090818] p-6 sm:p-8 shadow-xl dark:shadow-2xl transition-all">
+        {/* Hero Bento Banner */}
+        <div className="relative overflow-hidden rounded-3xl border border-emerald-900/10 dark:border-white/10 bg-gradient-to-br from-white via-emerald-50/40 to-teal-50/30 dark:from-[#0d1419] dark:via-[#111922] dark:to-[#090e13] p-6 sm:p-8 shadow-xl dark:shadow-2xl transition-all">
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2.5 max-w-2xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-purple-50 px-3.5 py-1 text-xs font-bold text-purple-700 backdrop-blur-md dark:border-purple-400/30 dark:bg-purple-500/20 dark:text-purple-300 shadow-xs">
-                <Sparkles className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400 animate-spin" style={{ animationDuration: "12s" }} />
-                <span>Apple-Grade Cognitive Workspace</span>
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100/70 px-3.5 py-1 text-xs font-bold text-emerald-800 backdrop-blur-md dark:border-emerald-400/30 dark:bg-emerald-500/20 dark:text-emerald-300 shadow-xs">
+                <Sparkles className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 animate-spin" style={{ animationDuration: "12s" }} />
+                <span>Next-Gen Problem & Decision Engine</span>
               </div>
               <h1 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
-                <span className="bg-gradient-to-r from-purple-700 via-indigo-700 to-blue-600 bg-clip-text text-transparent dark:from-purple-300 dark:via-indigo-200 dark:to-cyan-300">
-                  Frontier Decision & Problem Studios
+                <span className="bg-gradient-to-r from-emerald-800 via-teal-700 to-indigo-700 bg-clip-text text-transparent dark:from-emerald-300 dark:via-teal-200 dark:to-cyan-300">
+                  Frontier Intelligence Studios
                 </span>
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-300 leading-relaxed">
@@ -266,23 +276,23 @@ export default function FrontierLabsPage() {
               </p>
             </div>
 
-            {/* Quick Apple-Style Status Pills */}
+            {/* Quick Status Badges */}
             <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
-              <span className="inline-flex items-center gap-1.5 rounded-2xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-white/5 px-3.5 py-2 text-xs font-mono font-medium text-slate-700 dark:text-zinc-300 backdrop-blur-md shadow-xs">
+              <span className="inline-flex items-center gap-1.5 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-white/5 px-3.5 py-2 text-xs font-mono font-medium text-slate-700 dark:text-zinc-300 backdrop-blur-md shadow-xs">
                 📚 {documents.length} Docs Indexed
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-2xl border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 px-3.5 py-2 text-xs font-mono font-bold text-emerald-700 dark:text-[#1db954] backdrop-blur-md shadow-xs">
-                <Zap className="h-3.5 w-3.5" /> 6 Active Studios
+              <span className="inline-flex items-center gap-1.5 rounded-2xl border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 px-3.5 py-2 text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400 backdrop-blur-md shadow-xs">
+                <Zap className="h-3.5 w-3.5" /> 6 Cognitive Studios
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-2xl border border-blue-200 dark:border-blue-500/30 bg-blue-50 dark:bg-blue-950/30 px-3.5 py-2 text-xs font-mono text-blue-700 dark:text-blue-300 backdrop-blur-md shadow-xs">
+              <span className="inline-flex items-center gap-1.5 rounded-2xl border border-teal-200 dark:border-teal-500/30 bg-teal-50 dark:bg-teal-950/30 px-3.5 py-2 text-xs font-mono text-teal-700 dark:text-teal-300 backdrop-blur-md shadow-xs">
                 <ShieldCheck className="h-3.5 w-3.5" /> Strict Isolation
               </span>
             </div>
           </div>
         </div>
 
-        {/* Floating VisionOS / Apple Widget Glass Dock */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 shrink-0 bg-white/80 dark:bg-[#121124]/80 p-2 rounded-2xl border border-slate-200/80 dark:border-white/10 backdrop-blur-2xl shadow-lg">
+        {/* Floating Glass Dock Navigation */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 shrink-0 bg-white/85 dark:bg-[#0e141a]/85 p-2 rounded-2xl border border-slate-200/80 dark:border-white/10 backdrop-blur-2xl shadow-lg">
           {DOCK_ITEMS.map((tab) => {
             const Icon = tab.icon;
             const isSelected = activeTab === tab.id;
@@ -292,7 +302,7 @@ export default function FrontierLabsPage() {
                 onClick={() => setActiveTab(tab.id as FrontierTab)}
                 className={`btn-pop shrink-0 inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold transition-all cursor-pointer ${
                   isSelected
-                    ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg shadow-purple-500/25 scale-102`
+                    ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg shadow-emerald-600/25 scale-102`
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-white/5"
                 }`}
               >
@@ -303,11 +313,13 @@ export default function FrontierLabsPage() {
           })}
         </div>
 
-        {/* Tab 1: Frontier Command Deck (Studio Directory as Apple Widgets) */}
+        {/* Tab 1: Frontier Command Deck (Studio Directory as Bento Cards) */}
         {activeTab === "command" && (
           <FrontierCommandDeck
             documents={documents}
             searchFilter={searchFilter}
+            categoryFilter={categoryFilter}
+            onSetCategory={setCategoryFilter}
             onSelectStudio={(tab) => setActiveTab(tab)}
           />
         )}
@@ -335,20 +347,35 @@ export default function FrontierLabsPage() {
 }
 
 /* =========================================================================
-   1. COMMAND DECK OVERVIEW (APPLE WIDGET GRID)
+   1. COMMAND DECK OVERVIEW (MODULAR BENTO GRID)
    ========================================================================= */
 function FrontierCommandDeck({
   documents,
   searchFilter,
+  categoryFilter,
+  onSetCategory,
   onSelectStudio,
 }: {
   documents: DocumentItem[];
   searchFilter: string;
+  categoryFilter: string;
+  onSetCategory: (cat: string) => void;
   onSelectStudio: (tab: FrontierTab) => void;
 }) {
+  const CATEGORIES = [
+    { id: "all", label: "All Studios" },
+    { id: "voice", label: "Voice & Speech" },
+    { id: "research", label: "Deep Research" },
+    { id: "finance", label: "Financial Modeling" },
+    { id: "legal", label: "Conflict & Radar" },
+    { id: "decisions", label: "Tradeoff Solver" },
+    { id: "automation", label: "Workflows" },
+  ];
+
   const STUDIOS = [
     {
       id: "voice" as FrontierTab,
+      category: "voice",
       title: "🎙️ Spoken Voice Co-Pilot",
       badge: "HANDS-FREE DIALOGUE",
       gradient: "from-violet-600 via-indigo-600 to-purple-600",
@@ -360,6 +387,7 @@ function FrontierCommandDeck({
     },
     {
       id: "research" as FrontierTab,
+      category: "research",
       title: "📑 Deep Research Dossier",
       badge: "MULTI-PASS REASONING",
       gradient: "from-cyan-500 via-blue-600 to-indigo-600",
@@ -371,6 +399,7 @@ function FrontierCommandDeck({
     },
     {
       id: "sheets" as FrontierTab,
+      category: "finance",
       title: "📊 Live Financial Modeler",
       badge: "REAL FORMULAS",
       gradient: "from-emerald-500 via-teal-600 to-cyan-600",
@@ -382,6 +411,7 @@ function FrontierCommandDeck({
     },
     {
       id: "radar" as FrontierTab,
+      category: "legal",
       title: "⚔️ Conflict & Discrepancy Radar",
       badge: "CLAUSE CLASH MATRIX",
       gradient: "from-rose-500 via-pink-600 to-purple-600",
@@ -393,6 +423,7 @@ function FrontierCommandDeck({
     },
     {
       id: "decisions" as FrontierTab,
+      category: "decisions",
       title: "🧠 Decision Tradeoff Solver",
       badge: "MULTI-CRITERIA SOLVER",
       gradient: "from-fuchsia-600 via-purple-600 to-indigo-600",
@@ -404,6 +435,7 @@ function FrontierCommandDeck({
     },
     {
       id: "workflows" as FrontierTab,
+      category: "automation",
       title: "⚡ Visual Workflow Automator",
       badge: "NO-CODE PIPELINES",
       gradient: "from-amber-500 via-orange-500 to-rose-500",
@@ -416,6 +448,8 @@ function FrontierCommandDeck({
   ];
 
   const filteredStudios = STUDIOS.filter((s) => {
+    const matchesCat = categoryFilter === "all" || s.category === categoryFilter;
+    if (!matchesCat) return false;
     if (!searchFilter.trim()) return true;
     const term = searchFilter.toLowerCase();
     return (
@@ -428,8 +462,35 @@ function FrontierCommandDeck({
 
   return (
     <div className="space-y-6">
+      {/* Category Filter Pills */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-1.5">
+          {CATEGORIES.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => onSetCategory(c.id)}
+              className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                categoryFilter === c.id
+                  ? "bg-slate-900 text-white dark:bg-emerald-500 dark:text-black shadow-sm"
+                  : "border border-slate-200/80 bg-white text-slate-600 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10"
+              }`}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+
+        <Link
+          href="/hub"
+          className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:underline"
+        >
+          <span>Read Innovation Hub Guidance</span>
+          <ExternalLink className="h-3 w-3" />
+        </Link>
+      </div>
+
       {/* Connected Repository Status Bar */}
-      <div className="flex items-center justify-between rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-[#121124]/70 px-4 py-3 text-xs text-slate-700 dark:text-zinc-300 backdrop-blur-md shadow-xs">
+      <div className="flex items-center justify-between rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white/80 dark:bg-[#0e141a]/70 px-4 py-3 text-xs text-slate-700 dark:text-zinc-300 backdrop-blur-md shadow-xs">
         <div className="flex items-center gap-2">
           <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-ping" />
           <span className="font-semibold text-slate-900 dark:text-white">Workspace Cognitive Engine:</span>
@@ -437,17 +498,17 @@ function FrontierCommandDeck({
             {documents.length > 0 ? `${documents.length} workspace files linked` : "Ready for documents"}
           </span>
         </div>
-        <span className="hidden sm:inline font-mono text-[11px] text-purple-600 dark:text-purple-400 font-bold">
-          VisionOS Glass Interface • 6 Studios
+        <span className="hidden sm:inline font-mono text-[11px] text-emerald-700 dark:text-emerald-400 font-bold">
+          Bento Grid Interface • 6 Specialized Studios
         </span>
       </div>
 
-      {/* 6 Apple Widget Cards */}
+      {/* 6 Bento Grid Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredStudios.map((s) => (
           <div
             key={s.id}
-            className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white/90 dark:bg-[#110f24]/80 p-6 shadow-lg hover:shadow-2xl dark:shadow-black/40 backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1"
+            className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white/90 dark:bg-[#0e141a]/90 p-6 shadow-lg hover:shadow-2xl dark:shadow-black/40 backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1"
           >
             <div className="space-y-4">
               {/* Top Gradient Badge & Version */}
@@ -459,7 +520,7 @@ function FrontierCommandDeck({
               </div>
 
               {/* Title & Description */}
-              <h3 className="text-lg font-black text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">
                 {s.title}
               </h3>
 
@@ -467,9 +528,9 @@ function FrontierCommandDeck({
                 {s.desc}
               </p>
 
-              {/* Targeted Problem Box (Apple Callout Style) */}
-              <div className="rounded-2xl border border-purple-200/60 dark:border-purple-500/20 bg-purple-50/60 dark:bg-purple-950/20 p-3 text-xs text-purple-900 dark:text-purple-200 space-y-1">
-                <span className="font-bold text-purple-700 dark:text-purple-300 block text-[10px] uppercase tracking-wider">🎯 Problem Solved:</span>
+              {/* Targeted Problem Box */}
+              <div className="rounded-2xl border border-emerald-200/60 dark:border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 p-3 text-xs text-emerald-900 dark:text-emerald-200 space-y-1">
+                <span className="font-bold text-emerald-800 dark:text-emerald-300 block text-[10px] uppercase tracking-wider">🎯 Problem Solved:</span>
                 <p className="leading-snug text-[11px]">{s.targetProblem}</p>
               </div>
 
@@ -477,7 +538,7 @@ function FrontierCommandDeck({
               <ul className="space-y-1.5 text-xs text-slate-500 dark:text-zinc-400">
                 {s.highlights.map((h, i) => (
                   <li key={i} className="flex items-center gap-2">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-[#1db954] shrink-0" />
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <span>{h}</span>
                   </li>
                 ))}
@@ -512,6 +573,12 @@ function FrontierVoiceStudio({ documents }: { documents: DocumentItem[] }) {
   ]);
   const [interim, setInterim] = useState("");
   const recognitionRef = useRef<{ stop: () => void } | null>(null);
+
+  const QUICK_PROMPTS = [
+    "Summarize the key contractual obligations and liabilities",
+    "Compare termination notice periods across our agreements",
+    "What are the top computational architecture bottlenecks?",
+  ];
 
   const speak = (text: string) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -609,7 +676,7 @@ function FrontierVoiceStudio({ documents }: { documents: DocumentItem[] }) {
   };
 
   return (
-    <div className="rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white/90 dark:bg-[#110f24]/90 p-6 space-y-6 shadow-xl backdrop-blur-2xl">
+    <div className="rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white/90 dark:bg-[#0e141a]/90 p-6 space-y-6 shadow-xl backdrop-blur-2xl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 dark:border-white/10 pb-4">
         <div>
           <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -626,26 +693,42 @@ function FrontierVoiceStudio({ documents }: { documents: DocumentItem[] }) {
           onClick={() => {
             if (window.speechSynthesis) window.speechSynthesis.cancel();
             setIsSpeaking(false);
-            showToast("info", "Speech canceled.");
+            showToast("info", "Speech playback stopped.");
           }}
-          className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/5 px-3 py-1.5 text-xs text-slate-700 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-white/10"
+          className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/5 px-3 py-1.5 text-xs text-slate-700 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-white/10 font-semibold"
         >
           Stop Audio
         </button>
       </div>
 
+      {/* Quick Prompt Chips */}
+      <div className="space-y-1.5">
+        <span className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Suggested Spoken Queries:</span>
+        <div className="flex flex-wrap gap-2">
+          {QUICK_PROMPTS.map((p, i) => (
+            <button
+              key={i}
+              onClick={() => void processQuery(p)}
+              className="rounded-full border border-violet-200 dark:border-violet-500/20 bg-violet-50/60 dark:bg-violet-950/30 px-3 py-1 text-xs text-violet-800 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors cursor-pointer text-left"
+            >
+              &ldquo;{p}&rdquo;
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="h-64 overflow-y-auto space-y-3 p-4 rounded-2xl bg-slate-100/60 dark:bg-black/40 border border-slate-200/60 dark:border-white/5">
         {liveTranscript.map((t, idx) => (
           <div key={idx} className={`flex gap-2 text-xs ${t.sender === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`p-3.5 rounded-2xl max-w-xl shadow-xs ${t.sender === "user" ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white" : "bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-zinc-200"}`}>
+            <div className={`p-3.5 rounded-2xl max-w-xl shadow-xs ${t.sender === "user" ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white" : "bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-zinc-200"}`}>
               <p>{t.text}</p>
-              <span className={`block text-[9px] mt-1 text-right ${t.sender === "user" ? "text-purple-200" : "text-slate-400 dark:text-zinc-500"}`}>{t.time}</span>
+              <span className={`block text-[9px] mt-1 text-right ${t.sender === "user" ? "text-violet-200" : "text-slate-400 dark:text-zinc-500"}`}>{t.time}</span>
             </div>
           </div>
         ))}
         {isListening && interim && (
           <div className="flex justify-end text-xs">
-            <div className="p-3 rounded-2xl bg-purple-100 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-500/30 text-purple-900 dark:text-zinc-300 italic">
+            <div className="p-3 rounded-2xl bg-violet-100 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-500/30 text-violet-900 dark:text-zinc-300 italic">
               {interim}…
             </div>
           </div>
@@ -658,7 +741,7 @@ function FrontierVoiceStudio({ documents }: { documents: DocumentItem[] }) {
           {[30, 80, 50, 100, 40, 70, 90, 60, 30, 85, 95, 40].map((h, i) => (
             <div
               key={i}
-              className={`w-1.5 rounded-full transition-all duration-150 ${isListening ? "bg-purple-600 dark:bg-purple-400 animate-pulse" : isSpeaking ? "bg-indigo-500 animate-pulse" : "bg-slate-300 dark:bg-zinc-700"}`}
+              className={`w-1.5 rounded-full transition-all duration-150 ${isListening ? "bg-violet-600 dark:bg-violet-400 animate-pulse" : isSpeaking ? "bg-indigo-500 animate-pulse" : "bg-slate-300 dark:bg-zinc-700"}`}
               style={{ height: isListening || isSpeaking ? `${h}%` : "20%" }}
             />
           ))}
@@ -668,14 +751,14 @@ function FrontierVoiceStudio({ documents }: { documents: DocumentItem[] }) {
           type="button"
           onClick={toggleMic}
           className={`btn-pop flex h-14 w-14 items-center justify-center rounded-full shadow-2xl transition-all ${
-            isListening ? "bg-rose-600 text-white animate-pulse" : "bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:scale-105"
+            isListening ? "bg-rose-600 text-white animate-pulse" : "bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:scale-105"
           }`}
         >
           {isListening ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
         </button>
 
         <span className="text-xs text-slate-500 dark:text-zinc-400 font-mono font-medium">
-          {isListening ? "Listening…" : isSpeaking ? "Speaking synthesis…" : "Click mic to speak"}
+          {isListening ? "Listening (speak now)…" : isSpeaking ? "Speaking synthesis…" : "Click mic to speak"}
         </span>
       </div>
     </div>
@@ -686,18 +769,29 @@ function FrontierVoiceStudio({ documents }: { documents: DocumentItem[] }) {
    3. DEEP RESEARCH DOSSIER STUDIO
    ========================================================================= */
 function FrontierResearchStudio({ documents }: { documents: DocumentItem[] }) {
-  const topic = "Comprehensive Enterprise Risk & Architecture Assessment 2026";
+  const [topic, setTopic] = useState("Comprehensive Enterprise Risk & Architecture Assessment 2026");
   const [generating, setGenerating] = useState(false);
+  const [progress, setProgress] = useState(100);
+
+  const RESEARCH_PRESETS = [
+    "Comprehensive Enterprise Risk & Architecture Assessment 2026",
+    "Clinical Trial Protocol Efficacy & Compliance Review",
+    "M&A Contractual Liability & Indemnity Audit Report",
+  ];
 
   const handleGenerate = async () => {
     setGenerating(true);
-    await new Promise((r) => setTimeout(r, 1200));
+    setProgress(20);
+    await new Promise((r) => setTimeout(r, 400));
+    setProgress(65);
+    await new Promise((r) => setTimeout(r, 500));
+    setProgress(100);
     setGenerating(false);
     showToast("success", "Deep Research Dossier generated with verified citations!");
   };
 
   return (
-    <div className="rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white/90 dark:bg-[#110f24]/90 p-6 space-y-6 shadow-xl backdrop-blur-2xl">
+    <div className="rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white/90 dark:bg-[#0e141a]/90 p-6 space-y-6 shadow-xl backdrop-blur-2xl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 dark:border-white/10 pb-4">
         <div>
           <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -717,30 +811,59 @@ function FrontierResearchStudio({ documents }: { documents: DocumentItem[] }) {
           disabled={generating}
           className="btn-pop rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg hover:brightness-110 cursor-pointer"
         >
-          {generating ? "Synthesizing Dossier…" : "✦ Generate 15-Page Dossier"}
+          {generating ? `Synthesizing Dossier (${progress}%)…` : "✦ Generate 15-Page Dossier"}
         </button>
+      </div>
+
+      {/* Research Topic Input & Presets */}
+      <div className="space-y-2">
+        <label className="text-xs font-bold text-slate-700 dark:text-zinc-300">Research Topic / Dossier Focus:</label>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            type="text"
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            className="flex-1 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-4 py-2 text-xs text-slate-800 dark:text-zinc-200 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            placeholder="Enter research topic…"
+          />
+        </div>
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {RESEARCH_PRESETS.map((p, i) => (
+            <button
+              key={i}
+              onClick={() => setTopic(p)}
+              className={`rounded-full px-3 py-1 text-[11px] font-medium transition-colors cursor-pointer ${
+                topic === p
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-white/10"
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-slate-50/80 dark:bg-white/5 p-5 text-xs">
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-sm text-slate-900 dark:text-white">{topic}</h3>
-            <span className="text-[10px] font-mono text-emerald-600 dark:text-[#1db954] font-bold">
+            <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
               ✓ {Math.max(documents.length, 1)} Document Citations Indexed
             </span>
           </div>
 
           <div className="space-y-3 text-slate-700 dark:text-zinc-300 leading-relaxed">
-            <h4 className="font-bold text-purple-600 dark:text-purple-300 text-xs uppercase tracking-wider">1. Executive Abstract & Methodology</h4>
+            <h4 className="font-bold text-blue-600 dark:text-blue-300 text-xs uppercase tracking-wider">1. Executive Abstract & Methodology</h4>
             <p>
               This investigation synthesizes operational policies, third-party vendor MSAs, and computational architecture notes across {documents.length > 0 ? `${documents.length} workspace files` : "the active repository"}. Findings demonstrate a 99.92% reliability index with critical indemnity exposures isolated to Section 4.
             </p>
 
-            <h4 className="font-bold text-purple-600 dark:text-purple-300 text-xs uppercase tracking-wider">2. Empirical Variance & Metric Breakdown</h4>
+            <h4 className="font-bold text-blue-600 dark:text-blue-300 text-xs uppercase tracking-wider">2. Empirical Variance & Metric Breakdown</h4>
             {/* SVG Mini Bar Graph */}
             <div className="h-32 w-full rounded-xl bg-white dark:bg-black/60 p-3 border border-slate-200 dark:border-white/10 flex items-end justify-between gap-3 shadow-xs">
               {[
-                { label: "Q1 Latency", val: 35, color: "bg-purple-500" },
+                { label: "Q1 Latency", val: 35, color: "bg-blue-500" },
                 { label: "Q2 Index", val: 65, color: "bg-indigo-500" },
                 { label: "Q3 Accuracy", val: 92, color: "bg-emerald-500" },
                 { label: "Q4 Throughput", val: 84, color: "bg-cyan-500" },
@@ -753,7 +876,7 @@ function FrontierResearchStudio({ documents }: { documents: DocumentItem[] }) {
               ))}
             </div>
 
-            <h4 className="font-bold text-purple-600 dark:text-purple-300 text-xs uppercase tracking-wider">3. Synthesized Architecture Diagram</h4>
+            <h4 className="font-bold text-blue-600 dark:text-blue-300 text-xs uppercase tracking-wider">3. Synthesized Architecture Diagram</h4>
             <div className="rounded-xl bg-slate-900 text-cyan-300 dark:bg-black/80 p-3 border border-slate-200 dark:border-white/10 font-mono text-[11px] space-y-1">
               <p>{"[Uploaded PDFs] ➔ [Vector Chunking] ➔ [Cosine Top-8] ➔ [Deep Dossier Matrix]"}</p>
             </div>
@@ -764,17 +887,17 @@ function FrontierResearchStudio({ documents }: { documents: DocumentItem[] }) {
           <h4 className="font-bold text-slate-900 dark:text-white text-xs uppercase">Dossier Actions & Exports</h4>
           <button
             onClick={() => showToast("success", "Exporting publication-ready PDF dossier...")}
-            className="w-full flex items-center justify-between rounded-xl bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 p-3 text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-white/20 transition-all font-bold shadow-xs"
+            className="w-full flex items-center justify-between rounded-xl bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 p-3 text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-white/20 transition-all font-bold shadow-xs cursor-pointer"
           >
             <span>Download PDF Report</span>
-            <Download className="h-4 w-4 text-emerald-600 dark:text-[#1db954]" />
+            <Download className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           </button>
           <button
             onClick={() => showToast("success", "LaTeX document copied to clipboard!")}
-            className="w-full flex items-center justify-between rounded-xl bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 p-3 text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-white/20 transition-all font-bold shadow-xs"
+            className="w-full flex items-center justify-between rounded-xl bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 p-3 text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-white/20 transition-all font-bold shadow-xs cursor-pointer"
           >
             <span>Copy LaTeX Source</span>
-            <Copy className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+            <Copy className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           </button>
         </div>
       </div>
@@ -787,24 +910,41 @@ function FrontierResearchStudio({ documents }: { documents: DocumentItem[] }) {
    ========================================================================= */
 function FrontierSheetsStudio({ documents }: { documents: DocumentItem[] }) {
   const [growthRate, setGrowthRate] = useState(15);
-  const rows = [
+  const [rows, setRows] = useState([
     { id: "1", metric: "Software Licensing ARR", base: 120000, cost: 24000 },
     { id: "2", metric: "Cloud GPU Vector Compute", base: 45000, cost: 18000 },
     { id: "3", metric: "Enterprise Support Contracts", base: 60000, cost: 12000 },
-  ];
+  ]);
 
   const totalBase = rows.reduce((acc, r) => acc + r.base, 0);
   const totalCost = rows.reduce((acc, r) => acc + r.cost, 0);
   const projectedRev = totalBase * (1 + growthRate / 100);
   const projectedNet = projectedRev - totalCost;
 
+  const handleExportCsv = () => {
+    let csv = "Metric,Base Revenue ($),Fixed Cost ($),Projected Revenue ($)\n";
+    rows.forEach((r) => {
+      csv += `"${r.metric}",${r.base},${r.cost},${Math.round(r.base * (1 + growthRate / 100))}\n`;
+    });
+    csv += `"TOTAL FORMULA",${totalBase},${totalCost},${Math.round(projectedRev)}\n`;
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `Financial_Scenario_Model_${growthRate}pct.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("success", "Spreadsheet exported to CSV / Excel!");
+  };
+
   return (
-    <div className="rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white/90 dark:bg-[#110f24]/90 p-6 space-y-6 shadow-xl backdrop-blur-2xl">
+    <div className="rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white/90 dark:bg-[#0e141a]/90 p-6 space-y-6 shadow-xl backdrop-blur-2xl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 dark:border-white/10 pb-4">
         <div>
           <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
             <span>📊 Live Financial & Scenario Modeler</span>
-            <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-mono font-bold text-emerald-700 dark:text-[#1db954]">
+            <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-mono font-bold text-emerald-700 dark:text-emerald-400">
               LIVE FORMULAS
             </span>
           </h2>
@@ -814,18 +954,18 @@ function FrontierSheetsStudio({ documents }: { documents: DocumentItem[] }) {
         </div>
 
         <button
-          onClick={() => showToast("success", "Exporting live workbook to .xlsx spreadsheet...")}
-          className="btn-pop rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-4 py-2 text-xs font-bold shadow-md hover:brightness-110"
+          onClick={handleExportCsv}
+          className="btn-pop rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-4 py-2 text-xs font-bold shadow-md hover:brightness-110 cursor-pointer"
         >
-          Export to Excel (.xlsx)
+          Export to Excel (.csv / .xlsx)
         </button>
       </div>
 
       {/* Scenario What-If Slider */}
       <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-slate-50/80 dark:bg-white/5 p-4 space-y-2 text-xs">
         <div className="flex items-center justify-between">
-          <span className="font-bold text-purple-700 dark:text-purple-300">⚡ What-If Revenue Growth Simulation: +{growthRate}%</span>
-          <span className="font-mono text-emerald-600 dark:text-[#1db954] font-bold">Projected Net Margin: ${projectedNet.toLocaleString()}</span>
+          <span className="font-bold text-emerald-800 dark:text-emerald-300">⚡ What-If Revenue Growth Simulation: +{growthRate}%</span>
+          <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">Projected Net Margin: ${projectedNet.toLocaleString()}</span>
         </div>
         <input
           type="range"
@@ -833,7 +973,7 @@ function FrontierSheetsStudio({ documents }: { documents: DocumentItem[] }) {
           max="50"
           value={growthRate}
           onChange={(e) => setGrowthRate(Number(e.target.value))}
-          className="w-full accent-emerald-600 dark:accent-[#1db954] cursor-pointer"
+          className="w-full accent-emerald-600 dark:accent-emerald-500 cursor-pointer"
         />
       </div>
 
@@ -845,7 +985,7 @@ function FrontierSheetsStudio({ documents }: { documents: DocumentItem[] }) {
               <th className="p-3">Financial Metric</th>
               <th className="p-3">Base Revenue</th>
               <th className="p-3">Fixed Cost</th>
-              <th className="p-3 text-emerald-600 dark:text-[#1db954]">Projected (+{growthRate}%)</th>
+              <th className="p-3 text-emerald-600 dark:text-emerald-400">Projected (+{growthRate}%)</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-white/5">
@@ -854,14 +994,14 @@ function FrontierSheetsStudio({ documents }: { documents: DocumentItem[] }) {
                 <td className="p-3 font-bold text-slate-900 dark:text-white">{r.metric}</td>
                 <td className="p-3 text-slate-600 dark:text-zinc-300">${r.base.toLocaleString()}</td>
                 <td className="p-3 text-rose-600 dark:text-rose-400">${r.cost.toLocaleString()}</td>
-                <td className="p-3 text-emerald-600 dark:text-[#1db954] font-bold">${Math.round(r.base * (1 + growthRate / 100)).toLocaleString()}</td>
+                <td className="p-3 text-emerald-600 dark:text-emerald-400 font-bold">${Math.round(r.base * (1 + growthRate / 100)).toLocaleString()}</td>
               </tr>
             ))}
-            <tr className="bg-slate-50 dark:bg-white/5 font-bold border-t border-purple-200 dark:border-purple-500/30">
-              <td className="p-3 text-purple-700 dark:text-purple-300">TOTAL FORMULA (=SUM)</td>
+            <tr className="bg-slate-50 dark:bg-white/5 font-bold border-t border-emerald-200 dark:border-emerald-500/30">
+              <td className="p-3 text-emerald-800 dark:text-emerald-300">TOTAL FORMULA (=SUM)</td>
               <td className="p-3 text-slate-900 dark:text-white">${totalBase.toLocaleString()}</td>
               <td className="p-3 text-rose-600 dark:text-rose-400">${totalCost.toLocaleString()}</td>
-              <td className="p-3 text-emerald-600 dark:text-[#1db954] text-sm">${Math.round(projectedRev).toLocaleString()}</td>
+              <td className="p-3 text-emerald-600 dark:text-emerald-400 text-sm">${Math.round(projectedRev).toLocaleString()}</td>
             </tr>
           </tbody>
         </table>
@@ -874,6 +1014,8 @@ function FrontierSheetsStudio({ documents }: { documents: DocumentItem[] }) {
    5. CONFLICT & DISCREPANCY RADAR STUDIO
    ========================================================================= */
 function FrontierRadarStudio({ documents }: { documents: DocumentItem[] }) {
+  const [harmonized, setHarmonized] = useState(false);
+
   const CLASHES = [
     {
       id: "clash-1",
@@ -898,8 +1040,8 @@ function FrontierRadarStudio({ documents }: { documents: DocumentItem[] }) {
   ];
 
   return (
-    <div className="rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white/90 dark:bg-[#110f24]/90 p-6 space-y-6 shadow-xl backdrop-blur-2xl">
-      <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-white/10 pb-4">
+    <div className="rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white/90 dark:bg-[#0e141a]/90 p-6 space-y-6 shadow-xl backdrop-blur-2xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 dark:border-white/10 pb-4">
         <div>
           <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
             <span>⚔️ Multi-Document Conflict & Discrepancy Radar</span>
@@ -913,10 +1055,13 @@ function FrontierRadarStudio({ documents }: { documents: DocumentItem[] }) {
         </div>
 
         <button
-          onClick={() => showToast("success", "Generating standardized harmonization amendment...")}
-          className="btn-pop rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-md"
+          onClick={() => {
+            setHarmonized(true);
+            showToast("success", "Generated standardized harmonization amendment!");
+          }}
+          className="btn-pop rounded-2xl bg-gradient-to-r from-rose-600 to-purple-600 px-4 py-2 text-xs font-bold text-white shadow-md cursor-pointer"
         >
-          1-Click AI Harmonization
+          {harmonized ? "✓ Harmonization Proposal Ready" : "1-Click AI Harmonization"}
         </button>
       </div>
 
@@ -944,8 +1089,8 @@ function FrontierRadarStudio({ documents }: { documents: DocumentItem[] }) {
               </div>
             </div>
 
-            <div className="rounded-xl bg-emerald-50 dark:bg-[#1db954]/10 border border-emerald-200 dark:border-[#1db954]/30 p-3 text-xs text-slate-800 dark:text-zinc-200">
-              <span className="font-bold text-emerald-700 dark:text-[#1db954] block mb-1">✓ AI Harmonization Proposal:</span>
+            <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-500/30 p-3 text-xs text-slate-800 dark:text-zinc-200">
+              <span className="font-bold text-emerald-700 dark:text-emerald-400 block mb-1">✓ AI Harmonization Proposal:</span>
               <p>{c.recommendation}</p>
             </div>
           </div>
@@ -975,12 +1120,12 @@ function FrontierDecisionsStudio({ documents }: { documents: DocumentItem[] }) {
   }).sort((a, b) => b.composite - a.composite);
 
   return (
-    <div className="rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white/90 dark:bg-[#110f24]/90 p-6 space-y-6 shadow-xl backdrop-blur-2xl">
+    <div className="rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white/90 dark:bg-[#0e141a]/90 p-6 space-y-6 shadow-xl backdrop-blur-2xl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 dark:border-white/10 pb-4">
         <div>
           <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
             <span>🧠 Executive Decision & Tradeoff Solver</span>
-            <span className="rounded-full bg-cyan-100 dark:bg-cyan-950/60 border border-cyan-200 dark:border-cyan-500/30 px-2.5 py-0.5 text-[10px] font-mono font-bold text-cyan-700 dark:text-cyan-300">
+            <span className="rounded-full bg-fuchsia-100 dark:bg-fuchsia-950/60 border border-fuchsia-200 dark:border-fuchsia-500/30 px-2.5 py-0.5 text-[10px] font-mono font-bold text-fuchsia-700 dark:text-fuchsia-300">
               WEIGHTED MATRIX
             </span>
           </h2>
@@ -991,7 +1136,7 @@ function FrontierDecisionsStudio({ documents }: { documents: DocumentItem[] }) {
 
         <button
           onClick={() => showToast("success", "Decision recommendation memorandum generated!")}
-          className="btn-pop rounded-2xl bg-gradient-to-r from-fuchsia-600 to-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:brightness-110"
+          className="btn-pop rounded-2xl bg-gradient-to-r from-fuchsia-600 to-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:brightness-110 cursor-pointer"
         >
           Export Decision Memo
         </button>
@@ -1002,23 +1147,23 @@ function FrontierDecisionsStudio({ documents }: { documents: DocumentItem[] }) {
         <div className="space-y-1">
           <div className="flex justify-between font-bold text-slate-700 dark:text-zinc-300">
             <span>💰 Cost Efficiency Weight</span>
-            <span className="font-mono text-emerald-600 dark:text-[#1db954]">{costWeight}%</span>
+            <span className="font-mono text-emerald-600 dark:text-emerald-400">{costWeight}%</span>
           </div>
-          <input type="range" min="0" max="100" value={costWeight} onChange={(e) => setCostWeight(Number(e.target.value))} className="w-full accent-emerald-600 dark:accent-[#1db954]" />
+          <input type="range" min="0" max="100" value={costWeight} onChange={(e) => setCostWeight(Number(e.target.value))} className="w-full accent-emerald-600 dark:accent-emerald-500 cursor-pointer" />
         </div>
         <div className="space-y-1">
           <div className="flex justify-between font-bold text-slate-700 dark:text-zinc-300">
             <span>⚡ Execution Speed Weight</span>
             <span className="font-mono text-purple-600 dark:text-purple-300">{speedWeight}%</span>
           </div>
-          <input type="range" min="0" max="100" value={speedWeight} onChange={(e) => setSpeedWeight(Number(e.target.value))} className="w-full accent-purple-500" />
+          <input type="range" min="0" max="100" value={speedWeight} onChange={(e) => setSpeedWeight(Number(e.target.value))} className="w-full accent-purple-500 cursor-pointer" />
         </div>
         <div className="space-y-1">
           <div className="flex justify-between font-bold text-slate-700 dark:text-zinc-300">
             <span>🛡️ Compliance & Risk Weight</span>
             <span className="font-mono text-blue-600 dark:text-cyan-300">{complianceWeight}%</span>
           </div>
-          <input type="range" min="0" max="100" value={complianceWeight} onChange={(e) => setComplianceWeight(Number(e.target.value))} className="w-full accent-cyan-500" />
+          <input type="range" min="0" max="100" value={complianceWeight} onChange={(e) => setComplianceWeight(Number(e.target.value))} className="w-full accent-cyan-500 cursor-pointer" />
         </div>
       </div>
 
@@ -1026,15 +1171,15 @@ function FrontierDecisionsStudio({ documents }: { documents: DocumentItem[] }) {
       <div className="space-y-3">
         {scoredOptions.map((opt, rank) => (
           <div key={opt.name} className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${
-            rank === 0 ? "border-purple-300 dark:border-[#1db954]/50 bg-purple-50/60 dark:bg-[#1db954]/10 shadow-md" : "border-slate-200 dark:border-white/10 bg-white dark:bg-white/5"
+            rank === 0 ? "border-emerald-300 dark:border-emerald-500/50 bg-emerald-50/60 dark:bg-emerald-950/20 shadow-md" : "border-slate-200 dark:border-white/10 bg-white dark:bg-white/5"
           }`}>
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className={`flex h-6 w-6 items-center justify-center rounded-lg text-xs font-mono font-bold ${rank === 0 ? "bg-purple-600 dark:bg-[#1db954] text-white dark:text-black" : "bg-slate-200 dark:bg-white/10 text-slate-800 dark:text-white"}`}>
+                <span className={`flex h-6 w-6 items-center justify-center rounded-lg text-xs font-mono font-bold ${rank === 0 ? "bg-emerald-600 text-white" : "bg-slate-200 dark:bg-white/10 text-slate-800 dark:text-white"}`}>
                   #{rank + 1}
                 </span>
                 <span className="text-xs font-bold text-slate-900 dark:text-white">{opt.name}</span>
-                {rank === 0 && <span className="rounded-full bg-purple-100 dark:bg-[#1db954]/20 text-purple-700 dark:text-[#1db954] px-2 py-0.5 text-[9px] font-bold">TOP RECOMMENDATION</span>}
+                {rank === 0 && <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 text-[9px] font-bold">TOP RECOMMENDATION</span>}
               </div>
               <p className="text-[11px] text-slate-500 dark:text-zinc-400 font-mono">Cost: {opt.costScore}/100 • Speed: {opt.speedScore}/100 • Compliance: {opt.compScore}/100</p>
             </div>
@@ -1054,16 +1199,21 @@ function FrontierDecisionsStudio({ documents }: { documents: DocumentItem[] }) {
    ========================================================================= */
 function FrontierWorkflowsStudio({ documents }: { documents: DocumentItem[] }) {
   const [runningFlow, setRunningFlow] = useState(false);
+  const [activeStep, setActiveStep] = useState<number | null>(null);
 
   const handleTestFlow = async () => {
     setRunningFlow(true);
-    await new Promise((r) => setTimeout(r, 1400));
+    for (let i = 1; i <= 4; i++) {
+      setActiveStep(i);
+      await new Promise((r) => setTimeout(r, 400));
+    }
     setRunningFlow(false);
+    setActiveStep(null);
     showToast("success", "Workflow execution completed across 4 pipeline nodes!");
   };
 
   return (
-    <div className="rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white/90 dark:bg-[#110f24]/90 p-6 space-y-6 shadow-xl backdrop-blur-2xl">
+    <div className="rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white/90 dark:bg-[#0e141a]/90 p-6 space-y-6 shadow-xl backdrop-blur-2xl">
       <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-white/10 pb-4">
         <div>
           <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -1080,34 +1230,50 @@ function FrontierWorkflowsStudio({ documents }: { documents: DocumentItem[] }) {
         <button
           onClick={handleTestFlow}
           disabled={runningFlow}
-          className="btn-pop rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2 text-xs font-bold text-white shadow-md hover:brightness-110"
+          className="btn-pop rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2 text-xs font-bold text-white shadow-md hover:brightness-110 cursor-pointer"
         >
-          {runningFlow ? "Executing Pipeline…" : "▶ Test Workflow"}
+          {runningFlow ? `Executing Node #${activeStep}…` : "▶ Test Workflow Pipeline"}
         </button>
       </div>
 
-      {/* Visual Flow Nodes (Apple Shortcuts Style) */}
+      {/* Visual Flow Nodes */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
-        <div className="rounded-2xl border border-purple-200 dark:border-purple-500/30 bg-purple-50/50 dark:bg-purple-950/20 p-4 space-y-2 shadow-xs">
+        <div className={`rounded-2xl border p-4 space-y-2 transition-all ${
+          activeStep === 1
+            ? "border-purple-500 bg-purple-100 dark:bg-purple-950/50 shadow-lg scale-102"
+            : "border-purple-200 dark:border-purple-500/30 bg-purple-50/50 dark:bg-purple-950/20"
+        }`}>
           <span className="rounded-md bg-purple-200/70 dark:bg-purple-500/20 px-2 py-0.5 text-[9px] font-bold text-purple-800 dark:text-purple-300 uppercase">Trigger</span>
           <h4 className="font-bold text-slate-900 dark:text-white">1. Document Upload</h4>
           <p className="text-[10px] text-slate-600 dark:text-zinc-400">Fires when any PDF or DOCX is uploaded to workspace ({documents.length} existing).</p>
         </div>
 
-        <div className="rounded-2xl border border-blue-200 dark:border-blue-500/30 bg-blue-50/50 dark:bg-blue-950/20 p-4 space-y-2 shadow-xs">
+        <div className={`rounded-2xl border p-4 space-y-2 transition-all ${
+          activeStep === 2
+            ? "border-blue-500 bg-blue-100 dark:bg-blue-950/50 shadow-lg scale-102"
+            : "border-blue-200 dark:border-blue-500/30 bg-blue-50/50 dark:bg-blue-950/20"
+        }`}>
           <span className="rounded-md bg-blue-200/70 dark:bg-blue-500/20 px-2 py-0.5 text-[9px] font-bold text-blue-800 dark:text-blue-300 uppercase">AI Processing</span>
           <h4 className="font-bold text-slate-900 dark:text-white">2. Table & OCR Extraction</h4>
           <p className="text-[10px] text-slate-600 dark:text-zinc-400">Extracts financial balance tables into live spreadsheets.</p>
         </div>
 
-        <div className="rounded-2xl border border-rose-200 dark:border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20 p-4 space-y-2 shadow-xs">
+        <div className={`rounded-2xl border p-4 space-y-2 transition-all ${
+          activeStep === 3
+            ? "border-rose-500 bg-rose-100 dark:bg-rose-950/50 shadow-lg scale-102"
+            : "border-rose-200 dark:border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20"
+        }`}>
           <span className="rounded-md bg-rose-200/70 dark:bg-rose-500/20 px-2 py-0.5 text-[9px] font-bold text-rose-800 dark:text-rose-300 uppercase">Compliance Check</span>
           <h4 className="font-bold text-slate-900 dark:text-white">3. Redline Conflict Radar</h4>
           <p className="text-[10px] text-slate-600 dark:text-zinc-400">Scans clauses against existing master agreements.</p>
         </div>
 
-        <div className="rounded-2xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20 p-4 space-y-2 shadow-xs">
-          <span className="rounded-md bg-emerald-200/70 dark:bg-emerald-500/20 px-2 py-0.5 text-[9px] font-bold text-emerald-800 dark:text-[#1db954] uppercase">Action</span>
+        <div className={`rounded-2xl border p-4 space-y-2 transition-all ${
+          activeStep === 4
+            ? "border-emerald-500 bg-emerald-100 dark:bg-emerald-950/50 shadow-lg scale-102"
+            : "border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20"
+        }`}>
+          <span className="rounded-md bg-emerald-200/70 dark:bg-emerald-500/20 px-2 py-0.5 text-[9px] font-bold text-emerald-800 dark:text-emerald-400 uppercase">Action</span>
           <h4 className="font-bold text-slate-900 dark:text-white">4. Notify Chat & Archive</h4>
           <p className="text-[10px] text-slate-600 dark:text-zinc-400">Posts briefing card into Team Chats with 1-click approve.</p>
         </div>

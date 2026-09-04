@@ -10,16 +10,20 @@ import {
   EyeOff,
   FileCode,
   FileSignature,
+  FileText,
+  GitBranch,
   GraduationCap,
   Headphones,
   Layers,
   MessagesSquare,
+  Mic,
   Presentation,
   Rocket,
   Scale,
   Search,
   ShieldCheck,
   Sparkles,
+  Table,
   Terminal,
   X,
   Zap,
@@ -29,6 +33,7 @@ import { showToast } from "@/components/Toast";
 
 type CategoryFilter =
   | "all"
+  | "frontier"
   | "ai"
   | "security"
   | "audio"
@@ -53,6 +58,112 @@ interface FeatureCardData {
 }
 
 const FEATURES: FeatureCardData[] = [
+  {
+    id: "frontier_voice",
+    category: "frontier",
+    title: "🎙️ Spoken Voice Co-Pilot",
+    badge: { text: "FRONTIER", color: "bg-violet-100 text-violet-700 dark:bg-violet-950/80 dark:text-violet-300" },
+    icon: Mic,
+    iconBg: "bg-violet-500/15 text-violet-600 dark:text-violet-400",
+    glowColor: "group-hover:shadow-violet-500/20 group-hover:border-violet-400/50",
+    desc: "Hands-free continuous 2-way spoken dialogue with real-time speech recognition, spoken citations, and instant interruption tolerance.",
+    highlights: ["Live Web Speech API Voice Engine", "Real-Time Equalizer Waveforms", "Interruption-Tolerant Dialogue"],
+    href: "/frontier?tab=voice",
+    actionText: "Open Voice Co-Pilot",
+    metric: "2-Way Hands-Free",
+    demoSnippet: `// Spoken Voice Co-Pilot Speech Loop
+User: "What are the primary data breach indemnities in Section 4?"
+AI (Spoken): "Under Exhibit B, liability for data protection breaches is uncapped."`,
+  },
+  {
+    id: "frontier_research",
+    category: "frontier",
+    title: "📑 Deep Research Dossier Engine",
+    badge: { text: "FRONTIER", color: "bg-blue-100 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300" },
+    icon: FileText,
+    iconBg: "bg-blue-500/15 text-blue-600 dark:text-blue-400",
+    glowColor: "group-hover:shadow-blue-500/20 group-hover:border-blue-400/50",
+    desc: "Autonomous multi-pass research engine synthesizing repository files into 15-page publication-ready reports with inline SVG charts and LaTeX source.",
+    highlights: ["Autonomous Multi-Page Report Synthesis", "Inline Empirical Variance Bar Graphs", "1-Click PDF & LaTeX Export"],
+    href: "/frontier?tab=research",
+    actionText: "Open Research Studio",
+    metric: "15-Page Dossiers",
+    demoSnippet: `// Autonomous Research Synthesis Query
+const dossier = await askDocs.synthesizeDossier({
+  topic: "Enterprise Risk & Architecture Assessment 2026",
+  format: ["PDF", "LaTeX"],
+  includeCharts: true
+});`,
+  },
+  {
+    id: "frontier_sheets",
+    category: "frontier",
+    title: "📊 Live Financial & Scenario Modeler",
+    badge: { text: "FRONTIER", color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300" },
+    icon: Table,
+    iconBg: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+    glowColor: "group-hover:shadow-emerald-500/20 group-hover:border-emerald-400/50",
+    desc: "In-browser live spreadsheet with real mathematical formulas (=SUM), What-If growth simulation sliders, and Excel CSV export.",
+    highlights: ["Real Mathematical Formula Solver", "Interactive What-If Growth Sliders", "1-Click .CSV / .XLSX Export"],
+    href: "/frontier?tab=sheets",
+    actionText: "Open Financial Modeler",
+    metric: "Live Calculations",
+    demoSnippet: `// Real-Time What-If Financial Simulation
+Growth Rate: +15%
+Base Revenue: $225,000 | Projected: $258,750
+Net Margin: $204,750 (Recalculated in 0.1ms)`,
+  },
+  {
+    id: "frontier_radar",
+    category: "frontier",
+    title: "⚔️ Multi-Doc Conflict & Discrepancy Radar",
+    badge: { text: "FRONTIER", color: "bg-rose-100 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300" },
+    icon: Scale,
+    iconBg: "bg-rose-500/15 text-rose-600 dark:text-rose-400",
+    glowColor: "group-hover:shadow-rose-500/20 group-hover:border-rose-400/50",
+    desc: "Cross-document contradiction detector highlighting clause discrepancies, notice period clashes, and generating 1-click harmonization amendments.",
+    highlights: ["Clause Clash Comparison Matrix", "Exposure Severity Badges", "1-Click AI Harmonization"],
+    href: "/frontier?tab=radar",
+    actionText: "Open Conflict Radar",
+    metric: "Auto-Clash Detection",
+    demoSnippet: `// Conflict Radar Discrepancy Detected
+Doc A (MSA): "30 days prior written notice."
+Doc B (SLA): "60 days minimum notice required."
+Proposal: Harmonize to 45 days mutual notice.`,
+  },
+  {
+    id: "frontier_decisions",
+    category: "frontier",
+    title: "🧠 Executive Decision & Tradeoff Solver",
+    badge: { text: "FRONTIER", color: "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-950/80 dark:text-fuchsia-300" },
+    icon: Brain,
+    iconBg: "bg-fuchsia-500/15 text-fuchsia-600 dark:text-fuchsia-400",
+    glowColor: "group-hover:shadow-fuchsia-500/20 group-hover:border-fuchsia-400/50",
+    desc: "Multi-criteria weighted solver with importance sliders (Cost vs Speed vs Compliance), ranked composite scoring, and recommendation memos.",
+    highlights: ["Interactive Importance Weight Sliders", "Ranked Composite Score Meters", "Executive Decision Memo Export"],
+    href: "/frontier?tab=decisions",
+    actionText: "Open Decision Solver",
+    metric: "Weighted Matrix",
+    demoSnippet: `// Weighted Multi-Criteria Decision Solver
+Weights: Cost (40%) + Speed (30%) + Compliance (30%)
+#1 Recommendation: Vendor Alpha (Score: 81/100)`,
+  },
+  {
+    id: "frontier_workflows",
+    category: "frontier",
+    title: "⚡ Visual Workflow Automator",
+    badge: { text: "FRONTIER", color: "bg-amber-100 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300" },
+    icon: GitBranch,
+    iconBg: "bg-amber-500/15 text-amber-600 dark:text-amber-400",
+    glowColor: "group-hover:shadow-amber-500/20 group-hover:border-amber-400/50",
+    desc: "Node-based canvas automating routine document triage, OCR table extraction, compliance checking, and team chat alerts.",
+    highlights: ["Visual 4-Node Pipeline Flow", "Live Step Execution Simulation", "Team Chat Action Approvals"],
+    href: "/frontier?tab=workflows",
+    actionText: "Open Workflow Automator",
+    metric: "No-Code Pipelines",
+    demoSnippet: `// Automated Workflow Pipeline
+[Upload PDF] -> [OCR Table Extraction] -> [Redline Radar] -> [Notify Team Chat]`,
+  },
   {
     id: "ai_chat",
     category: "ai",
@@ -352,12 +463,107 @@ export default function InnovationHubPage() {
         </div>
       </div>
 
+      {/* ✦ Frontier Labs Cognitive Playbook & Notes Showcase Banner */}
+      <div className="relative overflow-hidden rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-[#0a1a14] via-[#0d231b] to-[#07130e] p-6 sm:p-8 text-white shadow-xl">
+        <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-emerald-500/20 blur-3xl animate-pulse" />
+        <div className="absolute -left-16 -bottom-16 h-56 w-56 rounded-full bg-teal-500/15 blur-3xl animate-pulse" />
+
+        <div className="relative z-10 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-500/20 px-3 py-0.5 text-xs font-bold text-emerald-200 backdrop-blur-md">
+                <Rocket className="h-3.5 w-3.5 text-emerald-300" />
+                <span>Frontier Labs Cognitive Playbook (v3.0)</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-white">
+                What Can You Do in Frontier Labs?
+              </h2>
+              <p className="text-xs text-zinc-300 max-w-2xl">
+                Frontier Labs is AskDocs&apos; dedicated autonomous studio suite engineered to solve complex cognitive bottlenecks: spoken voice interrogation, live spreadsheet modeling, and multi-doc contradiction detection.
+              </p>
+            </div>
+
+            <Link
+              href="/frontier"
+              className="btn-pop shrink-0 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 px-5 py-2.5 text-xs font-bold text-black shadow-lg hover:brightness-110 active:scale-95 transition-all"
+            >
+              <span>Launch Frontier Labs</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          {/* 6 Frontier Studio Quick Notes Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2 text-xs">
+            <Link href="/frontier?tab=voice" className="rounded-2xl border border-white/10 bg-white/5 p-3.5 space-y-1 hover:bg-white/10 hover:border-emerald-500/40 transition-all">
+              <div className="flex items-center gap-2 font-bold text-emerald-300">
+                <Mic className="h-4 w-4" />
+                <span>1. Spoken Voice Co-Pilot</span>
+              </div>
+              <p className="text-[11px] text-zinc-300 leading-snug">
+                Hands-free spoken 2-way dialogue with real-time waveform visualization, live transcript, and spoken citations.
+              </p>
+            </Link>
+
+            <Link href="/frontier?tab=research" className="rounded-2xl border border-white/10 bg-white/5 p-3.5 space-y-1 hover:bg-white/10 hover:border-blue-500/40 transition-all">
+              <div className="flex items-center gap-2 font-bold text-blue-300">
+                <FileText className="h-4 w-4" />
+                <span>2. Deep Research Dossier</span>
+              </div>
+              <p className="text-[11px] text-zinc-300 leading-snug">
+                Synthesizes repository documents into 15-page publication-ready reports with inline SVG charts and LaTeX export.
+              </p>
+            </Link>
+
+            <Link href="/frontier?tab=sheets" className="rounded-2xl border border-white/10 bg-white/5 p-3.5 space-y-1 hover:bg-white/10 hover:border-emerald-500/40 transition-all">
+              <div className="flex items-center gap-2 font-bold text-emerald-300">
+                <Table className="h-4 w-4" />
+                <span>3. Live Financial Modeler</span>
+              </div>
+              <p className="text-[11px] text-zinc-300 leading-snug">
+                In-browser spreadsheet with real mathematical =SUM formulas, What-If growth sliders, and Excel CSV export.
+              </p>
+            </Link>
+
+            <Link href="/frontier?tab=radar" className="rounded-2xl border border-white/10 bg-white/5 p-3.5 space-y-1 hover:bg-white/10 hover:border-rose-500/40 transition-all">
+              <div className="flex items-center gap-2 font-bold text-rose-300">
+                <Scale className="h-4 w-4" />
+                <span>4. Conflict & Discrepancy Radar</span>
+              </div>
+              <p className="text-[11px] text-zinc-300 leading-snug">
+                Cross-document contradiction scanner with Clause Clash matrix and 1-click AI harmonization amendments.
+              </p>
+            </Link>
+
+            <Link href="/frontier?tab=decisions" className="rounded-2xl border border-white/10 bg-white/5 p-3.5 space-y-1 hover:bg-white/10 hover:border-fuchsia-500/40 transition-all">
+              <div className="flex items-center gap-2 font-bold text-fuchsia-300">
+                <Brain className="h-4 w-4" />
+                <span>5. Decision Tradeoff Solver</span>
+              </div>
+              <p className="text-[11px] text-zinc-300 leading-snug">
+                Weighted multi-criteria decision solver with importance sliders (Cost vs Speed vs Compliance) and recommendation memos.
+              </p>
+            </Link>
+
+            <Link href="/frontier?tab=workflows" className="rounded-2xl border border-white/10 bg-white/5 p-3.5 space-y-1 hover:bg-white/10 hover:border-amber-500/40 transition-all">
+              <div className="flex items-center gap-2 font-bold text-amber-300">
+                <GitBranch className="h-4 w-4" />
+                <span>6. Visual Workflow Automator</span>
+              </div>
+              <p className="text-[11px] text-zinc-300 leading-snug">
+                No-code node canvas automating document intake, OCR extraction, redline scanning, and team chat alerts.
+              </p>
+            </Link>
+          </div>
+        </div>
+      </div>
+
       {/* Category Navigation Bar & Search with Motion Transitions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
         {/* Category Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scroll-touch">
           {[
             { id: "all", label: "All Upgrades", icon: Layers },
+            { id: "frontier", label: "✦ Frontier Labs", icon: Rocket },
             { id: "ai", label: "AI & RAG", icon: Sparkles },
             { id: "security", label: "Security & WAF", icon: ShieldCheck },
             { id: "audio", label: "Audio Podcasts", icon: Headphones },
