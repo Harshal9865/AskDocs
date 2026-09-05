@@ -9,7 +9,6 @@ import {
   Settings,
   UsersRound,
   X,
-  Sparkles,
   ArrowRight,
   Shield,
   GraduationCap,
@@ -44,7 +43,7 @@ export default function WorkspaceHubModal({
   async function handleCreate(workspaceName?: string) {
     const finalName = (workspaceName || name).trim();
     if (!finalName) {
-      showToast("Please enter a workspace name", "error");
+      showToast("error", "Please enter a workspace name");
       return;
     }
 
@@ -53,11 +52,11 @@ export default function WorkspaceHubModal({
       const newWs = await api.createWorkspace(finalName);
       await refresh();
       select(newWs);
-      showToast(`Workspace "${newWs.name}" created!`, "success");
+      showToast("success", `Workspace "${newWs.name}" created!`);
       setName("");
       onClose();
     } catch (err) {
-      showToast((err as Error).message || "Failed to create workspace", "error");
+      showToast("error", (err as Error).message || "Failed to create workspace");
     } finally {
       setBusy(false);
     }
@@ -137,7 +136,7 @@ export default function WorkspaceHubModal({
                   key={ws.id}
                   onClick={() => {
                     select(ws);
-                    showToast(`Switched to workspace "${ws.name}"`, "info");
+                    showToast("info", `Switched to workspace "${ws.name}"`);
                     onClose();
                   }}
                   className={`group flex items-center justify-between rounded-2xl border p-3.5 cursor-pointer transition-all ${

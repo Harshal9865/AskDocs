@@ -127,7 +127,7 @@ export default function OnboardingPage() {
       }
       setStep(2);
     } catch (err) {
-      showToast((err as Error).message, "error");
+      showToast("error", (err as Error).message);
     } finally {
       setBusy(false);
     }
@@ -147,11 +147,11 @@ export default function OnboardingPage() {
       const newWs = await api.createWorkspace(nameToUse);
       await refreshWs();
       selectWs(newWs);
-      showToast(`Workspace "${newWs.name}" initialized!`, "success");
+      showToast("success", `Workspace "${newWs.name}" initialized!`);
       localStorage.setItem("askdocs_onboarded", "1");
       router.replace("/dashboard");
     } catch (err) {
-      showToast((err as Error).message || "Failed to create workspace", "error");
+      showToast("error", (err as Error).message || "Failed to create workspace");
     } finally {
       setBusy(false);
     }

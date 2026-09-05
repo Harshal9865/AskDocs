@@ -98,7 +98,6 @@ export default function Sidebar({
   const { config: modeConfig } = useAudienceMode();
   const [showModeModal, setShowModeModal] = useState(false);
   const [showWsModal, setShowWsModal] = useState(false);
-  const [myRole, setMyRole] = useState<string | null>(null);
   const [docCount, setDocCount] = useState<number | null>(null);
   const [friendReqCount, setFriendReqCount] = useState<number>(0);
   const asideRef = useRef<HTMLElement>(null);
@@ -175,28 +174,6 @@ export default function Sidebar({
     },
     [width, setWidth],
   );
-
-  // resolve my role in the active workspace
-  useEffect(() => {
-    if (!workspace || !user) {
-      setMyRole(null);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      try {
-        const members = await api.listMembers(workspace.id);
-        if (!cancelled) {
-          setMyRole(members.find((m) => m.email === user.email)?.role ?? null);
-        }
-      } catch {
-        if (!cancelled) setMyRole(null);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [workspace, user]);
 
   // fetch document count for badge (use count endpoint, fallback to list length if 422/old deploy)
   useEffect(() => {
