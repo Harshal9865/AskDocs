@@ -319,14 +319,45 @@ export default function WorkspacesPage() {
           </p>
         </div>
 
-        {/* Action Button */}
-        <button
-          onClick={() => setActiveTab("create")}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-indigo-500 transition-all shadow-md shadow-indigo-500/20 shrink-0 w-full sm:w-auto cursor-pointer"
-        >
-          <Plus className="h-4 w-4" />
-          <span>New Workspace</span>
-        </button>
+        <div className="flex items-center gap-3">
+          {/* Active Workspace Logo Emblem Badge */}
+          {workspace && (
+            <div className="hidden sm:flex items-center gap-2.5 rounded-2xl border border-indigo-200/80 bg-gradient-to-r from-indigo-50/80 to-purple-50/50 p-2 dark:border-indigo-500/30 dark:bg-indigo-950/40 shadow-2xs shrink-0">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black text-xs shadow-xs overflow-hidden">
+                {brandSrcLocal ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={brandSrcLocal} alt={workspace.name} className="h-full w-full object-cover" />
+                ) : brandStickerLocal ? (
+                  <span className="text-sm">{brandStickerLocal}</span>
+                ) : (
+                  workspace.name.slice(0, 2).toUpperCase()
+                )}
+              </div>
+              <div className="min-w-0 pr-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-extrabold text-slate-900 dark:text-white truncate max-w-[130px]">
+                    {workspace.name}
+                  </span>
+                  <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[9px] font-bold text-emerald-700 dark:text-emerald-300">
+                    Active
+                  </span>
+                </div>
+                <div className="text-[10px] font-medium text-slate-500 dark:text-zinc-400">
+                  Current Workspace
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Action Button */}
+          <button
+            onClick={() => setActiveTab("create")}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-indigo-500 transition-all shadow-md shadow-indigo-500/20 shrink-0 w-full sm:w-auto cursor-pointer"
+          >
+            <Plus className="h-4 w-4" />
+            <span>New Workspace</span>
+          </button>
+        </div>
       </div>
 
       {/* Skippable Onboarding Tutorial Banner */}
@@ -595,6 +626,35 @@ export default function WorkspacesPage() {
                   Search existing workspaces across your company, request membership, or track join requests.
                 </p>
               </div>
+
+              {/* Active Workspace Badge in Discover Header */}
+              {workspace && (
+                <div className="flex items-center gap-3 rounded-2xl border border-purple-200/80 bg-gradient-to-r from-purple-50/80 to-indigo-50/50 px-3.5 py-2 dark:border-purple-500/30 dark:bg-purple-950/40 shrink-0">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white font-black text-xs shadow-xs overflow-hidden">
+                    {brandSrcLocal ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={brandSrcLocal} alt={workspace.name} className="h-full w-full object-cover" />
+                    ) : brandStickerLocal ? (
+                      <span className="text-sm">{brandStickerLocal}</span>
+                    ) : (
+                      workspace.name.slice(0, 2).toUpperCase()
+                    )}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-extrabold text-slate-900 dark:text-white truncate max-w-[150px]">
+                        {workspace.name}
+                      </span>
+                      <span className="rounded-full bg-purple-600 px-2 py-0.5 text-[9px] font-bold text-white">
+                        Active
+                      </span>
+                    </div>
+                    <div className="text-[10px] font-medium text-slate-500 dark:text-zinc-400">
+                      Your Current Workspace
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Search Input Bar */}

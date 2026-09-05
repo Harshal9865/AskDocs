@@ -43,6 +43,7 @@ const NAV = [
   { href: "/chat", label: "AI Chat", icon: Sparkles },
   { href: "/chats", label: "Chats", icon: MessagesSquare },
   { href: "/friends", label: "Friends", icon: UsersRound },
+  { href: "/members", label: "Team Members", icon: UsersRound },
   { href: "/documents", label: "Documents", icon: FileText },
 ];
 
@@ -66,7 +67,6 @@ const NAV_SECONDARY = [
   { href: "/pricing", label: "Plans & Pricing", icon: Crown },
   { href: "/insights", label: "Insights", icon: BarChart3 },
   { href: "/activity", label: "Activity log", icon: History },
-  { href: "/members", label: "Members", icon: UsersRound },
   { href: "/help", label: "Help & FAQ", icon: CircleHelp },
   { href: "/trash", label: "Trash", icon: Trash2 },
 ];
@@ -92,10 +92,26 @@ export default function Sidebar({
   const [showModeModal, setShowModeModal] = useState(false);
   const [docCount, setDocCount] = useState<number | null>(null);
   const [friendReqCount, setFriendReqCount] = useState<number>(0);
+  const [sidebarBrandUrl, setSidebarBrandUrl] = useState<string | null>(null);
   const asideRef = useRef<HTMLElement>(null);
   const [collapsed, setCollapsed] = useState(false);
   // on mobile drawer open, always show labels regardless of desktop collapsed
   const isCollapsed = collapsed && !mobileOpen;
+
+  // Resolve uploaded brand logo for active workspace
+  useEffect(() => {
+    if (!workspace) {
+      setSidebarBrandUrl(null);
+      return;
+    }
+    if (workspace.brand_kind === "upload") {
+      api.getBrandLogoUrl(workspace.id)
+        .then((url) => setSidebarBrandUrl(url))
+        .catch(() => setSidebarBrandUrl(null));
+    } else {
+      setSidebarBrandUrl(null);
+    }
+  }, [workspace]);
 
   // Dynamic NAV items with mode's chat nomenclature
   const dynamicNav = NAV.map((item) =>
@@ -292,8 +308,15 @@ export default function Sidebar({
             className="w-full flex items-center justify-between gap-2 rounded-xl border border-indigo-200/60 bg-gradient-to-r from-slate-50 to-indigo-50/30 p-2.5 hover:border-indigo-400 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] transition-all group cursor-pointer shadow-2xs"
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black text-xs shadow-xs group-hover:scale-105 transition-transform">
-                {(workspace?.name || "W").slice(0, 1).toUpperCase()}
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black text-xs shadow-xs group-hover:scale-105 transition-transform overflow-hidden">
+                {sidebarBrandUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={sidebarBrandUrl} alt={workspace?.name || "WS"} className="h-full w-full object-cover" />
+                ) : workspace?.brand_kind === "sticker" && workspace?.brand_value ? (
+                  <span className="text-sm">{workspace.brand_value}</span>
+                ) : (
+                  (workspace?.name || "W").slice(0, 1).toUpperCase()
+                )}
               </div>
               <div className="min-w-0 text-left">
                 <div className="truncate text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1">
