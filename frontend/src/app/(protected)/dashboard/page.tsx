@@ -30,6 +30,7 @@ import {
   FileCode,
   Presentation,
   Plug2,
+} from "lucide-react";
 import type { ContractObligation, DocumentItem, PlanInfo, TeamChat, WorkspaceMemory } from "@/lib/types";
 import HintTooltip from "@/components/HintTooltip";
 
