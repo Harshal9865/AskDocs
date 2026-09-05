@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Sparkles, Crown, Zap, HelpCircle, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Check, Sparkles, Crown, Zap, HelpCircle, ArrowRight, ChevronLeft } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import FakeCheckoutModal from "@/components/FakeCheckoutModal";
 
 export default function PricingPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const [interval, setInterval] = useState<"monthly" | "annual">("monthly");
   const [checkoutTarget, setCheckoutTarget] = useState<"premium" | "ultra_premium" | null>(null);
@@ -16,6 +18,16 @@ export default function PricingPage() {
     <div className="mx-auto max-w-5xl space-y-10 py-4 sm:py-8">
       {/* Hero Header */}
       <div className="text-center space-y-3">
+        <div className="flex justify-start sm:hidden">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="inline-flex items-center gap-1 text-xs font-bold text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white transition-colors cursor-pointer"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span>Back</span>
+          </button>
+        </div>
         <div className="inline-flex items-center gap-1.5 rounded-full border border-purple-200/70 bg-purple-50/80 px-3.5 py-1 text-xs font-bold text-purple-700 dark:border-purple-800/40 dark:bg-purple-950/40 dark:text-purple-300 shadow-2xs">
           <Sparkles className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
           <span>Plans & Pricing</span>

@@ -364,6 +364,14 @@ export default function DocumentsPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="inline-flex items-center gap-1 text-xs font-bold text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white transition-colors cursor-pointer sm:hidden mb-1"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span>Back</span>
+          </button>
           <h1 className="text-xl font-extrabold bg-gradient-to-r from-slate-900 via-purple-900 to-indigo-900 bg-clip-text text-transparent dark:from-white dark:via-purple-200 dark:to-indigo-200">
             {viewMode === "mine" ? "My Uploads" : "Documents"}
           </h1>

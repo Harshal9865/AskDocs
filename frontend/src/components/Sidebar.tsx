@@ -313,7 +313,8 @@ export default function Sidebar({
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={sidebarBrandUrl} alt={workspace?.name || "WS"} className="h-full w-full object-cover" />
                 ) : workspace?.brand_kind === "sticker" && workspace?.brand_value ? (
-                  <span className="text-sm">{workspace.brand_value}</span>
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={`/stickers/${workspace.brand_value}.svg`} alt={workspace.name} className="h-full w-full object-contain p-0.5" />
                 ) : (
                   (workspace?.name || "W").slice(0, 1).toUpperCase()
                 )}

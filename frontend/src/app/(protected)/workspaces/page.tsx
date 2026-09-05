@@ -24,6 +24,7 @@ import {
   Send,
   Loader2,
   X,
+  ChevronLeft,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -74,7 +75,8 @@ function WorkspaceLogoCardBadge({ ws, isCurrent }: { ws: Workspace; isCurrent?: 
         // eslint-disable-next-line @next/next/no-img-element
         <img src={logoUrl} alt={ws.name} className="h-full w-full object-cover" />
       ) : ws.brand_kind === "sticker" && ws.brand_value ? (
-        <span className="text-sm">{ws.brand_value}</span>
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={`/stickers/${ws.brand_value}.svg`} alt={ws.name} className="h-full w-full object-contain p-1 bg-white/10" />
       ) : (
         ws.name.slice(0, 2).toUpperCase()
       )}
@@ -365,7 +367,8 @@ export default function WorkspacesPage() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={brandSrcLocal} alt={workspace.name} className="h-full w-full object-cover" />
                 ) : brandStickerLocal ? (
-                  <span className="text-sm">{brandStickerLocal}</span>
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={`/stickers/${brandStickerLocal}.svg`} alt={workspace.name} className="h-full w-full object-contain p-0.5 bg-white/10" />
                 ) : (
                   workspace.name.slice(0, 2).toUpperCase()
                 )}
@@ -641,7 +644,15 @@ export default function WorkspacesPage() {
 
       {/* TAB: DISCOVER & JOIN PUBLIC WORKSPACES */}
       {activeTab === "discover" && (
-        <div className="space-y-6 animate-in fade-in duration-200">
+        <div className="space-y-4 animate-in fade-in duration-200">
+          <button
+            type="button"
+            onClick={() => setActiveTab("all")}
+            className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 cursor-pointer sm:hidden"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span>Back to My Workspaces</span>
+          </button>
           <div className="rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-8 shadow-xl dark:border-white/10 dark:bg-[#121420] space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4 dark:border-white/5">
               <div>
@@ -666,7 +677,8 @@ export default function WorkspacesPage() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={brandSrcLocal} alt={workspace.name} className="h-full w-full object-cover" />
                     ) : brandStickerLocal ? (
-                      <span className="text-sm">{brandStickerLocal}</span>
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={`/stickers/${brandStickerLocal}.svg`} alt={workspace.name} className="h-full w-full object-contain p-0.5 bg-white/10" />
                     ) : (
                       workspace.name.slice(0, 2).toUpperCase()
                     )}
@@ -1043,7 +1055,8 @@ export default function WorkspacesPage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={brandSrcLocal} alt="Brand logo" className="h-full w-full object-cover" />
                   ) : brandStickerLocal ? (
-                    <span className="text-xs font-bold text-white">{brandStickerLocal}</span>
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={`/stickers/${brandStickerLocal}.svg`} alt="Brand emblem" className="h-full w-full object-contain p-2.5 bg-white/10" />
                   ) : (
                     workspace.name.slice(0, 2).toUpperCase()
                   )}
@@ -1086,17 +1099,26 @@ export default function WorkspacesPage() {
                     Or select a 3D Emblem Preset:
                   </span>
                   <div className="flex flex-wrap gap-2">
-                    {WORKSPACE_EMBLEMS.map((emb) => (
-                      <button
-                        key={emb.id}
-                        type="button"
-                        onClick={() => applyBrand("sticker", emb.id)}
-                        disabled={!isAdmin || brandBusy}
-                        className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700 hover:border-indigo-400 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 transition-colors"
-                      >
-                        {emb.name}
-                      </button>
-                    ))}
+                    {WORKSPACE_EMBLEMS.map((emb) => {
+                      const isSelected = brandStickerLocal === emb.id;
+                      return (
+                        <button
+                          key={emb.id}
+                          type="button"
+                          onClick={() => applyBrand("sticker", emb.id)}
+                          disabled={!isAdmin || brandBusy}
+                          className={`inline-flex items-center gap-2 rounded-2xl border px-3 py-1.5 text-xs font-bold transition-all ${
+                            isSelected
+                              ? "border-purple-500 bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 ring-2 ring-purple-500/30"
+                              : "border-slate-200/90 bg-slate-50 text-slate-700 hover:border-purple-300 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-zinc-300"
+                          }`}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={`/stickers/${emb.id}.svg`} alt={emb.name} className="h-5 w-5 object-contain" />
+                          <span>{emb.name}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>

@@ -17,6 +17,7 @@ import {
   Copy,
   Check,
   ArrowRight,
+  ChevronLeft,
 } from "lucide-react";
 
 interface Results {
@@ -143,6 +144,14 @@ function SearchInner() {
 
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="space-y-3">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="inline-flex items-center gap-1 text-xs font-bold text-slate-300 hover:text-white transition-colors cursor-pointer sm:hidden mb-1"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              <span>Back</span>
+            </button>
             <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-3.5 py-1 text-[11px] font-semibold tracking-wider text-purple-300 backdrop-blur-md shadow-sm">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75"></span>

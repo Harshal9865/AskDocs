@@ -194,7 +194,8 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={brandSrc} alt={workspace.name} className="h-4 w-4 rounded-full object-cover shrink-0" />
             ) : brandSticker ? (
-              <span className="text-xs shrink-0">{brandSticker}</span>
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={`/stickers/${brandSticker}.svg`} alt={workspace.name} className="h-4 w-4 object-contain shrink-0" />
             ) : (
               <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
             )}

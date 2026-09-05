@@ -263,11 +263,28 @@ export default function MembersPage() {
       {/* Header & Metrics */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
+          <button
+            type="button"
+            onClick={() => router.push("/workspaces")}
+            className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors cursor-pointer group"
+          >
+            <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+            <span>Back to Workspaces</span>
+          </button>
           <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">Workspace Members</h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-zinc-400">
-            Manage teammates, roles, pending invites, and workspace access for {workspace.name}.
+            Manage teammates, roles, pending invites, and workspace access for <strong className="text-slate-700 dark:text-zinc-200">{workspace.name}</strong>.
           </p>
         </div>
+
+        <button
+          type="button"
+          onClick={() => router.push("/workspaces")}
+          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10 transition-all shadow-2xs shrink-0 cursor-pointer"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          <span>Workspaces Center</span>
+        </button>
       </div>
 
       {errorMsg && (

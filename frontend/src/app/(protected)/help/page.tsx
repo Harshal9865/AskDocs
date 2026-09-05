@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AccordionItem } from "@/components/Accordion";
 import {
   Bot,
@@ -17,6 +18,7 @@ import {
   Trash2,
   Users,
   Zap,
+  ChevronLeft,
 } from "lucide-react";
 
 interface FAQ {
@@ -29,6 +31,7 @@ interface FAQ {
 }
 
 export default function HelpPage() {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
 
@@ -160,6 +163,16 @@ export default function HelpPage() {
 
       {/* Hero Header */}
       <div className="mb-8 text-center sm:mb-10">
+        <div className="flex justify-start sm:hidden mb-2">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="inline-flex items-center gap-1 text-xs font-bold text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white transition-colors cursor-pointer"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span>Back</span>
+          </button>
+        </div>
         <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-purple-200/80 bg-purple-50/80 px-3.5 py-1 text-xs font-semibold text-purple-700 backdrop-blur-md shadow-xs dark:border-purple-500/20 dark:bg-purple-950/40 dark:text-purple-300">
           <Sparkles className="h-3.5 w-3.5 animate-spin" style={{ animationDuration: "10s" }} />
           Knowledge Base & Support
