@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   GraduationCap,
@@ -12,7 +12,6 @@ import {
   Upload,
   FileText,
   MessagesSquare,
-  Shield,
   Plus,
 } from "lucide-react";
 import { api } from "@/lib/api";
@@ -34,9 +33,8 @@ const JOB_TITLES = [
   "Prefer not to say",
 ];
 const JOB_ROLES = ["Academic & Education", "Engineering", "Design", "Product", "Legal & Compliance", "Finance", "Research", "Prefer not to say"];
-const PRONOUNS = ["he/him", "she/her", "they/them", "he/they", "she/they", "any", "Prefer not to say"];
 
-const MODE_OPTIONS: { id: AudienceMode; title: string; desc: string; icon: any; color: string; badge: string }[] = [
+const MODE_OPTIONS: { id: AudienceMode; title: string; desc: string; icon: React.ComponentType<{ className?: string }>; color: string; badge: string }[] = [
   {
     id: "academic",
     title: "Student & Academic Mode",
@@ -65,7 +63,7 @@ const MODE_OPTIONS: { id: AudienceMode; title: string; desc: string; icon: any; 
 
 export default function OnboardingPage() {
   const { user, refreshUser } = useAuth();
-  const { workspace, select: selectWs, refresh: refreshWs } = useWorkspace();
+  const { select: selectWs, refresh: refreshWs } = useWorkspace();
   const { mode, setMode } = useAudienceMode();
   const router = useRouter();
 
@@ -87,7 +85,6 @@ export default function OnboardingPage() {
 
   // Step 3 State
   const [workspaceName, setWorkspaceName] = useState("");
-  const [createdWs, setCreatedWs] = useState<boolean>(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -150,7 +147,6 @@ export default function OnboardingPage() {
       const newWs = await api.createWorkspace(nameToUse);
       await refreshWs();
       selectWs(newWs);
-      setCreatedWs(true);
       showToast(`Workspace "${newWs.name}" initialized!`, "success");
       localStorage.setItem("askdocs_onboarded", "1");
       router.replace("/dashboard");

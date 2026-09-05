@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   BarChart3,
   CircleHelp,
@@ -10,7 +10,6 @@ import {
   FileText,
   History,
   LayoutDashboard,
-  LogOut,
   MessagesSquare,
   Search,
   Settings,
@@ -31,7 +30,6 @@ import {
   Presentation,
   Rocket,
   ChevronDown,
-  Building2,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -94,9 +92,8 @@ export default function Sidebar({
   width?: number;
   setWidth?: (w: number) => void;
 }) {
-  const { user, logout } = useAuth();
-  const { workspace, workspaces, select, refresh } = useWorkspace();
-  const router = useRouter();
+  const { user } = useAuth();
+  const { workspace, workspaces } = useWorkspace();
   const pathname = usePathname();
   const { config: modeConfig } = useAudienceMode();
   const [showModeModal, setShowModeModal] = useState(false);
@@ -272,41 +269,6 @@ export default function Sidebar({
       window.removeEventListener("askdocs_chat_read", onChatRead);
     };
   }, [workspace]);
-
-  async function createWorkspace(e: React.FormEvent) {
-    e.preventDefault();
-    if (!newName.trim()) return;
-    setBusy(true);
-    try {
-      const ws = await api.createWorkspace(newName.trim());
-      select(ws);
-      await refresh(); // refetch list so the dropdown matches
-      setNewName("");
-      setCreating(false);
-    } catch (err) {
-      alert((err as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function deleteWorkspace() {
-    if (!workspace) return;
-    const confirmed = confirm(
-      `Delete workspace "${workspace.name}"?\n\nThis permanently removes all its documents and conversations. This cannot be undone.`,
-    );
-    if (!confirmed) return;
-    setBusy(true);
-    try {
-      await api.deleteWorkspace(workspace.id);
-      localStorage.removeItem("askdocs_workspace");
-      await refresh();
-    } catch (err) {
-      alert((err as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  }
 
   return (
     <>
