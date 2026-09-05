@@ -419,27 +419,37 @@ export default function MembersPage() {
                 <Users className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                 Join Requests ({joinRequests.length})
               </h3>
-              <ul className="space-y-2 max-h-48 overflow-y-auto pr-1">
+              <ul className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
                 {joinRequests.map((req) => (
-                  <li key={req.id} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-2.5 text-sm dark:bg-[#1a1726] border border-transparent dark:border-white/5">
-                    <div className="min-w-0 flex-1 truncate">
-                      <p className="font-semibold text-slate-800 dark:text-zinc-100">{req.user_name || req.user_email}</p>
-                      <p className="text-xs text-slate-400 truncate">{req.user_email}</p>
+                  <li key={req.id} className="flex flex-col gap-2 rounded-xl bg-slate-50 p-3 text-sm dark:bg-[#1a1726] border border-slate-200/60 dark:border-white/5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-slate-800 dark:text-zinc-100">{req.user_name || req.user_email}</p>
+                        <p className="text-xs text-slate-400 truncate">{req.user_email}</p>
+                      </div>
+                      <div className="flex shrink-0 gap-1.5">
+                        <button
+                          onClick={() => void handleJoinRequest(req.id, "approve")}
+                          className="rounded-lg bg-emerald-600 px-3 py-1 text-xs font-bold text-white hover:bg-emerald-700 shadow-sm transition-colors cursor-pointer"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => void handleJoinRequest(req.id, "reject")}
+                          className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                        >
+                          Reject
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex shrink-0 gap-1.5">
-                      <button
-                        onClick={() => void handleJoinRequest(req.id, "approve")}
-                        className="rounded-lg bg-emerald-600 px-3 py-1 text-xs font-bold text-white hover:bg-emerald-700 shadow-sm transition-colors"
-                      >
-                        Approve
-                      </button>
-                      <button
-                        onClick={() => void handleJoinRequest(req.id, "reject")}
-                        className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10 transition-colors"
-                      >
-                        Reject
-                      </button>
-                    </div>
+                    {req.message ? (
+                      <div className="rounded-lg bg-purple-50/80 px-2.5 py-1.5 text-xs text-purple-900 dark:bg-purple-950/40 dark:text-purple-200 border border-purple-200/50 dark:border-purple-800/30 flex items-start gap-1.5">
+                        <MessageSquare className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
+                        <span className="break-words font-medium">&ldquo;{req.message}&rdquo;</span>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-slate-400 dark:text-zinc-500 italic">No custom note included</p>
+                    )}
                   </li>
                 ))}
               </ul>

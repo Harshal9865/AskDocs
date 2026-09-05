@@ -497,8 +497,16 @@ export default function NotificationsPage() {
                         {req.user_name || req.user_email} wants to join
                       </p>
                       <p className="mt-0.5 text-xs text-slate-500 dark:text-zinc-400">
-                        {req.user_email} {req.message && `— "${req.message}"`}
+                        {req.user_email}
                       </p>
+                      {req.message ? (
+                        <div className="mt-2.5 rounded-2xl bg-purple-50/80 p-3 text-xs text-purple-900 dark:bg-purple-950/40 dark:text-purple-200 border border-purple-200/60 dark:border-purple-800/40">
+                          <span className="font-bold text-purple-700 dark:text-purple-300 block mb-0.5">💬 Message from Sender:</span>
+                          <span className="italic font-medium break-words">&ldquo;{req.message}&rdquo;</span>
+                        </div>
+                      ) : (
+                        <p className="mt-1 text-[11px] text-slate-400 dark:text-zinc-500 italic">No custom note included</p>
+                      )}
                     </div>
                   </div>
                   <div className="mt-4 flex justify-end">

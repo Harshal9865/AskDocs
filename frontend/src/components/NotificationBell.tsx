@@ -451,9 +451,16 @@ export default function NotificationBell() {
                               <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
                                 {notif.title}
                               </p>
-                              <p className="text-[11px] text-slate-500 dark:text-zinc-400 mb-2 truncate">
-                                {notif.subtitle}
-                              </p>
+                              {notif.joinReq?.message ? (
+                                <div className="my-1.5 rounded-lg bg-purple-50/90 dark:bg-purple-950/50 p-2 text-xs text-purple-900 dark:text-purple-200 border border-purple-200/50 dark:border-purple-800/40">
+                                  <p className="text-[10px] font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300">Note from applicant:</p>
+                                  <p className="italic mt-0.5 font-medium break-words">&ldquo;{notif.joinReq.message}&rdquo;</p>
+                                </div>
+                              ) : (
+                                <p className="text-[11px] text-slate-500 dark:text-zinc-400 mb-2 truncate">
+                                  {notif.subtitle}
+                                </p>
+                              )}
                               <button
                                 onClick={() => {
                                   setOpen(false);
