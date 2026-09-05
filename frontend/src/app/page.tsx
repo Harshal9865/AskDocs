@@ -52,7 +52,6 @@ import {
   Briefcase,
   Building2,
   Rocket,
-  BookOpen,
 } from "lucide-react";
 
 function AuroraHeroMock() {
@@ -947,7 +946,7 @@ function Reveal({ children, dir = "up", delay = 0, className = "" }: { children:
   );
 }
 
-function AudienceHub({ user }: { user: any }) {
+function AudienceHub({ user }: { user: ReturnType<typeof useAuth>["user"] }) {
   const [selectedAudience, setSelectedAudience] = React.useState<string>("students");
   const active = AUDIENCE_SOLUTIONS.find((a) => a.id === selectedAudience) || AUDIENCE_SOLUTIONS[0];
   const ActiveIcon = active.icon;

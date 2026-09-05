@@ -30,7 +30,6 @@ import {
   Square,
   Radio,
   ShieldAlert,
-  ShieldCheck,
   Lock,
   BookOpen,
   X,
