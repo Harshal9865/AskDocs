@@ -49,6 +49,10 @@ import {
   Table,
   GraduationCap,
   Headphones,
+  Briefcase,
+  Building2,
+  Rocket,
+  BookOpen,
 } from "lucide-react";
 
 function AuroraHeroMock() {
@@ -497,6 +501,157 @@ const REVIEWS = [
   },
 ];
 
+const AUDIENCE_SOLUTIONS = [
+  {
+    id: "students",
+    role: "Students & Learners",
+    badge: "Study Studio & Exam Prep",
+    target: "High school, college & university students, exam preppers, and researchers",
+    title: "Study Smarter, Ace Exams & Learn with Friends",
+    whatYouCanDo: "Convert lecture slides into 2-host audio podcasts, auto-generate 3D flashcards, and collaborate in real-time friend study rooms.",
+    howItHelps: "Cuts revision time in half, boosts retention with active recall quizzes, and answers homework questions with exact textbook citations.",
+    color: "from-purple-600 via-indigo-600 to-pink-500",
+    glow: "glow-violet",
+    tagColor: "bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border-purple-200 dark:border-purple-800/40",
+    icon: GraduationCap,
+    ctaLink: "/study-guide",
+    ctaText: "Open Study Studio",
+    features: [
+      {
+        title: "Study Studio & Flashcards",
+        desc: "Turn messy notes into 3D flip flashcards and active-recall quizzes.",
+        icon: GraduationCap,
+      },
+      {
+        title: "Study with Friends",
+        desc: "Join real-time study rooms with chat, doc-sharing, and group Q&A.",
+        icon: UsersRound,
+      },
+      {
+        title: "2-Host Audio Podcasts",
+        desc: "Listen to natural AI discussions of your textbook chapters on the go.",
+        icon: Headphones,
+      },
+      {
+        title: "Cited Textbook Answers",
+        desc: "Get instant answers with exact page numbers and paragraphs cited.",
+        icon: FileText,
+      },
+    ],
+  },
+  {
+    id: "startups",
+    role: "Startups & Teams",
+    badge: "Knowledge Hub & Team Chat",
+    target: "Founders, engineering leads, product managers, and remote teams",
+    title: "Centralize Team Knowledge & Eliminate Repeat Questions",
+    whatYouCanDo: "Index company wikis and specs, ask AI across all docs, and collaborate in team channels with private AI chats.",
+    howItHelps: "Onboards new hires in minutes, eliminates repetitive Slack questions, keeps company IP private, and speeds up team decisions.",
+    color: "from-blue-600 via-indigo-600 to-emerald-500",
+    glow: "glow-indigo",
+    tagColor: "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border-blue-200 dark:border-blue-800/40",
+    icon: Rocket,
+    ctaLink: "/chat",
+    ctaText: "Try Team AI Chat",
+    features: [
+      {
+        title: "Ask AI Across All Docs",
+        desc: "Instant, cited answers across handbooks, roadmaps, and technical specs.",
+        icon: Sparkles,
+      },
+      {
+        title: "Office Team Channels",
+        desc: "Channels, direct messages, read receipts, and live presence.",
+        icon: MessagesSquare,
+      },
+      {
+        title: "Private AI Discussions",
+        desc: "Brainstorm securely in isolated workspace channels without data leaks.",
+        icon: Shield,
+      },
+      {
+        title: "Knowledge Health Index",
+        desc: "Spot documentation gaps and out-of-date company policies instantly.",
+        icon: Activity,
+      },
+    ],
+  },
+  {
+    id: "freelancers",
+    role: "Freelancers & Solo Pros",
+    badge: "Contracts & Data Extractor",
+    target: "Freelancers, contractors, agency owners, and independent consultants",
+    title: "Automate Client Contracts & Data Entry in Seconds",
+    whatYouCanDo: "Compare contract versions with risk flags, and extract tables from client invoices directly into Excel & CSV sheets.",
+    howItHelps: "Protects you from disadvantageous contract clauses, saves hours of manual spreadsheet data entry, and gives instant client answers on call.",
+    color: "from-emerald-600 via-teal-600 to-cyan-500",
+    glow: "glow-emerald",
+    tagColor: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/40",
+    icon: Briefcase,
+    ctaLink: "/contracts/compare",
+    ctaText: "Try Contract Redline",
+    features: [
+      {
+        title: "Contract Redlining & Diff",
+        desc: "Side-by-side comparison highlighting liability and terms changes.",
+        icon: Scale,
+      },
+      {
+        title: "PDF Table-to-Excel",
+        desc: "Turn receipts and invoice tables into clean spreadsheets in 1 click.",
+        icon: Table,
+      },
+      {
+        title: "Instant Client File Search",
+        desc: "Find any clause, deliverable, or number across past client archives.",
+        icon: Search,
+      },
+      {
+        title: "Meeting Transcripts",
+        desc: "Convert client audio calls into structured, searchable action items.",
+        icon: Radio,
+      },
+    ],
+  },
+  {
+    id: "enterprise",
+    role: "Legal & Enterprise",
+    badge: "Security & Governance",
+    target: "Legal counsels, compliance officers, analysts, and enterprise managers",
+    title: "Secure Policy Governance & Multi-Doc Synthesis",
+    whatYouCanDo: "Audit multi-document compliance, detect conflicting clauses across agreements, and collaborate on a shared visual canvas.",
+    howItHelps: "Guarantees zero model training on confidential data, speeds up legal audits by 80%, and maintains a verifiable paper trail.",
+    color: "from-amber-600 via-rose-600 to-indigo-600",
+    glow: "glow-amber",
+    tagColor: "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200 dark:border-amber-800/40",
+    icon: Building2,
+    ctaLink: "/governance",
+    ctaText: "View Governance Hub",
+    features: [
+      {
+        title: "Zero Model Training",
+        desc: "Complete enterprise isolation with AES-256 encryption at rest.",
+        icon: Lock,
+      },
+      {
+        title: "Conflict Detection",
+        desc: "Flag contradictions and discrepancies across multi-page files.",
+        icon: Target,
+      },
+      {
+        title: "Multi-Doc Visual Canvas",
+        desc: "Visually map and cross-reference complex regulatory filings.",
+        icon: LayoutGrid,
+      },
+      {
+        title: "Role-Based Governance",
+        desc: "Full activity logging, role permissions, and soft-delete recovery.",
+        icon: FileKey,
+      },
+    ],
+  },
+];
+
 const CORE_CAPABILITIES = [
   {
     icon: FileText,
@@ -792,6 +947,191 @@ function Reveal({ children, dir = "up", delay = 0, className = "" }: { children:
   );
 }
 
+function AudienceHub({ user }: { user: any }) {
+  const [selectedAudience, setSelectedAudience] = React.useState<string>("students");
+  const active = AUDIENCE_SOLUTIONS.find((a) => a.id === selectedAudience) || AUDIENCE_SOLUTIONS[0];
+  const ActiveIcon = active.icon;
+
+  return (
+    <section id="audience" className="scroll-mt-16 py-16 sm:py-24 border-b border-slate-100 dark:border-white/5 bg-gradient-to-b from-slate-50/50 via-white to-slate-50/30 dark:from-white/[0.02] dark:via-[#070b0e] dark:to-white/[0.01]">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <Reveal dir="up">
+          <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-indigo-300 bg-indigo-50 px-3.5 py-1 text-xs font-semibold text-indigo-700 shadow-xs dark:border-indigo-500/30 dark:bg-indigo-950/50 dark:text-indigo-300">
+              <Sparkles className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
+              <span>TAILORED FOR YOUR WORKFLOW</span>
+            </div>
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl text-slate-900 dark:text-white">
+              Who is AskDocs built for?
+            </h2>
+            <p className="mt-3 text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">
+              Whether you are cramming for exams, building a startup, or reviewing client contracts — here is exactly what you can do and how it helps you.
+            </p>
+          </div>
+        </Reveal>
+
+        {/* Role Selector Tabs */}
+        <Reveal dir="up" delay={80}>
+          <div className="flex items-center justify-center gap-2 overflow-x-auto no-scrollbar pb-2 mb-8">
+            {AUDIENCE_SOLUTIONS.map((aud) => {
+              const Icon = aud.icon;
+              const isSelected = selectedAudience === aud.id;
+              return (
+                <button
+                  key={aud.id}
+                  type="button"
+                  onClick={() => setSelectedAudience(aud.id)}
+                  className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                    isSelected
+                      ? "bg-slate-900 text-white shadow-md dark:bg-white dark:text-black scale-[1.02]"
+                      : "border border-slate-200/80 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10"
+                  }`}
+                >
+                  <Icon className={`h-4 w-4 ${isSelected ? "text-indigo-400 dark:text-indigo-600" : "text-slate-400"}`} />
+                  <span>{aud.role}</span>
+                </button>
+              );
+            })}
+          </div>
+        </Reveal>
+
+        {/* Interactive Spotlight Card */}
+        <Reveal dir="up" delay={120}>
+          <div className="relative overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xl dark:border-white/10 dark:bg-[#0e111a] p-6 sm:p-10 mb-12">
+            <div className={`absolute top-0 right-0 h-96 w-96 rounded-full bg-gradient-to-br ${active.color} opacity-10 blur-3xl pointer-events-none`} />
+
+            <div className="relative z-10 grid gap-8 lg:grid-cols-12 lg:items-center">
+              {/* Left Column: Who it's for, What you can do, How it helps */}
+              <div className="lg:col-span-7 space-y-6">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-[11px] font-bold text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-950/40 dark:text-indigo-300">
+                      <ActiveIcon className="h-3.5 w-3.5" />
+                      <span>{active.badge}</span>
+                    </span>
+                    <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
+                      🎯 Built for: {active.target}
+                    </span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white leading-tight">
+                    {active.title}
+                  </h3>
+                </div>
+
+                {/* What You Can Do (One-Liner) */}
+                <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-white/[0.03]">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5 mb-1.5">
+                    <Zap className="h-3.5 w-3.5" />
+                    <span>WHAT YOU CAN DO</span>
+                  </div>
+                  <p className="text-sm sm:text-base font-semibold text-slate-800 dark:text-zinc-200 leading-snug">
+                    {active.whatYouCanDo}
+                  </p>
+                </div>
+
+                {/* How This Helps You (Benefits One-Liner) */}
+                <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/50 p-4 dark:border-emerald-500/20 dark:bg-emerald-950/20">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5 mb-1.5">
+                    <Check className="h-3.5 w-3.5" />
+                    <span>HOW THIS HELPS YOU & BENEFITS</span>
+                  </div>
+                  <p className="text-sm sm:text-base font-medium text-emerald-900 dark:text-emerald-200 leading-snug">
+                    {active.howItHelps}
+                  </p>
+                </div>
+
+                {/* CTA Button */}
+                <div className="pt-2 flex flex-wrap items-center gap-3">
+                  <Link
+                    href={user ? active.ctaLink : "/register"}
+                    className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:bg-black dark:bg-white dark:text-black dark:hover:bg-slate-100 transition-all hover:scale-105 active:scale-95"
+                  >
+                    <span>{user ? active.ctaText : "Start Free as " + active.role.split(" ")[0]}</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <a
+                    href="#capabilities"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-zinc-300 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <span>View all capabilities</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Right Column: 4 Feature Mini-Cards */}
+              <div className="lg:col-span-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                {active.features.map((feat) => {
+                  const FeatIcon = feat.icon;
+                  return (
+                    <div
+                      key={feat.title}
+                      className="group flex items-start gap-3.5 rounded-2xl border border-slate-200/70 bg-white p-4 shadow-2xs dark:border-white/10 dark:bg-[#131722] hover:border-indigo-400 dark:hover:border-indigo-500 transition-all"
+                    >
+                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${active.color} text-white shadow-xs`}>
+                        <FeatIcon className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                          {feat.title}
+                        </div>
+                        <div className="mt-0.5 text-xs text-slate-500 dark:text-zinc-400 leading-relaxed">
+                          {feat.desc}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* 4-Audience Quick Compare Grid */}
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {AUDIENCE_SOLUTIONS.map((aud, i) => {
+            const Icon = aud.icon;
+            const isSelected = selectedAudience === aud.id;
+            return (
+              <Reveal key={aud.id} dir={i % 2 === 0 ? "left" : "right"} delay={i * 90}>
+                <div
+                  onClick={() => setSelectedAudience(aud.id)}
+                  className={`cursor-pointer rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between h-full ${
+                    isSelected
+                      ? "border-indigo-500 ring-2 ring-indigo-500/20 bg-indigo-50/30 dark:bg-indigo-950/20 dark:border-indigo-400"
+                      : "border-slate-200 bg-white hover:border-slate-300 dark:border-white/10 dark:bg-[#111420] dark:hover:border-white/20"
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${aud.color} text-white`}>
+                        <Icon className="h-4.5 w-4.5" />
+                      </div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+                        0{i + 1}
+                      </span>
+                    </div>
+                    <div className="text-sm font-bold text-slate-900 dark:text-white">
+                      {aud.role}
+                    </div>
+                    <div className="mt-2 text-xs font-semibold text-slate-700 dark:text-zinc-300 leading-relaxed">
+                      {aud.whatYouCanDo}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                    <span>{isSelected ? "Active preview" : "Click to view benefits"}</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </div>
+                </div>
+              </Reveal>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   const { user, logout, avatarSrc, loading } = useAuth();
   const { dark, toggle } = useTheme();
@@ -838,6 +1178,9 @@ export default function Home() {
           <span className="text-[15px] font-bold tracking-tight">AskDocs</span>
         </Link>
         <nav className="home-nav hidden items-center gap-6 md:flex">
+          <a href="#audience" className="px-1 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-zinc-300 dark:hover:text-white">
+            Who it&apos;s for
+          </a>
           <a href="#capabilities" className="px-1 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-zinc-300 dark:hover:text-white">
             Capabilities
           </a>
@@ -1088,7 +1431,7 @@ export default function Home() {
               </span>
             </h1>
             <p className="mt-4 max-w-lg text-sm leading-relaxed text-slate-600 dark:text-zinc-400 sm:text-base">
-              Upload team documents, ask in plain language, and get cited AI answers. Then keep the conversation going in WhatsApp-style office chats — groups, DMs, presence, and read receipts — all in one Spotify-dark workspace.
+              Upload documents, ask in plain language, and get cited AI answers. Then keep the conversation going in WhatsApp-style office chats — groups, DMs, presence, and read receipts — all in one unified workspace.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
@@ -1098,11 +1441,11 @@ export default function Home() {
                 {user ? "Open Dashboard" : "Start for free"} <ArrowRight className="h-4 w-4" />
               </Link>
               <a
-                href="#capabilities"
+                href="#audience"
                 className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
               >
-                <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                Explore capabilities
+                <UsersRound className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                Who is AskDocs for?
               </a>
             </div>
             <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-zinc-500">
@@ -1122,6 +1465,9 @@ export default function Home() {
           </Reveal>
         </div>
       </section>
+
+      {/* Target Audiences: Who is AskDocs for, what you can do & how it helps */}
+      <AudienceHub user={user} />
 
       {/* Mini Section: What you can do in AskDocs */}
       <section id="capabilities" className="scroll-mt-16 py-14 sm:py-20 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]">
@@ -1596,11 +1942,11 @@ export default function Home() {
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-white">Resources</h3>
               <ul className="mt-4 space-y-3 text-sm">
+                <li><a href="#audience" className="text-slate-500 transition-colors hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400">Who it&apos;s for</a></li>
                 <li><a href="#capabilities" className="text-slate-500 transition-colors hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400">Capabilities</a></li>
                 <li><a href="#whats-new" className="text-slate-500 transition-colors hover:text-emerald-600 dark:text-zinc-400 dark:hover:text-emerald-400">What's New</a></li>
                 <li><a href="#reviews" className="text-slate-500 transition-colors hover:text-violet-600 dark:text-zinc-400 dark:hover:text-violet-400">Reviews</a></li>
                 <li><Link href="/help" className="text-slate-500 transition-colors hover:text-amber-600 dark:text-zinc-400 dark:hover:text-amber-400">Help & FAQ</Link></li>
-                <li><Link href="/discover" className="text-slate-500 transition-colors hover:text-rose-600 dark:text-zinc-400 dark:hover:text-rose-400">Discover workspaces</Link></li>
               </ul>
             </div>
 
