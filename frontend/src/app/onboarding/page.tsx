@@ -230,6 +230,21 @@ export default function OnboardingPage() {
     }
   }
 
+  async function handleSkipWorkspace() {
+    setBusy(true);
+    try {
+      await saveProfileData();
+      setMode(selectedMode);
+      localStorage.setItem("askdocs_onboarded", "1");
+      showToast("success", "Setup complete! Choose an existing workspace.");
+      router.replace("/workspaces");
+    } catch (err) {
+      showToast("error", (err as Error).message || "Failed to complete setup");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   if (!user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-[#07060e]">
@@ -295,7 +310,7 @@ export default function OnboardingPage() {
       </div>
 
       {/* ===== Outer Container Card ===== */}
-      <div className="relative z-10 flex w-full max-w-xl flex-col overflow-hidden rounded-3xl sm:rounded-[2.25rem] border border-white/70 bg-white/85 p-6 sm:p-10 shadow-2xl shadow-purple-950/20 backdrop-blur-2xl transition-all duration-300 dark:border-white/10 dark:bg-[#110f22]/90 dark:shadow-[0_0_90px_-15px_rgba(147,51,234,0.35)]">
+      <div className="relative z-10 flex w-full max-w-3xl flex-col overflow-hidden rounded-3xl sm:rounded-[2.25rem] border border-white/70 bg-white/85 p-6 sm:p-10 shadow-2xl shadow-purple-950/20 backdrop-blur-2xl transition-all duration-300 dark:border-white/10 dark:bg-[#110f22]/90 dark:shadow-[0_0_90px_-15px_rgba(147,51,234,0.35)]">
         
         {/* Top Header & Progress Dots */}
         <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4 dark:border-white/5">
@@ -611,7 +626,7 @@ export default function OnboardingPage() {
             </p>
 
             {/* Grid of 6 Modes with Simple 1-Liners */}
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[340px] overflow-y-auto pr-1 no-scrollbar">
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {MODE_CARDS.map((card) => {
                 const Icon = card.icon;
                 const isSelected = selectedMode === card.id;
@@ -620,23 +635,23 @@ export default function OnboardingPage() {
                     key={card.id}
                     type="button"
                     onClick={() => handleModeConfirm(card.id)}
-                    className={`group flex items-start gap-3 rounded-2xl border p-3 text-left transition-all duration-200 cursor-pointer ${
+                    className={`group flex flex-col justify-between rounded-2xl border p-4 text-left transition-all duration-200 cursor-pointer ${
                       isSelected
                         ? "border-purple-600 ring-2 ring-purple-500/30 bg-purple-50/70 dark:bg-purple-950/40 dark:border-purple-400 shadow-md scale-[1.02]"
                         : `border-slate-200/90 bg-slate-50/60 hover:bg-white dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.08] ${card.accentBorder}`
                     }`}
                   >
-                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${card.color} text-white shadow-md`}>
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-1">
-                        <span className="truncate text-xs font-bold text-slate-900 dark:text-white">
-                          {card.title}
-                        </span>
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${card.color} text-white shadow-md`}>
+                          <Icon className="h-5 w-5" />
+                        </div>
                         {isSelected && <Check className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0" />}
                       </div>
-                      <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400 leading-snug line-clamp-2">
+                      <span className="block text-xs font-bold text-slate-900 dark:text-white">
+                        {card.title}
+                      </span>
+                      <p className="mt-1 text-[11px] text-slate-500 dark:text-zinc-400 leading-snug line-clamp-2">
                         {card.oneLiner}
                       </p>
                     </div>
@@ -671,13 +686,13 @@ export default function OnboardingPage() {
           <div className="flex flex-col animate-in fade-in slide-in-from-right-4 duration-300">
             <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-bold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40 mb-3">
               <Zap className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>Final Step</span>
+              <span>Final Step (Optional)</span>
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               Create your first workspace 🏢
             </h2>
             <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">
-              Workspaces isolate your uploaded documents, AI chats, and team channels securely.
+              Workspaces isolate your uploaded documents, AI chats, and team channels securely. You can create a new one now or skip to join an existing workspace.
             </p>
 
             <div className="mt-5 space-y-4">
@@ -750,7 +765,7 @@ export default function OnboardingPage() {
               </div>
             </div>
 
-            <div className="mt-6 flex items-center justify-between">
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={prevSlide}
@@ -759,15 +774,25 @@ export default function OnboardingPage() {
                 <ArrowLeft className="h-4 w-4" />
                 <span>Back to Mode</span>
               </button>
-              <button
-                type="button"
-                onClick={() => void handleFinish()}
-                disabled={busy}
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 px-7 py-3.5 text-xs sm:text-sm font-black text-white shadow-xl shadow-emerald-500/25 transition-all hover:scale-105 hover:shadow-emerald-500/40 active:scale-95 cursor-pointer disabled:opacity-60"
-              >
-                <span>{busy ? "Opening Workspace…" : "Finish & Enter Workspace"}</span>
-                <ArrowRight className="h-4 w-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => void handleSkipWorkspace()}
+                  disabled={busy}
+                  className="rounded-full border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10 transition-colors cursor-pointer disabled:opacity-60"
+                >
+                  Skip & Join Existing
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleFinish()}
+                  disabled={busy}
+                  className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 px-6 py-3.5 text-xs sm:text-sm font-black text-white shadow-xl shadow-emerald-500/25 transition-all hover:scale-105 hover:shadow-emerald-500/40 active:scale-95 cursor-pointer disabled:opacity-60"
+                >
+                  <span>{busy ? "Opening Workspace…" : "Create & Enter Workspace"}</span>
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
         )}
