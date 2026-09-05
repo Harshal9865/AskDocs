@@ -350,7 +350,7 @@ Analyze risk shifts, liabilities, indemnities, and termination terms.`;
       </div>
 
       {/* Dual Document Picker Card */}
-      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-6">
+      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#131220] space-y-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Document A (Base Version) */}
           <div className="space-y-2.5">
@@ -437,7 +437,7 @@ Analyze risk shifts, liabilities, indemnities, and termination terms.`;
       {diffResult && (
         <div className="space-y-6 animate-in fade-in duration-300">
           {/* Executive Overview Card */}
-          <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-4">
+          <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#131220] space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4 dark:border-white/5">
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 shadow-inner">

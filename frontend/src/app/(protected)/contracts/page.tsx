@@ -181,7 +181,7 @@ export default function ContractsPage() {
       {/* Metrics Row */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         {/* Active Count */}
-        <div className="rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-sm backdrop-blur-md hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/10 dark:border-white/10 dark:bg-[#15151c]/90 transition-all duration-300 flex items-center justify-between">
+        <div className="rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-sm backdrop-blur-md hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/10 dark:border-white/10 dark:bg-[#131220] transition-all duration-300 flex items-center justify-between">
           <div>
             <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Active Tracked</p>
             <p className="mt-1 text-3xl font-black text-slate-900 dark:text-white">{activeCount}</p>
@@ -230,7 +230,7 @@ export default function ContractsPage() {
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-4 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-4 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#131220] flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Search */}
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-zinc-500" />
