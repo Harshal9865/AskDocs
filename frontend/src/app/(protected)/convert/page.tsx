@@ -373,7 +373,7 @@ export default function DocumentConverterStudioPage() {
       </div>
 
       {/* Redaction Profiles Selector */}
-      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-4">
+      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#131220] space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-zinc-400 flex items-center gap-2">
             <ShieldAlert className="h-4 w-4 text-purple-500" /> Select Industry Redaction Profile
@@ -413,7 +413,7 @@ export default function DocumentConverterStudioPage() {
       </div>
 
       {/* Control Configuration Card */}
-      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-6">
+      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#131220] space-y-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {/* Document Picker */}
           <div className="space-y-1.5">

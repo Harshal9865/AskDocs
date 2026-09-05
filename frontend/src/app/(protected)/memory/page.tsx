@@ -262,7 +262,7 @@ export default function InstitutionalMemoryPage() {
       </div>
 
       {/* Visual Knowledge Mind Map */}
-      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-4">
+      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#131220] space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-base font-extrabold text-slate-900 dark:text-white">
             <Network className="h-5 w-5 text-purple-600 dark:text-purple-400" />

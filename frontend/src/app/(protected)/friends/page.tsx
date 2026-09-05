@@ -22,7 +22,7 @@ function FriendCard({
 }) {
   const { src, stickerId } = useUserAvatar(member.user_id, member.avatar_kind, member.avatar_value);
   return (
-    <div className="group flex items-center gap-3.5 rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-2xs backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-300/80 hover:shadow-md hover:shadow-purple-500/5 dark:border-white/10 dark:bg-[#13111f]/90 dark:hover:border-purple-500/30">
+    <div className="group flex items-center gap-3.5 rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 shadow-2xs backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-300/80 hover:shadow-md hover:shadow-purple-500/5 dark:border-white/10 dark:bg-[#131220] dark:hover:border-purple-500/30">
       <Link
         href={`/profile/${member.user_id}`}
         className="flex items-center gap-3 min-w-0 flex-1"
@@ -205,7 +205,7 @@ export default function FriendsPage() {
             className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-bold transition-all ${
               tab === t.key
                 ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-xs"
-                : "border border-slate-200/80 bg-white/80 text-slate-600 hover:text-slate-900 dark:border-white/10 dark:bg-[#13111f]/90 dark:text-zinc-400 dark:hover:text-white"
+                : "border border-slate-200/80 bg-white/80 text-slate-600 hover:text-slate-900 dark:border-white/10 dark:bg-[#131220] dark:text-zinc-400 dark:hover:text-white"
             }`}
           >
             {t.label} {t.count !== undefined && t.count > 0 && <span className="ml-1 opacity-75">({t.count})</span>}
@@ -221,7 +221,7 @@ export default function FriendsPage() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search colleagues by name or email…"
           aria-label="Search friends"
-          className="w-full rounded-2xl border border-slate-200/80 bg-white/80 py-2.5 pl-10 pr-10 text-xs sm:text-sm font-medium outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#13111f]/90 dark:text-white"
+          className="w-full rounded-2xl border border-slate-200/80 bg-white/80 py-2.5 pl-10 pr-10 text-xs sm:text-sm font-medium outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#131220] dark:text-white"
         />
         {searchLoading && <Loader2 className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-purple-600 dark:text-purple-400" />}
       </div>

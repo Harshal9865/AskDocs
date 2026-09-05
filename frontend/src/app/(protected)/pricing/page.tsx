@@ -41,7 +41,7 @@ export default function PricingPage() {
 
         {/* Monthly / Annual Toggle */}
         <div className="pt-3">
-          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 p-1.5 dark:border-white/10 dark:bg-[#13111f]/90 shadow-sm backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 p-1.5 dark:border-white/10 dark:bg-[#131220]/90 shadow-sm backdrop-blur-md">
             <button
               type="button"
               onClick={() => setInterval("monthly")}
@@ -66,7 +66,7 @@ export default function PricingPage() {
       {/* 3 Tier Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Free Plan */}
-        <div className="relative flex flex-col justify-between rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-[#13111f]/90 sm:p-7">
+        <div className="relative flex flex-col justify-between rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-[#131220]/90 sm:p-7">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-zinc-400">
@@ -119,7 +119,7 @@ export default function PricingPage() {
         </div>
 
         {/* Premium Plan */}
-        <div className="relative flex flex-col justify-between rounded-3xl border-2 border-purple-500 bg-white p-6 shadow-xl shadow-purple-500/10 backdrop-blur-md dark:border-purple-500/80 dark:bg-[#161328] sm:p-7">
+        <div className="relative flex flex-col justify-between rounded-3xl border-2 border-purple-500 bg-white p-6 shadow-xl shadow-purple-500/10 backdrop-blur-md dark:border-purple-500/80 dark:bg-[#131220] sm:p-7">
           <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 px-4 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-white shadow-md">
             ⭐ Most Popular
           </div>
@@ -192,7 +192,7 @@ export default function PricingPage() {
         </div>
 
         {/* Ultra Premium Plan */}
-        <div className="relative flex flex-col justify-between rounded-3xl border-2 border-amber-400/80 bg-gradient-to-b from-amber-50/40 via-white to-white p-6 shadow-xl shadow-amber-500/10 backdrop-blur-md dark:border-amber-400/60 dark:from-amber-950/20 dark:via-[#141224] dark:to-[#141224] sm:p-7">
+        <div className="relative flex flex-col justify-between rounded-3xl border-2 border-amber-400/80 bg-gradient-to-b from-amber-50/40 via-white to-white p-6 shadow-xl shadow-amber-500/10 backdrop-blur-md dark:border-amber-400/60 dark:from-amber-950/20 dark:via-[#131220] dark:to-[#131220] sm:p-7">
           <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500 px-4 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-white shadow-md flex items-center gap-1">
             <Crown className="h-3.5 w-3.5" />
             <span>Ultra VIP</span>
@@ -296,7 +296,7 @@ export default function PricingPage() {
       </div>
 
       {/* FAQ Section */}
-      <div className="rounded-3xl border border-slate-200/80 bg-white/90 p-6 sm:p-8 backdrop-blur-md dark:border-white/10 dark:bg-[#13111f]/90 space-y-6">
+      <div className="rounded-3xl border border-slate-200/80 bg-white/90 p-6 sm:p-8 backdrop-blur-md dark:border-white/10 dark:bg-[#131220]/90 space-y-6">
         <div className="flex items-center gap-2">
           <HelpCircle className="h-5 w-5 text-purple-600 dark:text-purple-400" />
           <h2 className="text-base font-bold text-slate-900 dark:text-white">

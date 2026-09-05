@@ -465,7 +465,7 @@ interface ExtractedJsonResponse {
 
       {/* Expandable Playbook Accordion */}
       {showQuickGuide && (
-        <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-4 animate-in fade-in duration-200 text-xs">
+        <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#131220] space-y-4 animate-in fade-in duration-200 text-xs">
           <h4 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
             <TableIcon className="h-4 w-4 text-emerald-500" /> Universal Data Extractor Playbook
           </h4>
@@ -491,7 +491,7 @@ interface ExtractedJsonResponse {
       )}
 
       {/* Document Picker & Domain Selector Card */}
-      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-6">
+      <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#131220] space-y-6">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {/* Document Picker */}
           <div className="space-y-2">
