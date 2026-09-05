@@ -30,8 +30,8 @@ import {
   FileCode,
   Presentation,
   Plug2,
-} from "lucide-react";
 import type { ContractObligation, DocumentItem, PlanInfo, TeamChat, WorkspaceMemory } from "@/lib/types";
+import HintTooltip from "@/components/HintTooltip";
 
 /* ── Helpers ── */
 function timeAgo(dateStr: string) {
@@ -318,13 +318,16 @@ export default function DashboardPage() {
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Workspace: {workspace.name}</span>
             </div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-3xl leading-normal py-1">
-              {greeting},{" "}
-              <span className="inline-block bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent pb-1">
-                {firstName}
-              </span>{" "}
-              <span className="inline-block">👋</span>
-            </h1>
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-3xl leading-normal py-1">
+                {greeting},{" "}
+                <span className="inline-block bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent pb-1">
+                  {firstName}
+                </span>{" "}
+                <span className="inline-block">👋</span>
+              </h1>
+              <HintTooltip text="Ask Docs searches across all PDFs & spreadsheets in this workspace with page citations." />
+            </div>
             <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
               Your AI-powered knowledge hub and team collaboration center.
             </p>

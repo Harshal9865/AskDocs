@@ -22,7 +22,7 @@ import {
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
 import { useAuth } from "@/lib/auth-context";
-import { showToast } from "@/components/Toast";
+import HintTooltip from "@/components/HintTooltip";
 import type { Workspace, Member } from "@/lib/types";
 
 const WORKSPACE_EMBLEMS = [
@@ -49,6 +49,17 @@ export default function WorkspacesPage() {
   const { user } = useAuth();
 
   const [activeTab, setActiveTab] = useState<"all" | "create" | "settings" | "members">(initialTab);
+
+  // Tutorial State
+  const [showTutorial, setShowTutorial] = useState(false);
+  useEffect(() => {
+    setShowTutorial(localStorage.getItem("askdocs_ws_tutorial_dismissed") !== "1");
+  }, []);
+
+  function dismissTutorial() {
+    localStorage.setItem("askdocs_ws_tutorial_dismissed", "1");
+    setShowTutorial(false);
+  }
 
   // Create Workspace State
   const [newWsName, setNewWsName] = useState("");
@@ -225,11 +236,14 @@ export default function WorkspacesPage() {
             <Building2 className="h-3.5 w-3.5" />
             <span>WORKSPACE MANAGEMENT CENTER</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Workspaces & Teams
-          </h1>
-          <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
-            Manage active workspaces, create new dedicated team rooms, adjust branding, and configure security permissions.
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Workspaces & Teams
+            </h1>
+            <HintTooltip text="Workspaces isolate team files, channels, and AI memories so your data stays private and organized." />
+          </div>
+          <p className="mt-1 text-xs sm:text-sm font-medium text-slate-500 dark:text-zinc-400">
+            Create dedicated team rooms, switch active workspaces, and customize branding in seconds.
           </p>
         </div>
 
@@ -242,6 +256,62 @@ export default function WorkspacesPage() {
           <span>New Workspace</span>
         </button>
       </div>
+
+      {/* Skippable Onboarding Tutorial Banner */}
+      {showTutorial && (
+        <div className="relative overflow-hidden rounded-3xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50/80 via-purple-50/40 to-white p-5 dark:border-indigo-500/20 dark:bg-gradient-to-br dark:from-indigo-950/40 dark:via-purple-950/20 dark:to-[#121420] shadow-sm animate-in fade-in duration-300">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <div className="space-y-3 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-white font-black text-xs">
+                  ⚡
+                </span>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Quick Start Guide: How Workspaces Work
+                </h3>
+                <span className="rounded-full bg-indigo-200/60 px-2 py-0.5 text-[10px] font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                  New User Guide
+                </span>
+              </div>
+
+              <div className="grid gap-2.5 sm:grid-cols-3 text-xs">
+                <div className="rounded-2xl bg-white/90 p-3 border border-indigo-100 dark:border-white/5 dark:bg-[#161826] shadow-2xs">
+                  <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                    <span>1. Select or Create</span>
+                  </div>
+                  <div className="text-slate-500 dark:text-zinc-400 text-[11px] mt-0.5 leading-snug">
+                    Pick a preset template or create a custom team workspace vault.
+                  </div>
+                </div>
+                <div className="rounded-2xl bg-white/90 p-3 border border-indigo-100 dark:border-white/5 dark:bg-[#161826] shadow-2xs">
+                  <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                    <span>2. Add Team & Files</span>
+                  </div>
+                  <div className="text-slate-500 dark:text-zinc-400 text-[11px] mt-0.5 leading-snug">
+                    Upload PDFs or spreadsheets and invite members with instant role links.
+                  </div>
+                </div>
+                <div className="rounded-2xl bg-white/90 p-3 border border-indigo-100 dark:border-white/5 dark:bg-[#161826] shadow-2xs">
+                  <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                    <span>3. Ask Cited AI</span>
+                  </div>
+                  <div className="text-slate-500 dark:text-zinc-400 text-[11px] mt-0.5 leading-snug">
+                    Get answers with exact page citations and collaborate in group chats.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={dismissTutorial}
+              className="shrink-0 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-100 dark:border-white/10 dark:bg-white/10 dark:text-zinc-300 dark:hover:bg-white/20 transition-all cursor-pointer"
+            >
+              Skip Tutorial ✕
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Navigation Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-slate-100 pb-3 dark:border-white/5">

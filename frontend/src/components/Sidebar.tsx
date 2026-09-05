@@ -65,7 +65,6 @@ const NAV_INTELLIGENCE = [
 ];
 
 const NAV_SECONDARY = [
-  { href: "/workspaces", label: "Workspaces", icon: Building2 },
   { href: "/search", label: "Search", icon: Search },
   { href: "/discover", label: "Discover", icon: Compass },
   { href: "/pricing", label: "Plans & Pricing", icon: Crown },
@@ -293,23 +292,22 @@ export default function Sidebar({
           <Link
             href="/workspaces"
             onClick={onCloseMobile}
-            title={`Active Workspace: ${workspace?.name || "None"}. Click to manage workspaces.`}
-            className="w-full flex items-center justify-between gap-2 rounded-xl border border-slate-200/80 bg-slate-50 p-2 hover:bg-slate-100 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] transition-all group cursor-pointer"
+            title={`Active Workspace: ${workspace?.name || "None"}. Click to manage, switch, or create.`}
+            className="w-full flex items-center justify-between gap-2 rounded-xl border border-indigo-200/60 bg-gradient-to-r from-slate-50 to-indigo-50/30 p-2.5 hover:border-indigo-400 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] transition-all group cursor-pointer shadow-2xs"
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-bold text-xs shadow-xs">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black text-xs shadow-xs group-hover:scale-105 transition-transform">
                 {(workspace?.name || "W").slice(0, 1).toUpperCase()}
               </div>
               <div className="min-w-0 text-left">
-                <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
-                  {workspace?.name || "Select Workspace"}
+                <div className="truncate text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                  <span>{workspace?.name || "Select Workspace"}</span>
                 </div>
-                <div className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
-                  {workspaces.length} workspace{workspaces.length === 1 ? "" : "s"} • Center
+                <div className="text-[10px] text-slate-500 dark:text-zinc-400 font-mono">
+                  {workspaces.length} workspace{workspaces.length === 1 ? "" : "s"} • Manage ➔
                 </div>
               </div>
             </div>
-            <ChevronDown className="h-4 w-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-white transition-colors shrink-0" />
           </Link>
         </div>
         <div className="sb-collapsed-show shrink-0 border-b border-slate-100 p-2">
