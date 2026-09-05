@@ -138,8 +138,8 @@ export default function DocumentHealthDashboardPage() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-md">
               Document Health & Integrity
             </h1>
-            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Automated deep audit scanning citation accuracy, duplicate files, regulatory standards, and operational integrity with 1-click PDF compliance reports.
+            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
+              Audit document quality, citation accuracy, and duplicate files automatically.
             </p>
           </div>
 

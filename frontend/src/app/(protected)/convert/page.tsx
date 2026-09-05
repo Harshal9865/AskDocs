@@ -336,8 +336,8 @@ export default function DocumentConverterStudioPage() {
               </span>
             </h1>
 
-            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-              Convert documents into LaTeX, Markdown, JSON, CSV, and TXT with specialized privacy profiles (HIPAA Healthcare, Legal NDA, Academic Blind Review, and Financial Audit).
+            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
+              Convert documents to Markdown, LaTeX, JSON, or CSV with zero-leak privacy redaction.
             </p>
           </div>
 

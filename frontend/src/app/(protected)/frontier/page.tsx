@@ -470,8 +470,8 @@ export default function FrontierLabsPage() {
                   <h1 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight text-slate-900 dark:text-white">
                     Frontier <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-teal-600 to-emerald-600 dark:from-indigo-400 dark:via-teal-300 dark:to-emerald-400">Acoustic & Neural</span> Studios
                   </h1>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 leading-relaxed max-w-xl">
-                    An advanced enterprise workspace pairing deep analytical document research with real-time hands-free voice interrogation, live financial formula ledgers, and automated workflow pipelines.
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 leading-relaxed max-w-xl font-medium">
+                    Advanced deep analysis with voice interrogation, financial modeling, and automated pipelines.
                   </p>
                 </div>
 

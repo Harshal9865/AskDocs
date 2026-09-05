@@ -393,8 +393,8 @@ interface ExtractedJsonResponse {
               </span>
             </h1>
             
-            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-              Transform your uploaded PDFs into structured grids. Tailored for HR rosters, clinical patient records, office policies, story timelines, technical specs, and financial statements.
+            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
+              Transform unstructured PDFs into clean, editable spreadsheets and data tables.
             </p>
           </div>
 
@@ -444,11 +444,13 @@ interface ExtractedJsonResponse {
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-400">
             <Lightbulb className="h-4 w-4" />
           </div>
-          <div>
-            <span className="font-bold text-slate-900 dark:text-white">How Table & Data Extractor Works: </span>
-            <span className="text-slate-600 dark:text-zinc-300">
-              Pick your PDF document ➔ select your industry domain (HR, Medical, Rules, Stories, Tech Specs, Finance) ➔ extract real tables with live cell editing and instant Excel CSV / JSON / PDF export!
-            </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-bold text-slate-900 dark:text-white mr-1">Steps:</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-emerald-700 dark:text-emerald-300 font-semibold text-[11px]">1. Select Document</span>
+            <span className="text-slate-400">→</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-teal-500/10 border border-teal-500/20 px-2.5 py-0.5 text-teal-700 dark:text-teal-300 font-semibold text-[11px]">2. Pick Domain</span>
+            <span className="text-slate-400">→</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-0.5 text-cyan-700 dark:text-cyan-300 font-semibold text-[11px]">3. Export CSV/PDF</span>
           </div>
         </div>
 

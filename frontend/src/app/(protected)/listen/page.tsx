@@ -505,8 +505,8 @@ You MUST return ONLY a valid JSON object strictly matching this schema with no m
               </span>
             </h1>
 
-            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-              Convert long PDFs, clinical guidelines, research papers, and corporate SOPs into 2-host conversational podcasts (NotebookLM style) or executive audio briefings with real-time browser voice playback.
+            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
+              Convert documents into 2-host podcasts and executive audio briefings in 1 click.
             </p>
           </div>
 
@@ -546,11 +546,13 @@ You MUST return ONLY a valid JSON object strictly matching this schema with no m
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-cyan-500/20 text-cyan-400">
             <Lightbulb className="h-4 w-4" />
           </div>
-          <div>
-            <span className="font-bold text-slate-900 dark:text-white">How Audio Studio Works: </span>
-            <span className="text-slate-600 dark:text-zinc-300">
-              Pick any uploaded PDF/DOCX ➔ choose your broadcast format (2-Host Podcast, Rapid Brief, Medical Rounds, SOP Brief) ➔ click Generate for instant dual-voice spoken dialogue with live soundwave controls!
-            </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-bold text-slate-900 dark:text-white mr-1">Steps:</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-0.5 text-cyan-700 dark:text-cyan-300 font-semibold text-[11px]">1. Select Doc</span>
+            <span className="text-slate-400">→</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-0.5 text-indigo-700 dark:text-indigo-300 font-semibold text-[11px]">2. Choose Format</span>
+            <span className="text-slate-400">→</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-emerald-700 dark:text-emerald-300 font-semibold text-[11px]">3. Listen & Play</span>
           </div>
         </div>
 
@@ -559,7 +561,7 @@ You MUST return ONLY a valid JSON object strictly matching this schema with no m
           onClick={() => setShowQuickGuide(!showQuickGuide)}
           className="inline-flex items-center gap-1.5 shrink-0 text-xs font-bold text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 cursor-pointer"
         >
-          <span>{showQuickGuide ? "Hide Guide" : "View Audio Playbook"}</span>
+          <span>{showQuickGuide ? "Hide Details" : "Quick Tips"}</span>
         </button>
       </div>
 

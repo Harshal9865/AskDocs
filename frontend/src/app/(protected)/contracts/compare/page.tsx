@@ -322,8 +322,8 @@ Analyze risk shifts, liabilities, indemnities, and termination terms.`;
               </span>
             </h1>
             
-            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-              Compare contract drafts, revised vendor agreements, or regulatory proposals. Automatically surface hidden liabilities, indemnity shifts, and favorable terms.
+            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
+              Compare contract drafts side-by-side to highlight redline changes and hidden risk shifts.
             </p>
           </div>
 

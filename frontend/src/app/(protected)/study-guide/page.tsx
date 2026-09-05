@@ -595,8 +595,8 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
               </span>
             </h1>
 
-            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-              Transform course syllabi, clinical guidelines, company SOPs, and legal briefs into interactive flashcard decks, timed practice exams, and downloadable study packets.
+            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
+              Convert documents into flashcards, study decks, and practice exams in seconds.
             </p>
           </div>
 
@@ -647,11 +647,13 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-purple-500/20 text-purple-400">
             <Lightbulb className="h-4 w-4" />
           </div>
-          <div>
-            <span className="font-bold text-slate-900 dark:text-white">How Study Studio Works: </span>
-            <span className="text-slate-600 dark:text-zinc-300">
-              Select 1 to 5 documents ➔ choose your audience persona (Student, Clinical, Corporate, Legal, Finance) ➔ pick question counts & optional past question style mimicry ➔ generate your 4-tab interactive study suite!
-            </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-bold text-slate-900 dark:text-white mr-1">Steps:</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/10 border border-purple-500/20 px-2.5 py-0.5 text-purple-700 dark:text-purple-300 font-semibold text-[11px]">1. Select Docs</span>
+            <span className="text-slate-400">→</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-0.5 text-indigo-700 dark:text-indigo-300 font-semibold text-[11px]">2. Choose Persona</span>
+            <span className="text-slate-400">→</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-emerald-700 dark:text-emerald-300 font-semibold text-[11px]">3. Generate Deck</span>
           </div>
         </div>
 
@@ -660,7 +662,7 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
           onClick={() => setShowQuickGuide(!showQuickGuide)}
           className="inline-flex items-center gap-1.5 shrink-0 text-xs font-bold text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 cursor-pointer"
         >
-          <span>{showQuickGuide ? "Hide Guide" : "View Step-by-Step Playbook"}</span>
+          <span>{showQuickGuide ? "Hide Details" : "Quick Tips"}</span>
         </button>
       </div>
 

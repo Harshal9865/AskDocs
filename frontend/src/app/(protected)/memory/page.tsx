@@ -158,8 +158,8 @@ export default function InstitutionalMemoryPage() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-md">
               Institutional Memory & Knowledge Graph
             </h1>
-            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Never lose context. Automatically index workspace decisions, meeting transcripts, policy exceptions, and document relationships into an immutable Knowledge Mind Map with downloadable PDF decision logs.
+            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
+              Permanently index workspace decisions, policy exceptions, and document relationships.
             </p>
           </div>
 

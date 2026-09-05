@@ -615,8 +615,8 @@ ${s.takeaway ? `**Takeaway:** ${s.takeaway}` : ""}
               </span>
             </h1>
 
-            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-              Transform any uploaded PDF into presentation slide decks using Free Google Gemini AI. Export to printable PDF slides, interactive HTML web decks, or 1-click bridge to Gamma AI.
+            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
+              Turn documents into presentations, PDF slides, and Gamma AI decks instantly.
             </p>
           </div>
 

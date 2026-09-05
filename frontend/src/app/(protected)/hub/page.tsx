@@ -438,8 +438,8 @@ export default function InnovationHubPage() {
             </span>
           </h1>
 
-          <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-2xl">
-            From Enterprise Application Firewalls and PowerPoint presentation studios to 2-host audio podcasts and token-efficient multi-document AI synthesis—discover how AskDocs elevates your institutional productivity.
+          <p className="text-xs sm:text-sm text-zinc-300 font-medium leading-relaxed max-w-2xl">
+            Discover and launch all AskDocs capabilities from presentation decks and audio podcasts to zero-trust security.
           </p>
 
           <div className="pt-2 flex flex-wrap items-center gap-3">

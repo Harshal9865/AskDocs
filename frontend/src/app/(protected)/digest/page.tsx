@@ -140,8 +140,8 @@ export default function WorkspaceDigestPage() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-md">
               Workspace Weekly Digest
             </h1>
-            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Automated weekly AI synthesis of workspace documents, contract obligations, and key strategic takeaways with 1-click PDF briefing downloads.
+            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
+              Synthesize active documents, contract alerts, and key takeaways into 1-click executive briefs.
             </p>
           </div>
 

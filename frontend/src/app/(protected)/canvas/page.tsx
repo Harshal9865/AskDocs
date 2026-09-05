@@ -382,8 +382,8 @@ Return ONLY valid JSON matching this schema:
               </span>
             </h1>
 
-            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
-              Transform static documents into dynamic side-by-side comparison matrices, interactive task checklists, risk heat maps, and printable PDF reports.
+            <p className="max-w-2xl text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
+              Transform documents into side-by-side matrices, task checklists, and risk heat maps.
             </p>
           </div>
 
@@ -414,11 +414,13 @@ Return ONLY valid JSON matching this schema:
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-purple-500/20 text-purple-400">
             <Lightbulb className="h-4 w-4" />
           </div>
-          <div>
-            <span className="font-bold text-slate-900 dark:text-white">How Live AI Canvas Works: </span>
-            <span className="text-slate-600 dark:text-zinc-300">
-              Select 2 or more documents from your workspace ➔ generate a multi-document synthesis featuring a side-by-side comparison matrix, verified action checklists, and visual risk heat map!
-            </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-bold text-slate-900 dark:text-white mr-1">Steps:</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/10 border border-purple-500/20 px-2.5 py-0.5 text-purple-700 dark:text-purple-300 font-semibold text-[11px]">1. Select 2+ Docs</span>
+            <span className="text-slate-400">→</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-0.5 text-indigo-700 dark:text-indigo-300 font-semibold text-[11px]">2. Synthesize Matrix</span>
+            <span className="text-slate-400">→</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-emerald-700 dark:text-emerald-300 font-semibold text-[11px]">3. Track Tasks & Risks</span>
           </div>
         </div>
 
@@ -427,7 +429,7 @@ Return ONLY valid JSON matching this schema:
           onClick={() => setShowQuickGuide(!showQuickGuide)}
           className="inline-flex items-center gap-1.5 shrink-0 text-xs font-bold text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 cursor-pointer"
         >
-          <span>{showQuickGuide ? "Hide Guide" : "View Canvas Playbook"}</span>
+          <span>{showQuickGuide ? "Hide Details" : "Quick Tips"}</span>
         </button>
       </div>
 
