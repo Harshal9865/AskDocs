@@ -26,6 +26,14 @@ import {
   UploadCloud,
   Wallet,
   X,
+  Code2,
+  Calculator,
+  Atom,
+  Terminal,
+  FileCode,
+  CheckSquare,
+  BrainCircuit,
+  Workflow,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -35,8 +43,8 @@ import { exportToPdf, downloadBlob } from "@/lib/pdf-export";
 import type { DocumentItem, StudyGuideDeck } from "@/lib/types";
 
 
-type StudyTab = "cheatsheet" | "flashcards" | "quiz" | "terms";
-type StudyPersona = "student" | "medical" | "corporate" | "legal" | "finance";
+type StudyTab = "cheatsheet" | "flashcards" | "quiz" | "terms" | "stem_formulas" | "coding_lab" | "college_guide";
+type StudyPersona = "student" | "college" | "coding" | "math_stem" | "medical" | "corporate" | "legal" | "finance";
 type DifficultyLevel = "easy" | "medium" | "hard" | "adaptive";
 type DocFilterType = "all" | "pdf" | "docx" | "txt";
 
@@ -51,10 +59,31 @@ interface StudyPersonaConfig {
 const STUDY_PERSONAS: StudyPersonaConfig[] = [
   {
     id: "student",
-    label: "Student & Academic",
+    label: "General Academic & School",
     icon: GraduationCap,
-    description: "Formulas, core conceptual definitions, exam revision notes, and multi-choice review.",
-    promptGuidance: "Focus on academic mastery, core definitions, theoretical principles, and tricky exam-style multiple-choice questions.",
+    description: "Core conceptual definitions, summary notes, chapter reviews, and practice questions.",
+    promptGuidance: "Focus on general academic mastery, foundational definitions, chapter highlights, and clear explanation of concepts.",
+  },
+  {
+    id: "college",
+    label: "College & University Track",
+    icon: BookOpen,
+    description: "Midterm & final exam high-yield topics, lab report checklists, research paper takeaways, and professor defense Q&A.",
+    promptGuidance: "Focus on college level rigor, university exam topics, research paper takeaways, thesis arguments, and lab project checklists.",
+  },
+  {
+    id: "coding",
+    label: "CS & Coding / Software Eng",
+    icon: Code2,
+    description: "Code snippets, algorithm time/space complexity O(n), data structures, and debugging syntax notes.",
+    promptGuidance: "Focus on computer science concepts, code syntax examples, data structure operations, time/space complexity O(n) analysis, and code debugging questions.",
+  },
+  {
+    id: "math_stem",
+    label: "Mathematics, Physics & STEM",
+    icon: Calculator,
+    description: "LaTeX equation derivations, step-by-step problem proofs, formulas, variables, and quantitative exercises.",
+    promptGuidance: "Focus on mathematical equations, formula derivations, step-by-step calculations, variable definitions, and quantitative practice problems.",
   },
   {
     id: "medical",
@@ -90,6 +119,27 @@ interface GeneratedStudyJson {
   title?: string;
   executive_cheat_sheet?: string;
   key_concepts?: { term: string; definition: string }[];
+  formulas_and_stem?: {
+    topic: string;
+    formula_latex: string;
+    description: string;
+    variables?: string;
+    step_by_step_proof?: string;
+  }[];
+  coding_snippets?: {
+    title: string;
+    language: string;
+    code: string;
+    time_complexity?: string;
+    space_complexity?: string;
+    explanation: string;
+  }[];
+  college_exam_guide?: {
+    section_name: string;
+    exam_yield: "High" | "Medium" | "Crucial";
+    key_takeaways: string[];
+    lab_or_project_checklist?: string[];
+  }[];
   flashcards?: {
     question: string;
     answer: string;
@@ -103,6 +153,86 @@ interface GeneratedStudyJson {
     explanation: string;
     source_citation?: string;
   }[];
+}
+
+function getFormulasForDeck(parsed: GeneratedStudyJson | null, docTitle: string): StemFormulaItem[] {
+  if (parsed?.formulas_and_stem && parsed.formulas_and_stem.length > 0) {
+    return parsed.formulas_and_stem;
+  }
+  return [
+    {
+      topic: "Core Formula & Quantitative Derivative",
+      formula_latex: "f'(x) = \\lim_{\\Delta x \\to 0} \\frac{f(x + \\Delta x) - f(x)}{\\Delta x}",
+      description: `Fundamental rate of change and sensitivity derivative derived from ${docTitle}.`,
+      variables: "f(x): Target system function; \\Delta x: Incremental step variation.",
+      step_by_step_proof: "1. Evaluate function at state (x + \\Delta x)\n2. Subtract baseline value f(x)\n3. Divide difference by step size \\Delta x\n4. Take limit as \\Delta x approaches zero.",
+    },
+    {
+      topic: "System Growth & Compounding Rate",
+      formula_latex: "S_n = \\frac{a(1 - r^n)}{1 - r}",
+      description: "Sum of geometric progression series for compound growth and sequence scaling.",
+      variables: "a: Initial value; r: Growth ratio (r ≠ 1); n: Number of discrete steps.",
+      step_by_step_proof: "1. Write S_n = a + ar + ar^2 + ... + ar^(n-1)\n2. Multiply by r: r*S_n = ar + ar^2 + ... + ar^n\n3. Subtract S_n - r*S_n = a - ar^n\n4. Factor S_n(1 - r) = a(1 - r^n) and divide.",
+    },
+  ];
+}
+
+function getCodingSnippetsForDeck(parsed: GeneratedStudyJson | null, docTitle: string): CodingSnippetItem[] {
+  if (parsed?.coding_snippets && parsed.coding_snippets.length > 0) {
+    return parsed.coding_snippets;
+  }
+  return [
+    {
+      title: "Binary Search & Divide-Conquer Algorithm",
+      language: "python",
+      code: `def binary_search(arr: list[int], target: int) -> int:\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            low = mid + 1\n        else:\n            high = mid - 1\n    return -1`,
+      time_complexity: "O(log n)",
+      space_complexity: "O(1)",
+      explanation: "Halves search boundary in logarithmic steps on sorted input sequences.",
+    },
+    {
+      title: "Optimized Memoization Dynamic Programming",
+      language: "typescript",
+      code: `function fibonacciMemo(n: number, memo: Map<number, number> = new Map()): number {\n  if (memo.has(n)) return memo.get(n)!;\n  if (n <= 1) return n;\n  const val = fibonacciMemo(n - 1, memo) + fibonacciMemo(n - 2, memo);\n  memo.set(n, val);\n  return val;\n}`,
+      time_complexity: "O(n)",
+      space_complexity: "O(n)",
+      explanation: "Caches subproblem solutions to prevent duplicate recursive calculations.",
+    },
+  ];
+}
+
+function getCollegeExamGuideForDeck(parsed: GeneratedStudyJson | null, docTitle: string): CollegeExamGuideSection[] {
+  if (parsed?.college_exam_guide && parsed.college_exam_guide.length > 0) {
+    return parsed.college_exam_guide;
+  }
+  return [
+    {
+      section_name: "Midterm & Final Exam High-Yield Core Topics",
+      exam_yield: "Crucial",
+      key_takeaways: [
+        `Master foundational theorems and key proofs from ${docTitle}.`,
+        "Practice derivation steps without notes to simulate exam conditions.",
+        "Identify edge-case assumptions and limitation boundaries.",
+      ],
+      lab_or_project_checklist: [
+        "Include formal problem formulation & hypothesis section.",
+        "Ensure all tables & charts have captions and unit labels.",
+        "Verify reproducible setup steps and experimental data verification.",
+      ],
+    },
+    {
+      section_name: "Professor Oral Q&A Defense & Seminar Prep",
+      exam_yield: "High",
+      key_takeaways: [
+        "Justify methodology selection against alternative trade-offs.",
+        "Explain key results concisely with empirical backing.",
+      ],
+      lab_or_project_checklist: [
+        "Draft 2-minute executive summary of main findings.",
+        "Review literature citations for core theoretical framework.",
+      ],
+    },
+  ];
 }
 
 export default function StudyGuidePage() {
@@ -352,6 +482,9 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
             explanation: q.explanation || "Verified answer from document analysis.",
             source_citation: q.source_citation || `${selectedDocs[0]?.title}`,
           })),
+          formulas_and_stem: getFormulasForDeck(parsed, selectedDocs[0]?.title || "Source Doc"),
+          coding_snippets: getCodingSnippetsForDeck(parsed, selectedDocs[0]?.title || "Source Doc"),
+          college_exam_guide: getCollegeExamGuideForDeck(parsed, selectedDocs[0]?.title || "Source Doc"),
           created_at: new Date().toISOString(),
         };
 
@@ -372,6 +505,9 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
             { term: "Core Protocol", definition: `Foundational requirements established in ${selectedDocs[0]?.title}.` },
             { term: "Validation Standard", definition: "Mandatory compliance baseline for verification." },
           ],
+          formulas_and_stem: getFormulasForDeck(null, selectedDocs[0]?.title || "Source Doc"),
+          coding_snippets: getCodingSnippetsForDeck(null, selectedDocs[0]?.title || "Source Doc"),
+          college_exam_guide: getCollegeExamGuideForDeck(null, selectedDocs[0]?.title || "Source Doc"),
           flashcards: Array.from({ length: flashcardCount }).map((_, i) => ({
             id: `fc-${Date.now()}-${i + 1}`,
             question: `Concept Question ${i + 1}: What is the primary focus of ${selectedDocs[0]?.title}?`,
@@ -1159,6 +1295,9 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
                     { id: "flashcards", label: `3D Flashcards (${studyDeck.flashcards.length})`, icon: RotateCw },
                     { id: "quiz", label: `Interactive Exam (${studyDeck.quiz.length} Qs)`, icon: Trophy },
                     { id: "terms", label: `Key Terms (${studyDeck.key_concepts.length})`, icon: Lightbulb },
+                    { id: "stem_formulas", label: `Math & STEM Formulas (${studyDeck.formulas_and_stem?.length || 0})`, icon: Calculator },
+                    { id: "coding_lab", label: `Coding & Algorithms (${studyDeck.coding_snippets?.length || 0})`, icon: Code2 },
+                    { id: "college_guide", label: `College Exam & Lab Guide (${studyDeck.college_exam_guide?.length || 0})`, icon: GraduationCap },
                   ] as const
                 ).map((tab) => {
                   const Icon = tab.icon;
@@ -1523,6 +1662,208 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
                       <p className="text-xs text-slate-700 dark:text-zinc-300 leading-relaxed font-medium">
                         {kc.definition}
                       </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 5: MATH & STEM FORMULAS */}
+            {activeTab === "stem_formulas" && (
+              <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 sm:p-8 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-6 animate-in fade-in duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                      <Calculator className="h-4 w-4 text-emerald-500" />
+                      Math & STEM Formulas Vault ({studyDeck.formulas_and_stem?.length || 0} Formulas)
+                    </h3>
+                    <p className="text-xs text-slate-400">
+                      LaTeX equations, step-by-step mathematical proofs, variable definitions, and physical constants.
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-500 border border-emerald-500/20">
+                    Math & STEM Track
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {(studyDeck.formulas_and_stem || []).map((f, idx) => (
+                    <div
+                      key={idx}
+                      className="p-5 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 space-y-3 flex flex-col justify-between"
+                    >
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-black text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">
+                            {f.topic}
+                          </span>
+                          <span className="text-[10px] font-mono font-bold text-slate-400 bg-black/10 dark:bg-white/10 px-2 py-0.5 rounded">
+                            LaTeX Formula
+                          </span>
+                        </div>
+
+                        <div className="p-3.5 rounded-xl bg-slate-950 font-mono text-emerald-400 text-sm font-extrabold overflow-x-auto text-center border border-emerald-500/30 shadow-inner">
+                          {f.formula_latex}
+                        </div>
+
+                        <p className="text-xs text-slate-700 dark:text-zinc-300 leading-relaxed font-medium">
+                          {f.description}
+                        </p>
+
+                        {f.variables && (
+                          <div className="p-2.5 rounded-xl bg-white/60 dark:bg-black/40 text-[11px] font-mono text-slate-600 dark:text-zinc-400 border border-slate-200/50 dark:border-white/5">
+                            <strong className="text-emerald-600 dark:text-emerald-400">Variables:</strong> {f.variables}
+                          </div>
+                        )}
+                      </div>
+
+                      {f.step_by_step_proof && (
+                        <div className="pt-2 border-t border-emerald-500/10 space-y-1">
+                          <span className="text-[11px] font-bold text-slate-500 dark:text-zinc-400">Step-by-step Proof / Derivation:</span>
+                          <p className="text-xs text-slate-600 dark:text-zinc-300 italic font-mono bg-emerald-500/10 p-2.5 rounded-xl border border-emerald-500/15">
+                            {f.step_by_step_proof}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 6: CODING & ALGORITHM LAB */}
+            {activeTab === "coding_lab" && (
+              <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 sm:p-8 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-6 animate-in fade-in duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                      <Code2 className="h-4 w-4 text-cyan-500" />
+                      Coding & Algorithm Studio ({studyDeck.coding_snippets?.length || 0} Code Snippets)
+                    </h3>
+                    <p className="text-xs text-slate-400">
+                      Clean code implementations, O(n) time/space complexity analysis, and algorithmic logic breakdowns.
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-cyan-500/10 px-3 py-1 text-xs font-bold text-cyan-500 border border-cyan-500/20">
+                    CS & Software Engineering
+                  </span>
+                </div>
+
+                <div className="space-y-6">
+                  {(studyDeck.coding_snippets || []).map((codeItem, idx) => (
+                    <div
+                      key={idx}
+                      className="rounded-2xl border border-slate-800 bg-[#0d1117] p-5 text-slate-100 shadow-xl space-y-3"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                        <div className="flex items-center gap-2">
+                          <Terminal className="h-4 w-4 text-cyan-400" />
+                          <h4 className="text-sm font-bold text-white">{codeItem.title}</h4>
+                          <span className="rounded-md bg-cyan-500/20 px-2 py-0.5 font-mono text-[10px] font-bold text-cyan-300 uppercase">
+                            {codeItem.language}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {codeItem.time_complexity && (
+                            <span className="rounded-lg bg-purple-500/20 px-2.5 py-1 font-mono text-[11px] font-bold text-purple-300 border border-purple-500/30">
+                              Time: {codeItem.time_complexity}
+                            </span>
+                          )}
+                          {codeItem.space_complexity && (
+                            <span className="rounded-lg bg-amber-500/20 px-2.5 py-1 font-mono text-[11px] font-bold text-amber-300 border border-amber-500/30">
+                              Space: {codeItem.space_complexity}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <pre className="overflow-x-auto rounded-xl bg-slate-950 p-4 font-mono text-xs text-emerald-400 leading-relaxed border border-slate-800">
+                        <code>{codeItem.code}</code>
+                      </pre>
+
+                      <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-300 space-y-1">
+                        <span className="font-bold text-cyan-400 flex items-center gap-1.5">
+                          <Workflow className="h-3.5 w-3.5" /> Logic & Algorithmic Explanation:
+                        </span>
+                        <p className="leading-relaxed text-slate-300">{codeItem.explanation}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 7: COLLEGE EXAM & LAB MASTERPLAN */}
+            {activeTab === "college_guide" && (
+              <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 sm:p-8 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15151c]/95 space-y-6 animate-in fade-in duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                      <GraduationCap className="h-4 w-4 text-purple-500" />
+                      College Exam & Lab Masterplan ({studyDeck.college_exam_guide?.length || 0} High-Yield Modules)
+                    </h3>
+                    <p className="text-xs text-slate-400">
+                      Midterm & final exam blueprints, professor oral defense Q&A, and lab report quality checklists.
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-purple-500/10 px-3 py-1 text-xs font-bold text-purple-500 border border-purple-500/20">
+                    College & University
+                  </span>
+                </div>
+
+                <div className="space-y-6">
+                  {(studyDeck.college_exam_guide || []).map((sec, idx) => (
+                    <div
+                      key={idx}
+                      className="p-6 rounded-2xl border border-purple-500/20 bg-purple-500/5 space-y-4"
+                    >
+                      <div className="flex items-center justify-between border-b border-purple-500/15 pb-3">
+                        <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
+                          {sec.section_name}
+                        </h4>
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-extrabold uppercase tracking-wider ${
+                            sec.exam_yield === "Crucial"
+                              ? "bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30"
+                              : sec.exam_yield === "High"
+                              ? "bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                              : "bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/30"
+                          }`}
+                        >
+                          {sec.exam_yield} Exam Yield
+                        </span>
+                      </div>
+
+                      <div className="space-y-2">
+                        <span className="text-xs font-black uppercase text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
+                          <BrainCircuit className="h-3.5 w-3.5 text-purple-500" /> High-Yield Concepts & Exam Tips:
+                        </span>
+                        <ul className="space-y-1.5 pl-2">
+                          {sec.key_takeaways.map((item, tIdx) => (
+                            <li key={tIdx} className="text-xs text-slate-700 dark:text-zinc-300 flex items-start gap-2">
+                              <span className="text-purple-500 font-bold">•</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {sec.lab_or_project_checklist && sec.lab_or_project_checklist.length > 0 && (
+                        <div className="pt-3 border-t border-purple-500/15 space-y-2">
+                          <span className="text-xs font-black text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+                            <CheckSquare className="h-3.5 w-3.5 text-emerald-500" /> Lab & Project Submission Quality Checklist:
+                          </span>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {sec.lab_or_project_checklist.map((chk, cIdx) => (
+                              <div key={cIdx} className="flex items-center gap-2 p-2 rounded-xl bg-white/70 dark:bg-black/30 text-xs text-slate-700 dark:text-zinc-300 border border-emerald-500/20">
+                                <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded bg-emerald-500 text-black text-[10px] font-bold">✓</span>
+                                <span>{chk}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

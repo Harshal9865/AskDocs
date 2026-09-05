@@ -510,6 +510,30 @@ export interface QuizQuestion {
   source_citation?: string;
 }
 
+export interface StemFormulaItem {
+  topic: string;
+  formula_latex: string;
+  description: string;
+  variables?: string;
+  step_by_step_proof?: string;
+}
+
+export interface CodingSnippetItem {
+  title: string;
+  language: string;
+  code: string;
+  time_complexity?: string;
+  space_complexity?: string;
+  explanation: string;
+}
+
+export interface CollegeExamGuideSection {
+  section_name: string;
+  exam_yield: "High" | "Medium" | "Crucial" | string;
+  key_takeaways: string[];
+  lab_or_project_checklist?: string[];
+}
+
 export interface StudyGuideDeck {
   id: string;
   workspace_id: string;
@@ -517,6 +541,9 @@ export interface StudyGuideDeck {
   document_titles: string[];
   executive_cheat_sheet: string;
   key_concepts: { term: string; definition: string }[];
+  formulas_and_stem?: StemFormulaItem[];
+  coding_snippets?: CodingSnippetItem[];
+  college_exam_guide?: CollegeExamGuideSection[];
   flashcards: FlashcardItem[];
   quiz: QuizQuestion[];
   created_at: string;
