@@ -423,14 +423,6 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
                       router.push("/settings/workspace");
                     }}
                   />
-                  <MenuItem
-                    icon={<Globe className="h-4 w-4" />}
-                    label="Public homepage"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      router.push("/");
-                    }}
-                  />
                 </div>
                 <div className="border-t border-slate-100 p-1">
                   <MenuItem
