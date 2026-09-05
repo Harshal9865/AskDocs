@@ -117,50 +117,50 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         </button>
 
         {/* Essential Navigation Icons for Small/Tablet Screens (<lg) — Compact & Spacing Optimized */}
-        <div className="flex items-center gap-0.5 sm:gap-1 lg:hidden">
+        <div className="flex items-center gap-1 sm:gap-1.5 lg:hidden">
           <Link
             href="/dashboard"
             title="Dashboard"
             aria-label="Dashboard"
-            className={`flex h-6.5 w-6.5 sm:h-7 sm:w-7 items-center justify-center rounded-lg transition-all ${
+            className={`flex h-8 w-8 sm:h-8.5 sm:w-8.5 items-center justify-center rounded-xl transition-all ${
               pathname === "/dashboard" || pathname.startsWith("/dashboard/")
                 ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
                 : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
             }`}
           >
-            <LayoutDashboard className="h-3.5 w-3.5" />
+            <LayoutDashboard className="h-4 w-4" />
           </Link>
 
           <Link
             href="/chat"
             title="AI Chat"
             aria-label="AI Chat"
-            className={`flex h-6.5 w-6.5 sm:h-7 sm:w-7 items-center justify-center rounded-lg transition-all ${
+            className={`flex h-8 w-8 sm:h-8.5 sm:w-8.5 items-center justify-center rounded-xl transition-all ${
               pathname === "/chat" || pathname.startsWith("/chat/")
                 ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
                 : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
             }`}
           >
-            <Sparkles className="h-3.5 w-3.5" />
+            <Sparkles className="h-4 w-4" />
           </Link>
 
           <Link
             href="/chats"
             title={modeConfig.chatLabel}
             aria-label={modeConfig.chatLabel}
-            className={`flex h-6.5 w-6.5 sm:h-7 sm:w-7 items-center justify-center rounded-lg transition-all ${
+            className={`flex h-8 w-8 sm:h-8.5 sm:w-8.5 items-center justify-center rounded-xl transition-all ${
               pathname === "/chats" || pathname.startsWith("/chats/")
                 ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
                 : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
             }`}
           >
-            <MessagesSquare className="h-3.5 w-3.5" />
+            <MessagesSquare className="h-4 w-4" />
           </Link>
         </div>
       </div>
 
       {/* desktop nav — expands progressively based on available laptop & desktop width */}
-      <nav className="hidden items-center gap-1 lg:flex">
+      <nav className="hidden items-center gap-1.5 lg:flex">
         {[
           { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
           { href: "/chat", label: "AI Chat", Icon: Sparkles },
@@ -173,26 +173,34 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-1.5 rounded-full px-2.5 xl:px-3 py-1.5 text-[13px] font-medium transition-colors ${
+              className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-[13px] font-medium transition-all ${
                 active
                   ? "bg-slate-900 text-white dark:bg-white dark:text-black font-semibold shadow-xs"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white"
               }`}
             >
-              <Icon className="h-3.5 w-3.5" />
+              <Icon className="h-4 w-4" />
               {label}
             </Link>
           );
         })}
         {workspace && (
-          <span
-            title={`Workspace: ${workspace.name}`}
-            className="ml-1.5 flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300"
+          <Link
+            href="/workspaces"
+            title={`Workspace: ${workspace.name}. Click to view workspace settings.`}
+            className="ml-1 flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 hover:bg-indigo-50/60 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10 transition-all cursor-pointer shrink-0"
           >
-            <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
-            <span className="hidden max-w-[110px] truncate xl:inline">{workspace.name}</span>
+            {brandSrc ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={brandSrc} alt={workspace.name} className="h-4 w-4 rounded-full object-cover shrink-0" />
+            ) : brandSticker ? (
+              <span className="text-xs shrink-0">{brandSticker}</span>
+            ) : (
+              <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+            )}
+            <span className="hidden max-w-[120px] truncate xl:inline">{workspace.name}</span>
             <span className="xl:hidden">{(workspace.name || "?").slice(0, 1).toUpperCase()}</span>
-          </span>
+          </Link>
         )}
       </nav>
 

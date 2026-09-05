@@ -40,12 +40,40 @@ const WORKSPACE_EMBLEMS = [
   { id: "ai-2", name: "Global Orbit", tag: "Planetary 3D" },
 ];
 
-const TEMPLATES = [
-  { name: "CS101 Midterm Prep", type: "student", icon: GraduationCap, tag: "Academic Mode" },
-  { name: "Engineering Ops & Architecture", type: "corporate", icon: Building2, tag: "Corporate Mode" },
-  { name: "Client Contracts & Invoices", type: "freelance", icon: Briefcase, tag: "Freelance Mode" },
-  { name: "Legal & Compliance Vault", type: "legal", icon: Shield, tag: "Legal Mode" },
-];
+function WorkspaceLogoCardBadge({ ws, isCurrent }: { ws: Workspace; isCurrent?: boolean }) {
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (ws.brand_kind === "upload") {
+      api.getBrandLogoUrl(ws.id)
+        .then((url) => { if (!cancelled) setLogoUrl(url); })
+        .catch(() => { if (!cancelled) setLogoUrl(null); });
+    } else {
+      setLogoUrl(null);
+    }
+    return () => { cancelled = true; };
+  }, [ws.id, ws.brand_kind]);
+
+  return (
+    <div
+      className={`flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-2xl font-black text-xs uppercase shadow-xs overflow-hidden ${
+        isCurrent
+          ? "bg-emerald-600 text-white"
+          : "bg-gradient-to-br from-indigo-600 to-purple-600 text-white"
+      }`}
+    >
+      {logoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={logoUrl} alt={ws.name} className="h-full w-full object-cover" />
+      ) : ws.brand_kind === "sticker" && ws.brand_value ? (
+        <span className="text-sm">{ws.brand_value}</span>
+      ) : (
+        ws.name.slice(0, 2).toUpperCase()
+      )}
+    </div>
+  );
+}
 
 export default function WorkspacesPage() {
   const router = useRouter();
@@ -552,13 +580,7 @@ export default function WorkspacesPage() {
                   <div>
                     <div className="flex items-start justify-between gap-2 mb-3">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className={`flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-2xl font-black text-sm uppercase shadow-xs ${
-                          isCurrent
-                            ? "bg-emerald-600 text-white"
-                            : "bg-gradient-to-br from-indigo-600 to-purple-600 text-white"
-                        }`}>
-                          {ws.name.slice(0, 2)}
-                        </div>
+                        <WorkspaceLogoCardBadge ws={ws} isCurrent={isCurrent} />
                         <div className="min-w-0">
                           <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex flex-wrap items-center gap-1.5">
                             <span className="truncate">{ws.name}</span>
@@ -716,9 +738,7 @@ export default function WorkspacesPage() {
                       <div>
                         <div className="flex items-start justify-between gap-3 mb-2">
                           <div className="flex items-center gap-3 min-w-0">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white font-black text-xs uppercase shadow-xs">
-                              {pubWs.name.slice(0, 2)}
-                            </div>
+                            <WorkspaceLogoCardBadge ws={pubWs} isCurrent={isMember} />
                             <div className="min-w-0">
                               <div className="text-sm font-bold text-slate-900 dark:text-white truncate">
                                 {pubWs.name}
