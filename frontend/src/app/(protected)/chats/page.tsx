@@ -714,18 +714,28 @@ export default function ChatsPage() {
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 <button 
-                  onClick={() => setShowNewChat(true)} 
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setNewChatQuery("");
+                    setNewChatResults([]);
+                    setShowNewChat(true);
+                  }} 
                   title="New Direct Message" 
                   aria-label="New chat" 
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-[#9333ea] hover:bg-[#7c3aed] text-white transition-all shadow-md shadow-purple-500/25 hover:scale-105 active:scale-95"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-[#9333ea] hover:bg-[#7c3aed] text-white transition-all shadow-md shadow-purple-500/25 hover:scale-105 active:scale-95 cursor-pointer"
                 >
                   <MessagesSquare className="h-4 w-4" />
                 </button>
                 <button 
-                  onClick={() => setShowNewGroup(true)} 
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowNewGroup(true);
+                  }} 
                   title={`New ${modeConfig.groupTypeLabel}`} 
                   aria-label="New group" 
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1DB954] hover:bg-[#1ed760] text-white transition-all shadow-md shadow-emerald-500/25 hover:scale-105 active:scale-95"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1DB954] hover:bg-[#1ed760] text-white transition-all shadow-md shadow-emerald-500/25 hover:scale-105 active:scale-95 cursor-pointer"
                 >
                   <UsersRound className="h-4 w-4" />
                 </button>
@@ -750,8 +760,9 @@ export default function ChatsPage() {
                 return (
                   <button 
                     key={c.key} 
+                    type="button"
                     onClick={() => setFilter(c.key)} 
-                    className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-bold transition-all duration-200 ${
+                    className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-bold transition-all duration-200 cursor-pointer ${
                       isActive 
                         ? "bg-gradient-to-r from-[#7c3aed] to-[#9333ea] text-white shadow-md shadow-purple-500/25 ring-1 ring-purple-400/30" 
                         : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-[#1a1a24] dark:text-zinc-300 dark:hover:bg-white/10"
@@ -774,13 +785,19 @@ export default function ChatsPage() {
           {/* Active online teammates bar */}
           {onlineColleagues.length > 0 && (
             <div className="border-b border-slate-100 px-2 py-2.5 dark:border-white/5">
-              <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Active Now</div>
+              <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Active Now (Click to Chat)</div>
               <div className="flex gap-2.5 overflow-x-auto pb-1 no-scrollbar">
                 {onlineColleagues.map((m) => (
-                  <Link key={m.user_id} href={`/profile/${m.user_id}`} className="flex shrink-0 flex-col items-center gap-1 hover:opacity-80 transition-opacity" title={`View profile of ${m.name || m.email}`}>
+                  <button
+                    key={m.user_id}
+                    type="button"
+                    onClick={() => void openDM(m)}
+                    className="flex shrink-0 flex-col items-center gap-1 hover:opacity-80 transition-opacity cursor-pointer"
+                    title={`Start direct chat with ${m.name || m.email}`}
+                  >
                     <ChatAvatar user={m} size={48} ring />
                     <span className="max-w-[52px] truncate text-[10px] font-medium text-slate-700 dark:text-zinc-300">{(m.name || m.email).split(" ")[0]}</span>
-                  </Link>
+                  </button>
                 ))}
               </div>
             </div>
@@ -1249,10 +1266,10 @@ export default function ChatsPage() {
                             <AIAvatarIcon size={16} className="h-4 w-4" />
                             <span>@AskDocs AI Teammate</span>
                           </div>
-                        ) : activeChat.type === "group" ? (
+                        ) : m.sender_id ? (
                           <Link
                             href={`/profile/${m.sender_id}`}
-                            className="mb-1 block text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline"
+                            className="mb-1 block text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline cursor-pointer"
                             title="View Profile"
                           >
                             {senderName(m.sender_id)}
