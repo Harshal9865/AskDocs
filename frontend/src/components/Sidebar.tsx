@@ -63,8 +63,6 @@ const NAV_INTELLIGENCE = [
 ];
 
 const NAV_SECONDARY = [
-  { href: "/search", label: "Search", icon: Search },
-  { href: "/discover", label: "Discover", icon: Compass },
   { href: "/pricing", label: "Plans & Pricing", icon: Crown },
   { href: "/insights", label: "Insights", icon: BarChart3 },
   { href: "/activity", label: "Activity log", icon: History },
@@ -286,7 +284,7 @@ export default function Sidebar({
             </button>
           </div>
         )}
-        <div className="sb-hide dark:border-slate-700/50 shrink-0 border-b border-slate-100 px-3 py-3">
+        <div className="sb-hide dark:border-slate-700/50 shrink-0 border-b border-slate-100 px-3 py-3 space-y-2">
           <Link
             href="/workspaces"
             onClick={onCloseMobile}
@@ -307,8 +305,38 @@ export default function Sidebar({
               </div>
             </div>
           </Link>
+
+          {/* Search & Discover Action Row inside Workspace block */}
+          <div className="flex items-center gap-1.5 pt-0.5">
+            <Link
+              href="/search"
+              onClick={onCloseMobile}
+              title="Search documents & chats"
+              className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg border py-1.5 text-[11px] font-semibold transition-all ${
+                pathname === "/search"
+                  ? "border-purple-500 bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 font-bold"
+                  : "border-slate-200/80 bg-white text-slate-700 hover:border-purple-300 hover:bg-purple-50/50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10"
+              }`}
+            >
+              <Search className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400 shrink-0" />
+              <span>Search</span>
+            </Link>
+            <Link
+              href="/discover"
+              onClick={onCloseMobile}
+              title="Discover public knowledge vaults"
+              className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg border py-1.5 text-[11px] font-semibold transition-all ${
+                pathname === "/discover"
+                  ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 font-bold"
+                  : "border-slate-200/80 bg-white text-slate-700 hover:border-indigo-300 hover:bg-indigo-50/50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10"
+              }`}
+            >
+              <Compass className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+              <span>Discover</span>
+            </Link>
+          </div>
         </div>
-        <div className="sb-collapsed-show shrink-0 border-b border-slate-100 p-2">
+        <div className="sb-collapsed-show shrink-0 border-b border-slate-100 p-2 space-y-2">
           <Link
             href="/workspaces"
             onClick={onCloseMobile}
@@ -318,6 +346,24 @@ export default function Sidebar({
           >
             {(workspace?.name ?? "W").slice(0, 1)}
           </Link>
+          <div className="flex flex-col items-center gap-1">
+            <Link
+              href="/search"
+              onClick={onCloseMobile}
+              title="Search"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-purple-50 dark:text-zinc-400 dark:hover:bg-white/10"
+            >
+              <Search className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+            </Link>
+            <Link
+              href="/discover"
+              onClick={onCloseMobile}
+              title="Discover"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-indigo-50 dark:text-zinc-400 dark:hover:bg-white/10"
+            >
+              <Compass className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+            </Link>
+          </div>
         </div>
 
       <nav className="scrollbar-thin min-h-0 flex-1 overflow-y-auto p-2">

@@ -234,11 +234,11 @@ export default function WorkspacesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-5 dark:border-white/10">
         <div>
           <div className="mb-1.5 inline-flex items-center gap-2 rounded-full border border-purple-200 bg-purple-50 px-3 py-1 text-xs font-bold text-purple-700 dark:border-purple-500/20 dark:bg-purple-950/40 dark:text-purple-300">
-            <Building2 className="h-3.5 w-3.5" />
+            <Building2 className="h-3.5 w-3.5 shrink-0" />
             <span>WORKSPACE MANAGEMENT CENTER</span>
           </div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            <h1 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Workspaces & Teams
             </h1>
             <HintTooltip text="Workspaces isolate team files, channels, and AI memories so your data stays private and organized." />
@@ -251,7 +251,7 @@ export default function WorkspacesPage() {
         {/* Action Button */}
         <button
           onClick={() => setActiveTab("create")}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-indigo-500 transition-all shadow-md shadow-indigo-500/20 shrink-0"
+          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-indigo-500 transition-all shadow-md shadow-indigo-500/20 shrink-0 w-full sm:w-auto cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           <span>New Workspace</span>
@@ -260,22 +260,28 @@ export default function WorkspacesPage() {
 
       {/* Skippable Onboarding Tutorial Banner */}
       {showTutorial && (
-        <div className="relative overflow-hidden rounded-3xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50/80 via-purple-50/40 to-white p-5 dark:border-indigo-500/20 dark:bg-gradient-to-br dark:from-indigo-950/40 dark:via-purple-950/20 dark:to-[#121420] shadow-sm animate-in fade-in duration-300">
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <div className="relative overflow-hidden rounded-3xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50/80 via-purple-50/40 to-white p-4 sm:p-5 dark:border-indigo-500/20 dark:bg-gradient-to-br dark:from-indigo-950/40 dark:via-purple-950/20 dark:to-[#121420] shadow-sm animate-in fade-in duration-300">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
             <div className="space-y-3 flex-1">
-              <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-white font-black text-xs">
-                  ⚡
-                </span>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Quick Start Guide: How Workspaces Work
-                </h3>
-                <span className="rounded-full bg-indigo-200/60 px-2 py-0.5 text-[10px] font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
-                  New User Guide
-                </span>
+              <div className="flex items-center justify-between sm:justify-start gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-white font-black text-xs shrink-0">
+                    ⚡
+                  </span>
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                    Quick Start Guide: How Workspaces Work
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={dismissTutorial}
+                  className="sm:hidden text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 p-1"
+                >
+                  ✕
+                </button>
               </div>
 
-              <div className="grid gap-2.5 sm:grid-cols-3 text-xs">
+              <div className="grid gap-2 grid-cols-1 sm:grid-cols-3 text-xs">
                 <div className="rounded-2xl bg-white/90 p-3 border border-indigo-100 dark:border-white/5 dark:bg-[#161826] shadow-2xs">
                   <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1">
                     <span>1. Select or Create</span>
@@ -306,7 +312,7 @@ export default function WorkspacesPage() {
             <button
               type="button"
               onClick={dismissTutorial}
-              className="shrink-0 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-100 dark:border-white/10 dark:bg-white/10 dark:text-zinc-300 dark:hover:bg-white/20 transition-all cursor-pointer"
+              className="hidden sm:block shrink-0 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-100 dark:border-white/10 dark:bg-white/10 dark:text-zinc-300 dark:hover:bg-white/20 transition-all cursor-pointer"
             >
               Skip Tutorial ✕
             </button>
@@ -315,12 +321,12 @@ export default function WorkspacesPage() {
       )}
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-slate-100 pb-3 dark:border-white/5">
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-slate-100 pb-3 dark:border-white/5 -mx-4 px-4 sm:mx-0 sm:px-0">
         {[
-          { id: "all", label: `All Workspaces (${workspaces.length})`, icon: Layers },
+          { id: "all", label: "All Workspaces", badge: workspaces.length, icon: Layers },
           { id: "create", label: "Create Workspace", icon: Plus },
-          { id: "settings", label: "Workspace Settings & Branding", icon: Settings },
-          { id: "members", label: `Team Members (${members.length})`, icon: UsersRound },
+          { id: "settings", label: "Settings & Brand", icon: Settings },
+          { id: "members", label: "Team Members", badge: members.length, icon: UsersRound },
         ].map((tab) => {
           const Icon = tab.icon;
           const isSelected = activeTab === tab.id;
@@ -328,14 +334,23 @@ export default function WorkspacesPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as "all" | "create" | "settings" | "members")}
-              className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              className={`flex shrink-0 items-center gap-2 rounded-2xl px-3.5 sm:px-4 py-2.5 text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                 isSelected
                   ? "bg-slate-900 text-white shadow-md dark:bg-white dark:text-black scale-[1.02]"
                   : "border border-slate-200/80 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10"
               }`}
             >
-              <Icon className="h-4 w-4" />
+              <Icon className="h-4 w-4 shrink-0" />
               <span>{tab.label}</span>
+              {tab.badge !== undefined && (
+                <span className={`ml-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold ${
+                  isSelected
+                    ? "bg-white/20 text-white dark:bg-black/20 dark:text-black"
+                    : "bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-zinc-400"
+                }`}>
+                  {tab.badge}
+                </span>
+              )}
             </button>
           );
         })}
@@ -344,58 +359,58 @@ export default function WorkspacesPage() {
       {/* TAB 1: ALL WORKSPACES & SWITCHER */}
       {activeTab === "all" && (
         <div className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
             {workspaces.map((ws) => {
               const isCurrent = workspace?.id === ws.id;
               return (
                 <div
                   key={ws.id}
                   onClick={() => handleSwitch(ws)}
-                  className={`group relative flex flex-col justify-between rounded-3xl border p-5 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 ${
+                  className={`group relative flex flex-col justify-between rounded-3xl border p-4 sm:p-5 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 ${
                     isCurrent
                       ? "border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/40 dark:border-emerald-500/40 dark:bg-emerald-950/20 shadow-md"
                       : "border-slate-200/90 bg-white hover:border-slate-300 shadow-sm dark:border-white/10 dark:bg-[#121420] dark:hover:border-white/20"
                   }`}
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className={`flex h-11 w-11 items-center justify-center rounded-2xl font-black text-sm uppercase shadow-xs ${
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-2xl font-black text-sm uppercase shadow-xs ${
                           isCurrent
                             ? "bg-emerald-600 text-white"
                             : "bg-gradient-to-br from-indigo-600 to-purple-600 text-white"
                         }`}>
                           {ws.name.slice(0, 2)}
                         </div>
-                        <div>
-                          <div className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                            <span>{ws.name}</span>
+                        <div className="min-w-0">
+                          <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex flex-wrap items-center gap-1.5">
+                            <span className="truncate">{ws.name}</span>
                             {isCurrent && (
-                              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
-                                Active Workspace
+                              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 shrink-0">
+                                Active
                               </span>
                             )}
                           </div>
-                          <div className="text-xs text-slate-400 dark:text-zinc-500 font-mono mt-0.5">
+                          <div className="text-[11px] text-slate-400 dark:text-zinc-500 font-mono mt-0.5 truncate max-w-[180px] sm:max-w-none">
                             ID: {ws.id}
                           </div>
                         </div>
                       </div>
 
                       {isCurrent ? (
-                        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
                           <Check className="h-4 w-4" />
                         </div>
                       ) : (
-                        <ArrowRight className="h-4 w-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+                        <ArrowRight className="h-4 w-4 text-slate-400 group-hover:translate-x-1 transition-transform shrink-0 mt-2" />
                       )}
                     </div>
                   </div>
 
                   <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-white/5 text-xs text-slate-500 dark:text-zinc-400">
-                    <span className="flex items-center gap-1 font-medium">
-                      <Shield className="h-3.5 w-3.5 text-indigo-500" />
-                      {ws.is_public ? "Public Workspace" : "Private Vault"}
+                    <span className="flex items-center gap-1 font-medium truncate">
+                      <Shield className="h-3.5 w-3.5 text-indigo-500 shrink-0" />
+                      <span>{ws.is_public ? "Public" : "Private Vault"}</span>
                     </span>
                     <button
                       type="button"
@@ -404,7 +419,7 @@ export default function WorkspacesPage() {
                         handleSwitch(ws);
                         setActiveTab("settings");
                       }}
-                      className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                      className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 shrink-0"
                     >
                       <Settings className="h-3.5 w-3.5" /> Configure
                     </button>
@@ -418,9 +433,9 @@ export default function WorkspacesPage() {
 
       {/* TAB 2: CREATE WORKSPACE */}
       {activeTab === "create" && (
-        <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xl dark:border-white/10 dark:bg-[#121420] sm:p-8 space-y-6">
+        <div className="rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-8 shadow-xl dark:border-white/10 dark:bg-[#121420] space-y-6">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Create a New Workspace</h2>
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Create a New Workspace</h2>
             <p className="mt-1 text-xs text-slate-500 dark:text-zinc-400">
               Workspaces isolate documents, team channels, and AI memories securely.
             </p>
@@ -431,7 +446,7 @@ export default function WorkspacesPage() {
               <label className="block text-xs font-bold text-slate-700 dark:text-zinc-300 mb-1.5">
                 Workspace Name <span className="text-rose-500">*</span>
               </label>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2.5">
                 <input
                   value={newWsName}
                   onChange={(e) => setNewWsName(e.target.value)}
@@ -442,7 +457,7 @@ export default function WorkspacesPage() {
                   type="button"
                   onClick={() => handleCreateWorkspace()}
                   disabled={createBusy || !newWsName.trim()}
-                  className="shrink-0 inline-flex items-center gap-2 rounded-2xl bg-indigo-600 px-6 py-3 text-xs font-bold text-white hover:bg-indigo-500 disabled:opacity-50 transition-all shadow-md shadow-indigo-500/20"
+                  className="shrink-0 inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-6 py-3 text-xs font-bold text-white hover:bg-indigo-500 disabled:opacity-50 transition-all shadow-md shadow-indigo-500/20 cursor-pointer"
                 >
                   <Plus className="h-4 w-4" />
                   <span>{createBusy ? "Initializing…" : "Initialize Workspace"}</span>
