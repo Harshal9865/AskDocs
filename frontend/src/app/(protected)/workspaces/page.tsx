@@ -40,6 +40,13 @@ const WORKSPACE_EMBLEMS = [
   { id: "ai-2", name: "Global Orbit", tag: "Planetary 3D" },
 ];
 
+const TEMPLATES = [
+  { name: "CS101 Midterm Prep", type: "student", icon: GraduationCap, tag: "Academic Mode" },
+  { name: "Engineering Ops & Architecture", type: "corporate", icon: Building2, tag: "Corporate Mode" },
+  { name: "Client Contracts & Invoices", type: "freelance", icon: Briefcase, tag: "Freelance Mode" },
+  { name: "Legal & Compliance Vault", type: "legal", icon: Shield, tag: "Legal Mode" },
+];
+
 function WorkspaceLogoCardBadge({ ws, isCurrent }: { ws: Workspace; isCurrent?: boolean }) {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
@@ -114,6 +121,7 @@ export default function WorkspacesPage() {
     if (activeTab === "discover") {
       void loadDiscoverWorkspaces(discoverQuery.trim() || undefined);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   useEffect(() => {
@@ -122,6 +130,7 @@ export default function WorkspacesPage() {
       void loadDiscoverWorkspaces(discoverQuery.trim() || undefined);
     }, 350);
     return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [discoverQuery]);
 
   async function handleApply(wsId: string) {
