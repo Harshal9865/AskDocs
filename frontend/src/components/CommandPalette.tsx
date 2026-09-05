@@ -79,7 +79,7 @@ export default function CommandPalette() {
       onClick={() => setOpen(false)}
     >
       <Command
-        className="w-full max-w-xl overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#13111f]/95 animate-in zoom-in-95 duration-150"
+        className="w-full max-w-xl overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#131220] animate-in zoom-in-95 duration-150"
         loop
         onClick={(e) => e.stopPropagation()}
       >

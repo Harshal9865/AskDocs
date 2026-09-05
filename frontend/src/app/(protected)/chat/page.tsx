@@ -670,7 +670,7 @@ export default function ChatPage() {
             void deleteConversation(activeConv);
           }
         }}
-        className={`gemini-gradient-bg sb-scroll relative flex-col overflow-y-auto border bg-white/95 shadow-sm backdrop-blur-md outline-none focus:ring-1 focus:ring-purple-500/30 dark:border-[rgba(129,140,248,0.16)] dark:bg-[#0d0d1f]/95 rounded-2xl shrink-0 p-2.5 sm:p-3.5
+        className={`gemini-gradient-bg sb-scroll relative flex-col overflow-y-auto border bg-white/95 shadow-sm backdrop-blur-md outline-none focus:ring-1 focus:ring-purple-500/30 dark:border-white/10 dark:bg-[#131220] rounded-2xl shrink-0 p-2.5 sm:p-3.5
           ${activeConv ? "hidden md:flex md:w-72 min-h-0" : "flex w-full md:w-72 min-h-0"}`}
       >
         <div className="gemini-orb gemini-orb-1 opacity-40" />
