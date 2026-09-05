@@ -391,14 +391,49 @@ export default function WorkspacesPage() {
         </div>
       )}
 
-      {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-slate-100 pb-3 dark:border-white/5 -mx-4 px-4 sm:mx-0 sm:px-0">
+      {/* Feature Hub Grid — No Horizontal Scroll Required! */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
         {[
-          { id: "all", label: "My Workspaces", badge: workspaces.length, icon: Layers },
-          { id: "discover", label: "Discover & Join", icon: Globe },
-          { id: "create", label: "Create Workspace", icon: Plus },
-          { id: "settings", label: "Settings & Brand", icon: Settings },
-          { id: "members", label: "Team Members", badge: members.length, icon: UsersRound },
+          {
+            id: "all",
+            label: "My Workspaces",
+            sub: `${workspaces.length} Vaults`,
+            icon: Layers,
+            color: "text-indigo-600 bg-indigo-50 border-indigo-200/60 dark:bg-indigo-950/50 dark:text-indigo-300 dark:border-indigo-800/40",
+            badge: workspaces.length,
+          },
+          {
+            id: "discover",
+            label: "Discover & Join",
+            sub: "Search Public",
+            icon: Globe,
+            color: "text-purple-600 bg-purple-50 border-purple-200/60 dark:bg-purple-950/50 dark:text-purple-300 dark:border-purple-800/40",
+            badge: "Search",
+          },
+          {
+            id: "create",
+            label: "Create Workspace",
+            sub: "New Room",
+            icon: Plus,
+            color: "text-emerald-600 bg-emerald-50 border-emerald-200/60 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/40",
+            badge: "+ New",
+          },
+          {
+            id: "settings",
+            label: "Settings & Brand",
+            sub: "Branding",
+            icon: Settings,
+            color: "text-amber-600 bg-amber-50 border-amber-200/60 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/40",
+          },
+          {
+            id: "members",
+            label: "Team Members",
+            sub: `${members.length} People`,
+            icon: UsersRound,
+            color: "text-cyan-600 bg-cyan-50 border-cyan-200/60 dark:bg-cyan-950/50 dark:text-cyan-300 dark:border-cyan-800/40",
+            badge: members.length,
+            colSpan: "col-span-2 sm:col-span-1",
+          },
         ].map((tab) => {
           const Icon = tab.icon;
           const isSelected = activeTab === tab.id;
@@ -406,23 +441,36 @@ export default function WorkspacesPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as "all" | "discover" | "create" | "settings" | "members")}
-              className={`flex shrink-0 items-center gap-2 rounded-2xl px-3.5 sm:px-4 py-2.5 text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              className={`group flex flex-col justify-between rounded-2xl border p-3 sm:p-3.5 text-left transition-all duration-200 cursor-pointer ${
+                tab.colSpan || ""
+              } ${
                 isSelected
-                  ? "bg-slate-900 text-white shadow-md dark:bg-white dark:text-black scale-[1.02]"
-                  : "border border-slate-200/80 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10"
+                  ? "border-purple-600 ring-2 ring-purple-500/30 bg-purple-50/80 dark:bg-purple-950/40 dark:border-purple-400 shadow-md scale-[1.02]"
+                  : "border-slate-200/90 bg-white hover:border-slate-300 hover:bg-slate-50/60 dark:border-white/10 dark:bg-[#121420] dark:hover:border-white/20 dark:hover:bg-white/[0.04] shadow-2xs"
               }`}
             >
-              <Icon className="h-4 w-4 shrink-0 text-purple-500" />
-              <span>{tab.label}</span>
-              {tab.badge !== undefined && (
-                <span className={`ml-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold ${
-                  isSelected
-                    ? "bg-white/20 text-white dark:bg-black/20 dark:text-black"
-                    : "bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-zinc-400"
-                }`}>
-                  {tab.badge}
+              <div className="flex items-center justify-between gap-1 mb-2">
+                <div className={`flex h-8 w-8 items-center justify-center rounded-xl border font-bold ${tab.color}`}>
+                  <Icon className="h-4 w-4 shrink-0" />
+                </div>
+                {tab.badge !== undefined && (
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${
+                    isSelected
+                      ? "bg-purple-600 text-white dark:bg-purple-500 dark:text-white"
+                      : "bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-zinc-400"
+                  }`}>
+                    {tab.badge}
+                  </span>
+                )}
+              </div>
+              <div>
+                <span className="block text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                  {tab.label}
                 </span>
-              )}
+                <span className="block text-[10px] font-medium text-slate-500 dark:text-zinc-400 mt-0.5">
+                  {tab.sub}
+                </span>
+              </div>
             </button>
           );
         })}

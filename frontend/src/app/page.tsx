@@ -1619,97 +1619,8 @@ export default function Home() {
 
 
 
-      {/* Open source — new end section 3 */}
-      <section className="mx-auto max-w-3xl px-4 py-12 text-center sm:px-6 sm:py-16">
-        <Reveal dir="up">
-          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-900 to-slate-700 text-white dark:from-white dark:to-zinc-200 dark:text-black">
-            <Globe className="h-5 w-5" />
-          </div>
-          <h2 className="mt-3 text-xl font-bold sm:text-2xl">Open in spirit, free to start</h2>
-          <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-slate-500 dark:text-zinc-400">
-            Core search and chat are open and auditable. Start free, invite your team, and only think about pricing when you outgrow the hobby limits.
-          </p>
-          <div className="mt-5 flex flex-wrap justify-center gap-3">
-            <a
-              href="https://github.com/Harshal9865/AskDocs"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium shadow-sm hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
-            >
-              <Globe className="h-4 w-4" /> View source
-            </a>
-            <Link
-              href={user ? "/dashboard" : "/register"}
-              className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-black dark:bg-white dark:text-black"
-            >
-              {user ? "Open Dashboard" : "Start free"} <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </Reveal>
-      </section>
-
-{/* Contact — themed cards with gradient accents */}
-      <section id="contact" className="scroll-mt-16 border-y border-slate-100 bg-white py-12 dark:border-white/5 dark:bg-[#0a0a0f] sm:py-16">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <Reveal dir="left">
-            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500 to-indigo-500 text-white">
-              <Heart className="h-6 w-6" />
-            </div>
-            <h2 className="text-center text-xl font-bold sm:text-2xl">Talk to us</h2>
-            <p className="mx-auto mt-2 max-w-xl text-center text-sm text-slate-500 dark:text-zinc-400">
-              Questions, feedback, or a feature your team needs? We read everything and ship fast.
-            </p>
-          </Reveal>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Reveal delay={100} dir="up">
-              <a href="mailto:hello@askdocs.app" className="glow-card glow-rose group flex flex-col items-center gap-3 rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#121212]">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-indigo-500 text-white">
-                  <Mail className="h-5 w-5" />
-                </span>
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">Email</span>
-                <span className="text-xs text-slate-500 dark:text-zinc-400">hello@askdocs.app</span>
-              </a>
-            </Reveal>
-            <Reveal delay={160} dir="up">
-              <a href="https://github.com/Harshal9865/AskDocs" target="_blank" rel="noopener noreferrer" className="glow-card glow-indigo group flex flex-col items-center gap-3 rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#121212]">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-white">
-                  <Globe className="h-5 w-5" />
-                </span>
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">GitHub</span>
-                <span className="text-xs text-slate-500 dark:text-zinc-400">Issues & source</span>
-              </a>
-            </Reveal>
-            <Reveal delay={220} dir="up">
-              <a href="https://twitter.com/askdocs" target="_blank" rel="noopener noreferrer" className="glow-card glow-sky group flex flex-col items-center gap-3 rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#121212]">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 text-white">
-                  <AtSign className="h-5 w-5" />
-                </span>
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">Twitter</span>
-                <span className="text-xs text-slate-500 dark:text-zinc-400">@askdocs</span>
-              </a>
-            </Reveal>
-            <Reveal delay={280} dir="up">
-              <a href="https://linkedin.com/company/askdocs" target="_blank" rel="noopener noreferrer" className="glow-card glow-emerald group flex flex-col items-center gap-3 rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#121212]">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-sky-500 text-white">
-                  <MessageCircle className="h-5 w-5" />
-                </span>
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">LinkedIn</span>
-                <span className="text-xs text-slate-500 dark:text-zinc-400">Company page</span>
-              </a>
-            </Reveal>
-          </div>
-          <Reveal delay={350} dir="up" className="mt-8 text-center">
-            <p className="text-xs text-slate-400 dark:text-zinc-500">
-              Typical response time: under 24 hours. We're a small team building in public — say hi.
-            </p>
-          </Reveal>
-        </div>
-      </section>
-
-
-
-{/* CTA — rich gradient with floating orbs + Talk to Us */}
-      <section className="relative overflow-hidden py-16 sm:py-24">
+      {/* CTA — Rich gradient hero call to action with quick contact links */}
+      <section id="contact" className="relative overflow-hidden py-16 sm:py-24">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-rose-600" aria-hidden />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_20%,rgba(255,255,255,0.15)_0%,transparent_50%),radial-gradient(ellipse_at_80%_80%,rgba(255,255,255,0.1)_0%,transparent_50%),radial-gradient(ellipse_at_50%_50%,rgba(255,255,255,0.08)_0%,transparent_60%)]" aria-hidden />
         <div className="absolute inset-0" aria-hidden>
@@ -1736,21 +1647,8 @@ export default function Home() {
               Your team's knowledge, one question away. Free to start, no card required.
             </p>
           </Reveal>
-          <Reveal dir="up" delay={300} className="mt-8 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-sm">
-              <div className="text-2xl font-bold text-white">50k+</div>
-              <div className="text-xs text-white/60">docs indexed</div>
-            </div>
-            <div className="rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-sm">
-              <div className="text-2xl font-bold text-white">12k+</div>
-              <div className="text-xs text-white/60">teams onboarded</div>
-            </div>
-            <div className="rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-sm">
-              <div className="text-2xl font-bold text-white">99%</div>
-              <div className="text-xs text-white/60">answer accuracy</div>
-            </div>
-          </Reveal>
-          <Reveal dir="up" delay={400} className="mt-10 flex flex-wrap justify-center gap-3">
+
+          <Reveal dir="up" delay={300} className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
               href={user ? "/dashboard" : "/register"}
               className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-indigo-600 shadow-xl hover:bg-white/90 dark:text-indigo-700 transition-all hover:scale-[1.02]"
@@ -1758,13 +1656,15 @@ export default function Home() {
               {user ? "Go to Dashboard" : "Create free account"} <ArrowRight className="h-4 w-4" />
             </Link>
             <a
-              href="#capabilities"
+              href="https://github.com/Harshal9865/AskDocs"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-transparent px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition-all"
             >
-              <Sparkles className="h-4 w-4" /> Explore capabilities
+              <Globe className="h-4 w-4" /> View GitHub Source
             </a>
           </Reveal>
-          <Reveal dir="up" delay={500} className="mt-6 text-center">
+          <Reveal dir="up" delay={400} className="mt-4 text-center">
             <p className="text-xs text-white/50">
               Already have an account?{" "}
               <Link href="/login" className="font-medium text-white hover:underline">
@@ -1774,10 +1674,10 @@ export default function Home() {
           </Reveal>
 
           {/* Talk to Us — social links inside CTA */}
-          <Reveal dir="up" delay={600}>
-            <div className="glow-divider mx-auto my-10 max-w-xs" />
+          <Reveal dir="up" delay={500}>
+            <div className="glow-divider mx-auto my-8 max-w-xs" />
           </Reveal>
-          <Reveal dir="up" delay={650}>
+          <Reveal dir="up" delay={550}>
             <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white/90 backdrop-blur-sm">
               <Heart className="h-4 w-4" />
             </div>
@@ -1786,7 +1686,7 @@ export default function Home() {
               Questions, feedback, or a feature your team needs? We read everything and ship fast.
             </p>
           </Reveal>
-          <Reveal dir="up" delay={700} className="mt-6 flex flex-wrap justify-center gap-3">
+          <Reveal dir="up" delay={600} className="mt-6 flex flex-wrap justify-center gap-3">
             <a href="mailto:hello@askdocs.app" className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/20">
               <Mail className="h-4 w-4" /> hello@askdocs.app
             </a>
@@ -1800,7 +1700,7 @@ export default function Home() {
               <MessageCircle className="h-4 w-4" /> LinkedIn
             </a>
           </Reveal>
-          <Reveal dir="up" delay={750} className="mt-4 text-center">
+          <Reveal dir="up" delay={650} className="mt-4 text-center">
             <p className="text-xs text-white/40">
               Typical response time: under 24 hours. We&apos;re a small team building in public — say hi.
             </p>
