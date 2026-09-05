@@ -188,16 +188,16 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           <Link
             href="/workspaces"
             title={`Workspace: ${workspace.name}. Click to view workspace settings.`}
-            className="ml-1 flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 hover:bg-indigo-50/60 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10 transition-all cursor-pointer shrink-0"
+            className="ml-1 flex items-center gap-2 rounded-full border border-indigo-500/20 bg-slate-100/90 hover:bg-slate-200/80 px-3 py-1.5 text-xs font-bold text-slate-800 dark:border-indigo-500/30 dark:bg-[#1f1f2e] dark:text-white dark:hover:bg-[#28283d] transition-all cursor-pointer shrink-0 shadow-2xs"
           >
             {brandSrc ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={brandSrc} alt={workspace.name} className="h-4 w-4 rounded-full object-cover shrink-0" />
+              <img src={brandSrc} alt={workspace.name} className="h-4 w-4 rounded-full object-cover shrink-0 ring-1 ring-white/30" />
             ) : brandSticker ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={`/stickers/${brandSticker}.svg`} alt={workspace.name} className="h-4 w-4 object-contain shrink-0" />
             ) : (
-              <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+              <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20" />
             )}
             <span className="hidden max-w-[120px] truncate xl:inline">{workspace.name}</span>
             <span className="xl:hidden">{(workspace.name || "?").slice(0, 1).toUpperCase()}</span>

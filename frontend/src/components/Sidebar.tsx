@@ -305,10 +305,10 @@ export default function Sidebar({
             href="/workspaces"
             onClick={onCloseMobile}
             title={`Active Workspace: ${workspace?.name || "None"}. Click to manage, switch, or create.`}
-            className="w-full flex items-center justify-between gap-2 rounded-xl border border-indigo-200/60 bg-gradient-to-r from-slate-50 to-indigo-50/30 p-2.5 hover:border-indigo-400 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] transition-all group cursor-pointer shadow-2xs"
+            className="w-full flex items-center justify-between gap-2.5 rounded-2xl border border-indigo-500/20 bg-slate-100/90 hover:bg-slate-200/80 dark:border-indigo-500/30 dark:bg-[#1c1c2b] dark:hover:bg-[#242438] p-2.5 transition-all duration-200 group cursor-pointer shadow-sm"
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black text-xs shadow-xs group-hover:scale-105 transition-transform overflow-hidden">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white font-black text-xs shadow-sm group-hover:scale-105 transition-transform overflow-hidden ring-1 ring-white/20">
                 {sidebarBrandUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={sidebarBrandUrl} alt={workspace?.name || "WS"} className="h-full w-full object-cover" />
@@ -319,12 +319,14 @@ export default function Sidebar({
                   (workspace?.name || "W").slice(0, 1).toUpperCase()
                 )}
               </div>
-              <div className="min-w-0 text-left">
-                <div className="truncate text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1">
+              <div className="min-w-0 text-left space-y-0.5">
+                <div className="truncate text-xs font-black text-slate-900 dark:text-white flex items-center gap-1">
                   <span>{workspace?.name || "Select Workspace"}</span>
                 </div>
-                <div className="text-[10px] text-slate-500 dark:text-zinc-400 font-mono">
-                  {workspaces.length} workspace{workspaces.length === 1 ? "" : "s"} • Manage ➔
+                <div className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                  <span>{workspaces.length} workspace{workspaces.length === 1 ? "" : "s"}</span>
+                  <span className="text-slate-400 dark:text-zinc-500">•</span>
+                  <span className="group-hover:underline">Manage ➔</span>
                 </div>
               </div>
             </div>
@@ -336,9 +338,9 @@ export default function Sidebar({
               href="/search"
               onClick={onCloseMobile}
               title="Search documents & chats"
-              className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg border py-1.5 text-[11px] font-semibold transition-all ${
+              className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl border py-1.5 text-[11px] font-bold transition-all ${
                 pathname === "/search"
-                  ? "border-purple-500 bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 font-bold"
+                  ? "border-purple-500 bg-purple-50 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-extrabold"
                   : "border-slate-200/80 bg-white text-slate-700 hover:border-purple-300 hover:bg-purple-50/50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10"
               }`}
             >
@@ -349,9 +351,9 @@ export default function Sidebar({
               href="/discover"
               onClick={onCloseMobile}
               title="Discover public knowledge vaults"
-              className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg border py-1.5 text-[11px] font-semibold transition-all ${
+              className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl border py-1.5 text-[11px] font-bold transition-all ${
                 pathname === "/discover"
-                  ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 font-bold"
+                  ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 shadow-xs font-extrabold"
                   : "border-slate-200/80 bg-white text-slate-700 hover:border-indigo-300 hover:bg-indigo-50/50 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10"
               }`}
             >
@@ -360,15 +362,23 @@ export default function Sidebar({
             </Link>
           </div>
         </div>
-        <div className="sb-collapsed-show shrink-0 border-b border-slate-100 p-2 space-y-2">
+        <div className="sb-collapsed-show shrink-0 border-b border-slate-100 p-2 space-y-2 dark:border-slate-700/50">
           <Link
             href="/workspaces"
             onClick={onCloseMobile}
             title={workspace ? `Workspace: ${workspace.name}` : "No workspace"}
             aria-label="Manage workspaces"
-            className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold uppercase text-white shadow-xs dark:bg-white dark:text-black"
+            className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-sm font-black uppercase text-white shadow-xs hover:scale-105 transition-transform overflow-hidden ring-1 ring-white/20"
           >
-            {(workspace?.name ?? "W").slice(0, 1)}
+            {sidebarBrandUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={sidebarBrandUrl} alt={workspace?.name || "WS"} className="h-full w-full object-cover" />
+            ) : workspace?.brand_kind === "sticker" && workspace?.brand_value ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={`/stickers/${workspace.brand_value}.svg`} alt={workspace.name} className="h-full w-full object-contain p-0.5" />
+            ) : (
+              (workspace?.name ?? "W").slice(0, 1).toUpperCase()
+            )}
           </Link>
           <div className="flex flex-col items-center gap-1">
             <Link

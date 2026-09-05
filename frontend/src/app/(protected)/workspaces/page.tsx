@@ -361,8 +361,8 @@ export default function WorkspacesPage() {
         <div className="flex items-center gap-3">
           {/* Active Workspace Logo Emblem Badge */}
           {workspace && (
-            <div className="hidden sm:flex items-center gap-2.5 rounded-2xl border border-indigo-200/80 bg-gradient-to-r from-indigo-50/80 to-purple-50/50 p-2 dark:border-indigo-500/30 dark:bg-indigo-950/40 shadow-2xs shrink-0">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black text-xs shadow-xs overflow-hidden">
+            <div className="hidden sm:flex items-center gap-2.5 rounded-2xl border border-indigo-500/20 bg-slate-100/90 p-2 dark:border-indigo-500/30 dark:bg-[#1c1c2b] shadow-xs shrink-0">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white font-black text-xs shadow-xs overflow-hidden ring-1 ring-white/20">
                 {brandSrcLocal ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={brandSrcLocal} alt={workspace.name} className="h-full w-full object-cover" />
@@ -375,14 +375,14 @@ export default function WorkspacesPage() {
               </div>
               <div className="min-w-0 pr-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-extrabold text-slate-900 dark:text-white truncate max-w-[130px]">
+                  <span className="text-xs font-black text-slate-900 dark:text-white truncate max-w-[130px]">
                     {workspace.name}
                   </span>
                   <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[9px] font-bold text-emerald-700 dark:text-emerald-300">
                     Active
                   </span>
                 </div>
-                <div className="text-[10px] font-medium text-slate-500 dark:text-zinc-400">
+                <div className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
                   Current Workspace
                 </div>
               </div>
