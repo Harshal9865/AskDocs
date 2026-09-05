@@ -381,7 +381,7 @@ export default function DocumentsPage() {
               : `${totalCount} document${totalCount !== 1 ? "s" : ""} indexed in this workspace`}
           </p>
         </div>
-        <div className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/80 p-1 shadow-2xs backdrop-blur-md dark:border-white/10 dark:bg-[#13111f]/90">
+        <div className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/80 p-1 shadow-2xs backdrop-blur-md dark:border-white/10 dark:bg-[#131220]">
           <button
             onClick={() => switchView("workspace")}
             className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all ${
