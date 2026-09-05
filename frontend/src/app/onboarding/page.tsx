@@ -16,7 +16,6 @@ import {
   Upload,
   FileText,
   MessagesSquare,
-  Plus,
   User,
   Camera,
   Compass,

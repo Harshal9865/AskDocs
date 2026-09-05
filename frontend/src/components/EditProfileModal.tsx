@@ -83,6 +83,15 @@ const MODE_JOB_TITLES: Record<AudienceMode, string[]> = {
     "Medical Fellow",
     "Prefer not to say",
   ],
+  personal: [
+    "Freelancer / Independent",
+    "Consultant / Advisor",
+    "Solo Founder / Entrepreneur",
+    "Creative Professional",
+    "Content Creator",
+    "Independent Contractor",
+    "Prefer not to say",
+  ],
 };
 
 const MODE_JOB_ROLES: Record<AudienceMode, string[]> = {
@@ -133,6 +142,14 @@ const MODE_JOB_ROLES: Record<AudienceMode, string[]> = {
     "Clinical Research & Trials",
     "Nursing & Patient Care",
     "Lab & Pathology",
+    "Prefer not to say",
+  ],
+  personal: [
+    "Freelance & Consulting",
+    "Creative & Design",
+    "Media & Content Creation",
+    "Technology & Engineering",
+    "Business & Advisory",
     "Prefer not to say",
   ],
 };

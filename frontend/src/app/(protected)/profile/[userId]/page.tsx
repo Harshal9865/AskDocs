@@ -518,10 +518,25 @@ export default function ProfilePage() {
                       <div className="rounded-xl border border-indigo-500/20 bg-white/60 dark:bg-white/5 p-2.5">
                         <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Memory Graph</span>
                         <span className="font-extrabold text-indigo-700 dark:text-indigo-300">Decisions Synced</span>
-                      </div>
                       <div className="rounded-xl border border-indigo-500/20 bg-white/60 dark:bg-white/5 p-2.5">
                         <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Slide Decks</span>
                         <span className="font-extrabold text-indigo-700 dark:text-indigo-300">Presentations Ready</span>
+                      </div>
+                    </>
+                  )}
+                  {mode === "personal" && (
+                    <>
+                      <div className="rounded-xl border border-purple-500/20 bg-white/60 dark:bg-white/5 p-2.5">
+                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Solo Studio</span>
+                        <span className="font-extrabold text-purple-700 dark:text-purple-300">Workspace Active</span>
+                      </div>
+                      <div className="rounded-xl border border-purple-500/20 bg-white/60 dark:bg-white/5 p-2.5">
+                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Audio Briefs</span>
+                        <span className="font-extrabold text-purple-700 dark:text-purple-300">Podcasts Ready</span>
+                      </div>
+                      <div className="rounded-xl border border-purple-500/20 bg-white/60 dark:bg-white/5 p-2.5">
+                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Knowledge Search</span>
+                        <span className="font-extrabold text-purple-700 dark:text-purple-300">Cited AI</span>
                       </div>
                     </>
                   )}
