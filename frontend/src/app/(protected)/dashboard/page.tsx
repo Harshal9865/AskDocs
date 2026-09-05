@@ -69,23 +69,27 @@ function StatCard({
   label,
   value,
   icon: Icon,
-  color,
+  badgeBg,
+  badgeText,
+  badgeBorder,
   accent,
   children,
 }: {
   label: string;
   value: React.ReactNode;
   icon: React.ComponentType<{ className?: string }>;
-  color: string;
+  badgeBg: string;
+  badgeText: string;
+  badgeBorder?: string;
   accent?: boolean;
   children?: React.ReactNode;
 }) {
   return (
-    <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 p-3.5 sm:p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-300/60 hover:shadow-lg hover:shadow-purple-500/5 dark:border-white/10 dark:bg-[#141422]/90 dark:hover:border-purple-500/30">
+    <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-3.5 sm:p-4 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-purple-300 dark:border-white/[0.08] dark:bg-[#131220] dark:hover:border-purple-500/40 dark:hover:bg-[#181628]">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div
-            className={`text-lg sm:text-xl md:text-2xl font-extrabold tracking-tight truncate leading-tight py-0.5 ${
+            className={`text-lg sm:text-xl font-extrabold tracking-tight truncate leading-tight py-0.5 ${
               accent
                 ? "bg-gradient-to-r from-rose-500 to-red-500 bg-clip-text text-transparent"
                 : "text-slate-900 dark:text-white"
@@ -93,14 +97,14 @@ function StatCard({
           >
             {value}
           </div>
-          <div className="mt-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 truncate leading-snug">
+          <div className="mt-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 whitespace-nowrap overflow-hidden text-ellipsis leading-snug">
             {label}
           </div>
         </div>
         <div
-          className={`flex h-8.5 w-8.5 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${color} text-white shadow-md shadow-indigo-500/20 transition-transform duration-300 group-hover:scale-110`}
+          className={`flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl ${badgeBg} ${badgeText} ${badgeBorder || ""} transition-transform duration-200 group-hover:scale-105`}
         >
-          <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+          <Icon className="h-4 w-4" />
         </div>
       </div>
       {children}
@@ -397,15 +401,15 @@ export default function DashboardPage() {
   return (
     <div className="relative mx-auto max-w-5xl space-y-6">
       {/* Header Banner with Mode Badge & Interactive Ask AI Bar */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 via-purple-50/30 to-indigo-50/20 p-5 shadow-xs backdrop-blur-xl dark:border-white/10 dark:from-[#13111f]/95 dark:via-[#19152e]/50 dark:to-[#0f0e1c]/80 sm:p-6 space-y-4">
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-sm dark:border-white/10 dark:bg-[#131220] space-y-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="mb-2.5 flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center gap-2 rounded-full border border-purple-200/60 bg-purple-50/80 px-3.5 py-1 text-xs font-semibold text-purple-700 backdrop-blur-sm dark:border-purple-500/20 dark:bg-purple-950/40 dark:text-purple-300">
+              <div className="inline-flex items-center gap-2 rounded-full border border-purple-200/70 bg-purple-50 px-3.5 py-1 text-xs font-semibold text-purple-700 dark:border-purple-500/30 dark:bg-purple-950/50 dark:text-purple-300">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span>Workspace: {workspace.name}</span>
               </div>
-              <span className="rounded-full bg-purple-500/15 px-3 py-1 text-xs font-mono font-extrabold text-purple-700 dark:text-purple-300 border border-purple-500/25">
+              <span className="rounded-full bg-purple-100/80 dark:bg-purple-950/60 px-3 py-1 text-xs font-mono font-extrabold text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800/50">
                 {modeConfig.badge}
               </span>
             </div>
@@ -413,10 +417,10 @@ export default function DashboardPage() {
             <div className="flex items-center gap-1.5">
               <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-3xl leading-normal py-1">
                 {greeting},{" "}
-                <span className="inline-block bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent pb-1">
+                <span className="bg-gradient-to-r from-purple-600 via-indigo-600 to-sky-500 dark:from-purple-300 dark:via-indigo-300 dark:to-sky-300 bg-clip-text text-transparent">
                   {firstName}
                 </span>{" "}
-                <span className="inline-block">👋</span>
+                <span>👋</span>
               </h1>
               <HintTooltip text="Ask Docs searches across all PDFs & spreadsheets in this workspace with page citations." />
             </div>
@@ -435,8 +439,8 @@ export default function DashboardPage() {
                   href={action.href}
                   className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold transition-all hover:scale-105 active:scale-95 ${
                     idx === 0
-                      ? `bg-gradient-to-r ${action.color} text-white shadow-md shadow-purple-500/20`
-                      : "border border-slate-200/80 bg-white/80 text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-purple-300/80 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10"
+                      ? "bg-purple-600 text-white hover:bg-purple-700 shadow-sm dark:bg-purple-600 dark:hover:bg-purple-500"
+                      : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-slate-300 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10"
                   }`}
                 >
                   <ActionIcon className="h-3.5 w-3.5" />
@@ -448,7 +452,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Interactive Ask AI Form inside Hero */}
-        <div className="mt-2 border-t border-purple-100/80 pt-4 dark:border-white/5">
+        <div className="mt-2 border-t border-slate-100 pt-4 dark:border-white/5">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -463,12 +467,12 @@ export default function DashboardPage() {
               value={quickPrompt}
               onChange={(e) => setQuickPrompt(e.target.value)}
               placeholder={`Ask AI anything in ${modeConfig.name} mode…`}
-              className="w-full rounded-2xl border border-slate-200/90 bg-white/95 py-2.5 pl-10 pr-24 text-xs sm:text-sm text-slate-800 shadow-xs backdrop-blur-md outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#181628]/95 dark:text-white"
+              className="w-full rounded-2xl border border-slate-200/90 bg-slate-50/80 py-2.5 pl-10 pr-24 text-xs sm:text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#0e0d17] dark:text-white dark:placeholder-zinc-500"
             />
             <button
               type="submit"
               disabled={!quickPrompt.trim()}
-              className="absolute right-1.5 inline-flex items-center gap-1 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition-all hover:scale-105 active:scale-95 disabled:opacity-40"
+              className="absolute right-1.5 inline-flex items-center gap-1 rounded-xl bg-purple-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition-all hover:bg-purple-700 disabled:opacity-40"
             >
               <span>Ask</span>
               <ArrowRight className="h-3.5 w-3.5" />
@@ -485,7 +489,7 @@ export default function DashboardPage() {
                 key={chip}
                 type="button"
                 onClick={() => router.push(`/chat?q=${encodeURIComponent(chip)}`)}
-                className="rounded-lg border border-slate-200/80 bg-white/70 px-2 py-0.5 text-[11px] font-medium text-slate-600 transition-all hover:border-purple-300 hover:bg-white hover:text-purple-600 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-300 dark:hover:border-purple-500/30 dark:hover:text-purple-400 cursor-pointer"
+                className="rounded-lg border border-slate-200/80 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600 transition-all hover:border-purple-300 hover:bg-purple-50 hover:text-purple-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-300 dark:hover:border-purple-500/30 dark:hover:bg-purple-950/40 dark:hover:text-purple-300 cursor-pointer"
               >
                 {chip}
               </button>
@@ -495,7 +499,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Operational Mode Switcher Bar & Security Notice */}
-      <div className="rounded-3xl border border-slate-200/80 bg-white/90 p-4 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-[#141424]/90 space-y-3">
+      <div className="rounded-3xl border border-slate-200/90 bg-white p-4 shadow-xs dark:border-white/10 dark:bg-[#131220] space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="text-xs font-black uppercase tracking-wider text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
@@ -531,8 +535,8 @@ export default function DashboardPage() {
                 onClick={() => setMode(m.modeKey as AudienceMode)}
                 className={`rounded-2xl px-3.5 py-1.5 text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                   isCurrentMode
-                    ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/20 scale-105 font-black"
-                    : "border border-slate-200/80 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10"
+                    ? "bg-purple-600 text-white shadow-sm dark:bg-purple-600 dark:text-white font-extrabold"
+                    : "border border-slate-200/80 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10 dark:hover:text-white"
                 }`}
               >
                 {m.label}
@@ -551,13 +555,15 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* Stats Row — 6 cards with gradient accents */}
+      {/* Stats Row — 6 cards with clean badges & non-truncated labels */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
         <StatCard
           label="Documents"
           value={loading ? "…" : docCount}
           icon={FileText}
-          color="from-purple-600 to-indigo-600"
+          badgeBg="bg-purple-100 dark:bg-purple-950/60"
+          badgeText="text-purple-600 dark:text-purple-400"
+          badgeBorder="border border-purple-200/50 dark:border-purple-800/40"
         >
           {processingCount > 0 && (
             <p className="mt-2 text-[10px] font-bold text-amber-600 dark:text-amber-400">
@@ -567,10 +573,12 @@ export default function DashboardPage() {
         </StatCard>
 
         <StatCard
-          label="AI Questions"
+          label="AI Queries"
           value={loading ? "…" : questionCount}
           icon={Sparkles}
-          color="from-indigo-600 to-blue-600"
+          badgeBg="bg-indigo-100 dark:bg-indigo-950/60"
+          badgeText="text-indigo-600 dark:text-indigo-400"
+          badgeBorder="border border-indigo-200/50 dark:border-indigo-800/40"
         >
           {plan && (
             <div className="mt-2">
@@ -586,7 +594,7 @@ export default function DashboardPage() {
                   }}
                 />
               </div>
-              <p className="mt-1 text-[10px] text-slate-400 dark:text-zinc-500">
+              <p className="mt-1 text-[10px] font-medium text-slate-500 dark:text-zinc-400">
                 {plan.questions_used}/{plan.questions_limit === -1 ? "∞" : plan.questions_limit} used
               </p>
             </div>
@@ -595,10 +603,12 @@ export default function DashboardPage() {
 
         <Link href="/contracts" className="block transition-transform hover:scale-[1.02] active:scale-[0.98]">
           <StatCard
-            label="Active Contracts"
+            label="Contracts"
             value={loading ? "…" : activeObligations.length}
             icon={FileSignature}
-            color="from-indigo-500 via-purple-500 to-pink-500"
+            badgeBg="bg-rose-100 dark:bg-rose-950/60"
+            badgeText="text-rose-600 dark:text-rose-400"
+            badgeBorder="border border-rose-200/50 dark:border-rose-800/40"
           >
             <p className="mt-2 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
               <span>Obligations tracked</span>
@@ -609,10 +619,12 @@ export default function DashboardPage() {
 
         <Link href="/memory" className="block transition-transform hover:scale-[1.02] active:scale-[0.98]">
           <StatCard
-            label="Memory Facts"
+            label="Memory"
             value={loading ? "…" : memories.length}
             icon={Brain}
-            color="from-purple-600 via-indigo-600 to-cyan-500"
+            badgeBg="bg-violet-100 dark:bg-violet-950/60"
+            badgeText="text-violet-600 dark:text-violet-400"
+            badgeBorder="border border-violet-200/50 dark:border-violet-800/40"
           >
             <p className="mt-2 text-[10px] font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1">
               <span>Knowledge graph</span>
@@ -625,7 +637,9 @@ export default function DashboardPage() {
           label="Team Online"
           value={loading ? "…" : `${onlineCount}/${memberCount}`}
           icon={UsersRound}
-          color="from-emerald-500 to-teal-500"
+          badgeBg="bg-emerald-100 dark:bg-emerald-950/60"
+          badgeText="text-emerald-600 dark:text-emerald-400"
+          badgeBorder="border border-emerald-200/50 dark:border-emerald-800/40"
         >
           {onlineCount > 0 && (
             <p className="mt-2 flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
@@ -640,19 +654,15 @@ export default function DashboardPage() {
             label="Plan Tier"
             value={
               plan?.plan === "ultra_premium"
-                ? "Ultra 👑"
+                ? "Ultra"
                 : plan?.plan === "premium"
-                  ? "Premium ⭐"
+                  ? "Premium"
                   : "Free"
             }
             icon={plan?.plan === "ultra_premium" ? Crown : plan?.plan === "premium" ? Sparkles : Shield}
-            color={
-              plan?.plan === "ultra_premium"
-                ? "from-amber-500 via-orange-500 to-yellow-500"
-                : plan?.plan === "premium"
-                  ? "from-purple-600 to-indigo-600"
-                  : "from-slate-600 to-slate-800"
-            }
+            badgeBg="bg-amber-100 dark:bg-amber-950/60"
+            badgeText="text-amber-600 dark:text-amber-400"
+            badgeBorder="border border-amber-200/50 dark:border-amber-800/40"
           >
             {plan && (
               <div className="mt-2">
@@ -668,7 +678,7 @@ export default function DashboardPage() {
                     }}
                   />
                 </div>
-                <p className="mt-1 text-[10px] text-slate-400 dark:text-zinc-500 truncate">
+                <p className="mt-1 text-[10px] font-medium text-slate-500 dark:text-zinc-400 truncate">
                   {plan.documents_limit === -1 ? `${plan.documents_used} docs (∞)` : `${plan.documents_used}/${plan.documents_limit} docs`}
                 </p>
               </div>
@@ -696,7 +706,8 @@ export default function DashboardPage() {
               desc: "Synthesize multi-doc cheat sheets, 3D flippable flashcards, and test quizzes.",
               icon: GraduationCap,
               action: "Learn →",
-              bgClass: "from-white/95 to-purple-50/30 dark:from-[#131122]/90 dark:to-[#1e132d]/80 border-purple-200/80 hover:border-purple-400 text-purple-600 dark:text-purple-400",
+              accentColor: "text-purple-600 dark:text-purple-400",
+              badgeBg: "bg-purple-50 dark:bg-purple-950/60",
             },
             {
               href: "/listen",
@@ -704,7 +715,8 @@ export default function DashboardPage() {
               desc: "Listen to 3-minute spoken audio summaries of long PDFs with wave visualizers.",
               icon: Headphones,
               action: "Listen →",
-              bgClass: "from-white/95 to-violet-50/30 dark:from-[#131122]/90 dark:to-[#1c132d]/80 border-violet-200/80 hover:border-violet-400 text-violet-600 dark:text-violet-400",
+              accentColor: "text-indigo-600 dark:text-indigo-400",
+              badgeBg: "bg-indigo-50 dark:bg-indigo-950/60",
             },
             {
               href: "/extract",
@@ -712,7 +724,8 @@ export default function DashboardPage() {
               desc: "Extract tables from invoices, receipts, and reports into Excel & CSV grids.",
               icon: Table,
               action: "Extract →",
-              bgClass: "from-white/95 to-emerald-50/30 dark:from-[#131122]/90 dark:to-[#12241d]/80 border-emerald-200/80 hover:border-emerald-400 text-emerald-600 dark:text-emerald-400",
+              accentColor: "text-emerald-600 dark:text-emerald-400",
+              badgeBg: "bg-emerald-50 dark:bg-emerald-950/60",
             },
             {
               href: "/contracts/compare",
@@ -720,7 +733,8 @@ export default function DashboardPage() {
               desc: "Compare 2 contract versions side-by-side with automated liability & risk detection.",
               icon: Scale,
               action: "Diff →",
-              bgClass: "from-white/95 to-rose-50/30 dark:from-[#131122]/90 dark:to-[#24131d]/80 border-rose-200/80 hover:border-rose-400 text-rose-600 dark:text-rose-400",
+              accentColor: "text-rose-600 dark:text-rose-400",
+              badgeBg: "bg-rose-50 dark:bg-rose-950/60",
             },
             {
               href: "/contracts",
@@ -728,7 +742,8 @@ export default function DashboardPage() {
               desc: activeObligations.length > 0 ? `${activeObligations.length} active contract terms and renewal dates monitored.` : "Audit agreements, NDAs, and auto-extract obligations & deadlines.",
               icon: FileSignature,
               action: "View →",
-              bgClass: "from-white/95 to-indigo-50/30 dark:from-[#131122]/90 dark:to-[#17142d]/80 border-indigo-200/80 hover:border-indigo-400 text-indigo-600 dark:text-indigo-400",
+              accentColor: "text-indigo-600 dark:text-indigo-400",
+              badgeBg: "bg-indigo-50 dark:bg-indigo-950/60",
             },
             {
               href: "/memory",
@@ -736,7 +751,8 @@ export default function DashboardPage() {
               desc: memories.length > 0 ? `${memories.length} organizational decisions and facts recorded in graph.` : "Ingest meeting transcripts and preserve team decisions automatically.",
               icon: Brain,
               action: "Graph →",
-              bgClass: "from-white/95 to-purple-50/30 dark:from-[#131122]/90 dark:to-[#1a122e]/80 border-purple-200/80 hover:border-purple-400 text-purple-600 dark:text-purple-400",
+              accentColor: "text-violet-600 dark:text-violet-400",
+              badgeBg: "bg-violet-50 dark:bg-violet-950/60",
             },
             {
               href: "/health",
@@ -744,7 +760,8 @@ export default function DashboardPage() {
               desc: docCount > 0 ? `${docCount} documents audited for freshness, clarity, and policy conflicts.` : "Audit document freshness and detect contradictory policies in real-time.",
               icon: Activity,
               action: "Audit →",
-              bgClass: "from-white/95 to-cyan-50/30 dark:from-[#131122]/90 dark:to-[#0f172a]/80 border-cyan-200/80 hover:border-cyan-400 text-cyan-600 dark:text-cyan-400",
+              accentColor: "text-cyan-600 dark:text-cyan-400",
+              badgeBg: "bg-cyan-50 dark:bg-cyan-950/60",
             },
             {
               href: "/slides",
@@ -752,7 +769,8 @@ export default function DashboardPage() {
               desc: "Transform 40-page reports into 4-slide executive presentation decks with themes.",
               icon: Presentation,
               action: "Present →",
-              bgClass: "from-white/95 to-indigo-50/30 dark:from-[#131122]/90 dark:to-[#17132e]/80 border-indigo-200/80 hover:border-indigo-400 text-indigo-600 dark:text-indigo-400",
+              accentColor: "text-purple-600 dark:text-purple-400",
+              badgeBg: "bg-purple-50 dark:bg-purple-950/60",
             },
             {
               href: "/convert",
@@ -760,7 +778,8 @@ export default function DashboardPage() {
               desc: "Convert docs to Markdown, JSON, CSV & mask emails, phones, and SSNs.",
               icon: FileCode,
               action: "Convert →",
-              bgClass: "from-white/95 to-purple-50/30 dark:from-[#131122]/90 dark:to-[#1c122e]/80 border-purple-200/80 hover:border-purple-400 text-purple-600 dark:text-purple-400",
+              accentColor: "text-amber-600 dark:text-amber-400",
+              badgeBg: "bg-amber-50 dark:bg-amber-950/60",
             },
             {
               href: "/integrations",
@@ -768,7 +787,8 @@ export default function DashboardPage() {
               desc: "Connect Slack, Discord, Notion, Google Drive & Odoo ERP for auto-sync.",
               icon: Plug2,
               action: "Sync →",
-              bgClass: "from-white/95 to-emerald-50/30 dark:from-[#131122]/90 dark:to-[#12241b]/80 border-emerald-200/80 hover:border-emerald-400 text-emerald-600 dark:text-emerald-400",
+              accentColor: "text-emerald-600 dark:text-emerald-400",
+              badgeBg: "bg-emerald-50 dark:bg-emerald-950/60",
             },
           ]
             .sort((a, b) => {
@@ -786,13 +806,13 @@ export default function DashboardPage() {
                 <Link
                   key={card.href}
                   href={card.href}
-                  className={`group relative flex flex-col justify-between overflow-hidden rounded-3xl border bg-gradient-to-br p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${card.bgClass} ${
-                    isTopPriority ? "ring-2 ring-purple-500/30 scale-[1.01]" : ""
+                  className={`group relative flex flex-col justify-between overflow-hidden rounded-3xl border bg-white p-4.5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-[#131220] dark:hover:border-purple-500/40 dark:hover:bg-[#181628] ${
+                    isTopPriority ? "ring-1 ring-purple-500/40 dark:ring-purple-400/40" : "border-slate-200/90"
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-50/80 dark:bg-purple-950/60">
+                    <div className="flex items-center gap-2.5">
+                      <span className={`flex h-8 w-8 items-center justify-center rounded-xl ${card.badgeBg} ${card.accentColor}`}>
                         <Icon className="h-4 w-4" />
                       </span>
                       <div>
@@ -803,16 +823,16 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex items-center gap-1.5">
                       {isTopPriority && (
-                        <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-[9px] font-extrabold uppercase text-purple-700 dark:text-purple-300 border border-purple-500/30">
+                        <span className="rounded-full bg-purple-100 dark:bg-purple-950/70 px-2 py-0.5 text-[9px] font-extrabold uppercase text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/40">
                           Top Choice
                         </span>
                       )}
-                      <span className="text-[10px] font-bold group-hover:translate-x-0.5 transition-transform">
+                      <span className={`text-[10px] font-bold ${card.accentColor} group-hover:translate-x-0.5 transition-transform`}>
                         {card.action}
                       </span>
                     </div>
                   </div>
-                  <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
+                  <p className="mt-2.5 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
                     {card.desc}
                   </p>
                 </Link>
@@ -824,7 +844,7 @@ export default function DashboardPage() {
       {/* Two-column grid: Documents + Activity / Team */}
       <div className="grid gap-5 md:grid-cols-2">
         {/* Recent Documents */}
-        <section className="rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-[#13111f]/90">
+        <section className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs dark:border-white/10 dark:bg-[#131220]">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400">
@@ -893,7 +913,7 @@ export default function DashboardPage() {
         </section>
 
         {/* Activity Feed (admin-only) or Team Members */}
-        <section className="rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-[#13111f]/90">
+        <section className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs dark:border-white/10 dark:bg-[#131220]">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400">
@@ -956,7 +976,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Office Chats Quick Panel */}
-      <section className="rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-[#13111f]/90">
+      <section className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs dark:border-white/10 dark:bg-[#131220]">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
