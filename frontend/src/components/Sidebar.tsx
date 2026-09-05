@@ -307,7 +307,7 @@ export default function Sidebar({
             title={`Active Workspace: ${workspace?.name || "None"}. Click to manage, switch, or create.`}
             className="w-full flex items-center justify-between gap-2.5 rounded-2xl border border-indigo-500/20 bg-slate-100/90 hover:bg-slate-200/80 dark:border-indigo-500/30 dark:bg-[#1c1c2b] dark:hover:bg-[#242438] p-2.5 transition-all duration-200 group cursor-pointer shadow-sm"
           >
-            <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1 overflow-hidden">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white font-black text-xs shadow-sm group-hover:scale-105 transition-transform overflow-hidden ring-1 ring-white/20">
                 {sidebarBrandUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -319,14 +319,14 @@ export default function Sidebar({
                   (workspace?.name || "W").slice(0, 1).toUpperCase()
                 )}
               </div>
-              <div className="min-w-0 text-left space-y-0.5">
-                <div className="truncate text-xs font-black text-slate-900 dark:text-white flex items-center gap-1">
-                  <span>{workspace?.name || "Select Workspace"}</span>
+              <div className="min-w-0 flex-1 text-left space-y-0.5 overflow-hidden">
+                <div className="truncate text-xs font-black text-slate-900 dark:text-white">
+                  {workspace?.name || "Select Workspace"}
                 </div>
-                <div className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
-                  <span>{workspaces.length} workspace{workspaces.length === 1 ? "" : "s"}</span>
-                  <span className="text-slate-400 dark:text-zinc-500">•</span>
-                  <span className="group-hover:underline">Manage ➔</span>
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap overflow-hidden text-ellipsis">
+                  <span className="truncate">{workspaces.length} workspace{workspaces.length === 1 ? "" : "s"}</span>
+                  <span className="text-slate-400 dark:text-zinc-500 shrink-0">•</span>
+                  <span className="group-hover:underline shrink-0 flex items-center gap-0.5">Manage ➔</span>
                 </div>
               </div>
             </div>
