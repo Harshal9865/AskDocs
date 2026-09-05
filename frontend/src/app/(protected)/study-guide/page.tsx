@@ -28,9 +28,7 @@ import {
   X,
   Code2,
   Calculator,
-  Atom,
   Terminal,
-  FileCode,
   CheckSquare,
   BrainCircuit,
   Workflow,
@@ -40,7 +38,13 @@ import { useWorkspace } from "@/lib/workspace-context";
 import { useAudienceMode } from "@/lib/audience-mode-context";
 import { showToast } from "@/components/Toast";
 import { exportToPdf, downloadBlob } from "@/lib/pdf-export";
-import type { DocumentItem, StudyGuideDeck } from "@/lib/types";
+import type {
+  DocumentItem,
+  StudyGuideDeck,
+  StemFormulaItem,
+  CodingSnippetItem,
+  CollegeExamGuideSection,
+} from "@/lib/types";
 
 
 type StudyTab = "cheatsheet" | "flashcards" | "quiz" | "terms" | "stem_formulas" | "coding_lab" | "college_guide";
@@ -188,7 +192,7 @@ function getCodingSnippetsForDeck(parsed: GeneratedStudyJson | null, docTitle: s
       code: `def binary_search(arr: list[int], target: int) -> int:\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            low = mid + 1\n        else:\n            high = mid - 1\n    return -1`,
       time_complexity: "O(log n)",
       space_complexity: "O(1)",
-      explanation: "Halves search boundary in logarithmic steps on sorted input sequences.",
+      explanation: `Halves search boundary in logarithmic steps on sorted input sequences synthesized from ${docTitle}.`,
     },
     {
       title: "Optimized Memoization Dynamic Programming",
