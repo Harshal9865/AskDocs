@@ -18,13 +18,19 @@ import {
   Globe,
   Lock,
   Layers,
+  Search,
+  Compass,
+  Clock,
+  Send,
+  Loader2,
+  X,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
 import { useAuth } from "@/lib/auth-context";
 import { showToast } from "@/components/Toast";
 import HintTooltip from "@/components/HintTooltip";
-import type { Workspace, Member } from "@/lib/types";
+import type { Workspace, Member, JoinRequest } from "@/lib/types";
 
 const WORKSPACE_EMBLEMS = [
   { id: "cute-1", name: "Nexus Prism", tag: "Quantum 3D" },
@@ -44,12 +50,77 @@ const TEMPLATES = [
 export default function WorkspacesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialTab = (searchParams.get("tab") as "all" | "create" | "settings" | "members") || "all";
+  const initialTab = (searchParams.get("tab") as "all" | "discover" | "create" | "settings" | "members") || "all";
 
   const { workspace, workspaces, select, refresh } = useWorkspace();
   const { user } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<"all" | "create" | "settings" | "members">(initialTab);
+  const [activeTab, setActiveTab] = useState<"all" | "discover" | "create" | "settings" | "members">(initialTab);
+
+  // Discover Public Workspaces State
+  const [discoverQuery, setDiscoverQuery] = useState("");
+  const [publicWorkspaces, setPublicWorkspaces] = useState<Workspace[]>([]);
+  const [discoverLoading, setDiscoverLoading] = useState(false);
+  const [myRequests, setMyRequests] = useState<JoinRequest[]>([]);
+  const [applyMsg, setApplyMsg] = useState<Record<string, string>>({});
+  const [showMsgFor, setShowMsgFor] = useState<string | null>(null);
+  const [busyJoinId, setBusyJoinId] = useState<string | null>(null);
+
+  const loadDiscoverWorkspaces = async (q?: string) => {
+    setDiscoverLoading(true);
+    try {
+      const [pubList, reqList] = await Promise.all([
+        api.discoverWorkspaces(q, 50, 0),
+        api.myJoinRequests().catch(() => [] as JoinRequest[]),
+      ]);
+      setPublicWorkspaces(pubList);
+      setMyRequests(reqList);
+    } catch (err) {
+      console.error("Discover load error:", err);
+    } finally {
+      setDiscoverLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "discover") {
+      void loadDiscoverWorkspaces(discoverQuery.trim() || undefined);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab !== "discover") return;
+    const t = setTimeout(() => {
+      void loadDiscoverWorkspaces(discoverQuery.trim() || undefined);
+    }, 350);
+    return () => clearTimeout(t);
+  }, [discoverQuery]);
+
+  async function handleApply(wsId: string) {
+    setBusyJoinId(wsId);
+    try {
+      const message = applyMsg[wsId]?.trim() || "";
+      await api.createJoinRequest(wsId, message);
+      showToast("success", "Join request sent! Workspace admin will review.");
+      setShowMsgFor(null);
+      await loadDiscoverWorkspaces(discoverQuery.trim() || undefined);
+    } catch (err) {
+      showToast("error", (err as Error).message || "Failed to send request");
+    } finally {
+      setBusyJoinId(null);
+    }
+  }
+
+  async function handleWithdraw(reqId: string) {
+    if (!confirm("Withdraw this join request?")) return;
+    try {
+      await api.withdrawJoinRequest(reqId);
+      showToast("info", "Join request withdrawn.");
+      setMyRequests((prev) => prev.filter((r) => r.id !== reqId));
+    } catch (err) {
+      showToast("error", (err as Error).message);
+    }
+  }
 
   // Tutorial State
   const [showTutorial, setShowTutorial] = useState(false);
@@ -323,7 +394,8 @@ export default function WorkspacesPage() {
       {/* Navigation Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-slate-100 pb-3 dark:border-white/5 -mx-4 px-4 sm:mx-0 sm:px-0">
         {[
-          { id: "all", label: "All Workspaces", badge: workspaces.length, icon: Layers },
+          { id: "all", label: "My Workspaces", badge: workspaces.length, icon: Layers },
+          { id: "discover", label: "Discover & Join", icon: Globe },
           { id: "create", label: "Create Workspace", icon: Plus },
           { id: "settings", label: "Settings & Brand", icon: Settings },
           { id: "members", label: "Team Members", badge: members.length, icon: UsersRound },
@@ -333,14 +405,14 @@ export default function WorkspacesPage() {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as "all" | "create" | "settings" | "members")}
+              onClick={() => setActiveTab(tab.id as "all" | "discover" | "create" | "settings" | "members")}
               className={`flex shrink-0 items-center gap-2 rounded-2xl px-3.5 sm:px-4 py-2.5 text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                 isSelected
                   ? "bg-slate-900 text-white shadow-md dark:bg-white dark:text-black scale-[1.02]"
                   : "border border-slate-200/80 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10"
               }`}
             >
-              <Icon className="h-4 w-4 shrink-0" />
+              <Icon className="h-4 w-4 shrink-0 text-purple-500" />
               <span>{tab.label}</span>
               {tab.badge !== undefined && (
                 <span className={`ml-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold ${
@@ -359,6 +431,32 @@ export default function WorkspacesPage() {
       {/* TAB 1: ALL WORKSPACES & SWITCHER */}
       {activeTab === "all" && (
         <div className="space-y-4">
+          {/* Quick Discover Callout Banner */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-3xl border border-indigo-200/80 bg-gradient-to-r from-indigo-50/80 via-purple-50/40 to-white p-4 dark:border-indigo-500/20 dark:bg-gradient-to-r dark:from-indigo-950/40 dark:via-purple-950/20 dark:to-[#121420] shadow-xs">
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white font-bold shadow-xs">
+                <Compass className="h-5 w-5" />
+              </span>
+              <div className="min-w-0">
+                <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                  Looking to search or join an existing workspace?
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-zinc-400">
+                  Discover public workspaces across your company, request access, or track pending join requests.
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab("discover")}
+              className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-500 transition-all shadow-xs cursor-pointer w-full sm:w-auto justify-center"
+            >
+              <Search className="h-3.5 w-3.5" />
+              <span>Search Public Workspaces</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
             {workspaces.map((ws) => {
               const isCurrent = workspace?.id === ws.id;
@@ -428,6 +526,233 @@ export default function WorkspacesPage() {
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* TAB: DISCOVER & JOIN PUBLIC WORKSPACES */}
+      {activeTab === "discover" && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-8 shadow-xl dark:border-white/10 dark:bg-[#121420] space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4 dark:border-white/5">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-purple-600 text-white font-bold text-xs shadow-xs">
+                    <Globe className="h-4 w-4" />
+                  </span>
+                  <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">
+                    Discover Public Workspaces
+                  </h2>
+                </div>
+                <p className="mt-1 text-xs text-slate-500 dark:text-zinc-400">
+                  Search existing workspaces across your company, request membership, or track join requests.
+                </p>
+              </div>
+            </div>
+
+            {/* Search Input Bar */}
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                value={discoverQuery}
+                onChange={(e) => setDiscoverQuery(e.target.value)}
+                placeholder="Search public workspaces by name, keyword, or domain…"
+                className="w-full rounded-2xl border border-slate-200/90 bg-slate-50/80 py-3 pl-11 pr-10 text-sm font-semibold text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#181a28] dark:text-white dark:placeholder-zinc-500"
+              />
+              {discoverQuery && (
+                <button
+                  type="button"
+                  onClick={() => setDiscoverQuery("")}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 p-1"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Loading Spinner */}
+            {discoverLoading && (
+              <div className="flex items-center justify-center gap-2 py-10 text-slate-400">
+                <Loader2 className="h-5 w-5 animate-spin text-purple-600" />
+                <span className="text-xs font-semibold">Searching public workspace directory…</span>
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!discoverLoading && publicWorkspaces.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-slate-200/80 p-8 text-center dark:border-white/10">
+                <Compass className="mx-auto h-8 w-8 text-slate-300 dark:text-zinc-600 mb-2" />
+                <div className="text-sm font-bold text-slate-700 dark:text-zinc-300">
+                  No public workspaces found
+                </div>
+                <div className="mt-1 text-xs text-slate-400 dark:text-zinc-500">
+                  {discoverQuery ? `No public workspaces match "${discoverQuery}"` : "There are no public workspaces listed yet. You can create a new workspace or make yours public!"}
+                </div>
+              </div>
+            )}
+
+            {/* Public Workspaces Grid */}
+            {!discoverLoading && publicWorkspaces.length > 0 && (
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+                {publicWorkspaces.map((pubWs) => {
+                  const isMember = workspaces.some((w) => w.id === pubWs.id);
+                  const pendingReq = myRequests.find(
+                    (r) => r.workspace_id === pubWs.id && r.status === "pending"
+                  );
+                  const isBusy = busyJoinId === pubWs.id;
+
+                  return (
+                    <div
+                      key={pubWs.id}
+                      className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-slate-50/50 p-4 transition-all hover:border-purple-300 hover:bg-white dark:border-white/10 dark:bg-[#161826] dark:hover:bg-[#1b1e30]"
+                    >
+                      <div>
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white font-black text-xs uppercase shadow-xs">
+                              {pubWs.name.slice(0, 2)}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                                {pubWs.name}
+                              </div>
+                              <div className="text-[11px] text-slate-400 dark:text-zinc-500 font-mono truncate max-w-[150px] sm:max-w-none">
+                                ID: {pubWs.id}
+                              </div>
+                            </div>
+                          </div>
+                          <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-[10px] font-bold text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/40 shrink-0">
+                            Public Vault
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 border-t border-slate-100 pt-3 dark:border-white/5">
+                        {isMember ? (
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400">
+                              <Check className="h-3.5 w-3.5" /> Already Joined
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleSwitch(pubWs)}
+                              className="font-bold text-indigo-600 hover:underline dark:text-indigo-400"
+                            >
+                              Switch Workspace ➔
+                            </button>
+                          </div>
+                        ) : pendingReq ? (
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400">
+                              <Clock className="h-3.5 w-3.5" /> Request Pending
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleWithdraw(pendingReq.id)}
+                              className="text-[11px] font-bold text-rose-500 hover:underline"
+                            >
+                              Withdraw Request
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {showMsgFor === pubWs.id ? (
+                              <div className="space-y-2 animate-in fade-in duration-200">
+                                <input
+                                  type="text"
+                                  placeholder="Message for workspace admin (optional)…"
+                                  value={applyMsg[pubWs.id] || ""}
+                                  onChange={(e) =>
+                                    setApplyMsg((prev) => ({
+                                      ...prev,
+                                      [pubWs.id]: e.target.value,
+                                    }))
+                                  }
+                                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs outline-none focus:border-purple-500 dark:border-white/10 dark:bg-[#121420] dark:text-white"
+                                />
+                                <div className="flex items-center justify-end gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowMsgFor(null)}
+                                    className="rounded-lg px-2.5 py-1 text-xs font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-white/10"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleApply(pubWs.id)}
+                                    disabled={isBusy}
+                                    className="inline-flex items-center gap-1 rounded-xl bg-purple-600 px-3.5 py-1 text-xs font-bold text-white hover:bg-purple-700 disabled:opacity-50 transition-all cursor-pointer"
+                                  >
+                                    <Send className="h-3 w-3" />
+                                    <span>{isBusy ? "Sending…" : "Send Join Request"}</span>
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => setShowMsgFor(pubWs.id)}
+                                className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 py-2 text-xs font-bold text-white shadow-xs hover:opacity-95 transition-all cursor-pointer"
+                              >
+                                <Plus className="h-3.5 w-3.5" />
+                                <span>Request to Join Workspace</span>
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Pending Sent Join Requests Tracking Section */}
+          {myRequests.length > 0 && (
+            <div className="rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-sm dark:border-white/10 dark:bg-[#121420] space-y-4">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Clock className="h-4 w-4 text-amber-500" />
+                My Sent Join Requests ({myRequests.length})
+              </h3>
+              <div className="divide-y divide-slate-100 dark:divide-white/5">
+                {myRequests.map((req) => (
+                  <div key={req.id} className="flex items-center justify-between py-2.5 text-xs">
+                    <div>
+                      <div className="font-bold text-slate-900 dark:text-white">
+                        Workspace ID: {req.workspace_id}
+                      </div>
+                      {req.message && (
+                        <div className="text-[11px] text-slate-500 dark:text-zinc-400 italic">
+                          &ldquo;{req.message}&rdquo;
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${
+                        req.status === "pending"
+                          ? "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+                          : req.status === "approved"
+                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                          : "bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300"
+                      }`}>
+                        {req.status}
+                      </span>
+                      {req.status === "pending" && (
+                        <button
+                          type="button"
+                          onClick={() => handleWithdraw(req.id)}
+                          className="font-bold text-rose-500 hover:underline text-[11px]"
+                        >
+                          Withdraw
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
