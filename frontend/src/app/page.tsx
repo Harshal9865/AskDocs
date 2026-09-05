@@ -481,91 +481,70 @@ const REVIEWS = [
     name: "Sofia Reyes",
     role: "Product Manager",
     quote:
-      "The office chats feel exactly like WhatsApp — my team actually uses them. Presence dots and read receipts were the killer detail for us.",
+      "The team chats feel natural and easy. Having all our docs searchable with instant citations in one clean workspace is a game-changer.",
     stars: 5,
     initials: "SR",
     color: "bg-emerald-500",
   },
   {
     name: "Daniel Kim",
-    role: "Founder, 12-person startup",
+    role: "Founder, Tech Startup",
     quote:
-      "Ask anything, get a source. That's the whole pitch and it delivers. We killed our internal wiki because of this tool.",
+      "Ask anything, get a verified source. That's the whole pitch and it delivers. It completely replaced our messy internal wiki.",
     stars: 5,
     initials: "DK",
     color: "bg-purple-500",
   },
-  {
-    name: "Priya Nair",
-    role: "HR Manager",
-    quote:
-      "Policy questions used to eat hours of my week. Now people ask AskDocs and only come to me for the edge cases. The conflict warnings are genius.",
-    stars: 4,
-    initials: "PN",
-    color: "bg-rose-500",
-  },
-  {
-    name: "Tomás Oliveira",
-    role: "CTO, HealthTech",
-    quote:
-      "Spotify-dark UI that engineers actually love, and the aurora ask box makes it feel alive. Underneath it's serious retrieval infrastructure.",
-    stars: 5,
-    initials: "TO",
-    color: "bg-amber-500",
-  },
-  {
-    name: "Emily Chen",
-    role: "Operations, Logistics",
-    quote:
-      "Cross-workspace friends + chat means our contractors and full-timers finally talk in one place. Setup took 10 minutes.",
-    stars: 5,
-    initials: "EC",
-    color: "bg-sky-500",
-  },
 ];
 
-const FEATURES = [
+const CORE_CAPABILITIES = [
   {
     icon: FileText,
-    title: "Smart Documents",
-    desc: "Upload PDFs, DOCX, TXT & CSV. AskDocs auto-chunks, embeds and indexes every paragraph so nothing is lost.",
+    title: "Ask Your Documents",
+    desc: "Ask questions in plain English and get instant answers with page & paragraph citations.",
     color: "from-indigo-500 to-violet-500",
     glow: "glow-indigo",
-  },
-  {
-    icon: Sparkles,
-    title: "Cited AI Answers",
-    desc: "Every answer links back to the exact document and chunk. Conflict detection warns when sources disagree.",
-    color: "from-violet-500 to-fuchsia-500",
-    glow: "glow-violet",
+    badge: "Instant Citations",
   },
   {
     icon: MessagesSquare,
-    title: "WhatsApp-style Chats",
-    desc: "DMs, group chats, presence dots, read receipts (✓✓), typing indicators and emoji — your team already knows it.",
+    title: "Real-time Team Chats",
+    desc: "Collaborate in direct messages and channels with live presence and typing indicators.",
     color: "from-emerald-500 to-teal-500",
     glow: "glow-emerald",
+    badge: "Real-time Chat",
   },
   {
-    icon: UsersRound,
-    title: "Friends, Any Workspace",
-    desc: "Add friends across workspaces, see who's online, jump into a DM — Instagram-style management, zero friction.",
-    color: "from-sky-500 to-cyan-500",
-    glow: "glow-sky",
+    icon: Table,
+    title: "Extract PDF Tables",
+    desc: "Convert scanned invoices, receipts, and balance sheets into clean, editable Excel spreadsheets.",
+    color: "from-[#1db954] to-emerald-600",
+    glow: "glow-emerald",
+    badge: "1-Click .XLSX",
   },
   {
-    icon: Search,
-    title: "Semantic Search",
-    desc: "Search by meaning, not keywords. Find the paragraph you half-remember across every document you own.",
-    color: "from-amber-500 to-orange-500",
-    glow: "glow-amber",
+    icon: Headphones,
+    title: "Generate Audio Podcasts",
+    desc: "Turn long whitepapers and files into conversational 2-host audio briefs you can listen to anywhere.",
+    color: "from-violet-500 to-indigo-600",
+    glow: "glow-violet",
+    badge: "Audio Briefs",
   },
   {
-    icon: Shield,
-    title: "Private Workspaces",
-    desc: "Public or private spaces, role-based access (admin / member / viewer), soft-delete trash and full activity log.",
-    color: "from-rose-500 to-red-500",
+    icon: GraduationCap,
+    title: "Create Study Flashcards",
+    desc: "Synthesize multi-doc study guides, 3D flip flashcards, and practice exam quizzes automatically.",
+    color: "from-purple-500 to-pink-500",
+    glow: "glow-violet",
+    badge: "Study Mode",
+  },
+  {
+    icon: Scale,
+    title: "Compare & Redline Contracts",
+    desc: "Spot clause contradictions, notice date mismatches, and liability differences between agreements.",
+    color: "from-rose-500 to-amber-500",
     glow: "glow-rose",
+    badge: "Risk Detection",
   },
 ];
 
@@ -573,7 +552,7 @@ const NEW_CAPABILITIES = [
   {
     badge: "AI Table Extractor",
     title: "Scanned PDF Tables to Live Excel",
-    desc: "Transform scanned invoices, receipts, lab results, and financial tables into interactive spreadsheets with in-place cell editing, live auto-sums, and 1-click Excel/CSV export.",
+    desc: "Turn scanned invoices, receipts, and PDF tables into editable spreadsheets with 1-click Excel export.",
     icon: Table,
     color: "from-[#1db954] via-emerald-500 to-teal-500",
     glow: "glow-emerald",
@@ -581,112 +560,103 @@ const NEW_CAPABILITIES = [
   },
   {
     badge: "Study Studio",
-    title: "Multi-Doc Cheat Sheets, 3D Flashcards & Quizzes",
-    desc: "Select 1 to 5 documents to synthesize executive cheat sheets, 3D flip flashcards, and exam quizzes mimicking your professor or company's exact question syntax.",
+    title: "Cheat Sheets, Flashcards & Quizzes",
+    desc: "Generate instant study summaries, 3D flip flashcards, and practice exam questions from your course materials.",
     icon: GraduationCap,
     color: "from-purple-500 via-pink-500 to-indigo-500",
     glow: "glow-violet",
-    tags: ["Multi-Doc Tracklist", "3D Flip Flashcards", "Exam Style Mimicry", "Anki Export"],
+    tags: ["Summary Sheets", "3D Flashcards", "Exam Practice", "Anki Export"],
   },
   {
     badge: "Audio Brief Player",
-    title: "Dual-Host Podcast Broadcasts & Rapid Briefs",
-    desc: "Convert dense whitepapers into conversational spoken podcasts (Alex & Taylor) with live soundwave visualizers, variable playback speed, and downloadable PDF transcripts.",
+    title: "Podcast Audio Summaries",
+    desc: "Listen to conversational 2-host spoken podcasts and quick audio briefs generated from your documents.",
     icon: Headphones,
     color: "from-violet-500 via-indigo-500 to-[#1db954]",
     glow: "glow-sky",
-    tags: ["2-Host Dialogue", "Spotify Equalizer", "Speed Controls", "PDF Broadcast Script"],
+    tags: ["2-Host Dialogue", "Waveform Visualizer", "Speed Controls", "PDF Script"],
   },
   {
     badge: "Slide Deck Studio",
-    title: "1-Click Presentation Generator & Gamma Bridge",
-    desc: "Convert PDFs into high-impact slide decks with Spotify Obsidian themes, fullscreen presenter mode, and instant 1-click export to Gamma AI (gamma.app/create).",
+    title: "1-Click Presentation Generator",
+    desc: "Convert document summaries into clean presentation slide decks and export directly to Gamma AI.",
     icon: Presentation,
     color: "from-pink-500 via-purple-600 to-indigo-500",
     glow: "glow-pink",
-    tags: ["Gamma AI Bridge", "Spotify Obsidian Deck", "Fullscreen Mode", "Vector PDF"],
+    tags: ["AI Slide Decks", "Gamma AI Export", "Fullscreen Mode", "Vector PDF"],
   },
   {
     badge: "Multi-Doc Canvas",
-    title: "Live Comparison Matrix & Risk Heat Map",
-    desc: "Synthesize 2+ documents simultaneously into side-by-side comparison tables, actionable procedural checklists, and critical liability heat maps.",
+    title: "Document Comparison Matrix",
+    desc: "Compare multiple documents side-by-side to highlight differences, checklists, and risk areas.",
     icon: LayoutGrid,
     color: "from-cyan-500 via-blue-500 to-indigo-500",
     glow: "glow-cyan",
-    tags: ["Side-by-Side Matrix", "Risk Heat Map", "Action Checklists", "Vector PDF Canvas"],
+    tags: ["Side-by-Side Matrix", "Risk Heat Map", "Action Checklists", "PDF Export"],
   },
   {
     badge: "Contract Redline Diff",
-    title: "Side-by-Side Contract Redline & Diff Studio",
-    desc: "Compare two contract drafts with automated clause variance detection, dynamic liability score recalculation, and 1-click counter-proposals.",
+    title: "Contract Redline & Diff Studio",
+    desc: "Compare two contract versions to spot changed clauses, risk variances, and draft counter-proposals.",
     icon: Scale,
     color: "from-rose-500 via-pink-500 to-purple-500",
     glow: "glow-rose",
-    tags: ["Side-by-Side Redline", "Dynamic Risk Recalculator", "Counter-Proposals"],
+    tags: ["Side-by-Side Redline", "Risk Score Recalculator", "Counter-Proposals"],
   },
   {
     badge: "Contract Expiry Tracker",
-    title: "Automated Renewal & Obligation Monitoring",
-    desc: "Extract payment milestones, termination notice windows, and auto-renewal deadlines across all vendor and client contracts with proactive urgency alerts.",
+    title: "Renewal & Deadline Alerts",
+    desc: "Track termination windows, renewal dates, and payment milestones with proactive notifications.",
     icon: FileSignature,
     color: "from-amber-500 via-orange-500 to-purple-500",
     glow: "glow-amber",
-    tags: ["Notice Window Alerts", "Obligation Tracking", "Urgent Expiry Badges"],
+    tags: ["Deadline Alerts", "Obligation Tracking", "Expiry Badges"],
   },
   {
     badge: "Institutional Memory",
-    title: "Permanent Knowledge & Memory Graph",
-    desc: "Ingest decisions, meeting transcripts, and policy exceptions into an immutable living mind map. Query institutional context with auto-extracted entity relationships.",
+    title: "Knowledge & Memory Graph",
+    desc: "Store past decisions, meetings, and policies in a living visual mind map for your organization.",
     icon: Brain,
     color: "from-indigo-500 via-purple-500 to-cyan-400",
     glow: "glow-indigo",
-    tags: ["Mind Map Graph", "Decision Tracking", "Meeting Transcripts", "PDF Logs"],
+    tags: ["Mind Map Graph", "Decision Tracking", "Meeting Summaries", "Entity Links"],
   },
   {
     badge: "Document Health",
-    title: "Automated Quality & Extraction Readiness Audit",
-    desc: "Continuous health checks for corrupt fonts, low-DPI OCR scans, and structural formatting errors with 1-click PDF executive health reports.",
+    title: "Quality & OCR Readiness Audit",
+    desc: "Scan documents for corrupt text, low-quality scans, or formatting issues before indexing.",
     icon: Activity,
     color: "from-emerald-500 via-teal-500 to-[#1db954]",
     glow: "glow-emerald",
-    tags: ["100-Point Quality Score", "OCR Scan Auditor", "Executive PDF Audit"],
+    tags: ["Quality Score", "OCR Scan Check", "Executive PDF Audit"],
   },
   {
     badge: "Weekly AI Digest",
-    title: "Proactive Workspace Executive Synthesis",
-    desc: "Automated weekly rollups synthesizing new files, contract obligations, and strategic milestones into a high-yield executive PDF briefing.",
+    title: "Weekly Executive Briefing",
+    desc: "Receive an automated weekly rollup summarizing all new files, decisions, and deadlines.",
     icon: FileSpreadsheet,
     color: "from-purple-600 via-indigo-600 to-[#1db954]",
     glow: "glow-violet",
-    tags: ["Weekly Milestone Rollups", "Strategic Takeaways", "1-Click PDF Digest"],
+    tags: ["Weekly Rollups", "Key Takeaways", "1-Click PDF Digest"],
   },
   {
     badge: "Batch Format & Redact",
-    title: "Automated PII Masking & Format Converter",
-    desc: "Convert files into Markdown, JSON, CSV, and TXT with autonomous redaction of sensitive emails, phone numbers, and SSNs for safe sharing.",
+    title: "PII Masking & File Converter",
+    desc: "Convert files to Markdown, JSON, or CSV with automatic redaction of emails, phones, and private data.",
     icon: FileCode,
     color: "from-blue-500 via-indigo-500 to-purple-500",
     glow: "glow-blue",
-    tags: ["PII Anonymization", "Clean Markdown", "Developer JSON", "Sanitized PDFs"],
+    tags: ["PII Redaction", "Clean Markdown", "JSON & CSV", "Sanitized PDFs"],
   },
   {
-    badge: "Zero-Trust Security",
-    title: "Enterprise Application Firewall (WAF)",
-    desc: "Active perimeter defense inspection scanning all incoming requests against SQL Injection, XSS, and unauthorized probing with zero model training guarantees.",
+    badge: "Enterprise Security",
+    title: "Application Firewall & Privacy",
+    desc: "Active threat protection with AES-256 encryption and a strict zero model training guarantee.",
     icon: Shield,
     color: "from-[#1db954] via-emerald-600 to-teal-600",
     glow: "glow-emerald",
-    tags: ["Perimeter WAF", "SQLi & XSS Shield", "Zero Model Training", "AES-256"],
+    tags: ["Firewall Shield", "Zero Model Training", "AES-256", "Isolated Workspaces"],
   },
-];
-
-const FEATURE_MARQUEE = [
-  { icon: FileText, title: "Documents", desc: "Upload PDFs, DOCs, TXTs. Auto-chunked & embedded.", color: "from-indigo-500 to-violet-500" },
-  { icon: Sparkles, title: "AI Chat", desc: "Ask anything. Cited answers with sources.", color: "from-violet-500 to-fuchsia-500" },
-  { icon: MessagesSquare, title: "Chats", desc: "WhatsApp-style study groups & DMs with presence.", color: "from-emerald-500 to-teal-500" },
-  { icon: Search, title: "Semantic Search", desc: "Find any paragraph across all docs.", color: "from-amber-500 to-orange-500" },
-  { icon: UsersRound, title: "Friends", desc: "Cross-workspace friends with online status.", color: "from-sky-500 to-cyan-500" },
-  { icon: Shield, title: "Workspaces", desc: "Public or private, roles, trash & activity log.", color: "from-rose-500 to-red-500" },
 ];
 
 const TRUSTED_LOGOS = [
@@ -868,11 +838,8 @@ export default function Home() {
           <span className="text-[15px] font-bold tracking-tight">AskDocs</span>
         </Link>
         <nav className="home-nav hidden items-center gap-6 md:flex">
-          <a href="#how-it-works" className="px-1 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-zinc-300 dark:hover:text-white">
-            How it works
-          </a>
-          <a href="#features" className="px-1 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-zinc-300 dark:hover:text-white">
-            Features
+          <a href="#capabilities" className="px-1 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-zinc-300 dark:hover:text-white">
+            Capabilities
           </a>
           <a href="#whats-new" className="px-1 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-zinc-300 dark:hover:text-white flex items-center gap-1">
             <span>What&apos;s new</span>
@@ -1131,11 +1098,11 @@ export default function Home() {
                 {user ? "Open Dashboard" : "Start for free"} <ArrowRight className="h-4 w-4" />
               </Link>
               <a
-                href="#how-it-works"
+                href="#capabilities"
                 className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
               >
                 <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                See how it works
+                Explore capabilities
               </a>
             </div>
             <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-zinc-500">
@@ -1156,54 +1123,50 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features teaser — calm, swipeable row (no auto-marquee) */}
-      <section id="features" className="scroll-mt-16 border-y border-slate-100 bg-slate-50/50 py-6 dark:border-white/5 dark:bg-white/[0.02]">
+      {/* Mini Section: What you can do in AskDocs */}
+      <section id="capabilities" className="scroll-mt-16 py-14 sm:py-20 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-zinc-500">
-              Everything in one place
-            </h2>
-            <span className="hidden text-xs text-slate-400 sm:inline">drag to explore →</span>
-          </div>
-          <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-px-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {FEATURE_MARQUEE.map((c) => (
-              <div
-                key={c.title}
-                className="group min-w-[220px] max-w-[260px] flex-1 shrink-0 snap-start rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-white/10 dark:bg-[#121212]"
-              >
-                <div
-                  className={`mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${c.color} text-white`}
-                >
-                  <c.icon className="h-5 w-5" />
-                </div>
-                <div className="text-sm font-semibold">{c.title}</div>
-                <div className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-zinc-400">{c.desc}</div>
+          <Reveal dir="up">
+            <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
+              <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-3.5 py-1 text-xs font-semibold text-emerald-700 shadow-xs dark:border-emerald-500/30 dark:bg-emerald-950/50 dark:text-emerald-300">
+                <Sparkles className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>WHAT YOU CAN DO</span>
               </div>
+              <h2 className="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl text-slate-900 dark:text-white">
+                Everything you need to master your documents.
+              </h2>
+              <p className="mt-3 text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">
+                No complex setup. Upload any file and let AskDocs extract answers, generate audio briefs, and build spreadsheets in seconds.
+              </p>
+            </div>
+          </Reveal>
+
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {CORE_CAPABILITIES.map((cap, i) => (
+              <Reveal key={cap.title} dir={i % 2 === 0 ? "left" : "right"} delay={(i % 3) * 90}>
+                <div
+                  className={`glow-card ${cap.glow} group relative flex h-full flex-col justify-between rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-[#11131c]`}
+                >
+                  <div>
+                    <div className="mb-4 flex items-center justify-between">
+                      <div className={`flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${cap.color} text-white shadow-md`}>
+                        <cap.icon className="h-5 w-5" />
+                      </div>
+                      <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[10px] font-mono font-bold text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300">
+                        {cap.badge}
+                      </span>
+                    </div>
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      {cap.title}
+                    </h3>
+                    <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-zinc-400">
+                      {cap.desc}
+                    </p>
+                  </div>
+                </div>
+              </Reveal>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Features deep-dive */}
-      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-        <h2 className="text-center text-xl font-bold sm:text-2xl">Built for how teams actually work</h2>
-        <p className="mx-auto mt-2 max-w-xl text-center text-sm text-slate-500 dark:text-zinc-400">
-          Six pillars that make AskDocs feel less like software and more like a teammate.
-        </p>
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((f, i) => (
-            <Reveal key={f.title} dir={i % 2 === 0 ? "left" : "right"} delay={(i % 3) * 100}>
-              <div
-                className={`glow-card ${f.glow} h-full rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#121212]`}
-              >
-                <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${f.color} text-white`}>
-                  <f.icon className="h-5 w-5" />
-                </div>
-                <div className="text-sm font-semibold">{f.title}</div>
-                <div className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-zinc-400">{f.desc}</div>
-              </div>
-            </Reveal>
-          ))}
         </div>
       </section>
 
@@ -1284,101 +1247,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Why AskDocs — comparison vs alternatives */}
-      <section className="scroll-mt-16 border-y border-slate-100 bg-slate-50/50 py-12 dark:border-white/5 dark:bg-white/[0.02] sm:py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <Reveal dir="up">
-            <p className="text-center text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Why AskDocs</p>
-            <h2 className="mt-2 text-center text-xl font-bold sm:text-2xl">Built different, for a reason</h2>
-            <p className="mx-auto mt-2 max-w-xl text-center text-sm text-slate-500 dark:text-zinc-400">
-              We compared AskDocs against the tools your team already uses. Here's what changes.
-            </p>
-          </Reveal>
-          <div className="mt-8 grid gap-5 sm:grid-cols-3">
-            {[
-              {
-                tool: "vs Confluence",
-                icon: FileText,
-                color: "glow-indigo",
-                gradient: "from-indigo-500 to-violet-500",
-                advantage: "No digging through 50-page wikis",
-                detail: "Confluence requires manual organization and keyword search. AskDocs auto-chunks, embeds and answers with citations — your team asks in plain language.",
-              },
-              {
-                tool: "vs Notion AI",
-                icon: Search,
-                color: "glow-emerald",
-                gradient: "from-emerald-500 to-teal-500",
-                advantage: "Answers across ALL your docs, not one workspace",
-                detail: "Notion AI only searches within one workspace. AskDocs indexes across every document you own, with conflict detection when sources disagree.",
-              },
-              {
-                tool: "vs ChatGPT",
-                icon: Sparkles,
-                color: "glow-violet",
-                gradient: "from-violet-500 to-fuchsia-500",
-                advantage: "Cited answers, not hallucinations",
-                detail: "ChatGPT guesses from training data. AskDocs retrieves from YOUR documents, links every claim to a source, and warns when documents contradict each other.",
-              },
-            ].map((c, i) => (
-              <Reveal key={c.tool} dir={i === 1 ? "up" : i === 0 ? "left" : "right"} delay={i * 100}>
-                <div className={`glow-card ${c.color} h-full rounded-2xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-[#121212]`}>
-                  <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${c.gradient} text-white`}>
-                    <c.icon className="h-5 w-5" />
-                  </div>
-                  <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500">{c.tool}</div>
-                  <div className="mt-1.5 text-sm font-bold">{c.advantage}</div>
-                  <div className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-zinc-400">{c.detail}</div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section id="how-it-works" className="scroll-mt-16 border-y border-slate-100 bg-slate-50/50 py-12 dark:border-white/5 dark:bg-white/[0.02] sm:py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <h2 className="text-center text-xl font-bold sm:text-2xl">How it works</h2>
-          <p className="mx-auto mt-2 max-w-xl text-center text-sm text-slate-500 dark:text-zinc-400">
-            From zero to cited answers in under five minutes.
-          </p>
-          <div className="mt-8 grid gap-6 sm:grid-cols-3">
-            {[
-              { n: "01", t: "Create your workspace", d: "Sign up, name your team space, and invite colleagues by email — they get a notification to accept." },
-              { n: "02", t: "Upload your documents", d: "Drag in PDFs, DOCX, TXT or CSV. AskDocs chunks, embeds and indexes every page automatically." },
-              { n: "03", t: "Ask & collaborate", d: "Ask in plain language and get answers with citations. Disagreements? Continue the thread in office chats." },
-            ].map((s, i) => (
-              <Reveal key={s.n} dir="up" delay={i * 120}>
-                <div
-                  className="relative h-full rounded-2xl border border-slate-200 bg-white p-5 text-center dark:border-white/10 dark:bg-[#121212]"
-                >
-                  <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white dark:bg-white dark:text-black">
-                    {s.n}
-                  </div>
-                  <div className="text-sm font-semibold">{s.t}</div>
-                  <div className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-zinc-400">{s.d}</div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-          <div className="mt-10 grid grid-cols-3 gap-4 text-center">
-            {[
-              { v: "< 5 min", l: "to first answer" },
-              { v: "100%", l: "answers cited" },
-              { v: "∞", l: "documents per workspace" },
-            ].map((s) => (
-              <div key={s.l} className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-[#121212]">
-                <div className="bg-gradient-to-r from-indigo-600 to-emerald-500 bg-clip-text text-xl font-bold text-transparent dark:from-indigo-400 dark:to-emerald-400 sm:text-2xl">
-                  {s.v}
-                </div>
-                <div className="mt-1 text-xs text-slate-500 dark:text-zinc-400">{s.l}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Reviews — calm static grid with subtle reveal */}
       <section id="reviews" className="scroll-mt-16 mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
         <div className="mb-2 flex items-center justify-center gap-2">
@@ -1388,7 +1256,7 @@ export default function Home() {
         </div>
         <p className="text-center text-xs text-slate-400 dark:text-zinc-500">Loved by teams of every size</p>
         <h2 className="mt-2 text-center text-xl font-bold sm:text-2xl">What people say</h2>
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-5 sm:grid-cols-3">
           {REVIEWS.map((r, i) => (
             <Reveal key={r.name} dir={i % 2 === 0 ? "left" : "right"} delay={(i % 3) * 90}>
               <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-[#121212]">
@@ -1461,79 +1329,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Security — new end section 1 */}
-      <section id="security" className="scroll-mt-16 border-t border-slate-100 bg-white py-12 dark:border-white/5 dark:bg-[#0a0a0f] sm:py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <Reveal dir="left">
-            <p className="text-center text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Security & privacy</p>
-            <h2 className="mt-2 text-center text-xl font-bold sm:text-2xl">Your docs stay yours.</h2>
-            <p className="mx-auto mt-2 max-w-xl text-center text-sm text-slate-500 dark:text-zinc-400">
-              No training on your data, no hidden retention. Just encryption, access control, and a paper trail.
-            </p>
-          </Reveal>
-          <div className="mt-8 grid gap-5 sm:grid-cols-3">
-            {[
-              { icon: Lock, title: "Encrypted at rest", desc: "Files and embeddings are encrypted at rest and in transit. Bring your own key in enterprise.", color: "from-indigo-500 to-violet-500", glow: "glow-indigo" },
-              { icon: Shield, title: "Private by default", desc: "Public or private workspaces, role-based access (admin / member / viewer) and invite-only sharing.", color: "from-emerald-500 to-teal-500", glow: "glow-emerald" },
-              { icon: FileKey, title: "Audit everything", desc: "Soft-delete trash, version history and a full activity log — so every answer is traceable.", color: "from-amber-500 to-orange-500", glow: "glow-amber" },
-            ].map((c, i) => (
-              <Reveal key={c.title} dir={i === 1 ? "up" : i === 0 ? "left" : "right"} delay={i * 100}>
-                <div className={`glow-card ${c.glow} h-full rounded-2xl border border-slate-200 bg-slate-50/60 p-5 dark:border-white/10 dark:bg-white/[0.04]`}>
-                  <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${c.color} text-white`}>
-                    <c.icon className="h-5 w-5" />
-                  </div>
-                  <div className="text-sm font-semibold">{c.title}</div>
-                  <div className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-zinc-400">{c.desc}</div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* Integrations — new end section 2 */}
-      <section id="integrations" className="scroll-mt-16 border-y border-slate-100 bg-slate-50/50 py-12 dark:border-white/5 dark:bg-white/[0.02] sm:py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="lg:flex lg:items-center lg:justify-between lg:gap-10">
-            <Reveal dir="left" className="max-w-xl">
-              <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Works with your stack</p>
-              <h2 className="mt-2 text-xl font-bold sm:text-2xl">Drop files in, get answers out. No migration.</h2>
-              <p className="mt-3 text-sm leading-relaxed text-slate-500 dark:text-zinc-400">
-                PDF, DOCX, TXT and CSV today. Slack and Drive connectors in preview. Everything you upload is auto-chunked, embedded and indexed — no tagging required.
-              </p>
-              <div className="mt-5 flex flex-wrap gap-2">
-                {["PDF", "DOCX", "TXT", "CSV", "Slack (soon)", "Drive (soon)", "Notion (soon)"].map((name) => (
-                  <span
-                    key={name}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-zinc-300"
-                  >
-                    {name}
-                  </span>
-                ))}
-              </div>
-            </Reveal>
-            <Reveal dir="right" delay={120} className="mt-8 grid w-full max-w-sm grid-cols-2 gap-3 lg:mt-0">
-              <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-500/20 dark:bg-indigo-500/10">
-                <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-300">4+</div>
-                <div className="text-xs text-indigo-700/70 dark:text-indigo-200/70">file types supported today</div>
-              </div>
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/10">
-                <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-300">Zero</div>
-                <div className="text-xs text-emerald-700/70 dark:text-emerald-200/70">manual tagging required</div>
-              </div>
-              <div className="col-span-2 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#121212]">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
-                  <Shield className="h-5 w-5" />
-                </span>
-                <div>
-                  <div className="text-sm font-semibold">Zero Model Training</div>
-                  <div className="text-xs text-slate-500 dark:text-zinc-400">100% private workspace isolation with AES-256 encryption.</div>
-                </div>
-              </div>
-            </Reveal>
-          </div>
-        </div>
-      </section>
 
       {/* Open source — new end section 3 */}
       <section className="mx-auto max-w-3xl px-4 py-12 text-center sm:px-6 sm:py-16">
@@ -1674,10 +1470,10 @@ export default function Home() {
               {user ? "Go to Dashboard" : "Create free account"} <ArrowRight className="h-4 w-4" />
             </Link>
             <a
-              href="#security"
+              href="#capabilities"
               className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-transparent px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition-all"
             >
-              <Shield className="h-4 w-4" /> Why AskDocs
+              <Sparkles className="h-4 w-4" /> Explore capabilities
             </a>
           </Reveal>
           <Reveal dir="up" delay={500} className="mt-6 text-center">
@@ -1800,8 +1596,8 @@ export default function Home() {
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-white">Resources</h3>
               <ul className="mt-4 space-y-3 text-sm">
-                <li><a href="#how-it-works" className="text-slate-500 transition-colors hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400">How it works</a></li>
-                <li><a href="#features" className="text-slate-500 transition-colors hover:text-emerald-600 dark:text-zinc-400 dark:hover:text-emerald-400">Features</a></li>
+                <li><a href="#capabilities" className="text-slate-500 transition-colors hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400">Capabilities</a></li>
+                <li><a href="#whats-new" className="text-slate-500 transition-colors hover:text-emerald-600 dark:text-zinc-400 dark:hover:text-emerald-400">What's New</a></li>
                 <li><a href="#reviews" className="text-slate-500 transition-colors hover:text-violet-600 dark:text-zinc-400 dark:hover:text-violet-400">Reviews</a></li>
                 <li><Link href="/help" className="text-slate-500 transition-colors hover:text-amber-600 dark:text-zinc-400 dark:hover:text-amber-400">Help & FAQ</Link></li>
                 <li><Link href="/discover" className="text-slate-500 transition-colors hover:text-rose-600 dark:text-zinc-400 dark:hover:text-rose-400">Discover workspaces</Link></li>
@@ -1823,7 +1619,6 @@ export default function Home() {
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-white">Trust & security</h3>
               <ul className="mt-4 space-y-3 text-sm">
-                <li><a href="#security" className="text-slate-500 transition-colors hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400">Security center</a></li>
                 <li><Link href="/privacy" className="text-slate-500 transition-colors hover:text-emerald-600 dark:text-zinc-400 dark:hover:text-emerald-400">Privacy policy</Link></li>
                 <li><a href="#faq" className="text-slate-500 transition-colors hover:text-violet-600 dark:text-zinc-400 dark:hover:text-violet-400">Terms of service</a></li>
                 <li><a href="#faq" className="text-slate-500 transition-colors hover:text-amber-600 dark:text-zinc-400 dark:hover:text-amber-400">Cookie policy</a></li>
