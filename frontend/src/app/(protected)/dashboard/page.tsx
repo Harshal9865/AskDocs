@@ -17,7 +17,6 @@ import {
   Crown,
   Sparkles,
   Target,
-  Upload,
   UsersRound,
   X,
   Brain,
@@ -32,7 +31,7 @@ import {
   Plug2,
 } from "lucide-react";
 import type { ContractObligation, DocumentItem, PlanInfo, TeamChat, WorkspaceMemory, AudienceMode } from "@/lib/types";
-import { useAudienceMode, AUDIENCE_MODES } from "@/lib/audience-mode-context";
+import { useAudienceMode } from "@/lib/audience-mode-context";
 import HintTooltip from "@/components/HintTooltip";
 
 /* ── Helpers ── */
@@ -242,7 +241,7 @@ const MODE_PROMPTS: Record<AudienceMode, string[]> = {
 
 const MODE_HERO_ACTIONS: Record<
   AudienceMode,
-  { label: string; href: string; icon: any; color: string }[]
+  { label: string; href: string; icon: React.ComponentType<{ className?: string }>; color: string }[]
 > = {
   academic: [
     { label: "Study Studio", href: "/study-guide", icon: GraduationCap, color: "from-purple-600 to-indigo-600" },
@@ -286,6 +285,7 @@ const MODE_HERO_ACTIONS: Record<
 export default function DashboardPage() {
   const { user } = useAuth();
   const { workspace } = useWorkspace();
+  const { mode, setMode, config: modeConfig } = useAudienceMode();
   const router = useRouter();
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [chats, setChats] = useState<TeamChat[]>([]);
@@ -378,8 +378,6 @@ export default function DashboardPage() {
       </div>
     );
   }
-
-  const { mode, setMode, config: modeConfig } = useAudienceMode();
 
   const docCount = docs.length;
   const processingCount = docs.filter((d) => d.status === "pending" || d.status === "processing").length;
