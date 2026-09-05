@@ -518,6 +518,7 @@ export default function ProfilePage() {
                       <div className="rounded-xl border border-indigo-500/20 bg-white/60 dark:bg-white/5 p-2.5">
                         <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Memory Graph</span>
                         <span className="font-extrabold text-indigo-700 dark:text-indigo-300">Decisions Synced</span>
+                      </div>
                       <div className="rounded-xl border border-indigo-500/20 bg-white/60 dark:bg-white/5 p-2.5">
                         <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Slide Decks</span>
                         <span className="font-extrabold text-indigo-700 dark:text-indigo-300">Presentations Ready</span>
