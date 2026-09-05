@@ -23,7 +23,7 @@ import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
 import { useAuth } from "@/lib/auth-context";
 import { showToast } from "@/components/Toast";
-import type { Workspace } from "@/lib/types";
+import type { Workspace, Member } from "@/lib/types";
 
 const WORKSPACE_EMBLEMS = [
   { id: "cute-1", name: "Nexus Prism", tag: "Quantum 3D" },
@@ -67,7 +67,7 @@ export default function WorkspacesPage() {
   const [brandStickerLocal, setBrandStickerLocal] = useState<string | null>(null);
 
   // Members State
-  const [members, setMembers] = useState<{ id: string; user_id: string; email: string; name?: string; role: string }[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
 
   useEffect(() => {
     if (!workspace || !user) return;
@@ -601,7 +601,7 @@ export default function WorkspacesPage() {
 
           <div className="divide-y divide-slate-100 dark:divide-white/5">
             {members.map((m) => (
-              <div key={m.id || m.email} className="flex items-center justify-between py-3">
+              <div key={m.user_id || m.email} className="flex items-center justify-between py-3">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 font-bold text-xs uppercase text-slate-700 dark:bg-white/10 dark:text-zinc-300">
                     {(m.name || m.email).slice(0, 2)}
