@@ -31,7 +31,8 @@ import {
   Presentation,
   Plug2,
 } from "lucide-react";
-import type { ContractObligation, DocumentItem, PlanInfo, TeamChat, WorkspaceMemory } from "@/lib/types";
+import type { ContractObligation, DocumentItem, PlanInfo, TeamChat, WorkspaceMemory, AudienceMode } from "@/lib/types";
+import { useAudienceMode, AUDIENCE_MODES } from "@/lib/audience-mode-context";
 import HintTooltip from "@/components/HintTooltip";
 
 /* ── Helpers ── */
@@ -200,6 +201,87 @@ function ActivityItem({ item }: { item: { actor: string; action: string; target:
   );
 }
 
+const MODE_PROMPTS: Record<AudienceMode, string[]> = {
+  academic: [
+    "Summarize midterm & final exam topics",
+    "Generate 3D flashcards & practice quiz",
+    "Derive step-by-step math proof",
+    "Lab report submission checklist",
+  ],
+  office: [
+    "Summarize team standups & SOPs",
+    "Quarterly engineering architecture sync",
+    "Extract team action items & owners",
+    "Weekly digest of workspace changes",
+  ],
+  legal: [
+    "Audit contract liability & indemnity risks",
+    "Contract renewal & expiration deadlines",
+    "Compare 2 agreement versions (Redline)",
+    "Privilege & NDA compliance verification",
+  ],
+  finance: [
+    "Extract invoice line items & totals",
+    "Tax & audit reconciliation report",
+    "CapEx budget allocation review",
+    "Payroll discrepancy verification",
+  ],
+  clinical: [
+    "Patient de-identification audit",
+    "Clinical protocol & safety review",
+    "Medical study flashcard deck",
+    "Grand rounds case vignette summary",
+  ],
+  personal: [
+    "Generate pitch deck outline",
+    "Create 3-minute spoken audio podcast",
+    "Document health & freshness audit",
+    "Key takeaways executive summary",
+  ],
+};
+
+const MODE_HERO_ACTIONS: Record<
+  AudienceMode,
+  { label: string; href: string; icon: any; color: string }[]
+> = {
+  academic: [
+    { label: "Study Studio", href: "/study-guide", icon: GraduationCap, color: "from-purple-600 to-indigo-600" },
+    { label: "Audio Briefs", href: "/listen", icon: Headphones, color: "from-indigo-600 to-blue-600" },
+    { label: "Slide Decks", href: "/slides", icon: Presentation, color: "from-emerald-600 to-teal-600" },
+    { label: "Data Extractor", href: "/extract", icon: Table, color: "from-cyan-600 to-blue-600" },
+  ],
+  office: [
+    { label: "Memory Graph", href: "/memory", icon: Brain, color: "from-indigo-600 to-blue-600" },
+    { label: "Weekly Digest", href: "/digest", icon: FileCode, color: "from-purple-600 to-indigo-600" },
+    { label: "Team Chats", href: "/chats", icon: MessagesSquare, color: "from-emerald-600 to-teal-600" },
+    { label: "Slide Decks", href: "/slides", icon: Presentation, color: "from-amber-600 to-orange-600" },
+  ],
+  legal: [
+    { label: "Redline Diff", href: "/contracts/compare", icon: Scale, color: "from-rose-600 to-pink-600" },
+    { label: "Contracts", href: "/contracts", icon: FileSignature, color: "from-indigo-600 to-purple-600" },
+    { label: "Redact & Mask", href: "/convert", icon: FileCode, color: "from-amber-600 to-orange-600" },
+    { label: "Canvas Vault", href: "/canvas", icon: Sparkles, color: "from-cyan-600 to-blue-600" },
+  ],
+  finance: [
+    { label: "Invoice Extractor", href: "/extract", icon: Table, color: "from-emerald-600 to-teal-600" },
+    { label: "Redline Diff", href: "/contracts/compare", icon: Scale, color: "from-rose-600 to-pink-600" },
+    { label: "Redact PII", href: "/convert", icon: FileCode, color: "from-amber-600 to-orange-600" },
+    { label: "Weekly Digest", href: "/digest", icon: FileCode, color: "from-indigo-600 to-purple-600" },
+  ],
+  clinical: [
+    { label: "Doc Health", href: "/health", icon: Activity, color: "from-cyan-600 to-teal-600" },
+    { label: "Study Cards", href: "/study-guide", icon: GraduationCap, color: "from-purple-600 to-indigo-600" },
+    { label: "Audio Briefs", href: "/listen", icon: Headphones, color: "from-emerald-600 to-teal-600" },
+    { label: "Redact PII", href: "/convert", icon: FileCode, color: "from-amber-600 to-orange-600" },
+  ],
+  personal: [
+    { label: "Slide Decks", href: "/slides", icon: Presentation, color: "from-purple-600 to-indigo-600" },
+    { label: "Audio Briefs", href: "/listen", icon: Headphones, color: "from-indigo-600 to-blue-600" },
+    { label: "Study Studio", href: "/study-guide", icon: GraduationCap, color: "from-emerald-600 to-teal-600" },
+    { label: "Canvas", href: "/canvas", icon: Sparkles, color: "from-cyan-600 to-blue-600" },
+  ],
+};
+
 /* ── Main Dashboard ── */
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -297,6 +379,8 @@ export default function DashboardPage() {
     );
   }
 
+  const { mode, setMode, config: modeConfig } = useAudienceMode();
+
   const docCount = docs.length;
   const processingCount = docs.filter((d) => d.status === "pending" || d.status === "processing").length;
   const memberCount = members.length;
@@ -309,16 +393,25 @@ export default function DashboardPage() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
+  const heroActions = MODE_HERO_ACTIONS[mode] || MODE_HERO_ACTIONS.academic;
+  const heroPrompts = MODE_PROMPTS[mode] || MODE_PROMPTS.academic;
+
   return (
     <div className="relative mx-auto max-w-5xl space-y-6">
-      {/* Header Banner with Interactive Ask AI Bar */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 via-purple-50/30 to-indigo-50/20 p-5 shadow-xs backdrop-blur-xl dark:border-white/10 dark:from-[#13111f]/95 dark:via-[#19152e]/50 dark:to-[#0f0e1c]/80 sm:p-6">
+      {/* Header Banner with Mode Badge & Interactive Ask AI Bar */}
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 via-purple-50/30 to-indigo-50/20 p-5 shadow-xs backdrop-blur-xl dark:border-white/10 dark:from-[#13111f]/95 dark:via-[#19152e]/50 dark:to-[#0f0e1c]/80 sm:p-6 space-y-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="mb-2.5 inline-flex items-center gap-2 rounded-full border border-purple-200/60 bg-purple-50/80 px-3.5 py-1 text-xs font-semibold text-purple-700 backdrop-blur-sm dark:border-purple-500/20 dark:bg-purple-950/40 dark:text-purple-300">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Workspace: {workspace.name}</span>
+            <div className="mb-2.5 flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-2 rounded-full border border-purple-200/60 bg-purple-50/80 px-3.5 py-1 text-xs font-semibold text-purple-700 backdrop-blur-sm dark:border-purple-500/20 dark:bg-purple-950/40 dark:text-purple-300">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Workspace: {workspace.name}</span>
+              </div>
+              <span className="rounded-full bg-purple-500/15 px-3 py-1 text-xs font-mono font-extrabold text-purple-700 dark:text-purple-300 border border-purple-500/25">
+                {modeConfig.badge}
+              </span>
             </div>
+
             <div className="flex items-center gap-1.5">
               <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-3xl leading-normal py-1">
                 {greeting},{" "}
@@ -329,36 +422,35 @@ export default function DashboardPage() {
               </h1>
               <HintTooltip text="Ask Docs searches across all PDFs & spreadsheets in this workspace with page citations." />
             </div>
-            <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
-              Your AI-powered knowledge hub and team collaboration center.
+            <p className="mt-1 text-xs sm:text-sm font-medium text-slate-500 dark:text-zinc-400">
+              {modeConfig.tagline}
             </p>
           </div>
 
-          {/* Quick Hero Actions */}
+          {/* Dynamic Hero Actions tailored to Mode */}
           <div className="flex flex-wrap gap-2 sm:justify-end">
-            <Link
-              href="/chat"
-              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-purple-500/25 transition-all hover:scale-105 active:scale-95"
-            >
-              <Sparkles className="h-3.5 w-3.5" /> AI Chat
-            </Link>
-            <Link
-              href="/contracts"
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/80 px-4 py-2 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-purple-300/80 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10 transition-all hover:scale-105"
-            >
-              <FileSignature className="h-3.5 w-3.5 text-indigo-500" /> Contracts
-            </Link>
-            <Link
-              href="/documents"
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/80 px-4 py-2 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-purple-300/80 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10 transition-all hover:scale-105"
-            >
-              <Upload className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" /> Upload
-            </Link>
+            {heroActions.map((action, idx) => {
+              const ActionIcon = action.icon;
+              return (
+                <Link
+                  key={idx}
+                  href={action.href}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold transition-all hover:scale-105 active:scale-95 ${
+                    idx === 0
+                      ? `bg-gradient-to-r ${action.color} text-white shadow-md shadow-purple-500/20`
+                      : "border border-slate-200/80 bg-white/80 text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-purple-300/80 dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10"
+                  }`}
+                >
+                  <ActionIcon className="h-3.5 w-3.5" />
+                  <span>{action.label}</span>
+                </Link>
+              );
+            })}
           </div>
         </div>
 
         {/* Interactive Ask AI Form inside Hero */}
-        <div className="mt-5 border-t border-purple-100/80 pt-4 dark:border-white/5">
+        <div className="mt-2 border-t border-purple-100/80 pt-4 dark:border-white/5">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -372,7 +464,7 @@ export default function DashboardPage() {
               type="text"
               value={quickPrompt}
               onChange={(e) => setQuickPrompt(e.target.value)}
-              placeholder="Ask AI anything across your workspace documents & contracts…"
+              placeholder={`Ask AI anything in ${modeConfig.name} mode…`}
               className="w-full rounded-2xl border border-slate-200/90 bg-white/95 py-2.5 pl-10 pr-24 text-xs sm:text-sm text-slate-800 shadow-xs backdrop-blur-md outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-white/10 dark:bg-[#181628]/95 dark:text-white"
             />
             <button
@@ -385,25 +477,70 @@ export default function DashboardPage() {
             </button>
           </form>
 
-          {/* Quick prompt accelerator chips */}
+          {/* Mode-Specific Quick Prompt Accelerator Chips */}
           <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Quick prompts:</span>
-            {[
-              "Summarize recent documents",
-              "Upcoming contract deadlines",
-              "Extract compliance risks",
-              "Action items checklist",
-            ].map((chip) => (
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+              {modeConfig.badge} Prompts:
+            </span>
+            {heroPrompts.map((chip) => (
               <button
                 key={chip}
                 type="button"
                 onClick={() => router.push(`/chat?q=${encodeURIComponent(chip)}`)}
-                className="rounded-lg border border-slate-200/80 bg-white/70 px-2 py-0.5 text-[11px] font-medium text-slate-600 transition-all hover:border-purple-300 hover:bg-white hover:text-purple-600 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-300 dark:hover:border-purple-500/30 dark:hover:text-purple-400"
+                className="rounded-lg border border-slate-200/80 bg-white/70 px-2 py-0.5 text-[11px] font-medium text-slate-600 transition-all hover:border-purple-300 hover:bg-white hover:text-purple-600 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-300 dark:hover:border-purple-500/30 dark:hover:text-purple-400 cursor-pointer"
               >
                 {chip}
               </button>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Operational Mode Switcher Bar & Security Notice */}
+      <div className="rounded-3xl border border-slate-200/80 bg-white/90 p-4 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-[#141424]/90 space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-black uppercase tracking-wider text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5" /> Active Mode Engine:
+            </span>
+            <span className="text-xs font-extrabold text-slate-900 dark:text-white">
+              {modeConfig.name}
+            </span>
+          </div>
+
+          <span className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 italic">
+            🔒 {modeConfig.securityNote}
+          </span>
+        </div>
+
+        {/* 1-Click Mode Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+          {(
+            [
+              { id: "academic", label: "🎓 Academic & Student", modeKey: "academic" },
+              { id: "office", label: "🏢 Corporate & SOP", modeKey: "office" },
+              { id: "legal", label: "⚖️ Legal & Regulatory", modeKey: "legal" },
+              { id: "finance", label: "💰 Finance & Audit", modeKey: "finance" },
+              { id: "clinical", label: "🩺 Clinical & Health", modeKey: "clinical" },
+              { id: "personal", label: "💼 Solo & Studio", modeKey: "personal" },
+            ] as const
+          ).map((m) => {
+            const isCurrentMode = mode === m.modeKey;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setMode(m.modeKey as AudienceMode)}
+                className={`rounded-2xl px-3.5 py-1.5 text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                  isCurrentMode
+                    ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/20 scale-105 font-black"
+                    : "border border-slate-200/80 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10"
+                }`}
+              >
+                {m.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -542,223 +679,148 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      {/* Intelligence & Workflow Highlight Cards */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {/* AI Table & Data Extractor Card */}
-        <Link
-          href="/extract"
-          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-emerald-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#12241d]/80"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
-                <Table className="h-4 w-4" />
-              </span>
-              <h3 className="text-xs font-bold text-slate-900 dark:text-white">AI Data Extractor</h3>
-            </div>
-            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 group-hover:translate-x-0.5 transition-transform">
-              Extract →
-            </span>
-          </div>
-          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
-            Extract tables from invoices, receipts, and reports into Excel & CSV grids.
-          </p>
-        </Link>
+      {/* Intelligence & Workflow Highlight Cards — Dynamically Sorted by Active Mode */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-zinc-500 flex items-center gap-1.5">
+            <Sparkles className="h-3.5 w-3.5 text-purple-500" /> Workflow & Intelligence Studios ({modeConfig.name})
+          </h2>
+          <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400">
+            Sorted by {modeConfig.badge} Priority
+          </span>
+        </div>
 
-        {/* Study Studio & Quizzes Card */}
-        <Link
-          href="/study-guide"
-          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-purple-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#1e132d]/80"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400">
-                <GraduationCap className="h-4 w-4" />
-              </span>
-              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Study Studio & Quizzes</h3>
-            </div>
-            <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 group-hover:translate-x-0.5 transition-transform">
-              Learn →
-            </span>
-          </div>
-          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
-            Synthesize multi-doc cheat sheets, 3D flippable flashcards, and test quizzes.
-          </p>
-        </Link>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            {
+              href: "/study-guide",
+              title: "Study Studio & Quizzes",
+              desc: "Synthesize multi-doc cheat sheets, 3D flippable flashcards, and test quizzes.",
+              icon: GraduationCap,
+              action: "Learn →",
+              bgClass: "from-white/95 to-purple-50/30 dark:from-[#131122]/90 dark:to-[#1e132d]/80 border-purple-200/80 hover:border-purple-400 text-purple-600 dark:text-purple-400",
+            },
+            {
+              href: "/listen",
+              title: "Document Audio Briefs",
+              desc: "Listen to 3-minute spoken audio summaries of long PDFs with wave visualizers.",
+              icon: Headphones,
+              action: "Listen →",
+              bgClass: "from-white/95 to-violet-50/30 dark:from-[#131122]/90 dark:to-[#1c132d]/80 border-violet-200/80 hover:border-violet-400 text-violet-600 dark:text-violet-400",
+            },
+            {
+              href: "/extract",
+              title: "AI Data Extractor",
+              desc: "Extract tables from invoices, receipts, and reports into Excel & CSV grids.",
+              icon: Table,
+              action: "Extract →",
+              bgClass: "from-white/95 to-emerald-50/30 dark:from-[#131122]/90 dark:to-[#12241d]/80 border-emerald-200/80 hover:border-emerald-400 text-emerald-600 dark:text-emerald-400",
+            },
+            {
+              href: "/contracts/compare",
+              title: "Redline Diff Studio",
+              desc: "Compare 2 contract versions side-by-side with automated liability & risk detection.",
+              icon: Scale,
+              action: "Diff →",
+              bgClass: "from-white/95 to-rose-50/30 dark:from-[#131122]/90 dark:to-[#24131d]/80 border-rose-200/80 hover:border-rose-400 text-rose-600 dark:text-rose-400",
+            },
+            {
+              href: "/contracts",
+              title: "Contract Intelligence",
+              desc: activeObligations.length > 0 ? `${activeObligations.length} active contract terms and renewal dates monitored.` : "Audit agreements, NDAs, and auto-extract obligations & deadlines.",
+              icon: FileSignature,
+              action: "View →",
+              bgClass: "from-white/95 to-indigo-50/30 dark:from-[#131122]/90 dark:to-[#17142d]/80 border-indigo-200/80 hover:border-indigo-400 text-indigo-600 dark:text-indigo-400",
+            },
+            {
+              href: "/memory",
+              title: "Institutional Memory",
+              desc: memories.length > 0 ? `${memories.length} organizational decisions and facts recorded in graph.` : "Ingest meeting transcripts and preserve team decisions automatically.",
+              icon: Brain,
+              action: "Graph →",
+              bgClass: "from-white/95 to-purple-50/30 dark:from-[#131122]/90 dark:to-[#1a122e]/80 border-purple-200/80 hover:border-purple-400 text-purple-600 dark:text-purple-400",
+            },
+            {
+              href: "/health",
+              title: "Document Health",
+              desc: docCount > 0 ? `${docCount} documents audited for freshness, clarity, and policy conflicts.` : "Audit document freshness and detect contradictory policies in real-time.",
+              icon: Activity,
+              action: "Audit →",
+              bgClass: "from-white/95 to-cyan-50/30 dark:from-[#131122]/90 dark:to-[#0f172a]/80 border-cyan-200/80 hover:border-cyan-400 text-cyan-600 dark:text-cyan-400",
+            },
+            {
+              href: "/slides",
+              title: "Slide Deck Studio",
+              desc: "Transform 40-page reports into 4-slide executive presentation decks with themes.",
+              icon: Presentation,
+              action: "Present →",
+              bgClass: "from-white/95 to-indigo-50/30 dark:from-[#131122]/90 dark:to-[#17132e]/80 border-indigo-200/80 hover:border-indigo-400 text-indigo-600 dark:text-indigo-400",
+            },
+            {
+              href: "/convert",
+              title: "Format & PII Redact",
+              desc: "Convert docs to Markdown, JSON, CSV & mask emails, phones, and SSNs.",
+              icon: FileCode,
+              action: "Convert →",
+              bgClass: "from-white/95 to-purple-50/30 dark:from-[#131122]/90 dark:to-[#1c122e]/80 border-purple-200/80 hover:border-purple-400 text-purple-600 dark:text-purple-400",
+            },
+            {
+              href: "/integrations",
+              title: "Integrations & API",
+              desc: "Connect Slack, Discord, Notion, Google Drive & Odoo ERP for auto-sync.",
+              icon: Plug2,
+              action: "Sync →",
+              bgClass: "from-white/95 to-emerald-50/30 dark:from-[#131122]/90 dark:to-[#12241b]/80 border-emerald-200/80 hover:border-emerald-400 text-emerald-600 dark:text-emerald-400",
+            },
+          ]
+            .sort((a, b) => {
+              const idxA = modeConfig.priorityStudios.indexOf(a.href);
+              const idxB = modeConfig.priorityStudios.indexOf(b.href);
+              const posA = idxA === -1 ? 99 : idxA;
+              const posB = idxB === -1 ? 99 : idxB;
+              return posA - posB;
+            })
+            .map((card, idx) => {
+              const Icon = card.icon;
+              const isTopPriority = idx < 2;
 
-        {/* Audio Brief Player Card */}
-        <Link
-          href="/listen"
-          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-violet-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-violet-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#1c132d]/80"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-violet-50 text-violet-600 dark:bg-violet-950/60 dark:text-violet-400">
-                <Headphones className="h-4 w-4" />
-              </span>
-              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Document Audio Briefs</h3>
-            </div>
-            <span className="text-[10px] font-bold text-violet-600 dark:text-violet-400 group-hover:translate-x-0.5 transition-transform">
-              Listen →
-            </span>
-          </div>
-          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
-            Listen to 3-minute spoken audio summaries of long PDFs with wave visualizers.
-          </p>
-        </Link>
-
-        {/* Contract Intelligence Card */}
-        <Link
-          href="/contracts"
-          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-indigo-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-indigo-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#17142d]/80"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400">
-                <FileSignature className="h-4 w-4" />
-              </span>
-              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Contract Intelligence</h3>
-            </div>
-            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform">
-              View →
-            </span>
-          </div>
-          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
-            {activeObligations.length > 0
-              ? `${activeObligations.length} active contract terms and renewal dates monitored.`
-              : "Audit agreements, NDAs, and auto-extract obligations & deadlines."}
-          </p>
-        </Link>
-
-        {/* Contract Redline Diff Studio */}
-        <Link
-          href="/contracts/compare"
-          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-rose-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-rose-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#24131d]/80"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400">
-                <Scale className="h-4 w-4" />
-              </span>
-              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Redline Diff Studio</h3>
-            </div>
-            <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 group-hover:translate-x-0.5 transition-transform">
-              Diff →
-            </span>
-          </div>
-          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
-            Compare 2 contract versions side-by-side with automated liability & risk detection.
-          </p>
-        </Link>
-
-        {/* Institutional Memory Card */}
-        <Link
-          href="/memory"
-          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-purple-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#1a122e]/80"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400">
-                <Brain className="h-4 w-4" />
-              </span>
-              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Institutional Memory</h3>
-            </div>
-            <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 group-hover:translate-x-0.5 transition-transform">
-              View →
-            </span>
-          </div>
-          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
-            {memories.length > 0
-              ? `${memories.length} organizational decisions and facts recorded in graph.`
-              : "Ingest meeting transcripts and preserve team decisions automatically."}
-          </p>
-        </Link>
-
-        {/* Document Health & Audit Card */}
-        <Link
-          href="/health"
-          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-cyan-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-cyan-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#0f172a]/80"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600 dark:bg-cyan-950/60 dark:text-cyan-400">
-                <Activity className="h-4 w-4" />
-              </span>
-              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Document Health</h3>
-            </div>
-            <span className="text-[10px] font-bold text-cyan-600 dark:text-cyan-400 group-hover:translate-x-0.5 transition-transform">
-              View →
-            </span>
-          </div>
-          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
-            {docCount > 0
-              ? `${docCount} documents audited for freshness, clarity, and policy conflicts.`
-              : "Audit document freshness and detect contradictory policies in real-time."}
-          </p>
-        </Link>
-
-        {/* AI Presentation Slide Decks */}
-        <Link
-          href="/slides"
-          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-indigo-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-indigo-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#17132e]/80"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400">
-                <Presentation className="h-4 w-4" />
-              </span>
-              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Slide Deck Studio</h3>
-            </div>
-            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform">
-              Present →
-            </span>
-          </div>
-          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
-            Transform 40-page reports into 4-slide executive presentation decks with themes.
-          </p>
-        </Link>
-
-        {/* Format Converter & PII Redactor */}
-        <Link
-          href="/convert"
-          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-purple-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#1c122e]/80"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400">
-                <FileCode className="h-4 w-4" />
-              </span>
-              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Format & PII Redact</h3>
-            </div>
-            <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 group-hover:translate-x-0.5 transition-transform">
-              Convert →
-            </span>
-          </div>
-          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
-            Convert docs to Markdown, JSON, CSV & mask emails, phones, and SSNs.
-          </p>
-        </Link>
-
-        {/* Integrations & Ecosystem Hub */}
-        <Link
-          href="/integrations"
-          className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white/95 to-emerald-50/30 p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300/80 hover:shadow-lg dark:border-white/10 dark:from-[#131122]/90 dark:to-[#12241b]/80"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
-                <Plug2 className="h-4 w-4" />
-              </span>
-              <h3 className="text-xs font-bold text-slate-900 dark:text-white">Integrations & API</h3>
-            </div>
-            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 group-hover:translate-x-0.5 transition-transform">
-              Sync →
-            </span>
-          </div>
-          <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
-            Connect Slack, Discord, Notion, Google Drive & Odoo ERP for auto-sync.
-          </p>
-        </Link>
+              return (
+                <Link
+                  key={card.href}
+                  href={card.href}
+                  className={`group relative flex flex-col justify-between overflow-hidden rounded-3xl border bg-gradient-to-br p-4.5 shadow-xs backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${card.bgClass} ${
+                    isTopPriority ? "ring-2 ring-purple-500/30 scale-[1.01]" : ""
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-50/80 dark:bg-purple-950/60">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <div>
+                        <h3 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                          <span>{card.title}</span>
+                        </h3>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {isTopPriority && (
+                        <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-[9px] font-extrabold uppercase text-purple-700 dark:text-purple-300 border border-purple-500/30">
+                          Top Choice
+                        </span>
+                      )}
+                      <span className="text-[10px] font-bold group-hover:translate-x-0.5 transition-transform">
+                        {card.action}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400 leading-snug">
+                    {card.desc}
+                  </p>
+                </Link>
+              );
+            })}
+        </div>
       </div>
 
       {/* Two-column grid: Documents + Activity / Team */}
