@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, LayoutDashboard, MoreHorizontal, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, Pencil, User, ShieldCheck, GraduationCap, FileSpreadsheet, CalendarClock, Brain, Compass } from "lucide-react";
+import { ChevronDown, LayoutDashboard, Search, Settings, LogOut, Sparkles, MessagesSquare, FileText, Pencil, User, ShieldCheck, GraduationCap, FileSpreadsheet, CalendarClock, Brain, Compass } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
@@ -22,7 +22,6 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
   const { mode, config: modeConfig } = useAudienceMode();
   const [q, setQ] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
   const [brandSrc, setBrandSrc] = useState<string | null>(null);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [modeModalOpen, setModeModalOpen] = useState(false);
@@ -159,62 +158,6 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           </Link>
         </div>
 
-        {/* Three Dots Menu Button for Mobile & Small Screens (<lg) */}
-        <div className="relative lg:hidden">
-          <button
-            onClick={() => setMoreOpen((o) => !o)}
-            aria-label="More Features"
-            aria-expanded={moreOpen}
-            className={`flex h-6.5 w-6.5 sm:h-7 sm:w-7 items-center justify-center rounded-lg transition-all ${
-              moreOpen
-                ? "bg-slate-900 text-white dark:bg-white dark:text-black shadow-xs font-bold"
-                : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
-            }`}
-          >
-            <MoreHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          </button>
-          {moreOpen && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setMoreOpen(false)} />
-              <div className="dark:border-white/10 dark:bg-[#16181f] absolute left-0 z-50 mt-2 w-52 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-2xl animate-in zoom-in-95 duration-150">
-                {[
-                  { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
-                  { href: "/chat", label: "AI Chat", Icon: Sparkles },
-                  { href: "/chats", label: modeConfig.chatLabel, Icon: MessagesSquare },
-                  { href: "/hub", label: "Innovation Hub", Icon: Compass },
-                  { href: "/documents", label: "Documents", Icon: FileText },
-                  { href: "/digest", label: "Digest", Icon: FileSpreadsheet },
-                  { href: "/contracts", label: "Contracts", Icon: CalendarClock },
-                  { href: "/memory", label: "Memory Graph", Icon: Brain },
-                ].map(({ href, label, Icon }) => {
-                  const active = pathname === href || pathname.startsWith(href + "/");
-                  return (
-                    <button
-                      key={href}
-                      onClick={() => {
-                        setMoreOpen(false);
-                        router.push(href);
-                      }}
-                      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
-                        active
-                          ? "bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 font-bold"
-                          : "text-slate-700 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/5"
-                      }`}
-                    >
-                      <Icon className="h-4 w-4 shrink-0 text-slate-400 dark:text-zinc-400" />
-                      <span>{label}</span>
-                    </button>
-                  );
-                })}
-                {workspace && (
-                  <div className="dark:border-white/10 mt-1.5 flex items-center gap-2 border-t border-slate-100 px-3 pb-1 pt-2 text-xs text-slate-500 dark:text-zinc-400">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
-                    <span className="truncate font-medium">{workspace.name}</span>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
         </div>
       </div>
 

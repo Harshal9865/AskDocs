@@ -22,6 +22,7 @@ import {
 import { api } from "@/lib/api";
 import { useWorkspace } from "@/lib/workspace-context";
 import { useAuth } from "@/lib/auth-context";
+import { showToast } from "@/components/Toast";
 import HintTooltip from "@/components/HintTooltip";
 import type { Workspace, Member } from "@/lib/types";
 

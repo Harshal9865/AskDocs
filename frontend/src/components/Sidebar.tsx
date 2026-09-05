@@ -28,8 +28,6 @@ import {
   FileCode,
   Presentation,
   Rocket,
-  ChevronDown,
-  Building2,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
