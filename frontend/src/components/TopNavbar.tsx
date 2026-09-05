@@ -420,7 +420,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
                     label="Workspace settings"
                     onClick={() => {
                       setMenuOpen(false);
-                      router.push("/settings/workspace");
+                      router.push("/workspaces?tab=settings");
                     }}
                   />
                 </div>

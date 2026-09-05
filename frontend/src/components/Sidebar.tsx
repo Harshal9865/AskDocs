@@ -12,7 +12,6 @@ import {
   LayoutDashboard,
   MessagesSquare,
   Search,
-  Settings,
   Sparkles,
   Trash2,
   Crown,
@@ -30,13 +29,13 @@ import {
   Presentation,
   Rocket,
   ChevronDown,
+  Building2,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWorkspace } from "@/lib/workspace-context";
 import { useAudienceMode } from "@/lib/audience-mode-context";
 import AudienceModeSwitcherModal from "@/components/AudienceModeSwitcher";
-import WorkspaceHubModal from "@/components/WorkspaceHubModal";
 import Colleagues from "@/components/Colleagues";
 import FriendsQuickAccess from "@/components/FriendsQuickAccess";
 import PlanBadge from "@/components/PlanBadge";
@@ -66,14 +65,13 @@ const NAV_INTELLIGENCE = [
 ];
 
 const NAV_SECONDARY = [
+  { href: "/workspaces", label: "Workspaces", icon: Building2 },
   { href: "/search", label: "Search", icon: Search },
   { href: "/discover", label: "Discover", icon: Compass },
   { href: "/pricing", label: "Plans & Pricing", icon: Crown },
   { href: "/insights", label: "Insights", icon: BarChart3 },
   { href: "/activity", label: "Activity log", icon: History },
   { href: "/members", label: "Members", icon: UsersRound },
-  { href: "/settings/workspace", label: "Workspace settings", icon: Settings },
-  { href: "/settings", label: "Account settings", icon: Settings },
   { href: "/help", label: "Help & FAQ", icon: CircleHelp },
   { href: "/trash", label: "Trash", icon: Trash2 },
 ];
@@ -97,7 +95,6 @@ export default function Sidebar({
   const pathname = usePathname();
   const { config: modeConfig } = useAudienceMode();
   const [showModeModal, setShowModeModal] = useState(false);
-  const [showWsModal, setShowWsModal] = useState(false);
   const [docCount, setDocCount] = useState<number | null>(null);
   const [friendReqCount, setFriendReqCount] = useState<number>(0);
   const asideRef = useRef<HTMLElement>(null);
@@ -293,9 +290,10 @@ export default function Sidebar({
           </div>
         )}
         <div className="sb-hide dark:border-slate-700/50 shrink-0 border-b border-slate-100 px-3 py-3">
-          <button
-            onClick={() => setShowWsModal(true)}
-            title={`Active Workspace: ${workspace?.name || "None"}. Click to switch or create.`}
+          <Link
+            href="/workspaces"
+            onClick={onCloseMobile}
+            title={`Active Workspace: ${workspace?.name || "None"}. Click to manage workspaces.`}
             className="w-full flex items-center justify-between gap-2 rounded-xl border border-slate-200/80 bg-slate-50 p-2 hover:bg-slate-100 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] transition-all group cursor-pointer"
           >
             <div className="flex items-center gap-2.5 min-w-0">
@@ -307,22 +305,23 @@ export default function Sidebar({
                   {workspace?.name || "Select Workspace"}
                 </div>
                 <div className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
-                  {workspaces.length} workspace{workspaces.length === 1 ? "" : "s"} • Hub
+                  {workspaces.length} workspace{workspaces.length === 1 ? "" : "s"} • Center
                 </div>
               </div>
             </div>
             <ChevronDown className="h-4 w-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-white transition-colors shrink-0" />
-          </button>
+          </Link>
         </div>
         <div className="sb-collapsed-show shrink-0 border-b border-slate-100 p-2">
-          <button
-            onClick={() => setShowWsModal(true)}
+          <Link
+            href="/workspaces"
+            onClick={onCloseMobile}
             title={workspace ? `Workspace: ${workspace.name}` : "No workspace"}
             aria-label="Manage workspaces"
             className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold uppercase text-white shadow-xs dark:bg-white dark:text-black"
           >
             {(workspace?.name ?? "W").slice(0, 1)}
-          </button>
+          </Link>
         </div>
 
       <nav className="scrollbar-thin min-h-0 flex-1 overflow-y-auto p-2">
@@ -481,12 +480,6 @@ export default function Sidebar({
       <AudienceModeSwitcherModal
         isOpen={showModeModal}
         onClose={() => setShowModeModal(false)}
-      />
-
-      {/* Workspace Hub Modal */}
-      <WorkspaceHubModal
-        isOpen={showWsModal}
-        onClose={() => setShowWsModal(false)}
       />
     </aside>
     </>
