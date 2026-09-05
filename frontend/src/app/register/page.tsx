@@ -30,7 +30,14 @@ export default function RegisterPage() {
 
   // If already logged in on initial visit, skip registration
   useEffect(() => {
-    if (!loading && user && !busy) router.replace("/dashboard");
+    if (!loading && user && !busy) {
+      const isOnboarded = typeof window !== "undefined" && localStorage.getItem("askdocs_onboarded") === "1";
+      if (!isOnboarded) {
+        router.replace("/onboarding");
+      } else {
+        router.replace("/dashboard");
+      }
+    }
   }, [loading, user, busy, router]);
 
   const googleLoginAction = useGoogleLogin({
@@ -40,8 +47,8 @@ export default function RegisterPage() {
       try {
         const token = tokenResponse.access_token;
         if (!token) throw new Error("No token received from Google");
-        const me = await googleLogin(token);
-        router.replace(`/profile/${me.id}?edit=true`);
+        await googleLogin(token);
+        router.replace("/onboarding");
       } catch (err) {
         setError((err as Error).message || "Google sign-in failed");
         setBusy(false);
@@ -72,8 +79,8 @@ export default function RegisterPage() {
     setBusy(true);
     setError(null);
     try {
-      const me = await register(emailClean, password, name.trim());
-      router.replace(`/profile/${me.id}?edit=true`);
+      await register(emailClean, password, name.trim());
+      router.replace("/onboarding");
     } catch (err) {
       setError((err as Error).message || "Registration failed");
       setBusy(false);

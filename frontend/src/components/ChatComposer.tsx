@@ -336,7 +336,7 @@ export default function ChatComposer({
       )}
 
       {/* input row */}
-      <div className="flex items-center gap-1.5 px-2 py-1">
+      <div className="flex items-center gap-1 sm:gap-1.5 px-1.5 py-1 sm:px-2.5 sm:py-1.5">
         {showAttach && (
           <div className="relative shrink-0" ref={menuRef}>
             <button
@@ -346,16 +346,16 @@ export default function ChatComposer({
               aria-expanded={menuOpen}
               aria-haspopup="menu"
               title="Attach files (PDFs, Images, Notes, Spreadsheets)"
-              className="dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-purple-600 disabled:opacity-40 dark:data-[open=true]:bg-white/10 cursor-pointer"
+              className="dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-purple-600 disabled:opacity-40 dark:data-[open=true]:bg-white/10 cursor-pointer"
               data-open={menuOpen}
             >
-              <Plus className={`h-5 w-5 transition-transform duration-200 ${menuOpen ? "rotate-45" : ""}`} />
+              <Plus className={`h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-200 ${menuOpen ? "rotate-45" : ""}`} />
             </button>
 
             {menuOpen && (
               <div
                 role="menu"
-                className="dark:border-white/10 dark:bg-[#1a1728] absolute bottom-full left-0 z-50 mb-2 w-72 rounded-2xl border border-slate-200/90 bg-white p-2 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
+                className="dark:border-white/10 dark:bg-[#1a1728] absolute bottom-full left-0 z-50 mb-2 w-64 sm:w-72 rounded-2xl border border-slate-200/90 bg-white p-2 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
               >
                 <div className="px-3 pb-1 pt-1 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-zinc-500">
                   Attach Media & Documents
@@ -489,9 +489,9 @@ export default function ChatComposer({
               disabled={disabled}
               aria-label="Emoji"
               title="Emoji"
-              className="dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-amber-300 flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-amber-500 disabled:opacity-40"
+              className="dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-amber-300 flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-amber-500 disabled:opacity-40"
             >
-              <Smile className="h-5 w-5" />
+              <Smile className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
             {emojiOpen && (
               <div className="dark:border-white/10 dark:bg-[#282828] absolute bottom-full left-0 z-50 mb-2 w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
@@ -512,7 +512,7 @@ export default function ChatComposer({
           </div>
         )}
 
-        {/* Quick @AskDocs Mention Tag */}
+        {/* Quick @AskDocs Mention Tag - hidden on small mobile to give textarea full width */}
         <button
           type="button"
           onClick={() => {
@@ -524,7 +524,7 @@ export default function ChatComposer({
           }}
           disabled={disabled}
           title="Tag @AskDocs AI Teammate"
-          className="flex h-7 shrink-0 items-center gap-1 rounded-full bg-gradient-to-r from-indigo-500/10 to-purple-500/10 px-2 py-0.5 text-[11px] font-bold text-purple-600 hover:from-indigo-500/20 hover:to-purple-500/20 dark:text-purple-300 transition-colors"
+          className="hidden sm:inline-flex h-7 shrink-0 items-center gap-1 rounded-full bg-gradient-to-r from-indigo-500/10 to-purple-500/10 px-2 py-0.5 text-[11px] font-bold text-purple-600 hover:from-indigo-500/20 hover:to-purple-500/20 dark:text-purple-300 transition-colors"
         >
           <span>🤖</span>
           <span>@AskDocs</span>
@@ -539,7 +539,7 @@ export default function ChatComposer({
           disabled={disabled}
           placeholder={placeholder ?? "Ask a question…"}
           id={inputId}
-          className="dark:text-white dark:placeholder:text-zinc-500 max-h-28 min-h-[36px] flex-1 resize-none border-0 bg-transparent px-1 py-2 text-[14px] leading-5 placeholder:text-slate-400 focus:ring-0 disabled:text-slate-400"
+          className="dark:text-white dark:placeholder:text-zinc-500 max-h-28 min-h-[32px] sm:min-h-[36px] flex-1 min-w-0 resize-none border-0 bg-transparent px-1.5 py-1.5 sm:py-2 text-xs sm:text-sm leading-5 placeholder:text-slate-400 focus:ring-0 disabled:text-slate-400"
         />
 
         {/* Voice Input Button */}
@@ -550,13 +550,13 @@ export default function ChatComposer({
             disabled={disabled}
             aria-label={isListening ? "Stop voice listening" : "Voice query"}
             title={isListening ? "Listening... Click to stop" : "Voice input"}
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all ${
+            className={`flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full transition-all ${
               isListening
                 ? "bg-red-500 text-white animate-pulse shadow-md shadow-red-500/30"
                 : "text-slate-400 hover:bg-slate-100 hover:text-purple-600 dark:hover:bg-white/10 dark:hover:text-purple-400"
             }`}
           >
-            {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+            {isListening ? <MicOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : <Mic className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
           </button>
         )}
 
@@ -564,7 +564,7 @@ export default function ChatComposer({
           onClick={send}
           disabled={!canSend}
           aria-label="Send message"
-          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all ${
+          className={`flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full transition-all ${
             canSend
               ? variant === "green"
                 ? "bg-[#1DB954] text-black shadow-sm hover:bg-[#1ed760]"
@@ -573,9 +573,9 @@ export default function ChatComposer({
           } disabled:opacity-40`}
         >
           {busy ? (
-            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent dark:border-black dark:border-t-transparent" />
+            <span className="inline-block h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin rounded-full border-2 border-white border-t-transparent dark:border-black dark:border-t-transparent" />
           ) : (
-            <ArrowUp className="h-4 w-4" />
+            <ArrowUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           )}
         </button>
       </div>

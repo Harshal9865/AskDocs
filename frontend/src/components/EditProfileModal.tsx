@@ -16,6 +16,9 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
+import { useAudienceMode } from "@/lib/audience-mode-context";
+import type { AudienceMode } from "@/lib/types";
+
 const STICKER_IDS = [
   "male-1", // 3D Ginger Curls (Yellow)
   "male-2", // 3D Cool Classic (Yellow)
@@ -24,34 +27,115 @@ const STICKER_IDS = [
   "ai-1", // 3D Violet Night (Dark Theme)
 ];
 
-const JOB_TITLES = [
-  "Intern",
-  "Junior Engineer",
-  "Mid-level Engineer",
-  "Senior Engineer",
-  "Staff Engineer",
-  "Lead Engineer",
-  "Principal Engineer",
-  "Engineering Manager",
-  "Product Manager",
-  "Product Designer",
-  "UI/UX Designer",
-  "Data Scientist",
-  "Prefer not to say",
-];
-const JOB_ROLES = [
-  "Engineering",
-  "Design",
-  "Product",
-  "Marketing",
-  "Sales",
-  "Operations",
-  "HR",
-  "Finance",
-  "Support",
-  "Research",
-  "Prefer not to say",
-];
+const MODE_JOB_TITLES: Record<AudienceMode, string[]> = {
+  academic: [
+    "Student / Scholar",
+    "Undergraduate Student",
+    "Graduate Researcher",
+    "Teaching Assistant (TA)",
+    "PhD Candidate",
+    "Postdoctoral Fellow",
+    "Professor / Faculty",
+    "Academic Advisor",
+    "Prefer not to say",
+  ],
+  office: [
+    "Software Engineer",
+    "Senior Engineer",
+    "Lead Engineer",
+    "Product Manager",
+    "Product Designer",
+    "Engineering Manager",
+    "Operations Specialist",
+    "Executive / Director",
+    "Prefer not to say",
+  ],
+  legal: [
+    "Legal Counsel",
+    "Senior Associate",
+    "Managing Partner",
+    "Paralegal",
+    "Compliance Officer",
+    "Regulatory Analyst",
+    "Legal Auditor",
+    "Legal Intern",
+    "Prefer not to say",
+  ],
+  finance: [
+    "Financial Analyst",
+    "Senior Accountant",
+    "Tax Specialist",
+    "Controller / VP Finance",
+    "Payroll Manager",
+    "CapEx Auditor",
+    "Investment Analyst",
+    "CFO",
+    "Prefer not to say",
+  ],
+  clinical: [
+    "Resident Physician",
+    "Attending Physician",
+    "Clinical Researcher",
+    "Nurse Practitioner",
+    "Medical Specialist",
+    "Chief Medical Officer",
+    "Lab Technologist",
+    "Medical Fellow",
+    "Prefer not to say",
+  ],
+};
+
+const MODE_JOB_ROLES: Record<AudienceMode, string[]> = {
+  academic: [
+    "Computer Science & IT",
+    "Medicine & Healthcare",
+    "Engineering & Tech",
+    "Business & Economics",
+    "Law & Public Policy",
+    "Natural Sciences",
+    "Humanities & Arts",
+    "Prefer not to say",
+  ],
+  office: [
+    "Engineering",
+    "Product",
+    "Design",
+    "Marketing",
+    "Sales",
+    "Operations",
+    "HR",
+    "Finance",
+    "Prefer not to say",
+  ],
+  legal: [
+    "Corporate & Contracts",
+    "Litigation & Risk",
+    "IP & Patents",
+    "Regulatory Compliance",
+    "Tax & Labor Law",
+    "M&A Due Diligence",
+    "Prefer not to say",
+  ],
+  finance: [
+    "Corporate Accounting",
+    "Financial Planning & Analysis",
+    "Tax & Audit",
+    "Payroll & Compensation",
+    "Treasury & Risk",
+    "Investment Strategy",
+    "Prefer not to say",
+  ],
+  clinical: [
+    "Internal Medicine",
+    "Cardiology & Oncology",
+    "Surgery & Emergency",
+    "Pediatrics & Primary Care",
+    "Clinical Research & Trials",
+    "Nursing & Patient Care",
+    "Lab & Pathology",
+    "Prefer not to say",
+  ],
+};
 const PRONOUNS = [
   "he/him",
   "she/her",
@@ -74,6 +158,7 @@ export default function EditProfileModal({
   trigger,
 }: EditProfileModalProps) {
   const { user, avatarSrc, refreshUser } = useAuth();
+  const { mode, config: modeConfig } = useAudienceMode();
   const [internalOpen, setInternalOpen] = useState(false);
 
   const open = controlledOpen ?? internalOpen;
@@ -376,12 +461,12 @@ export default function EditProfileModal({
                   list="edit-job-titles"
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
-                  placeholder="Select or type job title"
+                  placeholder={`Select or type ${modeConfig.badge} title`}
                   maxLength={120}
                   className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all placeholder:text-slate-400 dark:placeholder:text-zinc-500"
                 />
                 <datalist id="edit-job-titles">
-                  {JOB_TITLES.map((t) => (
+                  {(MODE_JOB_TITLES[mode] || MODE_JOB_TITLES.office).map((t) => (
                     <option key={t} value={t} />
                   ))}
                 </datalist>
@@ -400,7 +485,7 @@ export default function EditProfileModal({
                   className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 dark:border-white/10 dark:bg-[#181818] dark:text-white transition-all placeholder:text-slate-400 dark:placeholder:text-zinc-500"
                 />
                 <datalist id="edit-job-roles">
-                  {JOB_ROLES.map((r) => (
+                  {(MODE_JOB_ROLES[mode] || MODE_JOB_ROLES.office).map((r) => (
                     <option key={r} value={r} />
                   ))}
                 </datalist>

@@ -1027,17 +1027,17 @@ export default function ChatPage() {
           className="scroll-touch ai-thread relative z-10 flex-1 min-h-0 space-y-3 overflow-y-auto px-3 py-4 sm:px-6"
         >
           {!activeConv ? (
-            <div className="flex h-full flex-col items-center justify-center text-center px-4 py-8">
-              <AIAvatarIcon className="mx-auto mb-4 h-16 w-16" />
-              <h3 className="text-base font-bold text-slate-800 dark:text-white">AskDocs Intelligence</h3>
+            <div className="flex h-full flex-col items-center justify-center text-center px-3 py-4 sm:py-8">
+              <AIAvatarIcon className="mx-auto mb-3 h-10 w-10 sm:h-14 sm:w-14" />
+              <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-white">AskDocs Intelligence</h3>
               <p className="mt-1 max-w-sm text-xs text-slate-400 dark:text-zinc-400">
                 Select or create a conversation from the sidebar to chat with your workspace knowledge.
               </p>
             </div>
           ) : messages.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center text-center px-4 py-6">
-              <AIAvatarIcon className="mx-auto mb-4 h-16 w-16" />
-              <h3 className="text-base font-bold bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 bg-clip-text text-transparent dark:from-purple-300 dark:via-indigo-300 dark:to-cyan-300">
+            <div className="flex h-full flex-col items-center justify-center text-center px-3 py-3 sm:py-6">
+              <AIAvatarIcon className="mx-auto mb-2 sm:mb-4 h-10 w-10 sm:h-14 sm:w-14" />
+              <h3 className="text-sm sm:text-base font-bold bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 bg-clip-text text-transparent dark:from-purple-300 dark:via-indigo-300 dark:to-cyan-300">
                 How can I help you today?
               </h3>
               <p className="mt-1 max-w-md text-xs text-slate-500 dark:text-zinc-400">

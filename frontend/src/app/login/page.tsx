@@ -24,13 +24,13 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // If already logged in, route to profile edit if details missing, else dashboard
+  // If already logged in, route to onboarding if first-time / missing details, else dashboard
   useEffect(() => {
     if (!loading && user) {
-      const isMissing =
-        !user.name?.trim() || !user.job_title?.trim() || !user.job_role?.trim();
-      if (isMissing) {
-        router.replace(`/profile/${user.id}?edit=true`);
+      const isOnboarded = typeof window !== "undefined" && localStorage.getItem("askdocs_onboarded") === "1";
+      const isMissing = !user.name?.trim() || !user.job_title?.trim() || !user.job_role?.trim();
+      if (!isOnboarded || isMissing) {
+        router.replace("/onboarding");
       } else {
         router.replace("/dashboard");
       }
@@ -45,10 +45,10 @@ export default function LoginPage() {
         const token = tokenResponse.access_token;
         if (!token) throw new Error("No token received from Google");
         const me = await googleLogin(token);
-        const isMissing =
-          !me.name?.trim() || !me.job_title?.trim() || !me.job_role?.trim();
-        if (isMissing) {
-          router.replace(`/profile/${me.id}?edit=true`);
+        const isOnboarded = typeof window !== "undefined" && localStorage.getItem("askdocs_onboarded") === "1";
+        const isMissing = !me.name?.trim() || !me.job_title?.trim() || !me.job_role?.trim();
+        if (!isOnboarded || isMissing) {
+          router.replace("/onboarding");
         } else {
           router.replace("/dashboard");
         }
@@ -74,10 +74,10 @@ export default function LoginPage() {
     setError(null);
     try {
       const me = await login(email.trim().toLowerCase(), password);
-      const isMissing =
-        !me.name?.trim() || !me.job_title?.trim() || !me.job_role?.trim();
-      if (isMissing) {
-        router.replace(`/profile/${me.id}?edit=true`);
+      const isOnboarded = typeof window !== "undefined" && localStorage.getItem("askdocs_onboarded") === "1";
+      const isMissing = !me.name?.trim() || !me.job_title?.trim() || !me.job_role?.trim();
+      if (!isOnboarded || isMissing) {
+        router.replace("/onboarding");
       } else {
         router.replace("/dashboard");
       }

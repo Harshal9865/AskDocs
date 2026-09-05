@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import Avatar from "@/components/Avatar";
 import { useUserAvatar } from "@/lib/use-user-avatar";
 import { ArrowLeft, Mail, Phone, MapPin, MessageCircle, Briefcase, Pencil, UserPlus, UserCheck, Clock, X, Trash2, Shield, UserSearch, Camera, Award, CheckCircle2, FileText, KeyRound, Share2, Sparkles, TrendingUp, ShieldCheck, Check } from "lucide-react";
+import { useAudienceMode } from "@/lib/audience-mode-context";
 import EditProfileModal from "@/components/EditProfileModal";
 import { showToast } from "@/components/Toast";
 import type { User } from "@/lib/types";
@@ -17,6 +18,7 @@ export default function ProfilePage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { mode, config: modeConfig } = useAudienceMode();
   const [editOpen, setEditOpen] = useState(searchParams.get("edit") === "true");
   const [activeTab, setActiveTab] = useState<ProfileTab>("overview");
   const [copiedLink, setCopiedLink] = useState(false);
@@ -290,7 +292,11 @@ export default function ProfilePage() {
         {/* Cover Banner with balanced professional gradient */}
         <div className="relative h-40 bg-gradient-to-r from-slate-900 via-indigo-950/80 to-purple-950/80 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:16px_16px]" />
-          <div className="absolute top-4 right-4 flex items-center gap-2">
+          <div className="absolute top-4 right-4 flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold text-white backdrop-blur-md border border-white/20">
+              <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+              <span>{modeConfig.badge}</span>
+            </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold text-white backdrop-blur-md border border-white/20">
               <ShieldCheck className="h-3.5 w-3.5 text-purple-300" />
               <span>Enterprise Verified</span>
@@ -422,6 +428,106 @@ export default function ProfilePage() {
           {/* TAB 1: Overview & Contact */}
           {activeTab === "overview" && (
             <div className="space-y-6 animate-in fade-in duration-150">
+              {/* Mode-Aware Operational Credentials Card */}
+              <div className="rounded-2xl border border-purple-500/20 bg-gradient-to-r from-purple-500/10 via-indigo-500/5 to-transparent p-4 sm:p-5 backdrop-blur-md">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
+                      <Sparkles className="h-4 w-4 text-amber-400" />
+                      <span>{modeConfig.name} Profile Credentials</span>
+                    </span>
+                  </div>
+                  <span className="rounded-full bg-purple-500/15 border border-purple-500/30 px-2.5 py-0.5 text-[10px] font-mono font-bold text-purple-700 dark:text-purple-300">
+                    {modeConfig.badge}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-zinc-300 font-medium mb-3">
+                  {modeConfig.securityNote}
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
+                  {mode === "academic" && (
+                    <>
+                      <div className="rounded-xl border border-purple-500/20 bg-white/60 dark:bg-white/5 p-2.5">
+                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Study Pods</span>
+                        <span className="font-extrabold text-purple-700 dark:text-purple-300">4 Active Cohorts</span>
+                      </div>
+                      <div className="rounded-xl border border-purple-500/20 bg-white/60 dark:bg-white/5 p-2.5">
+                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Quiz Mastery</span>
+                        <span className="font-extrabold text-purple-700 dark:text-purple-300">94% Average</span>
+                      </div>
+                      <div className="rounded-xl border border-purple-500/20 bg-white/60 dark:bg-white/5 p-2.5">
+                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Flashcards</span>
+                        <span className="font-extrabold text-purple-700 dark:text-purple-300">128 Mastered</span>
+                      </div>
+                    </>
+                  )}
+                  {mode === "clinical" && (
+                    <>
+                      <div className="rounded-xl border border-cyan-500/20 bg-white/60 dark:bg-white/5 p-2.5">
+                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">HIPAA Status</span>
+                        <span className="font-extrabold text-cyan-700 dark:text-cyan-300">De-identified</span>
+                      </div>
+                      <div className="rounded-xl border border-cyan-500/20 bg-white/60 dark:bg-white/5 p-2.5">
+                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Grand Rounds</span>
+                        <span className="font-extrabold text-cyan-700 dark:text-cyan-300">12 Case Files</span>
+                      </div>
+                      <div className="rounded-xl border border-cyan-500/20 bg-white/60 dark:bg-white/5 p-2.5">
+                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Protocols</span>
+                        <span className="font-extrabold text-cyan-700 dark:text-cyan-300">Verified SOPs</span>
+                      </div>
+                    </>
+                  )}
+                  {mode === "legal" && (
+                    <>
+                      <div className="rounded-xl border border-rose-500/20 bg-white/60 dark:bg-white/5 p-2.5">
+                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Privilege Vault</span>
+                        <span className="font-extrabold text-rose-700 dark:text-rose-300">NDA Enforced</span>
+                      </div>
+                      <div className="rounded-xl border border-rose-500/20 bg-white/60 dark:bg-white/5 p-2.5">
+                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Redline Audits</span>
+                        <span className="font-extrabold text-rose-700 dark:text-rose-300">18 Matter Diffs</span>
+                      </div>
+                      <div className="rounded-xl border border-rose-500/20 bg-white/60 dark:bg-white/5 p-2.5">
+                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Contract Expiries</span>
+                        <span className="font-extrabold text-rose-700 dark:text-rose-300">0 Overdue</span>
+                      </div>
+                    </>
+                  )}
+                  {mode === "finance" && (
+                    <>
+                      <div className="rounded-xl border border-emerald-500/20 bg-white/60 dark:bg-white/5 p-2.5">
+                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Fiscal Desk</span>
+                        <span className="font-extrabold text-emerald-700 dark:text-emerald-300">Audited Ledger</span>
+                      </div>
+                      <div className="rounded-xl border border-emerald-500/20 bg-white/60 dark:bg-white/5 p-2.5">
+                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Invoices</span>
+                        <span className="font-extrabold text-emerald-700 dark:text-emerald-300">100% Extracted</span>
+                      </div>
+                      <div className="rounded-xl border border-emerald-500/20 bg-white/60 dark:bg-white/5 p-2.5">
+                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Reconciliations</span>
+                        <span className="font-extrabold text-emerald-700 dark:text-emerald-300">Zero Discrepancy</span>
+                      </div>
+                    </>
+                  )}
+                  {mode === "office" && (
+                    <>
+                      <div className="rounded-xl border border-indigo-500/20 bg-white/60 dark:bg-white/5 p-2.5">
+                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Team Standups</span>
+                        <span className="font-extrabold text-indigo-700 dark:text-indigo-300">Daily Active</span>
+                      </div>
+                      <div className="rounded-xl border border-indigo-500/20 bg-white/60 dark:bg-white/5 p-2.5">
+                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Memory Graph</span>
+                        <span className="font-extrabold text-indigo-700 dark:text-indigo-300">Decisions Synced</span>
+                      </div>
+                      <div className="rounded-xl border border-indigo-500/20 bg-white/60 dark:bg-white/5 p-2.5">
+                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Slide Decks</span>
+                        <span className="font-extrabold text-indigo-700 dark:text-indigo-300">Presentations Ready</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
               {/* Bio */}
               <div className="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4.5 dark:border-white/5 dark:bg-white/[0.02]">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2 flex items-center gap-1.5">

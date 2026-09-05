@@ -171,7 +171,7 @@ function AttachmentThumbnail({ att, onOpenImage }: { att: ChatAttachment; onOpen
     return (
       <div
         onClick={() => onOpenImage?.(att)}
-        className="group/img relative mt-1 overflow-hidden rounded-2xl border border-black/10 bg-slate-900 shadow-md transition-all hover:shadow-xl dark:border-white/10 max-w-[320px] cursor-pointer"
+        className="group/img relative mt-1 overflow-hidden rounded-2xl border border-black/10 bg-slate-900 shadow-md transition-all hover:shadow-xl dark:border-white/10 max-w-full sm:max-w-[320px] cursor-pointer"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -204,7 +204,7 @@ function AttachmentThumbnail({ att, onOpenImage }: { att: ChatAttachment; onOpen
 
   if (isVideo) {
     return (
-      <div className="mt-1 max-w-[320px] overflow-hidden rounded-2xl border border-black/10 bg-black shadow-md dark:border-white/10">
+      <div className="mt-1 max-w-full sm:max-w-[320px] overflow-hidden rounded-2xl border border-black/10 bg-black shadow-md dark:border-white/10">
         <video src={fileUrl} controls preload="metadata" className="max-h-64 w-full rounded-2xl" />
       </div>
     );
@@ -217,7 +217,7 @@ function AttachmentThumbnail({ att, onOpenImage }: { att: ChatAttachment; onOpen
       target="_blank"
       rel="noopener noreferrer"
       download={att.filename}
-      className="mt-1 flex items-center justify-between gap-3 rounded-2xl border border-slate-200/90 bg-white/95 p-3 shadow-xs hover:border-purple-400 hover:shadow-md dark:border-white/10 dark:bg-[#1a1728]/95 transition-all max-w-[320px] group/file"
+      className="mt-1 flex items-center justify-between gap-2.5 sm:gap-3 rounded-2xl border border-slate-200/90 bg-white/95 p-2.5 sm:p-3 shadow-xs hover:border-purple-400 hover:shadow-md dark:border-white/10 dark:bg-[#1a1728]/95 transition-all max-w-full sm:max-w-[320px] group/file"
     >
       <div className="flex items-center gap-3 overflow-hidden">
         <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-xs ${
