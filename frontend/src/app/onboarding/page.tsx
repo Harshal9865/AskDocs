@@ -88,6 +88,7 @@ const MODE_CARDS: {
     color: "from-amber-600 to-orange-600",
     badge: "⚖️ Legal",
     accentBorder: "hover:border-amber-500",
+  },
   {
     id: "personal",
     title: "Solo & Freelance",
