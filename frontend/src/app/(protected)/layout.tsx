@@ -88,8 +88,8 @@ export default function ProtectedLayout({
             <main
               className={`min-w-0 max-w-full flex-1 min-h-0 transition-colors ${
                 isChatPage
-                  ? "flex flex-col overflow-hidden p-3 pb-20 md:p-6"
-                  : "overflow-y-auto p-4 pb-20 md:p-6"
+                  ? "flex flex-col overflow-hidden p-3 pb-24 md:p-6"
+                  : "overflow-y-auto p-4 pb-24 md:p-6"
               }`}
             >
               <WelcomeModal />

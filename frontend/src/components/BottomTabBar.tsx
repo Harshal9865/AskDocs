@@ -48,15 +48,15 @@ export default function BottomTabBar() {
 
   // Exactly 5 Tabs:
   // 1. Dashboard (Left 1)
-  // 2. Friends (Left 2 - not in top navbar)
+  // 2. Info Hub (Left 2 - /hub)
   // 3. Home / Workspace (Center anchor - /workspaces)
-  // 4. Info Hub (Right 1 - /hub)
+  // 4. Friends (Right 1 - /friends)
   // 5. Replaceable Dynamic Mode Tool (Right 2 - changes according to mode!)
   const tabs = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/friends", label: "Friends", icon: UsersRound },
-    { href: "/workspaces", label: "Home", icon: HomeIcon, isCenter: true },
     { href: "/hub", label: "Info Hub", icon: Compass },
+    { href: "/workspaces", label: "Home", icon: HomeIcon, isCenter: true },
+    { href: "/friends", label: "Friends", icon: UsersRound },
     modeTab,
   ];
 
