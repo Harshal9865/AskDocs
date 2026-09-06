@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight, Menu, X, CircleDot } from "lucide-react";
-import { useMobile, usePrefersReducedMotion } from "@/lib/hooks/useMobile";
+import { ChevronLeft, ChevronRight, X, CircleDot } from "lucide-react";
+import { useMobile } from "@/lib/hooks/useMobile";
 import { getModeColors, type Mode } from "@/lib/design-tokens";
 import { useAudienceMode } from "@/lib/audience-mode-context";
 import { useTheme } from "@/components/ThemeToggle";
@@ -57,7 +57,6 @@ export default function SidebarRail({
   const pathname = usePathname();
   const { dark: isDark } = useTheme();
   const { isMobile, isClient } = useMobile();
-  const prefersReducedMotion = usePrefersReducedMotion();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);

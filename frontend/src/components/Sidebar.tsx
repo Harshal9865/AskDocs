@@ -31,11 +31,9 @@ import {
   LogOut,
   Pencil,
   X,
-  ShieldCheck,
   Building2,
   Briefcase,
   ChevronRight,
-  User,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -266,15 +264,6 @@ export default function Sidebar({
       window.removeEventListener("askdocs_chat_read", onChatRead);
     };
   }, [workspace]);
-
-  const ModeIcon =
-    mode === "academic"
-      ? GraduationCap
-      : mode === "office"
-      ? Building2
-      : mode === "legal"
-      ? Scale
-      : Briefcase;
 
   return (
     <>

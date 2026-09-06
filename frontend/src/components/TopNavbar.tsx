@@ -22,33 +22,10 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
   const { mode, config: modeConfig } = useAudienceMode();
   const [q, setQ] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [brandSrc, setBrandSrc] = useState<string | null>(null);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [modeModalOpen, setModeModalOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { dark, toggle } = useTheme();
-
-  // resolve uploaded brand logo for the active workspace
-  useEffect(() => {
-    let cancelled = false;
-    setBrandSrc(null);
-    (async () => {
-      if (!workspace || workspace.brand_kind !== "upload" || !workspace.brand_value) return;
-      try {
-        const url = await api.getBrandLogoUrl(workspace.id);
-        if (!cancelled) setBrandSrc(url);
-      } catch {
-        /* ignore */
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [workspace]);
-
-  // apply sticker brand when set
-  const brandSticker =
-    workspace?.brand_kind === "sticker" ? workspace.brand_value : null;
 
   // close avatar menu on outside click
   useEffect(() => {

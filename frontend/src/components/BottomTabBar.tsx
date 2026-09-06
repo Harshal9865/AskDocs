@@ -38,12 +38,8 @@ export default function BottomTabBar() {
     if (!isMobile) return;
     let lastScrollY = 0;
 
-    const handleScroll = (e: Event) => {
-      const target = e.target as HTMLElement;
-      const currentY =
-        target === document || target === document.body || !target?.scrollTop
-          ? window.scrollY
-          : target.scrollTop;
+    const handleScroll = () => {
+      const currentY = window.scrollY || document.documentElement.scrollTop;
 
       if (currentY > lastScrollY + 12 && currentY > 40) {
         // Scrolling down -> auto hide bottom bar
