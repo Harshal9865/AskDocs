@@ -275,45 +275,45 @@ function ModeSpotlightWidget({
 }) {
   if (mode === "academic") {
     return (
-      <div className="rounded-3xl border border-purple-500/20 bg-gradient-to-r from-purple-900/10 via-indigo-900/10 to-slate-900/40 p-5 shadow-md backdrop-blur-md dark:border-purple-500/30 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/20 text-purple-400 font-bold">
+      <div className="rounded-3xl border border-purple-200/90 bg-gradient-to-r from-purple-100/70 via-indigo-50/80 to-purple-50/60 p-4 sm:p-5 shadow-xs dark:border-purple-500/30 dark:bg-gradient-to-r dark:from-purple-950/40 dark:via-indigo-950/30 dark:to-slate-950/60 space-y-4 max-w-full min-w-0 overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-500/20 text-purple-700 dark:text-purple-300 font-bold text-lg">
               🎓
             </span>
-            <div>
-              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+            <div className="min-w-0">
+              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight truncate">
                 Academic & Exam Revision Spotlight
               </h3>
-              <p className="text-xs text-slate-500 dark:text-zinc-400">
+              <p className="text-xs font-semibold text-slate-600 dark:text-zinc-300 truncate">
                 Syllabus mastery, 3D flippable flashcards & practice test quizzes
               </p>
             </div>
           </div>
           <Link
             href="/study-guide"
-            className="inline-flex items-center gap-1.5 rounded-full bg-purple-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-purple-500 transition-all cursor-pointer"
+            className="inline-flex shrink-0 w-fit items-center gap-1.5 rounded-full bg-purple-600 px-4 py-1.5 text-xs font-extrabold text-white shadow-sm hover:bg-purple-500 transition-all cursor-pointer"
           >
             <span>Open Study Studio</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl border border-purple-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">Course Disciplines</span>
-            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">CS, Math, Commerce, Arts</div>
-            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Tailored 3D flashcard decks</p>
+        <div className="grid gap-3 grid-cols-1 sm:grid-cols-3 min-w-0">
+          <div className="rounded-2xl border border-purple-200/90 bg-white/90 p-3.5 shadow-2xs dark:border-white/10 dark:bg-white/[0.05]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300">Course Disciplines</span>
+            <div className="mt-1 text-sm font-black text-slate-900 dark:text-white truncate">CS, Math, Commerce, Arts</div>
+            <p className="mt-0.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400">Tailored 3D flashcard decks</p>
           </div>
-          <div className="rounded-2xl border border-indigo-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Audio Podcasts</span>
-            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">3-Min Audio Briefs</div>
-            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Listen to key syllabus topics</p>
+          <div className="rounded-2xl border border-indigo-200/90 bg-white/90 p-3.5 shadow-2xs dark:border-white/10 dark:bg-white/[0.05]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300">Audio Podcasts</span>
+            <div className="mt-1 text-sm font-black text-slate-900 dark:text-white truncate">3-Min Audio Briefs</div>
+            <p className="mt-0.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400">Listen to key syllabus topics</p>
           </div>
-          <div className="rounded-2xl border border-emerald-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Study Groups</span>
-            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">{chats.filter(c => c.type === "group").length} Active Groups</div>
-            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Share revision guides with peers</p>
+          <div className="rounded-2xl border border-emerald-200/90 bg-white/90 p-3.5 shadow-2xs dark:border-white/10 dark:bg-white/[0.05]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">Study Groups</span>
+            <div className="mt-1 text-sm font-black text-slate-900 dark:text-white truncate">{chats.filter(c => c.type === "group").length} Active Groups</div>
+            <p className="mt-0.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400">Share revision guides with peers</p>
           </div>
         </div>
       </div>
@@ -322,45 +322,45 @@ function ModeSpotlightWidget({
 
   if (mode === "office") {
     return (
-      <div className="rounded-3xl border border-indigo-500/20 bg-gradient-to-r from-indigo-900/10 via-blue-900/10 to-slate-900/40 p-5 shadow-md backdrop-blur-md dark:border-indigo-500/30 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-400 font-bold">
+      <div className="rounded-3xl border border-indigo-200/90 bg-gradient-to-r from-indigo-100/70 via-blue-50/80 to-indigo-50/60 p-4 sm:p-5 shadow-xs dark:border-indigo-500/30 dark:bg-gradient-to-r dark:from-indigo-950/40 dark:via-blue-950/30 dark:to-slate-950/60 space-y-4 max-w-full min-w-0 overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-bold text-lg">
               🏢
             </span>
-            <div>
-              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+            <div className="min-w-0">
+              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight truncate">
                 Corporate Operations & Decision Graph
               </h3>
-              <p className="text-xs text-slate-500 dark:text-zinc-400">
+              <p className="text-xs font-semibold text-slate-600 dark:text-zinc-300 truncate">
                 Institutional memory, team standup logs & architecture sync
               </p>
             </div>
           </div>
           <Link
             href="/memory"
-            className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-500 transition-all cursor-pointer"
+            className="inline-flex shrink-0 w-fit items-center gap-1.5 rounded-full bg-indigo-600 px-4 py-1.5 text-xs font-extrabold text-white shadow-sm hover:bg-indigo-500 transition-all cursor-pointer"
           >
             <span>View Memory Graph</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl border border-indigo-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Knowledge Graph</span>
-            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">{memories.length} Recorded Nodes</div>
-            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Preserved meeting decisions</p>
+        <div className="grid gap-3 grid-cols-1 sm:grid-cols-3 min-w-0">
+          <div className="rounded-2xl border border-indigo-200/90 bg-white/90 p-3.5 shadow-2xs dark:border-white/10 dark:bg-white/[0.05]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300">Knowledge Graph</span>
+            <div className="mt-1 text-sm font-black text-slate-900 dark:text-white truncate">{memories.length} Recorded Nodes</div>
+            <p className="mt-0.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400">Preserved meeting decisions</p>
           </div>
-          <div className="rounded-2xl border border-purple-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">Weekly Digest</span>
-            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">Auto Digest Ready</div>
-            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">1-click corporate summaries</p>
+          <div className="rounded-2xl border border-purple-200/90 bg-white/90 p-3.5 shadow-2xs dark:border-white/10 dark:bg-white/[0.05]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300">Weekly Digest</span>
+            <div className="mt-1 text-sm font-black text-slate-900 dark:text-white truncate">Auto Digest Ready</div>
+            <p className="mt-0.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400">1-click corporate summaries</p>
           </div>
-          <div className="rounded-2xl border border-emerald-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Office Channels</span>
-            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">{chats.length} Team Channels</div>
-            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Enterprise NDA messaging</p>
+          <div className="rounded-2xl border border-emerald-200/90 bg-white/90 p-3.5 shadow-2xs dark:border-white/10 dark:bg-white/[0.05]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">Office Channels</span>
+            <div className="mt-1 text-sm font-black text-slate-900 dark:text-white truncate">{chats.length} Team Channels</div>
+            <p className="mt-0.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400">Enterprise NDA messaging</p>
           </div>
         </div>
       </div>
@@ -369,45 +369,45 @@ function ModeSpotlightWidget({
 
   if (mode === "legal") {
     return (
-      <div className="rounded-3xl border border-rose-500/20 bg-gradient-to-r from-rose-900/10 via-purple-900/10 to-slate-900/40 p-5 shadow-md backdrop-blur-md dark:border-rose-500/30 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-500/20 text-rose-400 font-bold">
+      <div className="rounded-3xl border border-rose-200/90 bg-gradient-to-r from-rose-100/70 via-purple-50/80 to-rose-50/60 p-4 sm:p-5 shadow-xs dark:border-rose-500/30 dark:bg-gradient-to-r dark:from-rose-950/40 dark:via-purple-950/30 dark:to-slate-950/60 space-y-4 max-w-full min-w-0 overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-500/20 text-rose-700 dark:text-rose-300 font-bold text-lg">
               ⚖️
             </span>
-            <div>
-              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+            <div className="min-w-0">
+              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight truncate">
                 Legal Vault & Contract Risk Spotlight
               </h3>
-              <p className="text-xs text-slate-500 dark:text-zinc-400">
+              <p className="text-xs font-semibold text-slate-600 dark:text-zinc-300 truncate">
                 Redline diffs, NDA privilege masking & liability tracking
               </p>
             </div>
           </div>
           <Link
             href="/contracts/compare"
-            className="inline-flex items-center gap-1.5 rounded-full bg-rose-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-rose-500 transition-all cursor-pointer"
+            className="inline-flex shrink-0 w-fit items-center gap-1.5 rounded-full bg-rose-600 px-4 py-1.5 text-xs font-extrabold text-white shadow-sm hover:bg-rose-500 transition-all cursor-pointer"
           >
             <span>Run Redline Diff</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl border border-rose-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">Active Obligations</span>
-            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">{obligations.length} Terms Tracked</div>
-            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Auto-extracted renewal dates</p>
+        <div className="grid gap-3 grid-cols-1 sm:grid-cols-3 min-w-0">
+          <div className="rounded-2xl border border-rose-200/90 bg-white/90 p-3.5 shadow-2xs dark:border-white/10 dark:bg-white/[0.05]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300">Active Obligations</span>
+            <div className="mt-1 text-sm font-black text-slate-900 dark:text-white truncate">{obligations.length} Terms Tracked</div>
+            <p className="mt-0.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400">Auto-extracted renewal dates</p>
           </div>
-          <div className="rounded-2xl border border-purple-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">Privilege Vault</span>
-            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">Strict NDA Active</div>
-            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Auto PII & liability masking</p>
+          <div className="rounded-2xl border border-purple-200/90 bg-white/90 p-3.5 shadow-2xs dark:border-white/10 dark:bg-white/[0.05]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300">Privilege Vault</span>
+            <div className="mt-1 text-sm font-black text-slate-900 dark:text-white truncate">Strict NDA Active</div>
+            <p className="mt-0.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400">Auto PII & liability masking</p>
           </div>
-          <div className="rounded-2xl border border-amber-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Redact & Format</span>
-            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">1-Click Sanitizer</div>
-            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Mask secret emails & phones</p>
+          <div className="rounded-2xl border border-amber-200/90 bg-white/90 p-3.5 shadow-2xs dark:border-white/10 dark:bg-white/[0.05]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">Redact & Format</span>
+            <div className="mt-1 text-sm font-black text-slate-900 dark:text-white truncate">1-Click Sanitizer</div>
+            <p className="mt-0.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400">Mask secret emails & phones</p>
           </div>
         </div>
       </div>
@@ -416,45 +416,45 @@ function ModeSpotlightWidget({
 
   // Personal / Solo Studio Mode
   return (
-    <div className="rounded-3xl border border-purple-500/20 bg-gradient-to-r from-purple-900/10 via-indigo-900/10 to-slate-900/40 p-5 shadow-md backdrop-blur-md dark:border-purple-500/30 space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/20 text-purple-400 font-bold">
+    <div className="rounded-3xl border border-purple-200/90 bg-gradient-to-r from-purple-100/70 via-indigo-50/80 to-purple-50/60 p-4 sm:p-5 shadow-xs dark:border-purple-500/30 dark:bg-gradient-to-r dark:from-purple-950/40 dark:via-indigo-950/30 dark:to-slate-950/60 space-y-4 max-w-full min-w-0 overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-500/20 text-purple-700 dark:text-purple-300 font-bold text-lg">
             💼
           </span>
-          <div>
-            <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+          <div className="min-w-0">
+            <h3 className="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight truncate">
               Solo Studio & Freelance Project Spotlight
             </h3>
-            <p className="text-xs text-slate-500 dark:text-zinc-400">
+            <p className="text-xs font-semibold text-slate-600 dark:text-zinc-300 truncate">
               Executive presentation decks, audio podcasts & direct client messaging
             </p>
           </div>
         </div>
         <Link
           href="/slides"
-          className="inline-flex items-center gap-1.5 rounded-full bg-purple-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-purple-500 transition-all cursor-pointer"
+          className="inline-flex shrink-0 w-fit items-center gap-1.5 rounded-full bg-purple-600 px-4 py-1.5 text-xs font-extrabold text-white shadow-sm hover:bg-purple-500 transition-all cursor-pointer"
         >
           <span>Open Slide Studio</span>
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl border border-purple-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
-          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">Slide Decks</span>
-          <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">Client Pitch Decks</div>
-          <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">4-slide executive decks</p>
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-3 min-w-0">
+        <div className="rounded-2xl border border-purple-200/90 bg-white/90 p-3.5 shadow-2xs dark:border-white/10 dark:bg-white/[0.05]">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300">Slide Decks</span>
+          <div className="mt-1 text-sm font-black text-slate-900 dark:text-white truncate">Client Pitch Decks</div>
+          <p className="mt-0.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400">4-slide executive decks</p>
         </div>
-        <div className="rounded-2xl border border-indigo-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
-          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Audio Briefs</span>
-          <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">3-Min Podcasts</div>
-          <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Spoken audio summaries</p>
+        <div className="rounded-2xl border border-indigo-200/90 bg-white/90 p-3.5 shadow-2xs dark:border-white/10 dark:bg-white/[0.05]">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300">Audio Briefs</span>
+          <div className="mt-1 text-sm font-black text-slate-900 dark:text-white truncate">3-Min Podcasts</div>
+          <p className="mt-0.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400">Spoken audio summaries</p>
         </div>
-        <div className="rounded-2xl border border-emerald-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
-          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Direct Messaging</span>
-          <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">{chats.length} Client Chats</div>
-          <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Direct freelancer threads</p>
+        <div className="rounded-2xl border border-emerald-200/90 bg-white/90 p-3.5 shadow-2xs dark:border-white/10 dark:bg-white/[0.05]">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">Direct Messaging</span>
+          <div className="mt-1 text-sm font-black text-slate-900 dark:text-white truncate">{chats.length} Active Threads</div>
+          <p className="mt-0.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400">Client project channels</p>
         </div>
       </div>
     </div>

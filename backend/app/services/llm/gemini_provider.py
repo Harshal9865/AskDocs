@@ -153,10 +153,16 @@ class GeminiProvider(LLMProvider):
                     result = await self.client.aio.models.embed_content(
                         model=model_name,
                         contents=text,
+                        config=types.EmbedContentConfig(output_dimensionality=768),
                     )
                     # google-genai v1: result.embeddings is a list of ContentEmbedding
                     if hasattr(result, "embeddings") and result.embeddings:
-                        vectors.append(list(result.embeddings[0].values))
+                        vec = list(result.embeddings[0].values)
+                        if len(vec) > 768:
+                            vec = vec[:768]
+                        elif len(vec) < 768:
+                            vec = vec + [0.0] * (768 - len(vec))
+                        vectors.append(vec)
                     else:
                         raise ValueError(f"Unexpected embed result shape: {result}")
                 logger.info("embed() model %s OK for %d texts", model_name, len(texts))
