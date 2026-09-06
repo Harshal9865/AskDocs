@@ -264,7 +264,7 @@ const MODE_HERO_ACTIONS: Record<
 /* ── Mode-Specific Intelligence Spotlight Widget ── */
 function ModeSpotlightWidget({
   mode,
-  docs,
+  docs: _docs,
   obligations,
   memories,
   chats,

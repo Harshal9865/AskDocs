@@ -461,22 +461,6 @@ export default function ProfilePage() {
                       </div>
                     </>
                   )}
-                  {mode === "clinical" && (
-                    <>
-                      <div className="rounded-xl border border-cyan-500/20 bg-white/60 dark:bg-white/5 p-2.5">
-                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">HIPAA Status</span>
-                        <span className="font-extrabold text-cyan-700 dark:text-cyan-300">De-identified</span>
-                      </div>
-                      <div className="rounded-xl border border-cyan-500/20 bg-white/60 dark:bg-white/5 p-2.5">
-                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Grand Rounds</span>
-                        <span className="font-extrabold text-cyan-700 dark:text-cyan-300">12 Case Files</span>
-                      </div>
-                      <div className="rounded-xl border border-cyan-500/20 bg-white/60 dark:bg-white/5 p-2.5">
-                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Protocols</span>
-                        <span className="font-extrabold text-cyan-700 dark:text-cyan-300">Verified SOPs</span>
-                      </div>
-                    </>
-                  )}
                   {mode === "legal" && (
                     <>
                       <div className="rounded-xl border border-rose-500/20 bg-white/60 dark:bg-white/5 p-2.5">

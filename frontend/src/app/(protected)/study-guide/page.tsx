@@ -328,9 +328,7 @@ export default function StudyGuidePage() {
 
   // Auto-sync persona with active operational mode
   useEffect(() => {
-    if (mode === "clinical") setPersona("medical");
-    else if (mode === "legal") setPersona("legal");
-    else if (mode === "finance") setPersona("finance");
+    if (mode === "legal") setPersona("legal");
     else if (mode === "office") setPersona("corporate");
     else setPersona("student");
   }, [mode]);

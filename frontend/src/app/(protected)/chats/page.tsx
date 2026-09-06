@@ -30,7 +30,6 @@ import {
   MoreVertical,
   Palette,
   Search,
-  Smile,
   Sparkles,
   Trash2,
   UsersRound,
