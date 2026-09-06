@@ -17,6 +17,7 @@ import {
   BellRing,
   Check,
   CheckCheck,
+  Copy,
   CornerUpLeft,
   Download,
   Eraser,
@@ -26,9 +27,11 @@ import {
   FileUp,
   MessageCirclePlus,
   MessagesSquare,
+  MoreHorizontal,
   MoreVertical,
   Palette,
   Search,
+  Smile,
   Sparkles,
   Trash2,
   UsersRound,
@@ -146,7 +149,72 @@ function formatBytes(bytes: number): string {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }
 
-function AttachmentThumbnail({ att, onOpenImage }: { att: ChatAttachment; onOpenImage?: (att: ChatAttachment) => void }) {
+function AttachmentThumbnail({
+  att,
+  onOpenImage,
+  onLongPress,
+}: {
+  att: ChatAttachment;
+  onOpenImage?: (att: ChatAttachment) => void;
+  onLongPress?: () => void;
+}) {
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const startPosRef = useRef<{ x: number; y: number } | null>(null);
+  const isLongPressRef = useRef(false);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    isLongPressRef.current = false;
+    const touch = e.touches[0];
+    if (touch) {
+      startPosRef.current = { x: touch.clientX, y: touch.clientY };
+    }
+    timerRef.current = setTimeout(() => {
+      isLongPressRef.current = true;
+      if (typeof window !== "undefined" && window.navigator && window.navigator.vibrate) {
+        try { window.navigator.vibrate(40); } catch {}
+      }
+      onLongPress?.();
+    }, 380);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!startPosRef.current || !timerRef.current) return;
+    const touch = e.touches[0];
+    if (touch) {
+      const dx = Math.abs(touch.clientX - startPosRef.current.x);
+      const dy = Math.abs(touch.clientY - startPosRef.current.y);
+      if (dx > 10 || dy > 10) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (isLongPressRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      isLongPressRef.current = false;
+      return;
+    }
+    onOpenImage?.(att);
+  };
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    if (onLongPress) {
+      e.preventDefault();
+      e.stopPropagation();
+      onLongPress();
+    }
+  };
+
   const isImage =
     att.content_type?.startsWith("image/") ||
     /\.(jpg|jpeg|png|webp|gif|svg|bmp|ico)$/i.test(att.filename);
@@ -170,15 +238,21 @@ function AttachmentThumbnail({ att, onOpenImage }: { att: ChatAttachment; onOpen
   if (isImage) {
     return (
       <div
-        onClick={() => onOpenImage?.(att)}
-        className="group/img relative mt-1 overflow-hidden rounded-2xl border border-black/10 bg-slate-900 shadow-md transition-all hover:shadow-xl dark:border-white/10 max-w-full sm:max-w-[320px] cursor-pointer"
+        onClick={handleClick}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
+        onContextMenu={handleContextMenu}
+        className="group/img relative mt-1 overflow-hidden rounded-2xl border border-black/10 bg-slate-900 shadow-md transition-all hover:shadow-xl dark:border-white/10 max-w-full sm:max-w-[320px] cursor-pointer select-none touch-manipulation"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={fileUrl}
           alt={att.filename}
           loading="lazy"
-          className="max-h-72 w-full object-cover transition-transform duration-300 group-hover/img:scale-102"
+          className="max-h-72 w-full object-cover transition-transform duration-300 group-hover/img:scale-102 select-none pointer-events-auto"
+          style={{ WebkitTouchCallout: "none" }}
         />
         {/* WhatsApp hover overlay with direct download & zoom */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity flex items-end justify-between p-3 text-white">
@@ -256,6 +330,381 @@ function AttachmentThumbnail({ att, onOpenImage }: { att: ChatAttachment; onOpen
   );
 }
 
+function ChatMessageItem({
+  m,
+  isMe,
+  isBot,
+  user,
+  msgReactions,
+  hasReactions,
+  activeMsgMenuId,
+  setActiveMsgMenuId,
+  toggleReaction,
+  senderName,
+  setReplyingTo,
+  setLightboxImg,
+  setDeletingMsg,
+  activeChat,
+  setMessages,
+}: {
+  m: TeamMessage;
+  isMe: boolean;
+  isBot: boolean;
+  user: any;
+  msgReactions: Record<string, string[]>;
+  hasReactions: boolean;
+  activeMsgMenuId: string | null;
+  setActiveMsgMenuId: (id: string | null) => void;
+  toggleReaction: (msgId: string, emoji: string) => void;
+  senderName: (senderId?: string | null) => string;
+  setReplyingTo: (reply: { id: string; sender_name: string; snippet: string }) => void;
+  setLightboxImg: (img: { url: string; filename: string }) => void;
+  setDeletingMsg: (msg: TeamMessage) => void;
+  activeChat: TeamChat;
+  setMessages: React.Dispatch<React.SetStateAction<TeamMessage[]>>;
+}) {
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const startPosRef = useRef<{ x: number; y: number } | null>(null);
+  const isLongPressRef = useRef(false);
+
+  // Check for quoted reply format: > [Replying to Name]: Snippet\n\nActual message
+  let quoteInfo: { author: string; snippet: string } | null = null;
+  let bodyContent = m.content;
+  if (m.content.startsWith("> [Replying to ")) {
+    const endIdx = m.content.indexOf("]: ");
+    const doubleBreak = m.content.indexOf("\n\n");
+    if (endIdx !== -1 && doubleBreak !== -1 && doubleBreak > endIdx) {
+      const author = m.content.substring(15, endIdx);
+      const snippet = m.content.substring(endIdx + 3, doubleBreak);
+      quoteInfo = { author, snippet };
+      bodyContent = m.content.substring(doubleBreak + 2);
+    }
+  }
+
+  const triggerMenu = () => {
+    if (typeof window !== "undefined" && window.navigator && window.navigator.vibrate) {
+      try { window.navigator.vibrate(40); } catch {}
+    }
+    setActiveMsgMenuId(m.id);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    isLongPressRef.current = false;
+    const touch = e.touches[0];
+    if (touch) {
+      startPosRef.current = { x: touch.clientX, y: touch.clientY };
+    }
+    timerRef.current = setTimeout(() => {
+      isLongPressRef.current = true;
+      triggerMenu();
+    }, 380);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!startPosRef.current || !timerRef.current) return;
+    const touch = e.touches[0];
+    if (touch) {
+      const dx = Math.abs(touch.clientX - startPosRef.current.x);
+      const dy = Math.abs(touch.clientY - startPosRef.current.y);
+      if (dx > 10 || dy > 10) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    triggerMenu();
+  };
+
+  const isMenuActive = activeMsgMenuId === m.id;
+
+  const copyMessageText = () => {
+    if (bodyContent.trim()) {
+      navigator.clipboard.writeText(bodyContent);
+      showToast("success", "Message copied to clipboard");
+      setActiveMsgMenuId(null);
+    }
+  };
+
+  return (
+    <div
+      key={m.id}
+      className={`group/msg relative flex flex-col ${isMe ? "items-end" : "items-start"} my-1.5 transition-all ${
+        isMenuActive ? "z-50" : "z-10"
+      }`}
+    >
+      {/* Action & Reaction Bar (Hover on desktop OR Active on Mobile/Touch) */}
+      <div
+        className={`transition-all duration-150 ease-out absolute -top-9 z-50 flex items-center gap-1 rounded-full border border-slate-200/90 bg-white/95 px-2 py-1 shadow-xl backdrop-blur-md dark:border-white/10 dark:bg-[#1f1d2e]/95 ${
+          isMe ? "right-2" : "left-2"
+        } ${
+          isMenuActive
+            ? "opacity-100 scale-100 pointer-events-auto"
+            : "pointer-events-none group-hover/msg:pointer-events-auto opacity-0 group-hover/msg:opacity-100 scale-95 group-hover/msg:scale-100"
+        }`}
+      >
+        {["👍", "❤️", "😂", "😮", "😢", "🙏", "🔥", "🎉"].map((emo) => {
+          const isReacted = (msgReactions[emo] || []).includes(user?.id || "");
+          return (
+            <button
+              key={emo}
+              type="button"
+              onClick={() => {
+                toggleReaction(m.id, emo);
+                setActiveMsgMenuId(null);
+              }}
+              className={`rounded-full p-1 text-xs sm:text-sm hover:scale-130 active:scale-90 transition-transform cursor-pointer ${
+                isReacted ? "bg-purple-100 dark:bg-purple-900/40 scale-110" : ""
+              }`}
+              title={`React with ${emo}`}
+            >
+              {emo}
+            </button>
+          );
+        })}
+        <div className="h-3.5 w-px bg-slate-200 dark:bg-white/10 mx-0.5" />
+        <button
+          type="button"
+          onClick={() => {
+            setReplyingTo({
+              id: m.id,
+              sender_name: isBot ? "AskDocs AI" : senderName(m.sender_id),
+              snippet: bodyContent.slice(0, 80),
+            });
+            setActiveMsgMenuId(null);
+          }}
+          title="Reply to message"
+          className="rounded-full p-1 text-slate-500 hover:text-purple-600 dark:text-zinc-400 dark:hover:text-purple-300 transition-colors cursor-pointer"
+        >
+          <CornerUpLeft className="h-3.5 w-3.5" />
+        </button>
+        {bodyContent.trim().length > 0 && (
+          <button
+            type="button"
+            onClick={copyMessageText}
+            title="Copy text"
+            className="rounded-full p-1 text-slate-500 hover:text-purple-600 dark:text-zinc-400 dark:hover:text-purple-300 transition-colors cursor-pointer"
+          >
+            <Copy className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+
+      <div className="flex items-center gap-1.5 w-full justify-inherit">
+        {!isMe && (
+          /* Mobile Reaction Trigger Icon */
+          <button
+            type="button"
+            onClick={triggerMenu}
+            className="md:hidden shrink-0 rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-purple-600 dark:hover:bg-white/10 dark:hover:text-purple-400 transition-colors cursor-pointer"
+            title="React or options"
+          >
+            <Smile className="h-4 w-4" />
+          </button>
+        )}
+
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
+          onContextMenu={handleContextMenu}
+          className={`relative max-w-[85%] sm:max-w-[75%] rounded-2xl px-3.5 py-2.5 text-sm shadow-sm transition-all select-none touch-manipulation ${
+            isMe
+              ? "bg-purple-600 text-white rounded-br-sm shadow-purple-500/10"
+              : isBot
+              ? "border border-purple-300/60 bg-gradient-to-br from-purple-50/90 via-indigo-50/60 to-white text-slate-900 shadow-md shadow-purple-500/5 dark:border-purple-500/30 dark:from-[#1b1736] dark:via-[#15122e] dark:to-[#0f0e24] dark:text-zinc-100 rounded-bl-sm"
+              : "bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white rounded-bl-sm"
+          } ${isMenuActive ? "ring-2 ring-purple-500 scale-[1.01]" : ""}`}
+        >
+          {/* Sender name for group chats */}
+          {!isMe && (
+            isBot ? (
+              <div className="mb-2 flex items-center gap-1.5 rounded-full border border-purple-300/60 bg-white/80 px-2.5 py-1 text-[11px] font-extrabold text-purple-700 shadow-xs backdrop-blur-sm dark:border-purple-500/30 dark:bg-purple-950/60 dark:text-purple-300">
+                <AIAvatarIcon size={16} className="h-4 w-4" />
+                <span>@AskDocs AI Teammate</span>
+              </div>
+            ) : m.sender_id ? (
+              <Link
+                href={`/profile/${m.sender_id}`}
+                className="mb-1 block text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline cursor-pointer"
+                title="View Profile"
+              >
+                {senderName(m.sender_id)}
+              </Link>
+            ) : null
+          )}
+
+          {/* Quoted Reply Preview inside bubble */}
+          {quoteInfo && (
+            <div className={`mb-2 rounded-xl p-2 text-xs border-l-4 ${
+              isMe
+                ? "border-white bg-white/15 text-purple-100"
+                : "border-purple-600 bg-purple-500/10 text-slate-700 dark:text-zinc-300"
+            }`}>
+              <span className="block font-bold text-[11px] text-purple-300 dark:text-purple-400">
+                {quoteInfo.author}
+              </span>
+              <span className="block truncate text-[11px] opacity-90">
+                {quoteInfo.snippet}
+              </span>
+            </div>
+          )}
+
+          {bodyContent.trim().length > 0 && (
+            <p className="whitespace-pre-wrap break-words leading-relaxed">{bodyContent}</p>
+          )}
+
+          {/* Autonomous Interactive Approval Card */}
+          {m.approval_card && (
+            <div className="mt-3 rounded-2xl border border-purple-500/30 bg-slate-900 p-3.5 text-white shadow-xl backdrop-blur-md dark:border-purple-500/40 dark:bg-[#1a172c]">
+              <div className="flex items-center justify-between gap-2 pb-2 border-b border-white/10">
+                <div className="flex items-center gap-1.5 text-xs font-black text-purple-300">
+                  <Sparkles className="h-3.5 w-3.5 text-purple-400 animate-pulse" />
+                  <span>APPROVAL WORKFLOW</span>
+                </div>
+                <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
+                  m.approval_card.status === "approved"
+                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                    : m.approval_card.status === "rejected"
+                    ? "bg-red-500/20 text-red-300 border border-red-500/30"
+                    : "bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse"
+                }`}>
+                  {m.approval_card.status}
+                </span>
+              </div>
+
+              <div className="mt-2.5 space-y-1 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Action:</span>
+                  <span className="font-bold text-white">{m.approval_card.action_type}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Requested Amount:</span>
+                  <span className="font-black text-emerald-400">{m.approval_card.requested_amount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Policy Citation:</span>
+                  <span className="font-medium text-slate-300 truncate max-w-[180px]">{m.approval_card.policy_citation}</span>
+                </div>
+                {m.approval_card.approved_by && (
+                  <div className="flex justify-between pt-1 border-t border-white/5 text-[11px] text-slate-400">
+                    <span>Decided By:</span>
+                    <span className="font-bold text-purple-300">{m.approval_card.approved_by}</span>
+                  </div>
+                )}
+              </div>
+
+              {m.approval_card.status === "pending" && (
+                <div className="mt-3 flex items-center gap-2 pt-2 border-t border-white/10">
+                  <button
+                    onClick={async () => {
+                      try {
+                        const updatedMsg = await api.updateMessageApprovalStatus(activeChat.id, m.id, "approved");
+                        setMessages((prev) => prev.map((msgItem) => (msgItem.id === m.id ? updatedMsg : msgItem)));
+                      } catch {
+                        alert("Failed to approve request.");
+                      }
+                    }}
+                    className="flex-1 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 py-1.5 text-xs font-black text-white shadow-md hover:from-emerald-500 hover:to-teal-500 active:scale-95 transition-all cursor-pointer"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const updatedMsg = await api.updateMessageApprovalStatus(activeChat.id, m.id, "rejected");
+                        setMessages((prev) => prev.map((msgItem) => (msgItem.id === m.id ? updatedMsg : msgItem)));
+                      } catch {
+                        alert("Failed to reject request.");
+                      }
+                    }}
+                    className="flex-1 rounded-xl bg-slate-800 py-1.5 text-xs font-black text-slate-300 hover:bg-red-600 hover:text-white active:scale-95 transition-all cursor-pointer"
+                  >
+                    Reject
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {m.attachments && m.attachments.length > 0 && (
+            <div className="mt-2 space-y-1">
+              {m.attachments.map((att) => (
+                <AttachmentThumbnail
+                  key={att.id}
+                  att={att}
+                  onOpenImage={(a) => setLightboxImg({ url: `${API_BASE}${a.url}`, filename: a.filename })}
+                  onLongPress={triggerMenu}
+                />
+              ))}
+            </div>
+          )}
+          <div className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${isMe ? "text-purple-200" : "text-slate-400 dark:text-zinc-500"}`}>
+            <span>{fmtTime(m.created_at)}</span>
+            {isMe && <ReadTicks readBy={m.read_by} myId={user?.id ?? ""} participantCount={activeChat.participants.length} />}
+          </div>
+        </div>
+
+        {isMe && (
+          /* Mobile Reaction Trigger Icon for sent messages */
+          <button
+            type="button"
+            onClick={triggerMenu}
+            className="md:hidden shrink-0 rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-purple-600 dark:hover:bg-white/10 dark:hover:text-purple-400 transition-colors cursor-pointer"
+            title="React or options"
+          >
+            <Smile className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+
+      {/* WhatsApp-Style Reaction Badges below bubble */}
+      {hasReactions && (
+        <div className={`mt-1 flex flex-wrap gap-1 ${isMe ? "justify-end mr-1" : "justify-start ml-1"}`}>
+          {Object.entries(msgReactions).map(([emo, uids]) => {
+            const isMine = uids.includes(user?.id || "");
+            return (
+              <button
+                key={emo}
+                type="button"
+                onClick={() => toggleReaction(m.id, emo)}
+                className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-bold shadow-2xs transition-transform active:scale-90 cursor-pointer ${
+                  isMine
+                    ? "border-purple-300 bg-purple-50 text-purple-700 dark:border-purple-500/40 dark:bg-purple-950/60 dark:text-purple-300"
+                    : "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-[#1a1728] dark:text-zinc-300"
+                }`}
+              >
+                <span>{emo}</span>
+                <span className="text-[10px] opacity-80">{uids.length}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {isMe && (
+        <button 
+          onClick={() => setDeletingMsg(m)} 
+          title="Delete message"
+          className="opacity-0 group-hover/msg:opacity-100 self-end p-1 text-slate-400 hover:text-red-500 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 transition-all cursor-pointer mt-0.5"
+        >
+          <Trash2 className="h-3 w-3" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 function fmtTime(iso: string | null): string {
   if (!iso) return "";
   const d = new Date(iso);
@@ -294,6 +743,7 @@ export default function ChatsPage() {
   const [showWallpaperMenu, setShowWallpaperMenu] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [notifEnabled, setNotifEnabled] = useState(false);
+  const [activeMsgMenuId, setActiveMsgMenuId] = useState<string | null>(null);
   const [dragOverThread, setDragOverThread] = useState(false);
   const [deletingMsg, setDeletingMsg] = useState<TeamMessage | null>(null);
   const [threadMenuOpen, setThreadMenuOpen] = useState(false);
@@ -1193,234 +1643,38 @@ export default function ChatsPage() {
                 </div>
               )}
 
+              {activeMsgMenuId && (
+                <div
+                  className="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-2xs transition-opacity duration-200"
+                  onClick={() => setActiveMsgMenuId(null)}
+                />
+              )}
+
               {displayedMessages.map((m) => {
                 const isMe = m.sender_id === user?.id;
                 const isBot = !m.sender_id;
                 const msgReactions = m.reactions || reactions[m.id] || {};
                 const hasReactions = Object.keys(msgReactions).length > 0;
 
-                // Check for quoted reply format: > [Replying to Name]: Snippet\n\nActual message
-                let quoteInfo: { author: string; snippet: string } | null = null;
-                let bodyContent = m.content;
-                if (m.content.startsWith("> [Replying to ")) {
-                  const endIdx = m.content.indexOf("]: ");
-                  const doubleBreak = m.content.indexOf("\n\n");
-                  if (endIdx !== -1 && doubleBreak !== -1 && doubleBreak > endIdx) {
-                    const author = m.content.substring(15, endIdx);
-                    const snippet = m.content.substring(endIdx + 3, doubleBreak);
-                    quoteInfo = { author, snippet };
-                    bodyContent = m.content.substring(doubleBreak + 2);
-                  }
-                }
-
                 return (
-                  <div key={m.id} className={`group/msg relative flex flex-col ${isMe ? "items-end" : "items-start"} my-1.5`}>
-                    {/* Floating WhatsApp Action & Reaction Bar on Hover (Strictly hover-only) */}
-                    <div className={`pointer-events-none group-hover/msg:pointer-events-auto opacity-0 group-hover/msg:opacity-100 scale-95 group-hover/msg:scale-100 transition-all duration-150 ease-out absolute -top-8.5 z-20 flex items-center gap-1 rounded-full border border-slate-200/90 bg-white/95 px-2 py-1 shadow-lg backdrop-blur-md dark:border-white/10 dark:bg-[#1f1d2e]/95 ${
-                      isMe ? "right-2" : "left-2"
-                    }`}>
-                      {["👍", "❤️", "😂", "😮", "😢", "🙏"].map((emo) => {
-                        const isReacted = (msgReactions[emo] || []).includes(user?.id || "");
-                        return (
-                          <button
-                            key={emo}
-                            type="button"
-                            onClick={() => toggleReaction(m.id, emo)}
-                            className={`rounded-full p-1 text-xs hover:scale-130 active:scale-90 transition-transform cursor-pointer ${
-                              isReacted ? "bg-purple-100 dark:bg-purple-900/40 scale-110" : ""
-                            }`}
-                            title={`React with ${emo}`}
-                          >
-                            {emo}
-                          </button>
-                        );
-                      })}
-                      <div className="h-3 w-px bg-slate-200 dark:bg-white/10 mx-0.5" />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setReplyingTo({
-                            id: m.id,
-                            sender_name: isBot ? "AskDocs AI" : senderName(m.sender_id),
-                            snippet: bodyContent.slice(0, 80),
-                          })
-                        }
-                        title="Reply to message"
-                        className="rounded-full p-1 text-slate-500 hover:text-purple-600 dark:text-zinc-400 dark:hover:text-purple-300 transition-colors cursor-pointer"
-                      >
-                        <CornerUpLeft className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-
-                    <div className={`relative max-w-[85%] sm:max-w-[75%] rounded-2xl px-3.5 py-2.5 text-sm shadow-sm transition-all ${
-                      isMe 
-                        ? "bg-purple-600 text-white rounded-br-sm shadow-purple-500/10" 
-                        : isBot
-                        ? "border border-purple-300/60 bg-gradient-to-br from-purple-50/90 via-indigo-50/60 to-white text-slate-900 shadow-md shadow-purple-500/5 dark:border-purple-500/30 dark:from-[#1b1736] dark:via-[#15122e] dark:to-[#0f0e24] dark:text-zinc-100 rounded-bl-sm"
-                        : "bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white rounded-bl-sm"
-                    }`}>
-                      {/* Sender name for group chats */}
-                      {!isMe && (
-                        isBot ? (
-                          <div className="mb-2 flex items-center gap-1.5 rounded-full border border-purple-300/60 bg-white/80 px-2.5 py-1 text-[11px] font-extrabold text-purple-700 shadow-xs backdrop-blur-sm dark:border-purple-500/30 dark:bg-purple-950/60 dark:text-purple-300">
-                            <AIAvatarIcon size={16} className="h-4 w-4" />
-                            <span>@AskDocs AI Teammate</span>
-                          </div>
-                        ) : m.sender_id ? (
-                          <Link
-                            href={`/profile/${m.sender_id}`}
-                            className="mb-1 block text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline cursor-pointer"
-                            title="View Profile"
-                          >
-                            {senderName(m.sender_id)}
-                          </Link>
-                        ) : null
-                      )}
-
-                      {/* Quoted Reply Preview inside bubble */}
-                      {quoteInfo && (
-                        <div className={`mb-2 rounded-xl p-2 text-xs border-l-4 ${
-                          isMe
-                            ? "border-white bg-white/15 text-purple-100"
-                            : "border-purple-600 bg-purple-500/10 text-slate-700 dark:text-zinc-300"
-                        }`}>
-                          <span className="block font-bold text-[11px] text-purple-300 dark:text-purple-400">
-                            {quoteInfo.author}
-                          </span>
-                          <span className="block truncate text-[11px] opacity-90">
-                            {quoteInfo.snippet}
-                          </span>
-                        </div>
-                      )}
-
-                      {bodyContent.trim().length > 0 && (
-                        <p className="whitespace-pre-wrap break-words leading-relaxed">{bodyContent}</p>
-                      )}
-
-                      {/* Autonomous Interactive Approval Card */}
-                      {m.approval_card && (
-                        <div className="mt-3 rounded-2xl border border-purple-500/30 bg-slate-900 p-3.5 text-white shadow-xl backdrop-blur-md dark:border-purple-500/40 dark:bg-[#1a172c]">
-                          <div className="flex items-center justify-between gap-2 pb-2 border-b border-white/10">
-                            <div className="flex items-center gap-1.5 text-xs font-black text-purple-300">
-                              <Sparkles className="h-3.5 w-3.5 text-purple-400 animate-pulse" />
-                              <span>APPROVAL WORKFLOW</span>
-                            </div>
-                            <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
-                              m.approval_card.status === "approved"
-                                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                                : m.approval_card.status === "rejected"
-                                ? "bg-red-500/20 text-red-300 border border-red-500/30"
-                                : "bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse"
-                            }`}>
-                              {m.approval_card.status}
-                            </span>
-                          </div>
-
-                          <div className="mt-2.5 space-y-1 text-xs">
-                            <div className="flex justify-between">
-                              <span className="text-slate-400">Action:</span>
-                              <span className="font-bold text-white">{m.approval_card.action_type}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-slate-400">Requested Amount:</span>
-                              <span className="font-black text-emerald-400">{m.approval_card.requested_amount}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-slate-400">Policy Citation:</span>
-                              <span className="font-medium text-slate-300 truncate max-w-[180px]">{m.approval_card.policy_citation}</span>
-                            </div>
-                            {m.approval_card.approved_by && (
-                              <div className="flex justify-between pt-1 border-t border-white/5 text-[11px] text-slate-400">
-                                <span>Decided By:</span>
-                                <span className="font-bold text-purple-300">{m.approval_card.approved_by}</span>
-                              </div>
-                            )}
-                          </div>
-
-                          {m.approval_card.status === "pending" && (
-                            <div className="mt-3 flex items-center gap-2 pt-2 border-t border-white/10">
-                              <button
-                                onClick={async () => {
-                                  try {
-                                    const updatedMsg = await api.updateMessageApprovalStatus(activeChat.id, m.id, "approved");
-                                    setMessages((prev) => prev.map((msgItem) => (msgItem.id === m.id ? updatedMsg : msgItem)));
-                                  } catch {
-                                    alert("Failed to approve request.");
-                                  }
-                                }}
-                                className="flex-1 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 py-1.5 text-xs font-black text-white shadow-md hover:from-emerald-500 hover:to-teal-500 active:scale-95 transition-all cursor-pointer"
-                              >
-                                Approve
-                              </button>
-                              <button
-                                onClick={async () => {
-                                  try {
-                                    const updatedMsg = await api.updateMessageApprovalStatus(activeChat.id, m.id, "rejected");
-                                    setMessages((prev) => prev.map((msgItem) => (msgItem.id === m.id ? updatedMsg : msgItem)));
-                                  } catch {
-                                    alert("Failed to reject request.");
-                                  }
-                                }}
-                                className="flex-1 rounded-xl bg-slate-800 py-1.5 text-xs font-black text-slate-300 hover:bg-red-600 hover:text-white active:scale-95 transition-all cursor-pointer"
-                              >
-                                Reject
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {m.attachments && m.attachments.length > 0 && (
-                        <div className="mt-2 space-y-1">
-                          {m.attachments.map((att) => (
-                            <AttachmentThumbnail
-                              key={att.id}
-                              att={att}
-                              onOpenImage={(a) => setLightboxImg({ url: `${API_BASE}${a.url}`, filename: a.filename })}
-                            />
-                          ))}
-                        </div>
-                      )}
-                      <div className={`mt-1 flex items-center justify-end gap-1 text-[10px] ${isMe ? "text-purple-200" : "text-slate-400 dark:text-zinc-500"}`}>
-                        <span>{fmtTime(m.created_at)}</span>
-                        {isMe && <ReadTicks readBy={m.read_by} myId={user?.id ?? ""} participantCount={activeChat.participants.length} />}
-                      </div>
-                    </div>
-
-                    {/* WhatsApp-Style Reaction Badges below bubble */}
-                    {hasReactions && (
-                      <div className={`mt-1 flex flex-wrap gap-1 ${isMe ? "justify-end mr-1" : "justify-start ml-1"}`}>
-                        {Object.entries(msgReactions).map(([emo, uids]) => {
-                          const isMine = uids.includes(user?.id || "");
-                          return (
-                            <button
-                              key={emo}
-                              type="button"
-                              onClick={() => toggleReaction(m.id, emo)}
-                              className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-bold shadow-2xs transition-transform active:scale-90 cursor-pointer ${
-                                isMine
-                                  ? "border-purple-300 bg-purple-50 text-purple-700 dark:border-purple-500/40 dark:bg-purple-950/60 dark:text-purple-300"
-                                  : "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-[#1a1728] dark:text-zinc-300"
-                              }`}
-                            >
-                              <span>{emo}</span>
-                              <span className="text-[10px] opacity-80">{uids.length}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    {isMe && (
-                      <button 
-                        onClick={() => setDeletingMsg(m)} 
-                        title="Delete message"
-                        className="opacity-0 group-hover/msg:opacity-100 self-end p-1 text-slate-400 hover:text-red-500 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 transition-all cursor-pointer mt-0.5"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    )}
-                  </div>
+                  <ChatMessageItem
+                    key={m.id}
+                    m={m}
+                    isMe={isMe}
+                    isBot={isBot}
+                    user={user}
+                    msgReactions={msgReactions}
+                    hasReactions={hasReactions}
+                    activeMsgMenuId={activeMsgMenuId}
+                    setActiveMsgMenuId={setActiveMsgMenuId}
+                    toggleReaction={toggleReaction}
+                    senderName={senderName}
+                    setReplyingTo={setReplyingTo}
+                    setLightboxImg={setLightboxImg}
+                    setDeletingMsg={setDeletingMsg}
+                    activeChat={activeChat}
+                    setMessages={setMessages}
+                  />
                 );
               })}
               <div ref={threadEnd} />

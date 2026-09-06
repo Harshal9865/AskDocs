@@ -119,6 +119,74 @@ const STUDY_PERSONAS: StudyPersonaConfig[] = [
   },
 ];
 
+interface SubjectTrackConfig {
+  id: string;
+  label: string;
+  iconName: string;
+  badge: string;
+  description: string;
+  promptGuidance: string;
+}
+
+const SUBJECT_TRACKS: SubjectTrackConfig[] = [
+  {
+    id: "general",
+    label: "General & Interdisciplinary",
+    iconName: "🎓",
+    badge: "Universal",
+    description: "Comprehensive core principles, definitions, summary notes, and foundational concepts.",
+    promptGuidance: "Focus on general academic mastery, foundational definitions, chapter highlights, and clear explanation of concepts.",
+  },
+  {
+    id: "cs_tech",
+    label: "Computer Science & Software",
+    iconName: "💻",
+    badge: "CS / Eng",
+    description: "Algorithms, Data Structures, System Architecture, Operating Systems, DBMS & Code syntax.",
+    promptGuidance: "Focus on computer science concepts, code syntax examples, data structure operations, time/space complexity O(n) analysis, and code debugging questions.",
+  },
+  {
+    id: "calculus_stem",
+    label: "Calculus, Mathematics & Physics",
+    iconName: "📐",
+    badge: "Calculus & STEM",
+    description: "Differential & Integral Calculus, Linear Algebra, Probability, Formulas, LaTeX equations & Physics proofs.",
+    promptGuidance: "Focus on mathematical equations, calculus limits, derivative & integral derivations, step-by-step problem proofs, formulas, variable definitions, and quantitative practice exercises.",
+  },
+  {
+    id: "commerce_biz",
+    label: "Commerce, Economics & Finance",
+    iconName: "📊",
+    badge: "Commerce & Biz",
+    description: "Accounting & Ledgers, Micro/Macro Economics, Business Strategy, Corporate Finance & Auditing.",
+    promptGuidance: "Focus on accounting principles, economic formulas (supply/demand, elasticity), financial metrics, expenditure reconciliation, tax rules, and business case scenarios.",
+  },
+  {
+    id: "arts_humanities",
+    label: "Arts, History & Literature",
+    iconName: "🎨",
+    badge: "Arts & Humanities",
+    description: "World & National History, English Literature, Philosophy, Ethics, Fine Arts & Critical Analysis.",
+    promptGuidance: "Focus on thematic analysis, historical timeline events, literary criticism, philosophical arguments, and conceptual synthesis.",
+  },
+  {
+    id: "medical_health",
+    label: "Medical & Health Sciences",
+    iconName: "🩺",
+    badge: "Medicine & Health",
+    description: "Anatomy, Pathology, Clinical Case Vignettes, Diagnostic Scenarios & Pharmacology.",
+    promptGuidance: "Focus on clinical case scenarios, patient vitals, diagnostic reasoning, medication dosage calculations, and treatment protocols.",
+  },
+  {
+    id: "custom",
+    label: "Custom Subject Focus...",
+    iconName: "✍️",
+    badge: "Custom Discipline",
+    description: "Specify any unique course title or specialized topic of interest.",
+    promptGuidance: "Focus strictly on user-specified custom subject specialization.",
+  },
+];
+
 interface GeneratedStudyJson {
   title?: string;
   executive_cheat_sheet?: string;
@@ -249,6 +317,8 @@ export default function StudyGuidePage() {
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [selectedDocIds, setSelectedDocIds] = useState<string[]>([]);
   const [persona, setPersona] = useState<StudyPersona>("student");
+  const [subjectTrack, setSubjectTrack] = useState<string>("general");
+  const [customSubjectText, setCustomSubjectText] = useState<string>("");
   const [questionCount, setQuestionCount] = useState<number>(5);
   const [flashcardCount, setFlashcardCount] = useState<number>(6);
   const [difficulty, setDifficulty] = useState<DifficultyLevel>("medium");
@@ -391,12 +461,17 @@ export default function StudyGuidePage() {
         .slice(0, 6000);
 
       const personaConfig = STUDY_PERSONAS.find((p) => p.id === persona);
+      const subjectConfig = SUBJECT_TRACKS.find((s) => s.id === subjectTrack) || SUBJECT_TRACKS[0];
+      const targetSubjectName = subjectTrack === "custom" && customSubjectText.trim()
+        ? customSubjectText.trim()
+        : subjectConfig.label;
 
       const prompt = `You are a master pedagogical exam and curriculum designer.
 Synthesize a comprehensive study deck, flashcards, and practice examination based on the source documents.
 
 SOURCE DOCUMENTS: ${titles}
 TARGET AUDIENCE / PERSONA: ${personaConfig?.label} (${personaConfig?.promptGuidance})
+SUBJECT DISCIPLINE FOCUS: ${targetSubjectName} (${subjectTrack === "custom" ? `Focus on: ${customSubjectText}` : subjectConfig.promptGuidance})
 TARGET QUESTION COUNT: Exactly ${questionCount} questions
 TARGET FLASHCARD COUNT: Exactly ${flashcardCount} flashcards
 DIFFICULTY LEVEL: ${difficulty.toUpperCase()}
@@ -1124,6 +1199,57 @@ Output MUST be strictly a JSON object with this structure, no markdown backticks
               );
             })}
           </div>
+        </div>
+
+        {/* Subject Track & Discipline Focus Selector */}
+        <div className="space-y-2.5 pt-3 border-t border-slate-100 dark:border-white/5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+            <label className="text-xs font-black uppercase tracking-wider text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
+              <BrainCircuit className="h-3.5 w-3.5 text-purple-500" /> 3. Subject & Knowledge Discipline Focus
+            </label>
+            <span className="text-[11px] text-slate-400">
+              Customize synthesis for Calculus, Computer Science, Commerce, Arts, or STEM
+            </span>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {SUBJECT_TRACKS.map((st) => {
+              const isSelected = subjectTrack === st.id;
+              return (
+                <button
+                  key={st.id}
+                  type="button"
+                  onClick={() => setSubjectTrack(st.id)}
+                  className={`flex items-center gap-2 rounded-2xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                    isSelected
+                      ? "bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 text-white font-extrabold shadow-md shadow-purple-500/25 ring-2 ring-purple-400/40 scale-102"
+                      : "border border-slate-200/80 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:bg-white/10"
+                  }`}
+                  title={st.description}
+                >
+                  <span className="text-sm">{st.iconName}</span>
+                  <span>{st.label}</span>
+                  <span className={`text-[10px] rounded-full px-2 py-0.2 font-mono font-bold ${
+                    isSelected ? "bg-white/20 text-white" : "bg-slate-200/80 text-slate-600 dark:bg-white/10 dark:text-zinc-400"
+                  }`}>
+                    {st.badge}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {subjectTrack === "custom" && (
+            <div className="mt-2 space-y-1.5 animate-in fade-in duration-200">
+              <input
+                type="text"
+                value={customSubjectText}
+                onChange={(e) => setCustomSubjectText(e.target.value)}
+                placeholder="Enter custom subject (e.g. Organic Chemistry, Linear Algebra & Calculus, Microeconomics, Philosophy of Mind...)"
+                className="w-full rounded-2xl border border-purple-300/80 bg-purple-50/50 px-4 py-2.5 text-xs font-semibold text-slate-900 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-purple-500/30 dark:bg-[#1a172e] dark:text-white"
+              />
+            </div>
+          )}
         </div>
 
         {/* Quantity and Difficulty Controls with Spotify Green Accent */}
