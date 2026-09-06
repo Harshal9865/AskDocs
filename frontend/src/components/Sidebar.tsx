@@ -362,13 +362,13 @@ export default function Sidebar({
             </Link>
           </div>
         </div>
-        <div className="sb-collapsed-show shrink-0 border-b border-slate-100 p-2 space-y-2 dark:border-slate-700/50">
+        <div className="sb-collapsed-show shrink-0 border-b border-slate-100 p-2 py-3 flex flex-col items-center justify-center gap-2.5 dark:border-slate-700/50 w-full">
           <Link
             href="/workspaces"
             onClick={onCloseMobile}
             title={workspace ? `Workspace: ${workspace.name}` : "No workspace"}
             aria-label="Manage workspaces"
-            className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-sm font-black uppercase text-white shadow-xs hover:scale-105 transition-transform overflow-hidden ring-1 ring-white/20"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-xs font-black uppercase text-white shadow-xs hover:scale-105 transition-transform overflow-hidden ring-1 ring-white/20"
           >
             {sidebarBrandUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -380,22 +380,22 @@ export default function Sidebar({
               (workspace?.name ?? "W").slice(0, 1).toUpperCase()
             )}
           </Link>
-          <div className="flex flex-col items-center gap-1">
+          <div className="flex flex-col items-center gap-1.5 w-full">
             <Link
               href="/search"
               onClick={onCloseMobile}
               title="Search"
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-purple-50 dark:text-zinc-400 dark:hover:bg-white/10"
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-600 hover:bg-purple-50 dark:text-zinc-400 dark:hover:bg-white/10 transition-colors"
             >
-              <Search className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              <Search className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
             </Link>
             <Link
               href="/discover"
               onClick={onCloseMobile}
               title="Discover"
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-indigo-50 dark:text-zinc-400 dark:hover:bg-white/10"
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-600 hover:bg-indigo-50 dark:text-zinc-400 dark:hover:bg-white/10 transition-colors"
             >
-              <Compass className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+              <Compass className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
             </Link>
           </div>
         </div>

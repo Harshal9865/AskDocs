@@ -292,6 +292,10 @@ input:focus-visible {
 }
 .sb-collapsed .sb-collapsed-show {
   display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
 }
 .sb-collapsed nav a,
 .sb-collapsed nav button,

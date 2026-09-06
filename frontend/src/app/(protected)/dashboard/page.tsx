@@ -285,6 +285,302 @@ const MODE_HERO_ACTIONS: Record<
   ],
 };
 
+/* ── Mode-Specific Intelligence Spotlight Widget ── */
+function ModeSpotlightWidget({
+  mode,
+  docs,
+  obligations,
+  memories,
+  chats,
+}: {
+  mode: AudienceMode;
+  docs: DocumentItem[];
+  obligations: ContractObligation[];
+  memories: WorkspaceMemory[];
+  chats: TeamChat[];
+}) {
+  if (mode === "academic") {
+    return (
+      <div className="rounded-3xl border border-purple-500/20 bg-gradient-to-r from-purple-900/10 via-indigo-900/10 to-slate-900/40 p-5 shadow-md backdrop-blur-md dark:border-purple-500/30 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/20 text-purple-400 font-bold">
+              🎓
+            </span>
+            <div>
+              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                Academic & Exam Revision Spotlight
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-zinc-400">
+                Syllabus mastery, 3D flippable flashcards & practice test quizzes
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/study-guide"
+            className="inline-flex items-center gap-1.5 rounded-full bg-purple-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-purple-500 transition-all cursor-pointer"
+          >
+            <span>Open Study Studio</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-purple-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">Course Disciplines</span>
+            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">CS, Math, Commerce, Arts</div>
+            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Tailored 3D flashcard decks</p>
+          </div>
+          <div className="rounded-2xl border border-indigo-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Audio Podcasts</span>
+            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">3-Min Audio Briefs</div>
+            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Listen to key syllabus topics</p>
+          </div>
+          <div className="rounded-2xl border border-emerald-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Study Groups</span>
+            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">{chats.filter(c => c.type === "group").length} Active Groups</div>
+            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Share revision guides with peers</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (mode === "office") {
+    return (
+      <div className="rounded-3xl border border-indigo-500/20 bg-gradient-to-r from-indigo-900/10 via-blue-900/10 to-slate-900/40 p-5 shadow-md backdrop-blur-md dark:border-indigo-500/30 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-400 font-bold">
+              🏢
+            </span>
+            <div>
+              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                Corporate Operations & Decision Graph
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-zinc-400">
+                Institutional memory, team standup logs & architecture sync
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/memory"
+            className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-500 transition-all cursor-pointer"
+          >
+            <span>View Memory Graph</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-indigo-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Knowledge Graph</span>
+            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">{memories.length} Recorded Nodes</div>
+            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Preserved meeting decisions</p>
+          </div>
+          <div className="rounded-2xl border border-purple-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">Weekly Digest</span>
+            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">Auto Digest Ready</div>
+            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">1-click corporate summaries</p>
+          </div>
+          <div className="rounded-2xl border border-emerald-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Office Channels</span>
+            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">{chats.length} Team Channels</div>
+            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Enterprise NDA messaging</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (mode === "legal") {
+    return (
+      <div className="rounded-3xl border border-rose-500/20 bg-gradient-to-r from-rose-900/10 via-purple-900/10 to-slate-900/40 p-5 shadow-md backdrop-blur-md dark:border-rose-500/30 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-500/20 text-rose-400 font-bold">
+              ⚖️
+            </span>
+            <div>
+              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                Legal Vault & Contract Risk Spotlight
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-zinc-400">
+                Redline diffs, NDA privilege masking & liability tracking
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/contracts/compare"
+            className="inline-flex items-center gap-1.5 rounded-full bg-rose-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-rose-500 transition-all cursor-pointer"
+          >
+            <span>Run Redline Diff</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-rose-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">Active Obligations</span>
+            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">{obligations.length} Terms Tracked</div>
+            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Auto-extracted renewal dates</p>
+          </div>
+          <div className="rounded-2xl border border-purple-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">Privilege Vault</span>
+            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">Strict NDA Active</div>
+            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Auto PII & liability masking</p>
+          </div>
+          <div className="rounded-2xl border border-amber-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Redact & Format</span>
+            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">1-Click Sanitizer</div>
+            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Mask secret emails & phones</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (mode === "finance") {
+    return (
+      <div className="rounded-3xl border border-emerald-500/20 bg-gradient-to-r from-emerald-900/10 via-teal-900/10 to-slate-900/40 p-5 shadow-md backdrop-blur-md dark:border-emerald-500/30 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 font-bold">
+              💰
+            </span>
+            <div>
+              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                Finance Desk & Fiscal Reconciliation Spotlight
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-zinc-400">
+                Invoice line-item extractor, live Excel grids & tax audits
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/extract"
+            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-500 transition-all cursor-pointer"
+          >
+            <span>Open Data Extractor</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-emerald-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Extracted Invoices</span>
+            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">{docs.filter(d => d.file_type === "pdf" || d.file_type === "xlsx").length} Fiscal Docs</div>
+            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Structured Excel & CSV grids</p>
+          </div>
+          <div className="rounded-2xl border border-cyan-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">Number Sanitizer</span>
+            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">Audit Mode Active</div>
+            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Auto-sums & balance checks</p>
+          </div>
+          <div className="rounded-2xl border border-indigo-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Weekly Fiscal Digest</span>
+            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">CapEx & Payroll Sync</div>
+            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Executive financial briefing</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (mode === "clinical") {
+    return (
+      <div className="rounded-3xl border border-cyan-500/20 bg-gradient-to-r from-cyan-900/10 via-teal-900/10 to-slate-900/40 p-5 shadow-md backdrop-blur-md dark:border-cyan-500/30 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-500/20 text-cyan-400 font-bold">
+              🩺
+            </span>
+            <div>
+              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                Clinical Lab & Medical De-Identification Spotlight
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-zinc-400">
+                Protocol audits, medical study cards & patient de-identification
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/health"
+            className="inline-flex items-center gap-1.5 rounded-full bg-cyan-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-cyan-500 transition-all cursor-pointer"
+          >
+            <span>Audit Doc Health</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-cyan-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">De-Identification</span>
+            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">HIPAA Sanitizer On</div>
+            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">MRNs & dates masked</p>
+          </div>
+          <div className="rounded-2xl border border-purple-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">Medical Study Cards</span>
+            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">Protocol Vetting</div>
+            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Clinical trial summary decks</p>
+          </div>
+          <div className="rounded-2xl border border-emerald-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Lab Rounds</span>
+            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">{chats.filter(c => c.type === "group").length} Clinical Cohorts</div>
+            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Grand rounds discussion</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Personal / Solo Studio Mode
+  return (
+    <div className="rounded-3xl border border-purple-500/20 bg-gradient-to-r from-purple-900/10 via-indigo-900/10 to-slate-900/40 p-5 shadow-md backdrop-blur-md dark:border-purple-500/30 space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-500/20 text-purple-400 font-bold">
+            💼
+          </span>
+          <div>
+            <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+              Solo Studio & Freelance Project Spotlight
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-zinc-400">
+              Executive presentation decks, audio podcasts & direct client messaging
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/slides"
+          className="inline-flex items-center gap-1.5 rounded-full bg-purple-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-purple-500 transition-all cursor-pointer"
+        >
+          <span>Open Slide Studio</span>
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="rounded-2xl border border-purple-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">Slide Decks</span>
+          <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">Client Pitch Decks</div>
+          <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">4-slide executive decks</p>
+        </div>
+        <div className="rounded-2xl border border-indigo-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Audio Briefs</span>
+          <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">3-Min Podcasts</div>
+          <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Spoken audio summaries</p>
+        </div>
+        <div className="rounded-2xl border border-emerald-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Direct Messaging</span>
+          <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">{chats.length} Client Chats</div>
+          <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Direct freelancer threads</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main Dashboard ── */
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -503,7 +799,7 @@ export default function DashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="text-xs font-black uppercase tracking-wider text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5" /> Active Mode Engine:
+              <Sparkles className="h-3.5 w-3.5 animate-pulse" /> Active Mode Engine:
             </span>
             <span className="text-xs font-extrabold text-slate-900 dark:text-white">
               {modeConfig.name}
@@ -545,6 +841,9 @@ export default function DashboardPage() {
           })}
         </div>
       </div>
+
+      {/* Mode-Specific Intelligence Spotlight Panel */}
+      <ModeSpotlightWidget mode={mode} docs={docs} obligations={obligations} memories={memories} chats={chats} />
 
       {/* Getting Started (new users) */}
       {showGuide && docCount === 0 && questionCount === 0 && (
