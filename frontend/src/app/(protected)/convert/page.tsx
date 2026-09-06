@@ -87,10 +87,8 @@ export default function DocumentConverterStudioPage() {
 
   // Auto-set initial redaction profile based on active mode
   useEffect(() => {
-    if (mode === "clinical") setRedactionProfile("hipaa");
-    else if (mode === "legal") setRedactionProfile("legal_nda");
+    if (mode === "legal") setRedactionProfile("legal_nda");
     else if (mode === "academic") setRedactionProfile("academic_blind");
-    else if (mode === "finance") setRedactionProfile("finance");
     else setRedactionProfile("universal");
   }, [mode]);
 
