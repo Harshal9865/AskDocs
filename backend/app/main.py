@@ -35,6 +35,7 @@ async def lifespan(app: FastAPI):
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS pronouns VARCHAR(50) DEFAULT NULL;",
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS job_title VARCHAR(120) DEFAULT NULL;",
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS job_role VARCHAR(120) DEFAULT NULL;",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS plan VARCHAR(30) DEFAULT 'free';",
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS documents_used INTEGER DEFAULT 0;",
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS questions_used INTEGER DEFAULT 0;",
                 "ALTER TABLE users ADD COLUMN IF NOT EXISTS plan_reset_at TIMESTAMP WITH TIME ZONE DEFAULT NULL;",

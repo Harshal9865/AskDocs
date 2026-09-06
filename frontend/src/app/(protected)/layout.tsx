@@ -6,14 +6,12 @@ import { useAuth } from "@/lib/auth-context";
 import { WorkspaceProvider } from "@/lib/workspace-context";
 import { AudienceModeProvider } from "@/lib/audience-mode-context";
 import Sidebar from "@/components/Sidebar";
-import SidebarRail from "@/components/SidebarRail";
 import TopNavbar from "@/components/TopNavbar";
 import CommandPalette from "@/components/CommandPalette";
 import WelcomeModal from "@/components/WelcomeModal";
 import Loading from "@/components/Loading";
 import { Toaster } from "@/components/Toast";
 import BottomTabBar from "@/components/BottomTabBar";
-import { useMobile } from "@/lib/hooks/useMobile";
 
 export default function ProtectedLayout({
   children,
@@ -21,10 +19,8 @@ export default function ProtectedLayout({
   const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(264);
   const [railMobileOpen, setRailMobileOpen] = useState(false);
-  const { isMobile, isClient } = useMobile();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -46,18 +42,6 @@ export default function ProtectedLayout({
     if (saved >= 220 && saved <= 420) setSidebarWidth(saved);
   }, []);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("askdocs_sb_collapsed") === "1";
-    setSidebarCollapsed(saved);
-  }, []);
-
-  const handleToggleCollapse = () => {
-    setSidebarCollapsed((c) => {
-      localStorage.setItem("askdocs_sb_collapsed", c ? "0" : "1");
-      return !c;
-    });
-  };
-
   const handleResize = (w: number) => {
     setSidebarWidth(w);
     localStorage.setItem("askdocs_sidebar_width", String(w));
@@ -68,8 +52,6 @@ export default function ProtectedLayout({
 
   const isChatPage = pathname === "/chat" || pathname === "/chats";
   const isFrontier = pathname === "/frontier" || pathname.startsWith("/frontier/");
-
-  const showFullSidebar = isClient && !isMobile;
 
   if (isFrontier) {
     return (
@@ -96,33 +78,12 @@ export default function ProtectedLayout({
           <TopNavbar onMenu={() => setRailMobileOpen(true)} />
           <Toaster />
           <div className="flex flex-1 min-h-0 min-w-0 max-w-full overflow-x-hidden">
-            {/* Desktop: Full sidebar when expanded, rail when collapsed */}
-            {showFullSidebar && (
-              <>
-                <Sidebar
-                  mobileOpen={railMobileOpen}
-                  onCloseMobile={() => setRailMobileOpen(false)}
-                  width={sidebarWidth}
-                  setWidth={handleResize}
-                />
-                <SidebarRail
-                  collapsed={sidebarCollapsed}
-                  onToggleCollapse={handleToggleCollapse}
-                  mobileOpen={railMobileOpen}
-                  onCloseMobile={() => setRailMobileOpen(false)}
-                />
-              </>
-            )}
-
-            {/* Mobile: Only rail (toggled) + bottom tabs always visible */}
-            {!showFullSidebar && (
-              <SidebarRail
-                collapsed={false}
-                onToggleCollapse={handleToggleCollapse}
-                mobileOpen={railMobileOpen}
-                onCloseMobile={() => setRailMobileOpen(false)}
-              />
-            )}
+            <Sidebar
+              mobileOpen={railMobileOpen}
+              onCloseMobile={() => setRailMobileOpen(false)}
+              width={sidebarWidth}
+              setWidth={handleResize}
+            />
 
             <main
               className={`min-w-0 max-w-full flex-1 min-h-0 transition-colors ${

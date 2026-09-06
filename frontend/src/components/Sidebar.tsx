@@ -278,18 +278,18 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Mobile Drawer Overlay & Sheet (Rendered full height on mobile) */}
+      {/* Mobile Drawer Overlay & Sheet (starts directly below TopNavbar at top-16) */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 flex md:hidden">
-          {/* Backdrop */}
+        <div className="fixed top-16 left-0 right-0 bottom-16 z-50 flex md:hidden">
+          {/* Backdrop (Dark tint, no blur filter for 100% crisp text) */}
           <div
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+            className="fixed top-16 left-0 right-0 bottom-0 bg-slate-950/70 transition-opacity"
             onClick={onCloseMobile}
             aria-hidden
           />
 
-          {/* Dedicated Full-Height Mobile Navigation Drawer */}
-          <aside className="relative flex w-[85vw] max-w-xs flex-col bg-white dark:bg-[#12131e] text-slate-900 dark:text-white shadow-2xl rounded-r-3xl overflow-hidden z-50 border-r border-slate-200 dark:border-white/10">
+          {/* Dedicated Sharp Mobile Navigation Drawer */}
+          <aside className="relative flex w-[85vw] max-w-xs flex-col bg-white dark:bg-[#12131e] text-slate-900 dark:text-white shadow-2xl rounded-r-2xl overflow-hidden z-50 border-r border-slate-200 dark:border-white/10">
             {/* Mobile Drawer Top Bar */}
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 p-4 bg-slate-50/50 dark:bg-white/5">
               <Link
