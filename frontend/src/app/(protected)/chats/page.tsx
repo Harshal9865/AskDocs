@@ -437,7 +437,7 @@ function ChatMessageItem({
   return (
     <div
       key={m.id}
-      className={`group/msg relative flex flex-col ${isMe ? "items-end" : "items-start"} my-1.5 transition-all ${
+      className={`group/msg relative flex flex-col ${isMe ? "items-end" : "items-start"} ${hasReactions ? "mb-4 mt-1.5" : "my-1.5"} transition-all ${
         isMenuActive ? "z-50" : "z-10"
       }`}
     >
@@ -649,32 +649,39 @@ function ChatMessageItem({
             <span>{fmtTime(m.created_at)}</span>
             {isMe && <ReadTicks readBy={m.read_by} myId={user?.id ?? ""} participantCount={activeChat.participants.length} />}
           </div>
+
+          {/* WhatsApp-Style Overlapping Reaction Pill attached to bottom corner */}
+          {hasReactions && (
+            <div
+              className={`absolute -bottom-3 z-30 flex flex-wrap gap-1 ${
+                isMe ? "right-2" : "left-2"
+              }`}
+            >
+              {Object.entries(msgReactions).map(([emo, uids]) => {
+                const isMine = uids.includes(user?.id || "");
+                return (
+                  <button
+                    key={emo}
+                    type="button"
+                    onClick={() => toggleReaction(m.id, emo)}
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-extrabold shadow-md transition-all active:scale-95 cursor-pointer ring-2 ${
+                      isMine
+                        ? "border border-purple-300/60 bg-purple-600 text-white dark:bg-purple-700 dark:border-purple-400 ring-white dark:ring-[#0b0f14] shadow-purple-500/30"
+                        : "border border-slate-200 bg-white text-slate-800 dark:border-white/15 dark:bg-[#1a1728] dark:text-zinc-100 ring-white dark:ring-[#0b0f14] shadow-black/10"
+                    }`}
+                    title={`${uids.length} reaction${uids.length > 1 ? "s" : ""}`}
+                  >
+                    <span>{emo}</span>
+                    {uids.length > 1 && (
+                      <span className="text-[10px] font-mono opacity-90">{uids.length}</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
-
-      {/* WhatsApp-Style Reaction Badges below bubble */}
-      {hasReactions && (
-        <div className={`mt-1 flex flex-wrap gap-1 ${isMe ? "justify-end mr-1" : "justify-start ml-1"}`}>
-          {Object.entries(msgReactions).map(([emo, uids]) => {
-            const isMine = uids.includes(user?.id || "");
-            return (
-              <button
-                key={emo}
-                type="button"
-                onClick={() => toggleReaction(m.id, emo)}
-                className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-bold shadow-2xs transition-transform active:scale-90 cursor-pointer ${
-                  isMine
-                    ? "border-purple-300 bg-purple-50 text-purple-700 dark:border-purple-500/40 dark:bg-purple-950/60 dark:text-purple-300"
-                    : "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-[#1a1728] dark:text-zinc-300"
-                }`}
-              >
-                <span>{emo}</span>
-                <span className="text-[10px] opacity-80">{uids.length}</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
 
       {isMe && (
         <button 
