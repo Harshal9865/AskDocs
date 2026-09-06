@@ -121,8 +121,6 @@ export default function AudioBriefPlayerPage() {
   useEffect(() => {
     if (mode === "academic") setPersona("professor_lecture");
     else if (mode === "legal") setPersona("legal_compliance");
-    else if (mode === "clinical") setPersona("clinical_rounds");
-    else if (mode === "finance") setPersona("earnings_call");
     else if (mode === "office") setPersona("executive_brief");
     else setPersona("two_host_podcast");
   }, [mode]);
