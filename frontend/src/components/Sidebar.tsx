@@ -307,24 +307,36 @@ export default function Sidebar({
               </button>
             </div>
 
-            {/* Quick Mode Switcher Chip */}
-            <div className="p-3 border-b border-slate-100 dark:border-white/10 bg-purple-50/30 dark:bg-purple-950/20 shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  onCloseMobile?.();
-                  setShowModeModal(true);
-                }}
-                className="w-full flex items-center justify-between rounded-xl border border-purple-500/20 bg-purple-50/60 dark:bg-purple-950/40 px-3 py-2 text-xs font-semibold text-purple-700 dark:text-purple-300 active:scale-[0.98] transition-all"
+            {/* Active Workspace Switcher Card */}
+            <div className="p-3 border-b border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-black/20 shrink-0">
+              <Link
+                href="/workspaces"
+                onClick={onCloseMobile}
+                className="w-full flex items-center justify-between gap-2.5 rounded-xl border border-indigo-500/20 bg-white dark:bg-[#181928] p-2.5 shadow-xs active:scale-[0.98] transition-all"
               >
-                <div className="flex items-center gap-2 min-w-0">
-                  <ModeIcon className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0" />
-                  <span className="truncate">Mode: {modeConfig.name}</span>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black text-xs shadow-xs overflow-hidden">
+                    {sidebarBrandUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={sidebarBrandUrl} alt="WS" className="h-full w-full object-cover" />
+                    ) : workspace?.brand_kind === "sticker" && workspace?.brand_value ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={`/stickers/${workspace.brand_value}.svg`} alt="WS" className="h-full w-full object-contain p-0.5" />
+                    ) : (
+                      (workspace?.name || "W").slice(0, 1).toUpperCase()
+                    )}
+                  </div>
+                  <div className="min-w-0 text-left">
+                    <div className="truncate text-xs font-black text-slate-900 dark:text-white">
+                      {workspace?.name || "Select Workspace"}
+                    </div>
+                    <div className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                      {workspaces.length} workspace{workspaces.length === 1 ? "" : "s"} • Switch
+                    </div>
+                  </div>
                 </div>
-                <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded bg-purple-200 dark:bg-purple-800 text-purple-900 dark:text-purple-100 shrink-0 ml-2">
-                  Change
-                </span>
-              </button>
+                <ChevronRight className="h-4 w-4 text-slate-400 shrink-0" />
+              </Link>
             </div>
 
             {/* Scrollable Mobile Nav Items starting right under top navbar */}
