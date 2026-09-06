@@ -264,13 +264,11 @@ const MODE_HERO_ACTIONS: Record<
 /* ── Mode-Specific Intelligence Spotlight Widget ── */
 function ModeSpotlightWidget({
   mode,
-  docs: _docs,
   obligations,
   memories,
   chats,
 }: {
   mode: AudienceMode;
-  docs: DocumentItem[];
   obligations: ContractObligation[];
   memories: WorkspaceMemory[];
   chats: TeamChat[];
@@ -723,7 +721,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Mode-Specific Intelligence Spotlight Panel */}
-      <ModeSpotlightWidget mode={mode} docs={docs} obligations={obligations} memories={memories} chats={chats} />
+      <ModeSpotlightWidget mode={mode} obligations={obligations} memories={memories} chats={chats} />
 
       {/* Getting Started (new users) */}
       {showGuide && docCount === 0 && questionCount === 0 && (

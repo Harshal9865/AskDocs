@@ -6,8 +6,6 @@ import {
   GraduationCap,
   Building2,
   Scale,
-  BadgePercent,
-  Stethoscope,
   Briefcase,
   Check,
   ArrowRight,
