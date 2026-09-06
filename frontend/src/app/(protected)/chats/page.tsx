@@ -449,65 +449,7 @@ function ChatMessageItem({
         />
       )}
 
-      {/* WhatsApp Action & Reaction Bar — ONLY visible on HOVER (desktop) or TAP/LONG-PRESS (mobile) */}
-      <div
-        className={`transition-all duration-200 ease-out absolute -top-10 z-50 flex items-center gap-1 rounded-full border border-slate-200/90 bg-white/95 px-2.5 py-1.5 shadow-xl backdrop-blur-xl dark:border-white/15 dark:bg-[#1a1728]/95 max-w-[92vw] overflow-x-auto no-scrollbar ${
-          isMe ? "right-2" : "left-2"
-        } ${
-          isMenuActive
-            ? "opacity-100 scale-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none scale-95 group-hover/msg:opacity-100 group-hover/msg:pointer-events-auto group-hover/msg:scale-100"
-        }`}
-      >
-        {["👍", "❤️", "😂", "😮", "😢", "🙏", "🔥", "🎉"].map((emo) => {
-          const isReacted = (msgReactions[emo] || []).includes(user?.id || "");
-          return (
-            <button
-              key={emo}
-              type="button"
-              onClick={() => {
-                toggleReaction(m.id, emo);
-                setActiveMsgMenuId(null);
-              }}
-              className={`rounded-full p-1.5 text-base sm:text-sm hover:scale-130 active:scale-90 transition-transform cursor-pointer shrink-0 ${
-                isReacted ? "bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 ring-1 ring-purple-400/40 scale-110" : ""
-              }`}
-              title={`React with ${emo}`}
-            >
-              {emo}
-            </button>
-          );
-        })}
-        <div className="h-4 w-px bg-slate-200 dark:bg-white/10 mx-0.5 shrink-0" />
-        <button
-          type="button"
-          onClick={() => {
-            setReplyingTo({
-              id: m.id,
-              sender_name: isBot ? "AskDocs AI" : senderName(m.sender_id),
-              snippet: bodyContent.slice(0, 80),
-            });
-            setActiveMsgMenuId(null);
-          }}
-          title="Reply to message"
-          className="rounded-full p-1.5 text-slate-500 hover:text-purple-600 dark:text-zinc-400 dark:hover:text-purple-300 transition-colors cursor-pointer shrink-0"
-        >
-          <CornerUpLeft className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
-        </button>
-        {bodyContent.trim().length > 0 && (
-          <button
-            type="button"
-            onClick={copyMessageText}
-            title="Copy text"
-            className="rounded-full p-1.5 text-slate-500 hover:text-purple-600 dark:text-zinc-400 dark:hover:text-purple-300 transition-colors cursor-pointer shrink-0"
-          >
-            <Copy className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
-          </button>
-        )}
-      </div>
-
       <div className="flex items-center gap-1.5 w-full justify-inherit">
-
         <div
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -522,6 +464,62 @@ function ChatMessageItem({
               : "bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white rounded-bl-sm"
           } ${isMenuActive ? "ring-2 ring-purple-500 scale-[1.01]" : ""}`}
         >
+          {/* WhatsApp Action & Reaction Bar — Anchored directly to THIS message/image bubble */}
+          <div
+            className={`transition-all duration-200 ease-out absolute -top-11 z-50 flex items-center gap-1 rounded-full border border-slate-200/90 bg-white/95 px-2.5 py-1.5 shadow-xl backdrop-blur-xl dark:border-white/15 dark:bg-[#1a1728]/95 max-w-[92vw] overflow-x-auto no-scrollbar ${
+              isMe ? "right-0" : "left-0"
+            } ${
+              isMenuActive
+                ? "opacity-100 scale-100 pointer-events-auto"
+                : "opacity-0 pointer-events-none scale-95 group-hover/msg:opacity-100 group-hover/msg:pointer-events-auto group-hover/msg:scale-100"
+            }`}
+          >
+            {["👍", "❤️", "😂", "😮", "😢", "🙏", "🔥", "🎉"].map((emo) => {
+              const isReacted = (msgReactions[emo] || []).includes(user?.id || "");
+              return (
+                <button
+                  key={emo}
+                  type="button"
+                  onClick={() => {
+                    toggleReaction(m.id, emo);
+                    setActiveMsgMenuId(null);
+                  }}
+                  className={`rounded-full p-1.5 text-base sm:text-sm hover:scale-130 active:scale-90 transition-transform cursor-pointer shrink-0 ${
+                    isReacted ? "bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 ring-1 ring-purple-400/40 scale-110" : ""
+                  }`}
+                  title={`React with ${emo}`}
+                >
+                  {emo}
+                </button>
+              );
+            })}
+            <div className="h-4 w-px bg-slate-200 dark:bg-white/10 mx-0.5 shrink-0" />
+            <button
+              type="button"
+              onClick={() => {
+                setReplyingTo({
+                  id: m.id,
+                  sender_name: isBot ? "AskDocs AI" : senderName(m.sender_id),
+                  snippet: bodyContent.slice(0, 80),
+                });
+                setActiveMsgMenuId(null);
+              }}
+              title="Reply to message"
+              className="rounded-full p-1.5 text-slate-500 hover:text-purple-600 dark:text-zinc-400 dark:hover:text-purple-300 transition-colors cursor-pointer shrink-0"
+            >
+              <CornerUpLeft className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+            </button>
+            {bodyContent.trim().length > 0 && (
+              <button
+                type="button"
+                onClick={copyMessageText}
+                title="Copy text"
+                className="rounded-full p-1.5 text-slate-500 hover:text-purple-600 dark:text-zinc-400 dark:hover:text-purple-300 transition-colors cursor-pointer shrink-0"
+              >
+                <Copy className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+              </button>
+            )}
+          </div>
           {/* Sender name for group chats */}
           {!isMe && (
             isBot ? (
