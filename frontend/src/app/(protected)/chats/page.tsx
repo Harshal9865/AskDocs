@@ -441,14 +441,22 @@ function ChatMessageItem({
         isMenuActive ? "z-50" : "z-10"
       }`}
     >
+      {/* Mobile Backdrop overlay for easy tap-away dismiss */}
+      {isMenuActive && (
+        <div
+          className="fixed inset-0 z-40 md:hidden bg-black/20 backdrop-blur-[1.5px] transition-opacity"
+          onClick={() => setActiveMsgMenuId(null)}
+        />
+      )}
+
       {/* Action & Reaction Bar (Hover on desktop OR Active on Mobile/Touch) */}
       <div
-        className={`transition-all duration-150 ease-out absolute -top-9 z-50 flex items-center gap-1 rounded-full border border-slate-200/90 bg-white/95 px-2 py-1 shadow-xl backdrop-blur-md dark:border-white/10 dark:bg-[#1f1d2e]/95 ${
-          isMe ? "right-2" : "left-2"
+        className={`transition-all duration-200 ease-out z-50 flex items-center gap-1 rounded-full border border-slate-200/90 bg-white/95 px-2.5 py-1.5 shadow-xl backdrop-blur-xl dark:border-white/15 dark:bg-[#1a1728]/95 max-w-[92vw] overflow-x-auto no-scrollbar md:absolute md:-top-10 ${
+          isMe ? "md:right-2" : "md:left-2"
         } ${
           isMenuActive
-            ? "opacity-100 scale-100 pointer-events-auto"
-            : "pointer-events-none group-hover/msg:pointer-events-auto opacity-0 group-hover/msg:opacity-100 scale-95 group-hover/msg:scale-100"
+            ? "opacity-100 scale-100 pointer-events-auto max-md:relative max-md:mb-1.5 max-md:self-center"
+            : "pointer-events-none opacity-0 scale-95 group-hover/msg:pointer-events-auto group-hover/msg:opacity-100 group-hover/msg:scale-100 max-md:hidden"
         }`}
       >
         {["👍", "❤️", "😂", "😮", "😢", "🙏", "🔥", "🎉"].map((emo) => {
@@ -461,8 +469,8 @@ function ChatMessageItem({
                 toggleReaction(m.id, emo);
                 setActiveMsgMenuId(null);
               }}
-              className={`rounded-full p-1 text-xs sm:text-sm hover:scale-130 active:scale-90 transition-transform cursor-pointer ${
-                isReacted ? "bg-purple-100 dark:bg-purple-900/40 scale-110" : ""
+              className={`rounded-full p-1.5 text-base sm:text-sm hover:scale-125 active:scale-95 transition-transform cursor-pointer shrink-0 ${
+                isReacted ? "bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 ring-1 ring-purple-400/40 scale-110" : ""
               }`}
               title={`React with ${emo}`}
             >
@@ -470,7 +478,7 @@ function ChatMessageItem({
             </button>
           );
         })}
-        <div className="h-3.5 w-px bg-slate-200 dark:bg-white/10 mx-0.5" />
+        <div className="h-4 w-px bg-slate-200 dark:bg-white/10 mx-0.5 shrink-0" />
         <button
           type="button"
           onClick={() => {
@@ -482,18 +490,18 @@ function ChatMessageItem({
             setActiveMsgMenuId(null);
           }}
           title="Reply to message"
-          className="rounded-full p-1 text-slate-500 hover:text-purple-600 dark:text-zinc-400 dark:hover:text-purple-300 transition-colors cursor-pointer"
+          className="rounded-full p-1.5 text-slate-500 hover:text-purple-600 dark:text-zinc-400 dark:hover:text-purple-300 transition-colors cursor-pointer shrink-0"
         >
-          <CornerUpLeft className="h-3.5 w-3.5" />
+          <CornerUpLeft className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
         </button>
         {bodyContent.trim().length > 0 && (
           <button
             type="button"
             onClick={copyMessageText}
             title="Copy text"
-            className="rounded-full p-1 text-slate-500 hover:text-purple-600 dark:text-zinc-400 dark:hover:text-purple-300 transition-colors cursor-pointer"
+            className="rounded-full p-1.5 text-slate-500 hover:text-purple-600 dark:text-zinc-400 dark:hover:text-purple-300 transition-colors cursor-pointer shrink-0"
           >
-            <Copy className="h-3.5 w-3.5" />
+            <Copy className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
           </button>
         )}
       </div>
@@ -504,7 +512,11 @@ function ChatMessageItem({
           <button
             type="button"
             onClick={triggerMenu}
-            className="md:hidden shrink-0 rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-purple-600 dark:hover:bg-white/10 dark:hover:text-purple-400 transition-colors cursor-pointer"
+            className={`md:hidden shrink-0 rounded-full p-1.5 transition-colors cursor-pointer ${
+              isMenuActive
+                ? "bg-purple-100 text-purple-600 dark:bg-purple-950 dark:text-purple-300 ring-1 ring-purple-400/40"
+                : "text-slate-400 hover:bg-slate-100 hover:text-purple-600 dark:hover:bg-white/10 dark:hover:text-purple-400"
+            }`}
             title="React or options"
           >
             <Smile className="h-4 w-4" />
@@ -659,7 +671,11 @@ function ChatMessageItem({
           <button
             type="button"
             onClick={triggerMenu}
-            className="md:hidden shrink-0 rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-purple-600 dark:hover:bg-white/10 dark:hover:text-purple-400 transition-colors cursor-pointer"
+            className={`md:hidden shrink-0 rounded-full p-1.5 transition-colors cursor-pointer ${
+              isMenuActive
+                ? "bg-purple-100 text-purple-600 dark:bg-purple-950 dark:text-purple-300 ring-1 ring-purple-400/40"
+                : "text-slate-400 hover:bg-slate-100 hover:text-purple-600 dark:hover:bg-white/10 dark:hover:text-purple-400"
+            }`}
             title="React or options"
           >
             <Smile className="h-4 w-4" />
