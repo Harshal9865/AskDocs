@@ -120,13 +120,20 @@ export default function Sidebar({
 
   // Filter & prioritize Intelligence studio items based on active mode
   const filteredIntelligence = NAV_INTELLIGENCE.filter((item) => {
+    const isContractTool = ["/contracts", "/contracts/compare"].includes(item.href);
+    const isStudyTool = item.href === "/study-guide";
+
     if (modeConfig.id === "academic") {
-      // Student mode: hide legal/contract heavy tools
-      return !["/contracts", "/contracts/compare"].includes(item.href);
+      return !isContractTool;
     }
     if (modeConfig.id === "office") {
-      // Corporate mode: hide purely student tools
-      return item.href !== "/study-guide";
+      return !isContractTool && !isStudyTool;
+    }
+    if (modeConfig.id === "personal") {
+      return !isContractTool;
+    }
+    if (modeConfig.id === "legal") {
+      return !isStudyTool;
     }
     return true;
   });
