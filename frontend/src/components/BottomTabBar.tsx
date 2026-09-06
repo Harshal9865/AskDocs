@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useMobile, usePrefersReducedMotion } from "@/lib/hooks/useMobile";
 import { getModeColors, type Mode } from "@/lib/design-tokens";
 import { useAudienceMode } from "@/lib/audience-mode-context";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/components/ThemeToggle";
 import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
@@ -27,7 +27,7 @@ const TABS = [
 export default function BottomTabBar() {
   const pathname = usePathname();
   const { mode } = useAudienceMode();
-  const { theme, resolvedTheme } = useTheme();
+  const { dark: isDark } = useTheme();
   const { isMobile, isClient } = useMobile();
   const prefersReducedMotion = usePrefersReducedMotion();
   const [mounted, setMounted] = useState(false);
@@ -36,7 +36,6 @@ export default function BottomTabBar() {
 
   if (!isClient || !isMobile || !mounted) return null;
 
-  const isDark = resolvedTheme === "dark";
   const colors = getModeColors(mode as Mode, isDark);
 
   const getActiveTab = () => {

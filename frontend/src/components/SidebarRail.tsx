@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight, Menu, X, CircleDot } from "lucide-react";
 import { useMobile, usePrefersReducedMotion } from "@/lib/hooks/useMobile";
 import { getModeColors, type Mode } from "@/lib/design-tokens";
 import { useAudienceMode } from "@/lib/audience-mode-context";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/components/ThemeToggle";
 import { useEffect } from "react";
 
 const NAV_MAIN = [
@@ -55,7 +55,7 @@ export default function SidebarRail({
 }: SidebarRailProps) {
   const { mode, config: modeConfig } = useAudienceMode();
   const pathname = usePathname();
-  const { theme, resolvedTheme } = useTheme();
+  const { dark: isDark } = useTheme();
   const { isMobile, isClient } = useMobile();
   const prefersReducedMotion = usePrefersReducedMotion();
   const [mounted, setMounted] = useState(false);
@@ -64,7 +64,6 @@ export default function SidebarRail({
 
   if (!isClient || !mounted) return null;
 
-  const isDark = resolvedTheme === "dark";
   const colors = getModeColors(mode as Mode, isDark);
 
   const filteredIntelligence = NAV_INTELLIGENCE.filter((item) => {

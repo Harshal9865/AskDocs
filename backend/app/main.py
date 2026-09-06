@@ -23,11 +23,31 @@ async def lifespan(app: FastAPI):
         from app.core.deps import AsyncSessionLocal
         from sqlalchemy import text
         async with AsyncSessionLocal() as session:
-            await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS billing_interval VARCHAR(20) DEFAULT NULL;"))
-            await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_status VARCHAR(30) DEFAULT 'active';"))
-            await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_renews_at TIMESTAMP WITH TIME ZONE DEFAULT NULL;"))
-            await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS card_brand VARCHAR(50) DEFAULT NULL;"))
-            await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS card_last4 VARCHAR(10) DEFAULT NULL;"))
+            # Add all missing columns to users table
+            user_columns = [
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_seen_at TIMESTAMP WITH TIME ZONE DEFAULT NULL;",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_kind VARCHAR(20) DEFAULT 'initials';",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_value VARCHAR(500) DEFAULT NULL;",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS bio VARCHAR(500) DEFAULT NULL;",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(32) DEFAULT NULL;",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS status VARCHAR(120) DEFAULT NULL;",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS location VARCHAR(120) DEFAULT NULL;",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS pronouns VARCHAR(50) DEFAULT NULL;",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS job_title VARCHAR(120) DEFAULT NULL;",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS job_role VARCHAR(120) DEFAULT NULL;",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS documents_used INTEGER DEFAULT 0;",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS questions_used INTEGER DEFAULT 0;",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS plan_reset_at TIMESTAMP WITH TIME ZONE DEFAULT NULL;",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_code VARCHAR(6) DEFAULT NULL;",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_code_expires TIMESTAMP WITH TIME ZONE DEFAULT NULL;",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS billing_interval VARCHAR(20) DEFAULT NULL;",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_status VARCHAR(30) DEFAULT 'active';",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_renews_at TIMESTAMP WITH TIME ZONE DEFAULT NULL;",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS card_brand VARCHAR(50) DEFAULT NULL;",
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS card_last4 VARCHAR(10) DEFAULT NULL;",
+            ]
+            for col_sql in user_columns:
+                await session.execute(text(col_sql))
             await session.execute(text("ALTER TABLE conversations ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN DEFAULT FALSE;"))
             await session.execute(text("""
             CREATE TABLE IF NOT EXISTS invoices (
