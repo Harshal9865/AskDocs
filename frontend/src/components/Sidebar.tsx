@@ -517,7 +517,7 @@ export default function Sidebar({
       <aside
         ref={asideRef}
         style={{ width: isCollapsed ? 68 : `min(${width}px, 85vw)` }}
-        className={`hidden md:flex dark:border-slate-700/50 dark:bg-[#1a1a2e] sb-aside h-full h-[100dvh] top-0 z-30 shrink-0 flex-col border-r border-slate-200/90 bg-white transition-colors overflow-visible ${
+        className={`hidden md:flex dark:border-slate-700/50 dark:bg-[#1a1a2e] sb-aside sticky top-16 h-[calc(100dvh-4rem)] z-30 shrink-0 flex-col border-r border-slate-200 bg-white transition-colors overflow-visible ${
           isCollapsed ? "sb-collapsed shadow-xl" : ""
         }`}
       >
@@ -526,7 +526,7 @@ export default function Sidebar({
           onClick={toggleCollapsed}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="absolute -right-3 top-5 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition-all hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600"
+          className="absolute -right-3 top-14 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition-all hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600"
         >
           <svg
             className="sb-chevron transition-transform duration-200"
@@ -542,39 +542,6 @@ export default function Sidebar({
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
-
-        {/* Top Header - Aligned with TopNavbar height (h-16) */}
-        {!isCollapsed ? (
-          <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200/90 dark:border-slate-700/50 px-4 bg-white dark:bg-[#1a1a2e]">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2.5 font-black text-slate-900 dark:text-white transition-transform hover:scale-105 active:scale-95"
-            >
-              <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-xl bg-indigo-500/10 p-1 dark:bg-white/10 shadow-xs ring-1 ring-black/5 dark:ring-white/10">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo-day.svg" alt="AskDocs" className="h-5 w-5 dark:hidden" />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo-night.svg" alt="AskDocs" className="hidden h-5 w-5 dark:block" />
-              </span>
-              <span className="text-base font-black tracking-tight">AskDocs</span>
-            </Link>
-          </div>
-        ) : (
-          <div className="flex h-16 shrink-0 items-center justify-center border-b border-slate-200/90 dark:border-slate-700/50 bg-white dark:bg-[#1a1a2e]">
-            <Link
-              href="/dashboard"
-              className="flex items-center justify-center transition-transform hover:scale-105 active:scale-95"
-              aria-label="AskDocs home"
-            >
-              <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-indigo-500/10 p-1 dark:bg-white/10 shadow-xs ring-1 ring-black/5 dark:ring-white/10">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo-day.svg" alt="AskDocs" className="h-5 w-5 dark:hidden" />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo-night.svg" alt="AskDocs" className="hidden h-5 w-5 dark:block" />
-              </span>
-            </Link>
-          </div>
-        )}
 
         {/* Workspace Block */}
         {!isCollapsed ? (

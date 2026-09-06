@@ -89,10 +89,10 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           </button>
         )}
 
-        {/* brand (shown on mobile, hidden on desktop where Sidebar header is active) */}
+        {/* brand */}
         <button
           onClick={() => router.push("/")}
-          className="flex shrink-0 items-center gap-2 transition-transform hover:scale-105 active:scale-95 cursor-pointer md:hidden"
+          className="flex shrink-0 items-center gap-2 transition-transform hover:scale-105 active:scale-95 cursor-pointer"
           aria-label="AskDocs home"
         >
           <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-xl bg-indigo-500/10 p-1 dark:bg-white/10 shadow-xs ring-1 ring-black/5 dark:ring-white/10">

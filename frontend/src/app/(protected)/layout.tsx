@@ -69,8 +69,6 @@ export default function ProtectedLayout({
   const isChatPage = pathname === "/chat" || pathname === "/chats";
   const isFrontier = pathname === "/frontier" || pathname.startsWith("/frontier/");
 
-  // On mobile, we use the rail (which can be toggled) + bottom tabs
-  // On desktop, we use full sidebar + rail for collapsed state
   const showFullSidebar = isClient && !isMobile;
 
   if (isFrontier) {
@@ -94,42 +92,40 @@ export default function ProtectedLayout({
   return (
     <WorkspaceProvider>
       <AudienceModeProvider>
-        <div className="flex h-[100dvh] w-full overflow-hidden" style={{ background: "var(--color-bg-primary)", color: "var(--color-text-primary)" }}>
+        <div className="flex h-[100dvh] flex-col overflow-hidden" style={{ background: "var(--color-bg-primary)", color: "var(--color-text-primary)" }}>
+          <TopNavbar onMenu={() => setRailMobileOpen(true)} />
           <Toaster />
+          <div className="flex flex-1 min-h-0 min-w-0 max-w-full overflow-x-hidden">
+            {/* Desktop: Full sidebar when expanded, rail when collapsed */}
+            {showFullSidebar && (
+              <>
+                <Sidebar
+                  mobileOpen={railMobileOpen}
+                  onCloseMobile={() => setRailMobileOpen(false)}
+                  width={sidebarWidth}
+                  setWidth={handleResize}
+                />
+                <SidebarRail
+                  collapsed={sidebarCollapsed}
+                  onToggleCollapse={handleToggleCollapse}
+                  mobileOpen={railMobileOpen}
+                  onCloseMobile={() => setRailMobileOpen(false)}
+                />
+              </>
+            )}
 
-          {/* Desktop: Full sidebar when expanded, rail when collapsed */}
-          {showFullSidebar && (
-            <>
-              <Sidebar
-                mobileOpen={railMobileOpen}
-                onCloseMobile={() => setRailMobileOpen(false)}
-                width={sidebarWidth}
-                setWidth={handleResize}
-              />
+            {/* Mobile: Only rail (toggled) + bottom tabs always visible */}
+            {!showFullSidebar && (
               <SidebarRail
-                collapsed={sidebarCollapsed}
+                collapsed={false}
                 onToggleCollapse={handleToggleCollapse}
                 mobileOpen={railMobileOpen}
                 onCloseMobile={() => setRailMobileOpen(false)}
               />
-            </>
-          )}
+            )}
 
-          {/* Mobile: Only rail (toggled) + bottom tabs always visible */}
-          {!showFullSidebar && (
-            <SidebarRail
-              collapsed={false}
-              onToggleCollapse={handleToggleCollapse}
-              mobileOpen={railMobileOpen}
-              onCloseMobile={() => setRailMobileOpen(false)}
-            />
-          )}
-
-          {/* Main Content Area (TopNavbar + Content) */}
-          <div className="flex flex-1 flex-col min-w-0 h-full overflow-hidden">
-            <TopNavbar onMenu={() => setRailMobileOpen(true)} />
             <main
-              className={`min-w-0 max-w-full flex-1 transition-colors ${
+              className={`min-w-0 max-w-full flex-1 min-h-0 transition-colors ${
                 isChatPage
                   ? "flex flex-col overflow-hidden p-3 pb-20 md:p-6"
                   : "overflow-y-auto p-4 pb-20 md:p-6"
@@ -140,7 +136,6 @@ export default function ProtectedLayout({
               {children}
             </main>
           </div>
-
           <BottomTabBar />
         </div>
       </AudienceModeProvider>
