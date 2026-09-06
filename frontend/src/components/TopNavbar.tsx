@@ -64,7 +64,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
 
   return (
     <>
-    <header className="dark:border-white/10 dark:bg-[#0d0c17] sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-slate-200/90 bg-white px-3 sm:px-6 transition-all shadow-xs">
+    <header className="dark:border-white/10 dark:bg-[#0d0c17] sticky top-0 z-30 flex h-14 sm:h-16 shrink-0 items-center justify-between border-b border-slate-200/90 bg-white px-3 sm:px-6 transition-all shadow-xs">
       {/* Left side cluster */}
       <div className="flex items-center gap-2 shrink-0 min-w-0">
         {/* mobile hamburger */}

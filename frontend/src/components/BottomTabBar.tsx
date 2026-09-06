@@ -2,9 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { useMobile, usePrefersReducedMotion } from "@/lib/hooks/useMobile";
-import { getModeColors, type Mode } from "@/lib/design-tokens";
-import { useAudienceMode } from "@/lib/audience-mode-context";
+import { useMobile } from "@/lib/hooks/useMobile";
 import { useTheme } from "@/components/ThemeToggle";
 import { useEffect, useState } from "react";
 import {
@@ -13,30 +11,55 @@ import {
   FileText,
   Layers,
   User,
-  CircleDot,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 const TABS = [
-  { href: "/dashboard", label: "Home", icon: LayoutDashboard, shortcut: "1" },
-  { href: "/chat", label: "AI Chat", icon: Sparkles, shortcut: "2" },
-  { href: "/documents", label: "Documents", icon: FileText, shortcut: "3" },
-  { href: "/frontier", label: "Studios", icon: Layers, shortcut: "4" },
-  { href: "/settings", label: "Profile", icon: User, shortcut: "5" },
+  { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+  { href: "/chat", label: "AI Chat", icon: Sparkles },
+  { href: "/documents", label: "Documents", icon: FileText },
+  { href: "/frontier", label: "Studios", icon: Layers },
+  { href: "/settings", label: "Profile", icon: User },
 ] as const;
 
 export default function BottomTabBar() {
   const pathname = usePathname();
-  const { mode } = useAudienceMode();
   const { dark: isDark } = useTheme();
   const { isMobile, isClient } = useMobile();
-  const prefersReducedMotion = usePrefersReducedMotion();
   const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const [manualCollapsed, setManualCollapsed] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
-  if (!isClient || !isMobile || !mounted) return null;
+  // Scroll listener: auto-hide when scrolling down, show when scrolling up
+  useEffect(() => {
+    if (!isMobile) return;
+    let lastScrollY = 0;
 
-  const colors = getModeColors(mode as Mode, isDark);
+    const handleScroll = (e: Event) => {
+      const target = e.target as HTMLElement;
+      const currentY =
+        target === document || target === document.body || !target?.scrollTop
+          ? window.scrollY
+          : target.scrollTop;
+
+      if (currentY > lastScrollY + 12 && currentY > 40) {
+        // Scrolling down -> auto hide bottom bar
+        setVisible(false);
+      } else if (currentY < lastScrollY - 12) {
+        // Scrolling up -> reveal bottom bar
+        setVisible(true);
+      }
+      lastScrollY = Math.max(0, currentY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true, capture: true });
+    return () => window.removeEventListener("scroll", handleScroll, { capture: true });
+  }, [isMobile]);
+
+  if (!isClient || !isMobile || !mounted) return null;
 
   const getActiveTab = () => {
     for (const tab of TABS) {
@@ -48,132 +71,91 @@ export default function BottomTabBar() {
   };
 
   const activeTab = getActiveTab();
+  const isHidden = !visible || manualCollapsed;
 
   return (
-    <nav
-      className="fixed bottom-0 left-0 right-0 z-50 pb-safe"
-      role="navigation"
-      aria-label="Primary navigation"
-      style={{
-        transform: "translateZ(0)",
-        willChange: "transform",
-      }}
-    >
-      <div
-        className="relative flex items-center justify-around h-16"
-        style={{
-          background: `var(--color-bg-elevated, ${isDark ? "#181824" : "#ffffff"})`,
-          borderTop: `1px solid var(--color-border-primary, ${isDark ? "rgba(255,255,255,0.08)" : "#e5e5e5"})`,
-          boxShadow: `0 -4px 20px var(--shadow-sm, ${isDark ? "rgba(0,0,0,0.3)" : "rgba(15,23,42,0.05)"})`,
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-        }}
+    <>
+      {/* Floating reveal button when bottom bar is hidden/collapsed */}
+      {isHidden && (
+        <button
+          onClick={() => {
+            setVisible(true);
+            setManualCollapsed(false);
+          }}
+          aria-label="Show navigation bar"
+          title="Show navigation"
+          className="fixed bottom-3 right-3 z-50 flex h-9 w-9 items-center justify-center rounded-full bg-slate-900/90 text-white dark:bg-white/90 dark:text-slate-900 shadow-lg border border-white/20 active:scale-95 transition-all"
+        >
+          <ChevronUp className="h-4 w-4" />
+        </button>
+      )}
+
+      {/* Main Resized Compact Bottom Tab Bar */}
+      <nav
+        className={`fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
+          isHidden ? "translate-y-full opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
+        }`}
+        role="navigation"
+        aria-label="Primary navigation"
       >
-        {/* Mode indicator dot */}
         <div
-          className="absolute left-4 top-3"
+          className="relative flex items-center justify-around h-[52px] px-1"
           style={{
-            width: "8px",
-            height: "8px",
-            borderRadius: "50%",
-            background: colors.primary,
-            boxShadow: `0 0 8px ${colors.primary}`,
-            animation: prefersReducedMotion ? "none" : "pulse-ring 2s ease-out infinite",
+            background: isDark ? "rgba(18, 19, 30, 0.95)" : "rgba(255, 255, 255, 0.95)",
+            borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+            boxShadow: `0 -4px 16px ${isDark ? "rgba(0,0,0,0.4)" : "rgba(0,0,0,0.06)"}`,
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
           }}
-          aria-label={`Current mode: ${mode}`}
-        />
+        >
+          {/* Top handle bar to manually hide/minimize navigation */}
+          <button
+            onClick={() => setManualCollapsed(true)}
+            aria-label="Hide navigation bar"
+            title="Tap to hide navigation bar for full screen"
+            className="absolute -top-3 left-1/2 -translate-x-1/2 flex h-3.5 w-12 items-center justify-center rounded-t-full bg-slate-200/80 dark:bg-white/10 text-slate-500 dark:text-zinc-400 active:scale-95 transition-all"
+          >
+            <ChevronDown className="h-3 w-3" />
+          </button>
 
-        {TABS.map((tab, index) => {
-          const isActive = activeTab === tab;
-          const Icon = tab.icon;
-          const key = tab.shortcut;
+          {TABS.map((tab) => {
+            const isActive = activeTab === tab;
+            const Icon = tab.icon;
 
-          return (
-            <Link
-              key={tab.href}
-              href={tab.href}
-              className={`relative flex flex-col items-center justify-center gap-1 px-3 py-2 transition-all duration-200 ${
-                isActive
-                  ? "text-primary"
-                  : "text-muted hover:text-secondary"
-              }`}
-              style={{
-                color: isActive ? colors.primary : "var(--color-text-muted)",
-                minWidth: "60px",
-              }}
-              aria-current={isActive ? "page" : undefined}
-              aria-label={`${tab.label}${isActive ? " (current)" : ""}`}
-            >
-              <div
-                className="relative flex items-center justify-center"
-                style={{
-                  width: "44px",
-                  height: "44px",
-                  borderRadius: "12px",
-                  background: isActive ? colors.light : "transparent",
-                  transition: prefersReducedMotion
-                    ? "none"
-                    : "background 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                }}
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                className={`relative flex flex-1 flex-col items-center justify-center py-1 transition-all duration-150 active:scale-95 ${
+                  isActive ? "font-bold" : "font-medium"
+                }`}
+                aria-current={isActive ? "page" : undefined}
+                aria-label={tab.label}
               >
-                <Icon
-                  className={`h-5 w-5 transition-all duration-200 ${
-                    isActive ? "scale-110" : ""
+                <div
+                  className={`flex h-7 w-11 items-center justify-center rounded-full transition-colors ${
+                    isActive
+                      ? "bg-indigo-600/15 dark:bg-purple-500/20 text-indigo-600 dark:text-purple-400"
+                      : "text-slate-500 dark:text-zinc-400"
                   }`}
-                  style={{
-                    color: isActive ? colors.primary : "inherit",
-                  }}
-                  aria-hidden="true"
-                />
+                >
+                  <Icon className="h-4.5 w-4.5" />
+                </div>
 
-                {isActive && (
-                  <span
-                    className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-black"
-                    style={{
-                      background: colors.primary,
-                      color: "var(--color-text-inverse)",
-                    }}
-                  >
-                    {key}
-                  </span>
-                )}
-              </div>
-
-              <span
-                className="text-[10px] font-semibold leading-none transition-opacity"
-                style={{
-                  opacity: isActive ? 1 : 0.7,
-                  color: isActive ? colors.primary : "inherit",
-                }}
-              >
-                {tab.label}
-              </span>
-            </Link>
-          );
-        })}
-
-        {/* Animated indicator */}
-        <div
-          className="absolute bottom-full left-1/2 h-1 w-0 -translate-x-1/2 rounded-full"
-          style={{
-            background: colors.primary,
-            transform: `translateX(-50%) translateX(${TABS.findIndex((t) => t === activeTab) * 20}%)`,
-            transition: prefersReducedMotion
-              ? "none"
-              : "transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.2s ease",
-            width: "40px",
-          }}
-          aria-hidden="true"
-        />
-      </div>
-
-      <style jsx>{`
-        @keyframes pulse-ring {
-          0% { box-shadow: 0 0 0 0 var(--ring-color); }
-          70% { box-shadow: 0 0 0 8px transparent; }
-          100% { box-shadow: 0 0 0 0 transparent; }
-        }
-      `}</style>
-    </nav>
+                <span
+                  className={`text-[10px] tracking-tight transition-colors ${
+                    isActive
+                      ? "text-indigo-600 dark:text-purple-400 font-bold"
+                      : "text-slate-500 dark:text-zinc-400"
+                  }`}
+                >
+                  {tab.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+    </>
   );
 }
