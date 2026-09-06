@@ -31,6 +31,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 const pwaManifestData = JSON.stringify({
+  id: "/",
   name: "AskDocs — Team Knowledge & Document Intelligence",
   short_name: "AskDocs",
   description: "Upload team documents and ask questions with AI-powered cited answers.",
@@ -42,18 +43,42 @@ const pwaManifestData = JSON.stringify({
   scope: "/",
   icons: [
     {
-      src: "/logo-day.svg",
-      sizes: "192x192 512x512",
-      type: "image/svg+xml",
+      src: "/icon-192.png",
+      sizes: "192x192",
+      type: "image/png",
       purpose: "any",
     },
     {
-      src: "/logo-night.svg",
-      sizes: "192x192 512x512",
-      type: "image/svg+xml",
+      src: "/icon-512.png",
+      sizes: "512x512",
+      type: "image/png",
+      purpose: "any",
+    },
+    {
+      src: "/icon-512-maskable.png",
+      sizes: "512x512",
+      type: "image/png",
       purpose: "maskable",
     },
   ],
+  screenshots: [
+    {
+      src: "/screenshot1.png",
+      sizes: "1280x720",
+      type: "image/png",
+      form_factor: "wide",
+      label: "AskDocs Dashboard",
+    },
+    {
+      src: "/screenshot2.png",
+      sizes: "750x1334",
+      type: "image/png",
+      form_factor: "narrow",
+      label: "AskDocs Mobile App",
+    },
+  ],
+  prefer_related_applications: false,
+  related_applications: [],
   categories: ["productivity", "utilities", "education"],
 });
 
