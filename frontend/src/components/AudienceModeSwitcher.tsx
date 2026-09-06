@@ -6,8 +6,6 @@ import {
   GraduationCap,
   Building2,
   Scale,
-  DollarSign,
-  Stethoscope,
   Briefcase,
   Check,
   X,
@@ -26,8 +24,6 @@ const MODE_ICONS: Record<AudienceMode, React.ComponentType<{ className?: string 
   academic: GraduationCap,
   office: Building2,
   legal: Scale,
-  finance: DollarSign,
-  clinical: Stethoscope,
   personal: Briefcase,
 };
 
@@ -142,7 +138,7 @@ export default function AudienceModeSwitcherModal({ isOpen, onClose }: ModeSwitc
         {/* Footer Actions */}
         <div className="flex items-center justify-between border-t border-slate-100 pt-4 dark:border-white/5">
           <span className="text-xs text-slate-400 dark:text-zinc-500">
-            Selected: <strong className="text-slate-900 dark:text-white">{AUDIENCE_MODES[selected].name}</strong>
+            Selected: <strong className="text-slate-900 dark:text-white">{(AUDIENCE_MODES[selected] || AUDIENCE_MODES.academic).name}</strong>
           </span>
 
           <div className="flex items-center gap-2">

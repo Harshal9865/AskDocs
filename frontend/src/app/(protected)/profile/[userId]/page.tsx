@@ -493,22 +493,6 @@ export default function ProfilePage() {
                       </div>
                     </>
                   )}
-                  {mode === "finance" && (
-                    <>
-                      <div className="rounded-xl border border-emerald-500/20 bg-white/60 dark:bg-white/5 p-2.5">
-                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Fiscal Desk</span>
-                        <span className="font-extrabold text-emerald-700 dark:text-emerald-300">Audited Ledger</span>
-                      </div>
-                      <div className="rounded-xl border border-emerald-500/20 bg-white/60 dark:bg-white/5 p-2.5">
-                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Invoices</span>
-                        <span className="font-extrabold text-emerald-700 dark:text-emerald-300">100% Extracted</span>
-                      </div>
-                      <div className="rounded-xl border border-emerald-500/20 bg-white/60 dark:bg-white/5 p-2.5">
-                        <span className="block text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500">Reconciliations</span>
-                        <span className="font-extrabold text-emerald-700 dark:text-emerald-300">Zero Discrepancy</span>
-                      </div>
-                    </>
-                  )}
                   {mode === "office" && (
                     <>
                       <div className="rounded-xl border border-indigo-500/20 bg-white/60 dark:bg-white/5 p-2.5">

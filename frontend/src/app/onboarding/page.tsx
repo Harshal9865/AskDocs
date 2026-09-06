@@ -88,25 +88,6 @@ const MODE_CARDS: {
     color: "from-amber-600 to-orange-600",
     badge: "⚖️ Legal",
     accentBorder: "hover:border-amber-500",
-  },
-  {
-    id: "finance",
-    title: "Finance & Accounting",
-    oneLiner: "PDF-to-Excel invoice extraction, balance sheet audit & tabular data",
-    icon: BadgePercent,
-    color: "from-emerald-600 to-teal-600",
-    badge: "📊 Finance",
-    accentBorder: "hover:border-emerald-500",
-  },
-  {
-    id: "clinical",
-    title: "Clinical & Healthcare",
-    oneLiner: "HIPAA-grade medical record summaries, clinical trial notes & lab reports",
-    icon: Stethoscope,
-    color: "from-rose-600 to-pink-600",
-    badge: "🏥 Clinical",
-    accentBorder: "hover:border-rose-500",
-  },
   {
     id: "personal",
     title: "Solo & Freelance",
@@ -205,10 +186,6 @@ export default function OnboardingPage() {
         ? "My Study Room"
         : selectedMode === "legal"
         ? "Legal Contracts Vault"
-        : selectedMode === "finance"
-        ? "Financial Intelligence Hub"
-        : selectedMode === "clinical"
-        ? "Clinical Records Vault"
         : "My Workspace");
 
     setBusy(true);

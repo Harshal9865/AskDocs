@@ -34,7 +34,7 @@ export interface TokenPair {
   token_type: string;
 }
 
-export type AudienceMode = "academic" | "office" | "legal" | "finance" | "clinical" | "personal";
+export type AudienceMode = "academic" | "office" | "legal" | "personal";
 
 export interface AudienceModeConfig {
   id: AudienceMode;

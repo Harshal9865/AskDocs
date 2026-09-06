@@ -66,7 +66,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
     <>
     <header className="dark:border-white/10 dark:bg-[#0d0c17] sticky top-0 z-30 flex h-13 sm:h-14 shrink-0 items-center justify-between border-b border-slate-200/90 bg-white px-2.5 sm:px-4 transition-colors">
       {/* Left side cluster */}
-      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0 min-w-0">
         {/* mobile hamburger */}
         {onMenu && (
           <button
@@ -157,53 +157,53 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
             <MessagesSquare className="h-3.5 w-3.5" />
           </Link>
         </div>
-      </div>
 
-      {/* desktop nav — expands progressively based on available laptop & desktop width */}
-      <nav className="hidden items-center gap-1 lg:flex">
-        {[
-          { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
-          { href: "/chat", label: "AI Chat", Icon: Sparkles },
-          { href: "/chats", label: modeConfig.chatLabel, Icon: MessagesSquare },
-          { href: "/hub", label: "Innovation Hub", Icon: Compass },
-          { href: "/documents", label: "Documents", Icon: FileText },
-        ].map(({ href, label, Icon }) => {
-          const active = pathname === href || pathname.startsWith(href + "/");
-          return (
+        {/* desktop nav — expands progressively based on available laptop & desktop width */}
+        <nav className="hidden items-center gap-1 lg:flex ml-1 sm:ml-2">
+          {[
+            { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
+            { href: "/chat", label: "AI Chat", Icon: Sparkles },
+            { href: "/chats", label: modeConfig.chatLabel, Icon: MessagesSquare },
+            { href: "/hub", label: "Innovation Hub", Icon: Compass },
+            { href: "/documents", label: "Documents", Icon: FileText },
+          ].map(({ href, label, Icon }) => {
+            const active = pathname === href || pathname.startsWith(href + "/");
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-all ${
+                  active
+                    ? "bg-slate-900 text-white dark:bg-white dark:text-black font-semibold shadow-xs"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white"
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5 shrink-0" />
+                <span className={active ? "inline" : "hidden xl:inline"}>{label}</span>
+              </Link>
+            );
+          })}
+          {workspace && (
             <Link
-              key={href}
-              href={href}
-              className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-all ${
-                active
-                  ? "bg-slate-900 text-white dark:bg-white dark:text-black font-semibold shadow-xs"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-white"
-              }`}
+              href="/workspaces"
+              title={`Workspace: ${workspace.name}. Click to view workspace settings.`}
+              className="ml-1 flex items-center gap-1.5 rounded-full border border-indigo-500/20 bg-slate-100/90 hover:bg-slate-200/80 px-2.5 py-1 text-xs font-bold text-slate-800 dark:border-indigo-500/30 dark:bg-[#1f1f2e] dark:text-white dark:hover:bg-[#28283d] transition-all cursor-pointer shrink-0 shadow-2xs"
             >
-              <Icon className="h-3.5 w-3.5" />
-              {label}
+              {brandSrc ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={brandSrc} alt={workspace.name} className="h-3.5 w-3.5 rounded-full object-cover shrink-0 ring-1 ring-white/30" />
+              ) : brandSticker ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={`/stickers/${brandSticker}.svg`} alt={workspace.name} className="h-3.5 w-3.5 object-contain shrink-0" />
+              ) : (
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20" />
+              )}
+              <span className="hidden max-w-[110px] truncate xl:inline">{workspace.name}</span>
+              <span className="xl:hidden">{(workspace.name || "?").slice(0, 1).toUpperCase()}</span>
             </Link>
-          );
-        })}
-        {workspace && (
-          <Link
-            href="/workspaces"
-            title={`Workspace: ${workspace.name}. Click to view workspace settings.`}
-            className="ml-1 flex items-center gap-1.5 rounded-full border border-indigo-500/20 bg-slate-100/90 hover:bg-slate-200/80 px-2.5 py-1 text-xs font-bold text-slate-800 dark:border-indigo-500/30 dark:bg-[#1f1f2e] dark:text-white dark:hover:bg-[#28283d] transition-all cursor-pointer shrink-0 shadow-2xs"
-          >
-            {brandSrc ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={brandSrc} alt={workspace.name} className="h-3.5 w-3.5 rounded-full object-cover shrink-0 ring-1 ring-white/30" />
-            ) : brandSticker ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={`/stickers/${brandSticker}.svg`} alt={workspace.name} className="h-3.5 w-3.5 object-contain shrink-0" />
-            ) : (
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20" />
-            )}
-            <span className="hidden max-w-[110px] truncate xl:inline">{workspace.name}</span>
-            <span className="xl:hidden">{(workspace.name || "?").slice(0, 1).toUpperCase()}</span>
-          </Link>
-        )}
-      </nav>
+          )}
+        </nav>
+      </div>
 
       {/* Search — hidden on phones & compact tablets, icon navigates to /search to save space */}
       <form
@@ -247,42 +247,28 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
               ? "border-purple-500/50 bg-purple-500/15 text-purple-300 shadow-purple-500/10 hover:bg-purple-500/25 hover:border-purple-400"
               : mode === "legal"
               ? "border-rose-500/50 bg-rose-500/15 text-rose-300 shadow-rose-500/10 hover:bg-rose-500/25 hover:border-rose-400"
-              : mode === "finance"
-              ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-300 shadow-emerald-500/10 hover:bg-emerald-500/25 hover:border-emerald-400"
-              : mode === "clinical"
-              ? "border-cyan-500/50 bg-cyan-500/15 text-cyan-300 shadow-cyan-500/10 hover:bg-cyan-500/25 hover:border-cyan-400"
               : "border-slate-400/40 bg-slate-500/10 text-slate-300 hover:bg-slate-500/20"
           }`}
         >
           {mode === "office" ? (
             <>
               <ShieldCheck className="h-3.5 w-3.5 text-[#fbbf24] animate-pulse shrink-0" />
-              <span className="hidden sm:inline font-mono uppercase text-[10px] sm:text-[11px] font-bold">ENTERPRISE NDA</span>
+              <span className="hidden xl:inline font-mono uppercase text-[10px] sm:text-[11px] font-bold">ENTERPRISE NDA</span>
             </>
           ) : mode === "academic" ? (
             <>
               <GraduationCap className="h-3.5 w-3.5 text-purple-400 shrink-0" />
-              <span className="hidden sm:inline font-mono uppercase text-[10px] sm:text-[11px] font-bold">STUDY MODE</span>
+              <span className="hidden xl:inline font-mono uppercase text-[10px] sm:text-[11px] font-bold">STUDY MODE</span>
             </>
           ) : mode === "legal" ? (
             <>
               <ShieldCheck className="h-3.5 w-3.5 text-rose-400 shrink-0" />
-              <span className="hidden sm:inline font-mono uppercase text-[10px] sm:text-[11px] font-bold">LEGAL VAULT</span>
-            </>
-          ) : mode === "finance" ? (
-            <>
-              <span className="text-[11px]">💰</span>
-              <span className="hidden sm:inline font-mono uppercase text-[10px] sm:text-[11px] font-bold">FINANCE DESK</span>
-            </>
-          ) : mode === "clinical" ? (
-            <>
-              <span className="text-[11px]">🩺</span>
-              <span className="hidden sm:inline font-mono uppercase text-[10px] sm:text-[11px] font-bold">CLINICAL LAB</span>
+              <span className="hidden xl:inline font-mono uppercase text-[10px] sm:text-[11px] font-bold">LEGAL VAULT</span>
             </>
           ) : (
             <>
               <span className="text-[11px]">💼</span>
-              <span className="hidden sm:inline font-mono uppercase text-[10px] sm:text-[11px] font-bold">SOLO STUDIO</span>
+              <span className="hidden xl:inline font-mono uppercase text-[10px] sm:text-[11px] font-bold">SOLO STUDIO</span>
             </>
           )}
         </button>

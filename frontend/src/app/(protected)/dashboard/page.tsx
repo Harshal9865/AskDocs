@@ -223,18 +223,6 @@ const MODE_PROMPTS: Record<AudienceMode, string[]> = {
     "Compare 2 agreement versions (Redline)",
     "Privilege & NDA compliance verification",
   ],
-  finance: [
-    "Extract invoice line items & totals",
-    "Tax & audit reconciliation report",
-    "CapEx budget allocation review",
-    "Payroll discrepancy verification",
-  ],
-  clinical: [
-    "Patient de-identification audit",
-    "Clinical protocol & safety review",
-    "Medical study flashcard deck",
-    "Grand rounds case vignette summary",
-  ],
   personal: [
     "Generate pitch deck outline",
     "Create 3-minute spoken audio podcast",
@@ -264,18 +252,6 @@ const MODE_HERO_ACTIONS: Record<
     { label: "Contracts", href: "/contracts", icon: FileSignature, color: "from-indigo-600 to-purple-600" },
     { label: "Redact & Mask", href: "/convert", icon: FileCode, color: "from-amber-600 to-orange-600" },
     { label: "Canvas Vault", href: "/canvas", icon: Sparkles, color: "from-cyan-600 to-blue-600" },
-  ],
-  finance: [
-    { label: "Invoice Extractor", href: "/extract", icon: Table, color: "from-emerald-600 to-teal-600" },
-    { label: "Redline Diff", href: "/contracts/compare", icon: Scale, color: "from-rose-600 to-pink-600" },
-    { label: "Redact PII", href: "/convert", icon: FileCode, color: "from-amber-600 to-orange-600" },
-    { label: "Weekly Digest", href: "/digest", icon: FileCode, color: "from-indigo-600 to-purple-600" },
-  ],
-  clinical: [
-    { label: "Doc Health", href: "/health", icon: Activity, color: "from-cyan-600 to-teal-600" },
-    { label: "Study Cards", href: "/study-guide", icon: GraduationCap, color: "from-purple-600 to-indigo-600" },
-    { label: "Audio Briefs", href: "/listen", icon: Headphones, color: "from-emerald-600 to-teal-600" },
-    { label: "Redact PII", href: "/convert", icon: FileCode, color: "from-amber-600 to-orange-600" },
   ],
   personal: [
     { label: "Slide Decks", href: "/slides", icon: Presentation, color: "from-purple-600 to-indigo-600" },
@@ -434,100 +410,6 @@ function ModeSpotlightWidget({
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Redact & Format</span>
             <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">1-Click Sanitizer</div>
             <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Mask secret emails & phones</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (mode === "finance") {
-    return (
-      <div className="rounded-3xl border border-emerald-500/20 bg-gradient-to-r from-emerald-900/10 via-teal-900/10 to-slate-900/40 p-5 shadow-md backdrop-blur-md dark:border-emerald-500/30 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 font-bold">
-              💰
-            </span>
-            <div>
-              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
-                Finance Desk & Fiscal Reconciliation Spotlight
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-zinc-400">
-                Invoice line-item extractor, live Excel grids & tax audits
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/extract"
-            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-500 transition-all cursor-pointer"
-          >
-            <span>Open Data Extractor</span>
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl border border-emerald-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Extracted Invoices</span>
-            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">{docs.filter(d => d.file_type === "pdf" || d.file_type === "xlsx").length} Fiscal Docs</div>
-            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Structured Excel & CSV grids</p>
-          </div>
-          <div className="rounded-2xl border border-cyan-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">Number Sanitizer</span>
-            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">Audit Mode Active</div>
-            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Auto-sums & balance checks</p>
-          </div>
-          <div className="rounded-2xl border border-indigo-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Weekly Fiscal Digest</span>
-            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">CapEx & Payroll Sync</div>
-            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Executive financial briefing</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (mode === "clinical") {
-    return (
-      <div className="rounded-3xl border border-cyan-500/20 bg-gradient-to-r from-cyan-900/10 via-teal-900/10 to-slate-900/40 p-5 shadow-md backdrop-blur-md dark:border-cyan-500/30 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-500/20 text-cyan-400 font-bold">
-              🩺
-            </span>
-            <div>
-              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
-                Clinical Lab & Medical De-Identification Spotlight
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-zinc-400">
-                Protocol audits, medical study cards & patient de-identification
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/health"
-            className="inline-flex items-center gap-1.5 rounded-full bg-cyan-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-cyan-500 transition-all cursor-pointer"
-          >
-            <span>Audit Doc Health</span>
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl border border-cyan-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">De-Identification</span>
-            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">HIPAA Sanitizer On</div>
-            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">MRNs & dates masked</p>
-          </div>
-          <div className="rounded-2xl border border-purple-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">Medical Study Cards</span>
-            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">Protocol Vetting</div>
-            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Clinical trial summary decks</p>
-          </div>
-          <div className="rounded-2xl border border-emerald-500/20 bg-white/80 p-3.5 dark:bg-white/[0.04]">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Lab Rounds</span>
-            <div className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">{chats.filter(c => c.type === "group").length} Clinical Cohorts</div>
-            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">Grand rounds discussion</p>
           </div>
         </div>
       </div>
@@ -818,8 +700,6 @@ export default function DashboardPage() {
               { id: "academic", label: "🎓 Academic & Student", modeKey: "academic" },
               { id: "office", label: "🏢 Corporate & SOP", modeKey: "office" },
               { id: "legal", label: "⚖️ Legal & Regulatory", modeKey: "legal" },
-              { id: "finance", label: "💰 Finance & Audit", modeKey: "finance" },
-              { id: "clinical", label: "🩺 Clinical & Health", modeKey: "clinical" },
               { id: "personal", label: "💼 Solo & Studio", modeKey: "personal" },
             ] as const
           ).map((m) => {
