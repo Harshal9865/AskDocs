@@ -1151,7 +1151,7 @@ export default function ChatsPage() {
         <div className="relative z-10 flex flex-col h-full">
           
           {/* Top Sticky Bar */}
-          <div className="sticky top-0 z-10 border-b border-slate-100 bg-white/95 px-2 pb-3.5 pt-2 backdrop-blur dark:border-white/5 dark:bg-[#0b0f14]/95">
+          <div className="sticky top-0 z-10 rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white/95 p-3 sm:p-3.5 backdrop-blur dark:border-white/10 dark:bg-[#13131a]/95 mb-3 shadow-xs">
             <div className="mb-3 flex items-center justify-between gap-1">
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">
