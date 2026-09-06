@@ -97,7 +97,7 @@ export default function BottomTabBar() {
           }}
           aria-label="Show navigation bar"
           title="Show navigation"
-          className="fixed bottom-3 right-3 z-50 flex h-9 w-9 items-center justify-center rounded-full bg-slate-900/90 text-white dark:bg-white/90 dark:text-slate-900 shadow-lg border border-white/20 active:scale-95 transition-all"
+          className="fixed bottom-[max(12px,env(safe-area-inset-bottom))] right-3 z-50 flex h-9 w-9 items-center justify-center rounded-full bg-slate-900/90 text-white dark:bg-white/90 dark:text-slate-900 shadow-lg border border-white/20 active:scale-95 transition-all"
         >
           <ChevronUp className="h-4 w-4" />
         </button>
@@ -112,9 +112,10 @@ export default function BottomTabBar() {
         aria-label="Primary navigation"
       >
         <div
-          className="relative flex items-center justify-around h-[54px] px-1"
+          className="relative flex items-center justify-around pt-1.5 pb-[max(10px,env(safe-area-inset-bottom))] px-1"
           style={{
-            background: isDark ? "rgba(18, 19, 30, 0.96)" : "rgba(255, 255, 255, 0.96)",
+            minHeight: "56px",
+            background: isDark ? "rgba(18, 19, 30, 0.97)" : "rgba(255, 255, 255, 0.97)",
             borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
             boxShadow: `0 -4px 16px ${isDark ? "rgba(0,0,0,0.4)" : "rgba(0,0,0,0.06)"}`,
             backdropFilter: "blur(16px)",
@@ -140,7 +141,7 @@ export default function BottomTabBar() {
               <Link
                 key={tab.href}
                 href={tab.href}
-                className={`relative flex flex-1 flex-col items-center justify-center py-0.5 transition-all duration-150 active:scale-95 ${
+                className={`relative flex flex-1 flex-col items-center justify-center pt-0.5 pb-0.5 transition-all duration-150 active:scale-95 ${
                   isActive ? "font-bold" : "font-medium"
                 }`}
                 aria-current={isActive ? "page" : undefined}
@@ -149,23 +150,23 @@ export default function BottomTabBar() {
                 <div
                   className={`flex items-center justify-center transition-all ${
                     isCenter
-                      ? `h-8 w-11 rounded-xl shadow-xs ${
+                      ? `h-7.5 w-11 rounded-xl shadow-xs ${
                           isActive
                             ? "bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black"
                             : "bg-indigo-500/20 text-indigo-600 dark:text-purple-400 border border-indigo-500/30"
                         }`
-                      : `h-7 w-10 rounded-full ${
+                      : `h-6.5 w-9 rounded-full ${
                           isActive
                             ? "bg-indigo-600/15 dark:bg-purple-500/20 text-indigo-600 dark:text-purple-400"
                             : "text-slate-500 dark:text-zinc-400"
                         }`
                   }`}
                 >
-                  <Icon className={isCenter ? "h-4.5 w-4.5" : "h-4 w-4"} />
+                  <Icon className={isCenter ? "h-4 w-4" : "h-3.5 w-3.5"} />
                 </div>
 
                 <span
-                  className={`text-[9.5px] tracking-tight transition-colors truncate max-w-[56px] text-center ${
+                  className={`text-[9px] font-semibold leading-tight tracking-tight transition-colors truncate max-w-[58px] text-center mt-0.5 ${
                     isActive
                       ? "text-indigo-600 dark:text-purple-400 font-bold"
                       : "text-slate-500 dark:text-zinc-400"
