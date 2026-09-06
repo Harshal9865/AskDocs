@@ -227,11 +227,34 @@ body {
 /* Never allow sideways scrolling off-screen; give html/body full height so flex children work */
 html,
 body {
-  overflow-x: clip;
+  max-width: 100vw;
+  width: 100%;
+  overflow-x: hidden !important;
   height: 100%;
 }
 
-/* Slim, unobtrusive scrollbars */
+/* Hide visible scrollbars on small mobile screens (<768px) while maintaining touch scroll */
+@media (max-width: 767px) {
+  html,
+  body,
+  #root,
+  #__next {
+    max-width: 100vw;
+    overflow-x: hidden !important;
+  }
+
+  * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  *::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+}
+
+/* Slim, unobtrusive scrollbars for desktop */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
