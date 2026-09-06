@@ -195,23 +195,31 @@ export const AUDIENCE_MODES: Record<AudienceMode, AudienceModeConfig> = {
 
 interface AudienceModeContextState {
   mode: AudienceMode;
-  setMode: (mode: AudienceMode) => void;
+  setMode: (mode: AudienceMode, targetWsId?: string) => void;
   config: AudienceModeConfig;
   modeConfig: AudienceModeConfig;
   allModes: AudienceModeConfig[];
 }
 
 const AudienceModeContext = createContext<AudienceModeContextState>({
-  mode: "academic",
+  mode: "office",
   setMode: () => {},
-  config: AUDIENCE_MODES.academic,
-  modeConfig: AUDIENCE_MODES.academic,
+  config: AUDIENCE_MODES.office,
+  modeConfig: AUDIENCE_MODES.office,
   allModes: Object.values(AUDIENCE_MODES),
 });
 
 export function AudienceModeProvider({ children }: { children: ReactNode }) {
   const { workspace } = useWorkspace();
-  const [mode, setModeState] = useState<AudienceMode>("academic");
+  const [mode, setModeState] = useState<AudienceMode>(() => {
+    if (typeof window !== "undefined") {
+      const storedGlobal = localStorage.getItem("askdocs_global_mode") as AudienceMode | null;
+      if (storedGlobal && AUDIENCE_MODES[storedGlobal]) {
+        return storedGlobal;
+      }
+    }
+    return "office";
+  });
 
   // Load mode when workspace changes or on mount
   useEffect(() => {
@@ -222,20 +230,29 @@ export function AudienceModeProvider({ children }: { children: ReactNode }) {
         setModeState(stored);
         return;
       }
+      if (workspace?.audience_mode && AUDIENCE_MODES[workspace.audience_mode]) {
+        setModeState(workspace.audience_mode);
+        localStorage.setItem(`askdocs_mode_${wsId}`, workspace.audience_mode);
+        return;
+      }
     }
-    const globalDefault = (localStorage.getItem("askdocs_global_mode") as AudienceMode | null) || "academic";
+    const globalDefault = (typeof window !== "undefined" ? localStorage.getItem("askdocs_global_mode") : null) as AudienceMode | null;
     if (globalDefault && AUDIENCE_MODES[globalDefault]) {
       setModeState(globalDefault);
+      if (wsId) {
+        localStorage.setItem(`askdocs_mode_${wsId}`, globalDefault);
+      }
     }
-  }, [workspace?.id]);
+  }, [workspace?.id, workspace?.audience_mode]);
 
   const setMode = useCallback(
-    (newMode: AudienceMode) => {
+    (newMode: AudienceMode, targetWsId?: string) => {
       if (!AUDIENCE_MODES[newMode]) return;
       setModeState(newMode);
       localStorage.setItem("askdocs_global_mode", newMode);
-      if (workspace?.id) {
-        localStorage.setItem(`askdocs_mode_${workspace.id}`, newMode);
+      const wsId = targetWsId || workspace?.id;
+      if (wsId) {
+        localStorage.setItem(`askdocs_mode_${wsId}`, newMode);
       }
     },
     [workspace?.id]

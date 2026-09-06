@@ -64,9 +64,9 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
 
   return (
     <>
-    <header className="dark:border-white/10 dark:bg-[#0d0c17] sticky top-0 z-30 flex h-12 sm:h-14 shrink-0 items-center justify-between gap-1 border-b border-slate-200/90 bg-white px-2 transition-colors sm:gap-3 sm:px-4">
+    <header className="dark:border-white/10 dark:bg-[#0d0c17] sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-slate-200/90 bg-white px-3 sm:px-5 transition-colors">
       {/* Left side cluster */}
-      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+      <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
         {/* mobile hamburger */}
         {onMenu && (
           <button
@@ -79,9 +79,9 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
             }}
             aria-label="Open menu"
             aria-expanded={false}
-            className="rounded-lg p-1 text-slate-600 transition-colors hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 md:hidden focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-600 transition-colors hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 md:hidden focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-200">
               <line x1="3" y1="6" x2="21" y2="6" />
               <line x1="3" y1="12" x2="21" y2="12" />
               <line x1="3" y1="18" x2="21" y2="18" />
@@ -92,37 +92,37 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         {/* brand */}
         <button
           onClick={() => router.push("/")}
-          className="flex shrink-0 items-center gap-1 sm:gap-1.5"
+          className="flex shrink-0 items-center gap-1.5 transition-transform hover:scale-105"
           aria-label="AskDocs home"
         >
-          <span className="flex h-5 w-5 sm:h-7 sm:w-7 items-center justify-center overflow-hidden rounded-lg">
+          <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-xl bg-slate-100 p-0.5 dark:bg-white/10">
             {brandSrc ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={brandSrc} alt="Brand" className="h-full w-full object-cover" />
+              <img src={brandSrc} alt="Brand" className="h-full w-full rounded-lg object-cover" />
             ) : brandSticker ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={`/stickers/${brandSticker}.svg`} alt="Brand" className="h-full w-full" />
+              <img src={`/stickers/${brandSticker}.svg`} alt="Brand" className="h-full w-full object-contain" />
             ) : (
               <>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo-day.svg" alt="AskDocs" className="h-5 w-5 sm:h-7 sm:w-7 dark:hidden" />
+                <img src="/logo-day.svg" alt="AskDocs" className="h-6 w-6 dark:hidden" />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo-night.svg" alt="AskDocs" className="hidden h-5 w-5 sm:h-7 sm:w-7 dark:block" />
+                <img src="/logo-night.svg" alt="AskDocs" className="hidden h-6 w-6 dark:block" />
               </>
             )}
           </span>
-          <span className="hidden md:inline dark:text-white text-[15px] font-bold tracking-tight text-slate-900">
+          <span className="hidden sm:inline dark:text-white text-base font-extrabold tracking-tight text-slate-900">
             AskDocs
           </span>
         </button>
 
-        {/* Essential Navigation Icons for Small/Tablet Screens (<lg) — Compact & Spacing Optimized */}
-        <div className="flex items-center gap-1 sm:gap-1.5 lg:hidden">
+        {/* Essential Navigation Icons for Small/Tablet Screens (<lg) */}
+        <div className="flex items-center gap-1 lg:hidden ml-1">
           <Link
             href="/dashboard"
             title="Dashboard"
             aria-label="Dashboard"
-            className={`flex h-8 w-8 sm:h-8.5 sm:w-8.5 items-center justify-center rounded-xl transition-all ${
+            className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all ${
               pathname === "/dashboard" || pathname.startsWith("/dashboard/")
                 ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
                 : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
@@ -135,7 +135,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
             href="/chat"
             title="AI Chat"
             aria-label="AI Chat"
-            className={`flex h-8 w-8 sm:h-8.5 sm:w-8.5 items-center justify-center rounded-xl transition-all ${
+            className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all ${
               pathname === "/chat" || pathname.startsWith("/chat/")
                 ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
                 : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
@@ -148,7 +148,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
             href="/chats"
             title={modeConfig.chatLabel}
             aria-label={modeConfig.chatLabel}
-            className={`flex h-8 w-8 sm:h-8.5 sm:w-8.5 items-center justify-center rounded-xl transition-all ${
+            className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all ${
               pathname === "/chats" || pathname.startsWith("/chats/")
                 ? "bg-purple-100 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 shadow-xs font-bold"
                 : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10"
@@ -223,24 +223,24 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         />
       </form>
 
-      {/* right side controls — always visible across all screens */}
-      <div className="flex items-center gap-0.5 sm:gap-1.5 ml-auto sm:ml-0 shrink-0">
+      {/* right side controls — always visible across all screens with crisp spacing */}
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         <button
           onClick={() => router.push("/search")}
           aria-label="Search"
           title="Search"
-          className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 md:hidden transition-colors"
+          className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-white/10 md:hidden transition-colors"
         >
-          <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <Search className="h-4 w-4" />
         </button>
 
-        {/* Audience Mode Switcher Pill Button (Matching Image 1, 2, 4) */}
+        {/* Audience Mode Switcher Pill Button */}
         <button
           onClick={() => setModeModalOpen(true)}
           type="button"
           aria-label="Switch Operational Mode"
           title={`Active Operational Mode: ${modeConfig.name}. Click to change mode.`}
-          className={`flex items-center justify-center gap-1.5 rounded-full px-2 md:px-3 py-1 text-xs font-black tracking-wider transition-all cursor-pointer border shadow-sm ${
+          className={`flex h-8 items-center justify-center gap-1.5 rounded-full px-2.5 sm:px-3 text-xs font-black tracking-wider transition-all cursor-pointer border shadow-xs ${
             mode === "office"
               ? "border-[#d97706]/70 bg-[#d97706]/15 text-[#fbbf24] shadow-amber-500/10 hover:bg-[#d97706]/25 hover:border-[#fbbf24]"
               : mode === "academic"
@@ -256,33 +256,33 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         >
           {mode === "office" ? (
             <>
-              <ShieldCheck className="h-3.5 w-3.5 text-[#fbbf24] animate-pulse" />
-              <span className="hidden md:inline font-mono uppercase text-[11px] font-bold">ENTERPRISE NDA</span>
+              <ShieldCheck className="h-3.5 w-3.5 text-[#fbbf24] animate-pulse shrink-0" />
+              <span className="hidden sm:inline font-mono uppercase text-[10px] sm:text-[11px] font-bold">ENTERPRISE NDA</span>
             </>
           ) : mode === "academic" ? (
             <>
-              <GraduationCap className="h-3.5 w-3.5 text-purple-400" />
-              <span className="hidden md:inline font-mono uppercase text-[11px] font-bold">STUDY MODE</span>
+              <GraduationCap className="h-3.5 w-3.5 text-purple-400 shrink-0" />
+              <span className="hidden sm:inline font-mono uppercase text-[10px] sm:text-[11px] font-bold">STUDY MODE</span>
             </>
           ) : mode === "legal" ? (
             <>
-              <ShieldCheck className="h-3.5 w-3.5 text-rose-400" />
-              <span className="hidden md:inline font-mono uppercase text-[11px] font-bold">LEGAL VAULT</span>
+              <ShieldCheck className="h-3.5 w-3.5 text-rose-400 shrink-0" />
+              <span className="hidden sm:inline font-mono uppercase text-[10px] sm:text-[11px] font-bold">LEGAL VAULT</span>
             </>
           ) : mode === "finance" ? (
             <>
               <span className="text-[11px]">💰</span>
-              <span className="hidden md:inline font-mono uppercase text-[11px] font-bold">FINANCE DESK</span>
+              <span className="hidden sm:inline font-mono uppercase text-[10px] sm:text-[11px] font-bold">FINANCE DESK</span>
             </>
           ) : mode === "clinical" ? (
             <>
               <span className="text-[11px]">🩺</span>
-              <span className="hidden md:inline font-mono uppercase text-[11px] font-bold">CLINICAL LAB</span>
+              <span className="hidden sm:inline font-mono uppercase text-[10px] sm:text-[11px] font-bold">CLINICAL LAB</span>
             </>
           ) : (
             <>
               <span className="text-[11px]">💼</span>
-              <span className="hidden md:inline font-mono uppercase text-[11px] font-bold">SOLO STUDIO</span>
+              <span className="hidden sm:inline font-mono uppercase text-[10px] sm:text-[11px] font-bold">SOLO STUDIO</span>
             </>
           )}
         </button>
@@ -290,34 +290,22 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         <ThemeToggle dark={dark} onToggle={toggle} />
         <NotificationBell />
 
-        {/* profile avatar menu */}
-        <div className="relative ml-0.5" ref={menuRef}>
+        {/* Profile Avatar Menu — Balanced & Properly Spaced */}
+        <div className="relative pl-0.5" ref={menuRef}>
           <button
             onClick={() => setMenuOpen((o) => !o)}
             aria-label="Open profile menu"
             aria-expanded={menuOpen}
-            className="flex items-center gap-0.5 sm:gap-1 rounded-full p-0.5 transition-colors hover:bg-slate-100 dark:hover:bg-white/10"
+            className="flex items-center gap-1 rounded-full p-1 transition-all hover:bg-slate-100 dark:hover:bg-white/10 ring-1 ring-slate-200/80 dark:ring-white/15 hover:ring-purple-400/50 active:scale-95 cursor-pointer"
           >
-            <span className="sm:hidden">
-              <Avatar
-                name={user?.name ?? "?"}
-                size={26}
-                src={avatarSrc}
-                stickerId={
-                  user?.avatar_kind === "sticker" ? user.avatar_value ?? null : null
-                }
-              />
-            </span>
-            <span className="hidden sm:inline">
-              <Avatar
-                name={user?.name ?? "?"}
-                size={30}
-                src={avatarSrc}
-                stickerId={
-                  user?.avatar_kind === "sticker" ? user.avatar_value ?? null : null
-                }
-              />
-            </span>
+            <Avatar
+              name={user?.name ?? "?"}
+              size={30}
+              src={avatarSrc}
+              stickerId={
+                user?.avatar_kind === "sticker" ? user.avatar_value ?? null : null
+              }
+            />
             <ChevronDown
               className={`hidden h-3.5 w-3.5 text-slate-400 transition-transform sm:block ${menuOpen ? "rotate-180" : ""}`}
             />

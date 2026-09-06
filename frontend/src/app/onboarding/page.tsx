@@ -214,11 +214,11 @@ export default function OnboardingPage() {
     setBusy(true);
     try {
       await saveProfileData();
-      setMode(selectedMode);
 
       const newWs = await api.createWorkspace(finalWsName);
       await refreshWs();
       selectWs(newWs);
+      setMode(selectedMode, newWs.id);
 
       localStorage.setItem("askdocs_onboarded", "1");
       showToast("success", `Welcome to ${newWs.name}! Setup complete.`);
