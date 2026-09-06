@@ -27,6 +27,20 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
   const menuRef = useRef<HTMLDivElement>(null);
   const { dark, toggle } = useTheme();
 
+  const handleLogoClick = () => {
+    const isStandaloneApp =
+      typeof window !== "undefined" &&
+      (window.matchMedia("(display-mode: standalone)").matches ||
+        ("standalone" in window.navigator &&
+          (window.navigator as unknown as { standalone?: boolean }).standalone));
+
+    if (isStandaloneApp) {
+      router.push("/workspaces");
+    } else {
+      router.push("/");
+    }
+  };
+
   // close avatar menu on outside click
   useEffect(() => {
     if (!menuOpen) return;
@@ -68,7 +82,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
 
         {/* brand */}
         <button
-          onClick={() => router.push("/")}
+          onClick={handleLogoClick}
           className="flex shrink-0 items-center gap-2 transition-transform hover:scale-105 active:scale-95 cursor-pointer"
           aria-label="AskDocs home"
         >

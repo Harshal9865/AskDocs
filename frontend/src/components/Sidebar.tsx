@@ -281,7 +281,11 @@ export default function Sidebar({
           <aside className="relative flex w-[290px] max-w-[85vw] flex-col bg-white dark:bg-[#12131e] text-slate-900 dark:text-white shadow-2xl z-50 border-r border-slate-200 dark:border-white/10 h-full">
             {/* Header Bar inside Mobile Drawer (h-14 sm:h-16, matching TopNavbar position & coordinates) */}
             <div className="flex h-14 sm:h-16 items-center justify-between border-b border-slate-100 dark:border-white/10 px-4 bg-white dark:bg-[#12131e] shrink-0">
-              <div className="flex items-center gap-2 min-w-0">
+              <Link
+                href="/workspaces"
+                onClick={onCloseMobile}
+                className="flex items-center gap-2 min-w-0 active:scale-95 transition-transform cursor-pointer"
+              >
                 <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-xl bg-indigo-500/10 p-1 dark:bg-white/10 shadow-xs ring-1 ring-black/5 dark:ring-white/10 shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/logo-day.svg" alt="AskDocs" className="h-5 w-5 dark:hidden" />
@@ -291,7 +295,7 @@ export default function Sidebar({
                 <span className="text-base font-black tracking-tight text-slate-900 dark:text-white">
                   AskDocs
                 </span>
-              </div>
+              </Link>
               <button
                 onClick={onCloseMobile}
                 aria-label="Close menu"
