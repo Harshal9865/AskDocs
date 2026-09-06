@@ -280,91 +280,54 @@ export default function Sidebar({
     <>
       {/* Mobile Drawer Overlay & Sheet (starts directly below TopNavbar at top-16) */}
       {mobileOpen && (
-        <div className="fixed top-16 left-0 right-0 bottom-16 z-50 flex md:hidden">
+        <div className="fixed top-16 left-0 right-0 bottom-0 z-50 flex md:hidden">
           {/* Backdrop (Dark tint, no blur filter for 100% crisp text) */}
           <div
-            className="fixed top-16 left-0 right-0 bottom-0 bg-slate-950/70 transition-opacity"
+            className="fixed top-16 left-0 right-0 bottom-0 bg-slate-950/75 transition-opacity"
             onClick={onCloseMobile}
             aria-hidden
           />
 
           {/* Dedicated Sharp Mobile Navigation Drawer */}
-          <aside className="relative flex w-[85vw] max-w-xs flex-col bg-white dark:bg-[#12131e] text-slate-900 dark:text-white shadow-2xl rounded-r-2xl overflow-hidden z-50 border-r border-slate-200 dark:border-white/10">
-            {/* Mobile Drawer Top Bar */}
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 p-4 bg-slate-50/50 dark:bg-white/5">
-              <Link
-                href="/dashboard"
-                onClick={onCloseMobile}
-                className="flex items-center gap-2.5 font-black text-base tracking-tight"
-              >
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600/10 dark:bg-white/10 p-1">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/logo-day.svg" alt="AskDocs" className="h-5 w-5 dark:hidden" />
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/logo-night.svg" alt="AskDocs" className="hidden h-5 w-5 dark:block" />
+          <aside className="relative flex w-[280px] max-w-[85vw] flex-col bg-white dark:bg-[#12131e] text-slate-900 dark:text-white shadow-2xl z-50 border-r border-slate-200 dark:border-white/10 h-full">
+            {/* Slim Header Bar inside Mobile Drawer */}
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 px-3.5 py-2.5 bg-slate-50/50 dark:bg-black/20 shrink-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="h-2 w-2 rounded-full bg-indigo-500 shrink-0" />
+                <span className="truncate text-xs font-black uppercase tracking-wider text-slate-700 dark:text-zinc-300">
+                  {workspace?.name || "Navigation"}
                 </span>
-                <span>AskDocs</span>
-              </Link>
+              </div>
               <button
                 onClick={onCloseMobile}
                 aria-label="Close menu"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/60 dark:bg-white/10 text-slate-600 dark:text-zinc-300 active:scale-95 transition-all"
+                className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-200/70 dark:bg-white/10 text-slate-600 dark:text-zinc-300 active:scale-95 transition-all hover:bg-slate-300 dark:hover:bg-white/20"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            {/* Active Workspace & Operational Mode Quick Switcher Card */}
-            <div className="p-3 border-b border-slate-100 dark:border-white/10 space-y-2 bg-slate-50/30 dark:bg-black/20">
-              <Link
-                href="/workspaces"
-                onClick={onCloseMobile}
-                className="flex items-center justify-between gap-3 rounded-2xl border border-indigo-500/20 bg-white dark:bg-[#181928] p-3 shadow-xs active:scale-[0.98] transition-all"
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black text-xs shadow-xs overflow-hidden">
-                    {sidebarBrandUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={sidebarBrandUrl} alt="WS" className="h-full w-full object-cover" />
-                    ) : workspace?.brand_kind === "sticker" && workspace?.brand_value ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={`/stickers/${workspace.brand_value}.svg`} alt="WS" className="h-full w-full object-contain p-0.5" />
-                    ) : (
-                      (workspace?.name || "W").slice(0, 1).toUpperCase()
-                    )}
-                  </div>
-                  <div className="min-w-0 text-left">
-                    <div className="truncate text-xs font-black text-slate-900 dark:text-white">
-                      {workspace?.name || "Select Workspace"}
-                    </div>
-                    <div className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
-                      {workspaces.length} workspace{workspaces.length === 1 ? "" : "s"} • Switch
-                    </div>
-                  </div>
-                </div>
-                <ChevronRight className="h-4 w-4 text-slate-400 shrink-0" />
-              </Link>
-
-              {/* Mode Button */}
+            {/* Quick Mode Switcher Chip */}
+            <div className="p-2.5 border-b border-slate-100 dark:border-white/10 bg-purple-50/30 dark:bg-purple-950/20 shrink-0">
               <button
                 type="button"
                 onClick={() => {
                   onCloseMobile?.();
                   setShowModeModal(true);
                 }}
-                className="w-full flex items-center justify-between rounded-xl border border-purple-500/20 bg-purple-50/50 dark:bg-purple-950/30 p-2.5 text-xs font-bold text-purple-700 dark:text-purple-300 active:scale-[0.98] transition-all"
+                className="w-full flex items-center justify-between rounded-xl border border-purple-500/20 bg-purple-50/60 dark:bg-purple-950/40 px-3 py-1.5 text-xs font-semibold text-purple-700 dark:text-purple-300 active:scale-[0.98] transition-all"
               >
                 <div className="flex items-center gap-2">
-                  <ModeIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  <ModeIcon className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
                   <span>Mode: {modeConfig.name}</span>
                 </div>
-                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-purple-200 dark:bg-purple-800 text-purple-900 dark:text-purple-100">
+                <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-purple-200 dark:bg-purple-800 text-purple-900 dark:text-purple-100">
                   Change
                 </span>
               </button>
             </div>
 
-            {/* Scrollable Mobile Nav Items */}
+            {/* Scrollable Mobile Nav Items starting right under top navbar */}
             <div className="flex-1 overflow-y-auto p-3 space-y-4">
               {/* Main Core Links */}
               <div className="space-y-1">
