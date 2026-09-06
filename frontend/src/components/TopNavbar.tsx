@@ -290,17 +290,17 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
         <ThemeToggle dark={dark} onToggle={toggle} />
         <NotificationBell />
 
-        {/* Profile Avatar Menu — Balanced & Properly Spaced */}
+        {/* Profile Avatar Menu — Compact & Proportionate on Mobile */}
         <div className="relative pl-0.5" ref={menuRef}>
           <button
             onClick={() => setMenuOpen((o) => !o)}
             aria-label="Open profile menu"
             aria-expanded={menuOpen}
-            className="flex items-center gap-1 rounded-full p-1 transition-all hover:bg-slate-100 dark:hover:bg-white/10 ring-1 ring-slate-200/80 dark:ring-white/15 hover:ring-purple-400/50 active:scale-95 cursor-pointer"
+            className="flex items-center gap-1 rounded-full p-0.5 sm:p-1 transition-all hover:bg-slate-100 dark:hover:bg-white/10 ring-1 ring-slate-200/80 dark:ring-white/15 hover:ring-purple-400/50 active:scale-95 cursor-pointer"
           >
             <Avatar
               name={user?.name ?? "?"}
-              size={30}
+              size={24}
               src={avatarSrc}
               stickerId={
                 user?.avatar_kind === "sticker" ? user.avatar_value ?? null : null
