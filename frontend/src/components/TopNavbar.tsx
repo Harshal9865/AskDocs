@@ -96,27 +96,15 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
           aria-label="AskDocs home"
         >
           <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-xl bg-indigo-500/10 p-1 dark:bg-white/10 shadow-xs ring-1 ring-black/5 dark:ring-white/10">
-            {brandSrc ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={brandSrc} alt="Brand" className="h-full w-full rounded-lg object-cover" />
-            ) : brandSticker ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={`/stickers/${brandSticker}.svg`} alt="Brand" className="h-full w-full object-contain" />
-            ) : (
-              <>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo-day.svg" alt="AskDocs" className="h-5 w-5 dark:hidden" />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo-night.svg" alt="AskDocs" className="hidden h-5 w-5 dark:block" />
-              </>
-            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo-day.svg" alt="AskDocs" className="h-5 w-5 dark:hidden" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo-night.svg" alt="AskDocs" className="hidden h-5 w-5 dark:block" />
           </span>
           <span className="hidden sm:inline dark:text-white text-base font-black tracking-tight text-slate-900">
             AskDocs
           </span>
         </button>
-
-
 
         {/* desktop nav — expands progressively based on available laptop & desktop width */}
         <nav className="hidden items-center gap-1 lg:flex ml-1 sm:ml-2">
@@ -149,15 +137,7 @@ export default function TopNavbar({ onMenu }: { onMenu?: () => void }) {
               title={`Workspace: ${workspace.name}. Click to view workspace settings.`}
               className="ml-1 flex items-center gap-1.5 rounded-full border border-indigo-500/20 bg-slate-100/90 hover:bg-slate-200/80 px-2.5 py-1 text-xs font-bold text-slate-800 dark:border-indigo-500/30 dark:bg-[#1f1f2e] dark:text-white dark:hover:bg-[#28283d] transition-all cursor-pointer shrink-0 shadow-2xs"
             >
-              {brandSrc ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={brandSrc} alt={workspace.name} className="h-3.5 w-3.5 rounded-full object-cover shrink-0 ring-1 ring-white/30" />
-              ) : brandSticker ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={`/stickers/${brandSticker}.svg`} alt={workspace.name} className="h-3.5 w-3.5 object-contain shrink-0" />
-              ) : (
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20" />
-              )}
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20" />
               <span className="hidden max-w-[110px] truncate xl:inline">{workspace.name}</span>
               <span className="xl:hidden">{(workspace.name || "?").slice(0, 1).toUpperCase()}</span>
             </Link>
