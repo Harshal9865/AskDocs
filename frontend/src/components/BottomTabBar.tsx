@@ -4,34 +4,61 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useMobile } from "@/lib/hooks/useMobile";
 import { useTheme } from "@/components/ThemeToggle";
+import { useAudienceMode } from "@/lib/audience-mode-context";
 import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
-  Sparkles,
-  FileText,
-  Layers,
-  User,
+  UsersRound,
+  Home as HomeIcon,
+  Compass,
+  GraduationCap,
+  FileSignature,
+  Scale,
+  Rocket,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-
-const TABS = [
-  { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-  { href: "/chat", label: "AI Chat", icon: Sparkles },
-  { href: "/documents", label: "Documents", icon: FileText },
-  { href: "/frontier", label: "Studios", icon: Layers },
-  { href: "/settings", label: "Profile", icon: User },
-] as const;
 
 export default function BottomTabBar() {
   const pathname = usePathname();
   const { dark: isDark } = useTheme();
   const { isMobile, isClient } = useMobile();
+  const { mode } = useAudienceMode();
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(true);
   const [manualCollapsed, setManualCollapsed] = useState(false);
 
   useEffect(() => setMounted(true), []);
+
+  // Dynamic Mode Tool (Tab 5) based on active operational mode
+  const getModeTab = () => {
+    if (mode === "academic") {
+      return { href: "/study-guide", label: "Study Studio", icon: GraduationCap };
+    }
+    if (mode === "office") {
+      return { href: "/contracts", label: "Contracts", icon: FileSignature };
+    }
+    if (mode === "legal") {
+      return { href: "/contracts/compare", label: "Redline Diff", icon: Scale };
+    }
+    return { href: "/frontier", label: "Frontier", icon: Rocket };
+  };
+
+  const modeTab = getModeTab();
+
+  // Exactly 5 Tabs:
+  // 1. Dashboard (Left 1)
+  // 2. Friends (Left 2 - not in top navbar)
+  // 3. Home / Workspace (Center anchor - /workspaces)
+  // 4. Info Hub (Right 1 - /hub)
+  // 5. Replaceable Dynamic Mode Tool (Right 2 - changes according to mode!)
+  const tabs = [
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/friends", label: "Friends", icon: UsersRound },
+    { href: "/workspaces", label: "Home", icon: HomeIcon, isCenter: true },
+    { href: "/hub", label: "Info Hub", icon: Compass },
+    modeTab,
+  ];
 
   // Scroll listener: auto-hide when scrolling down, show when scrolling up
   useEffect(() => {
@@ -57,16 +84,6 @@ export default function BottomTabBar() {
 
   if (!isClient || !isMobile || !mounted) return null;
 
-  const getActiveTab = () => {
-    for (const tab of TABS) {
-      if (pathname === tab.href || pathname.startsWith(tab.href + "/")) {
-        return tab;
-      }
-    }
-    return TABS[0];
-  };
-
-  const activeTab = getActiveTab();
   const isHidden = !visible || manualCollapsed;
 
   return (
@@ -86,7 +103,7 @@ export default function BottomTabBar() {
         </button>
       )}
 
-      {/* Main Resized Compact Bottom Tab Bar */}
+      {/* Main Resized 5-Tab Compact Bottom Navigation Bar */}
       <nav
         className={`fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
           isHidden ? "translate-y-full opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
@@ -95,9 +112,9 @@ export default function BottomTabBar() {
         aria-label="Primary navigation"
       >
         <div
-          className="relative flex items-center justify-around h-[52px] px-1"
+          className="relative flex items-center justify-around h-[54px] px-1"
           style={{
-            background: isDark ? "rgba(18, 19, 30, 0.95)" : "rgba(255, 255, 255, 0.95)",
+            background: isDark ? "rgba(18, 19, 30, 0.96)" : "rgba(255, 255, 255, 0.96)",
             borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
             boxShadow: `0 -4px 16px ${isDark ? "rgba(0,0,0,0.4)" : "rgba(0,0,0,0.06)"}`,
             backdropFilter: "blur(16px)",
@@ -114,32 +131,41 @@ export default function BottomTabBar() {
             <ChevronDown className="h-3 w-3" />
           </button>
 
-          {TABS.map((tab) => {
-            const isActive = activeTab === tab;
+          {tabs.map((tab) => {
+            const isActive = pathname === tab.href || (tab.href !== "/dashboard" && pathname.startsWith(tab.href + "/"));
             const Icon = tab.icon;
+            const isCenter = "isCenter" in tab && tab.isCenter;
 
             return (
               <Link
                 key={tab.href}
                 href={tab.href}
-                className={`relative flex flex-1 flex-col items-center justify-center py-1 transition-all duration-150 active:scale-95 ${
+                className={`relative flex flex-1 flex-col items-center justify-center py-0.5 transition-all duration-150 active:scale-95 ${
                   isActive ? "font-bold" : "font-medium"
                 }`}
                 aria-current={isActive ? "page" : undefined}
                 aria-label={tab.label}
               >
                 <div
-                  className={`flex h-7 w-11 items-center justify-center rounded-full transition-colors ${
-                    isActive
-                      ? "bg-indigo-600/15 dark:bg-purple-500/20 text-indigo-600 dark:text-purple-400"
-                      : "text-slate-500 dark:text-zinc-400"
+                  className={`flex items-center justify-center transition-all ${
+                    isCenter
+                      ? `h-8 w-11 rounded-xl shadow-xs ${
+                          isActive
+                            ? "bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black"
+                            : "bg-indigo-500/20 text-indigo-600 dark:text-purple-400 border border-indigo-500/30"
+                        }`
+                      : `h-7 w-10 rounded-full ${
+                          isActive
+                            ? "bg-indigo-600/15 dark:bg-purple-500/20 text-indigo-600 dark:text-purple-400"
+                            : "text-slate-500 dark:text-zinc-400"
+                        }`
                   }`}
                 >
-                  <Icon className="h-4.5 w-4.5" />
+                  <Icon className={isCenter ? "h-4.5 w-4.5" : "h-4 w-4"} />
                 </div>
 
                 <span
-                  className={`text-[10px] tracking-tight transition-colors ${
+                  className={`text-[9.5px] tracking-tight transition-colors truncate max-w-[56px] text-center ${
                     isActive
                       ? "text-indigo-600 dark:text-purple-400 font-bold"
                       : "text-slate-500 dark:text-zinc-400"
