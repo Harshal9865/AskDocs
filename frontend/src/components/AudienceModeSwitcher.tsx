@@ -40,15 +40,18 @@ export default function AudienceModeSwitcherModal({ isOpen, onClose }: ModeSwitc
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4 backdrop-blur-sm animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#12141c] animate-in zoom-in-95 duration-200 space-y-6"
+        className="w-full max-w-2xl overflow-hidden rounded-t-3xl sm:rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-2xl dark:border-white/10 dark:bg-[#12141c] animate-in slide-in-from-bottom sm:zoom-in-95 duration-200 space-y-4 sm:space-y-6 max-h-[85vh] sm:max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* iOS Pull Handle (Mobile) */}
+        <div className="mx-auto h-1.5 w-12 shrink-0 rounded-full bg-slate-300 dark:bg-white/20 sm:hidden cursor-grab active:cursor-grabbing" />
+
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-slate-100 pb-4 dark:border-white/5">
+        <div className="flex items-start justify-between border-b border-slate-100 pb-3 sm:pb-4 dark:border-white/5">
           <div className="space-y-1">
             <div className="inline-flex items-center gap-1.5 rounded-full border border-purple-500/20 bg-purple-500/10 px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider text-purple-600 dark:text-purple-300">
               <Layers className="h-3 w-3" />

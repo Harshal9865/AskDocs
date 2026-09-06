@@ -11,6 +11,7 @@ import CommandPalette from "@/components/CommandPalette";
 import WelcomeModal from "@/components/WelcomeModal";
 import Loading from "@/components/Loading";
 import { Toaster } from "@/components/Toast";
+import MobileBottomDock from "@/components/MobileBottomDock";
 
 export default function ProtectedLayout({
   children,
@@ -80,8 +81,8 @@ export default function ProtectedLayout({
             <main
               className={`dark:bg-[#121212] min-w-0 max-w-full flex-1 min-h-0 transition-colors ${
                 isChatPage
-                  ? "flex flex-col overflow-hidden p-4 md:p-6"
-                  : "overflow-y-auto p-4 md:p-6"
+                  ? "flex flex-col overflow-hidden p-3 pb-20 md:p-6"
+                  : "overflow-y-auto p-4 pb-20 md:p-6"
               }`}
             >
               <WelcomeModal />
@@ -89,6 +90,7 @@ export default function ProtectedLayout({
               {children}
             </main>
           </div>
+          <MobileBottomDock />
         </div>
       </AudienceModeProvider>
     </WorkspaceProvider>
