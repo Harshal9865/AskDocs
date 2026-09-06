@@ -27,7 +27,6 @@ import {
   FileUp,
   MessageCirclePlus,
   MessagesSquare,
-  MoreHorizontal,
   MoreVertical,
   Palette,
   Search,
@@ -350,7 +349,7 @@ function ChatMessageItem({
   m: TeamMessage;
   isMe: boolean;
   isBot: boolean;
-  user: any;
+  user: { id?: string; name?: string | null; email?: string | null } | null;
   msgReactions: Record<string, string[]>;
   hasReactions: boolean;
   activeMsgMenuId: string | null;
