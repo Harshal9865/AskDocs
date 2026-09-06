@@ -30,10 +30,40 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+const pwaManifestData = JSON.stringify({
+  name: "AskDocs — Team Knowledge & Document Intelligence",
+  short_name: "AskDocs",
+  description: "Upload team documents and ask questions with AI-powered cited answers.",
+  start_url: "/",
+  display: "standalone",
+  background_color: "#0d0c17",
+  theme_color: "#0d0c17",
+  orientation: "portrait-primary",
+  scope: "/",
+  icons: [
+    {
+      src: "/logo-day.svg",
+      sizes: "192x192 512x512",
+      type: "image/svg+xml",
+      purpose: "any",
+    },
+    {
+      src: "/logo-night.svg",
+      sizes: "192x192 512x512",
+      type: "image/svg+xml",
+      purpose: "maskable",
+    },
+  ],
+  categories: ["productivity", "utilities", "education"],
+});
+
+const pwaManifestDataUri = `data:application/manifest+json;charset=utf-8,${encodeURIComponent(pwaManifestData)}`;
+
 export const metadata: Metadata = {
   title: "AskDocs — Team Knowledge Base",
   description:
     "Upload team documents and ask questions with AI-powered cited answers.",
+  manifest: pwaManifestDataUri,
   icons: {
     icon: [
       { url: "/logo-day.svg", media: "(prefers-color-scheme: light)" },
@@ -50,6 +80,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.className} ${plusJakartaSans.variable}`}>
+      <head>
+        <link rel="manifest" href={pwaManifestDataUri} />
+        <meta name="theme-color" content="#0d0c17" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      </head>
       <body
         className={`${inter.variable} ${plusJakartaSans.variable} ${jetbrainsMono.variable} ${inter.className} font-sans antialiased`}
       >
