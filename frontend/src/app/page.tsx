@@ -1168,30 +1168,6 @@ export default function Home() {
           </a>
         </nav>
         <div className="flex items-center gap-2">
-          {/* Install App button in Homepage Navbar */}
-          <button
-            type="button"
-            onClick={() => {
-              const isIOS = typeof window !== "undefined" && /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-              if (isIOS) {
-                alert("To install AskDocs on iOS: Tap Share -> Add to Home Screen");
-              } else {
-                const isStandalone = typeof window !== "undefined" && window.matchMedia("(display-mode: standalone)").matches;
-                if (isStandalone) {
-                  alert("AskDocs App is already installed and running!");
-                } else {
-                  alert("To install AskDocs App: Tap the browser menu and select 'Install app' or 'Add to Home screen'");
-                }
-              }
-            }}
-            aria-label="Install AskDocs App"
-            className="flex items-center gap-1 sm:gap-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-2.5 py-1 text-[11px] sm:px-3 sm:py-1.5 sm:text-xs font-bold text-white shadow-xs hover:brightness-110 active:scale-95 transition-all cursor-pointer shrink-0"
-          >
-            <Download className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
-            <span className="hidden xs:inline sm:inline">Install App</span>
-            <span className="inline xs:hidden sm:hidden">Install</span>
-          </button>
-
           {/* Dashboard quick button for smaller screens */}
           <Link
             href="/dashboard"
