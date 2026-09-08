@@ -1082,6 +1082,30 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
 
+  const [isStandaloneApp, setIsStandaloneApp] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isStandalone =
+        window.matchMedia("(display-mode: standalone)").matches ||
+        ("standalone" in window.navigator &&
+          (window.navigator as unknown as { standalone?: boolean }).standalone === true);
+      setIsStandaloneApp(!!isStandalone);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (loading) return;
+
+    if (isStandaloneApp) {
+      if (user) {
+        router.replace("/workspaces");
+      } else {
+        router.replace("/login");
+      }
+    }
+  }, [user, loading, isStandaloneApp, router]);
+
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     onScroll();
@@ -1100,8 +1124,8 @@ export default function Home() {
     return () => window.removeEventListener("mousedown", onClick);
   }, [menuOpen]);
 
-  // Show nothing while auth is loading
-  if (loading) return null;
+  // Show nothing while auth is loading or when running as installed app
+  if (loading || isStandaloneApp) return null;
 
   return (
     <div className="min-h-screen bg-white text-slate-900 dark:bg-[#070b0e] dark:text-white">
