@@ -31,8 +31,6 @@ import {
   LogOut,
   Pencil,
   X,
-  Building2,
-  Briefcase,
   ChevronRight,
 } from "lucide-react";
 import { api } from "@/lib/api";
@@ -98,7 +96,7 @@ export default function Sidebar({
   const { workspace, workspaces } = useWorkspace();
   const pathname = usePathname();
   const router = useRouter();
-  const { mode, config: modeConfig } = useAudienceMode();
+  const { config: modeConfig } = useAudienceMode();
   const [showModeModal, setShowModeModal] = useState(false);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [docCount, setDocCount] = useState<number | null>(null);
