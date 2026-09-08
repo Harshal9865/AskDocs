@@ -108,7 +108,18 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href={pwaManifestDataUri} />
         <meta name="theme-color" content="#0d0c17" />
-        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="app-version" content="v1.0.0-pwa" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').catch(function() {});
+                });
+              }
+            `,
+          }}
+        />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>

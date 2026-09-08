@@ -8,7 +8,7 @@ import { AudienceModeProvider } from "@/lib/audience-mode-context";
 import Sidebar from "@/components/Sidebar";
 import TopNavbar from "@/components/TopNavbar";
 import CommandPalette from "@/components/CommandPalette";
-import WelcomeModal from "@/components/WelcomeModal";
+import WelcomeModal, { InstallAppBanner } from "@/components/WelcomeModal";
 import Loading from "@/components/Loading";
 import { Toaster } from "@/components/Toast";
 import BottomTabBar from "@/components/BottomTabBar";
@@ -93,6 +93,7 @@ export default function ProtectedLayout({
               }`}
             >
               <WelcomeModal />
+              <InstallAppBanner />
               <CommandPalette />
               {children}
             </main>
