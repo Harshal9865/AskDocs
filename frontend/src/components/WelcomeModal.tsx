@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FolderKanban, MessagesSquare, Upload, UsersRound } from "lucide-react";
 import { useWorkspace } from "@/lib/workspace-context";
