@@ -1160,10 +1160,12 @@ export default function Home() {
                 }
               }
             }}
-            className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+            aria-label="Install AskDocs App"
+            className="flex items-center gap-1 sm:gap-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-2.5 py-1 text-[11px] sm:px-3 sm:py-1.5 sm:text-xs font-bold text-white shadow-xs hover:brightness-110 active:scale-95 transition-all cursor-pointer shrink-0"
           >
-            <Download className="h-3.5 w-3.5" />
-            <span>Install App</span>
+            <Download className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
+            <span className="hidden xs:inline sm:inline">Install App</span>
+            <span className="inline xs:hidden sm:hidden">Install</span>
           </button>
 
           {/* Dashboard quick button for smaller screens */}
